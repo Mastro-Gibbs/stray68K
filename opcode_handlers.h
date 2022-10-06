@@ -108,7 +108,7 @@ generic_u32_t SUBQ(opcode code);      //ok
 // GROUP 0x06
 generic_u32_t BRA(opcode code);      //ok
 generic_u32_t BSR(opcode code);
-generic_u32_t Bcc(opcode code);
+generic_u32_t Bcc(opcode code);      //ok
 
 
 // GROUP 0x07
