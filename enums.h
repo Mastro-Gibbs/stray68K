@@ -120,4 +120,11 @@ enum __ignore_direction__
     USE_DIRECTION    = 1
 };
 
+
+typedef enum __bcd_type__
+{
+    ADDICTION   = 0,
+    SUBTRACTION = 1
+} BCD_type;
+
 #endif // __ENUMS_H__68000

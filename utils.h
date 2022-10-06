@@ -10,13 +10,29 @@
 
 
 #include <stdio.h>
-#define PANIC(fmt, ...) do {                             \
+#define TRAPEXC(fmt, ...) do {                           \
+                            printf("[TRAP] ");           \
                             printf (fmt, ##__VA_ARGS__); \
                             fflush(stdout);              \
                         } while (0);                     \
                         destroy_cpu();                   \
                         destroy_ram();                   \
                         exit(-1);
+
+#define PANIC(fmt, ...) do {                             \
+                            printf("[PANIC] ");          \
+                            printf (fmt, ##__VA_ARGS__); \
+                            fflush(stdout);              \
+                        } while (0);                     \
+                        destroy_cpu();                   \
+                        destroy_ram();                   \
+                        exit(-1);
+
+#define WARNING(fmt, ...) do {                           \
+                            printf("[WARN] ");           \
+                            printf (fmt, ##__VA_ARGS__); \
+                            fflush(stdout);              \
+                        } while (0);
 
 
 #define bprintf(x)                                               \

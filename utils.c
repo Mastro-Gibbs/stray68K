@@ -238,7 +238,7 @@ generic_u32_t read_EA(generic_u32_t *addr, opsize *size, ADDRMode *mode, ea_dire
                 break;
 
             default:
-                { PANIC("PANIC!, addressing mode not handled bla bla!\n") }
+                { PANIC("Addressing mode not handled! (read_EA)\n") }
                 break;
         }
     else switch (*mode) {
@@ -274,7 +274,7 @@ generic_u32_t read_EA(generic_u32_t *addr, opsize *size, ADDRMode *mode, ea_dire
             break;
 
         default:
-            { PANIC("PANIC!, addressing mode not handled!\n") }
+            { PANIC("Addressing mode not handled! (read_EA)\n") }
             break;
     }
 
@@ -316,7 +316,7 @@ void write_EA(generic_u32_t *addr, generic_u32_t val, opsize *size, ADDRMode *mo
             break;
 
         default:
-            { PANIC("PANIC!, writing an invalid Effective Address!\n") }
+            { PANIC("Writing an invalid Effective Address!\n") }
             break;
     }
 }

@@ -75,7 +75,7 @@ bytecode** read_bytecode(char *filename)
                 generic_u8_t size = size_by_row_len(read);
 
                 if (size == 0xFF)
-                    { PANIC("[PANIC] Error incomes while loading an invalid bytecode\n"); }
+                    { PANIC(" Error incomes while loading an invalid bytecode\n"); }
 
                 curr->size = size;
             }

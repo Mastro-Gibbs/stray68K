@@ -44,10 +44,10 @@ bit is_valid_file(char *filename)
     fp = fopen(filename, "r");
 
     if (fp == NULL)
-        { PANIC("[PANIC] File not found!\n"); }
+        { PANIC(" File not found!\n"); }
 
     if ((read = getline(&line, &len, fp)) == -1)
-        { PANIC("[PANIC] Empty file!\n"); }
+        { PANIC(" Empty file!\n"); }
 
     return 1;
 }
@@ -88,7 +88,7 @@ void  __load_bytecode__(char *filename)
 
             __set_simhalt__(ram_ptr);
         }
-        else { PANIC("[PANIC] Error incomes while loading an invalid bytecode\n"); }
+        else { PANIC(" Error incomes while loading an invalid bytecode\n"); }
     }
 }
 
@@ -97,7 +97,7 @@ void  __load_bytecode__(char *filename)
 /* SIMHALT */
 void __set_simhalt__(generic_u32_t addr) { simhalt = addr; write_long(addr, 0xFFFFFFFF); }
 
-bit __is_halt__() { return (get_pc() != simhalt) ? 0 : 1; }
+bit __is_halt__() { return (get_pc() != simhalt || get_pc() < simhalt) ? 0 : 1; }
 
 
 
@@ -258,6 +258,8 @@ int emulate_sbs(int argc, char **argv) // aka step-by-step
 
         ARCH.cpu->exec(describe_code);
     }
+
+    if (print) { _wait_(); }
 
     system("clear");
     printf("\033[01m\033[37mFinal system status:\033[0m\n\n");

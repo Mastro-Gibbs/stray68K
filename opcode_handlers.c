@@ -23,8 +23,13 @@
 opcodes_ds *codemap = NULL;
 
 
+generic_u32_t JSR_CALL_COUNTER;
+
+
 void init_codes()
 {
+    JSR_CALL_COUNTER = 0;
+
     if (!codemap)
     {
         codemap = malloc(sizeof (*codemap) * INSTRUCTION_SET_GROUPS_COUNT);
@@ -285,7 +290,7 @@ generic_u32_t run_opcode(opcode code, bit describe_code)
 {
     opcode_t *tmp = get_opcode_t(code);
 
-    if (tmp == NULL) { PANIC("[PANIC] Instruction code 0x%X not reconized\n", code); }
+    if (tmp == NULL) { PANIC("Instruction code 0x%X not reconized\n", code); }
 
     if (describe_code)
     {
@@ -295,7 +300,8 @@ generic_u32_t run_opcode(opcode code, bit describe_code)
 
     generic_u32_t res = tmp->handler(code);
 
-    incr_pc(WORD_SPAN);
+    if (res != RETURN_OK_PC_NO_INCR)
+        incr_pc(WORD_SPAN);
 
     return res;
 }
@@ -437,6 +443,8 @@ void set_srflags(const generic_u32_t mnemonic, opsize size, generic_u32_t src, g
 // GROUP 0x00
 generic_u32_t ORItoCCR(opcode code)
 {
+    ignore_param(code);
+
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u8_t bits  = read_byte(addr);
     srflags flags      = get_sr();
@@ -451,6 +459,8 @@ generic_u32_t ORItoCCR(opcode code)
 
 generic_u32_t ORItoSR(opcode code)
 {
+    ignore_param(code);
+
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = read_word(addr);
     srflags flags      = get_sr();
@@ -488,6 +498,8 @@ generic_u32_t ORI(opcode code)
 
 generic_u32_t ANDItoCCR(opcode code)
 {
+    ignore_param(code);
+
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = (generic_u16_t) (read_byte(addr) & 0x001F) | 0xFFE0;
     srflags flags      = get_sr();
@@ -502,6 +514,8 @@ generic_u32_t ANDItoCCR(opcode code)
 
 generic_u32_t ANDItoSR(opcode code)
 {
+    ignore_param(code);
+
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = read_word(addr);
     srflags flags      = get_sr();
@@ -603,6 +617,8 @@ generic_u32_t ADDI(opcode code)
 
 generic_u32_t EORItoCCR(opcode code)
 {
+    ignore_param(code);
+
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = (generic_u16_t) (read_byte(addr) & 0x001F) | 0xFFE0;
     srflags flags      = get_sr();
@@ -617,6 +633,8 @@ generic_u32_t EORItoCCR(opcode code)
 
 generic_u32_t EORItoSR(opcode code)
 {
+    ignore_param(code);
+
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = read_word(addr);
     srflags flags      = get_sr();
@@ -658,20 +676,21 @@ generic_u32_t CMPI(opcode code)
     generic_u32_t mode = (code & 0b0000000000111000) >> 3;
     opsize        size = (code & SIZE_MASK) >> 6;
 
-    printf("size: %d\n", size);
-
     ea_direction dummy_dir = NORMAL;
 
-    generic_u32_t dst_val = read_EA(&dst, &size, &mode, &dummy_dir);
-    generic_u32_t addr    = get_pc() + WORD_SPAN;
-    generic_u32_t ram_val = read_ram(&addr, &size);
+    opsize     tmpsize = size;
 
-    generic_u32_t value = dst_val - ram_val;
+    if (tmpsize == BYTE) tmpsize = WORD;
 
-    write_EA(&dst, value, &size, &mode);
-    set_srflags(cmpi, size, ram_val, dst_val, value);
+    generic_32_t dst_val  = sign_extended(read_EA(&dst, &size, &mode, &dummy_dir), size);
+    generic_u32_t addr    = get_pc() + size_to_span(tmpsize);
+    generic_32_t ram_val  = sign_extended(read_ram(&addr, &tmpsize), size);
 
-    incr_pc(size_to_span(size));
+    generic_32_t value = dst_val - ram_val;
+
+    set_srflags(cmpi, size, (generic_u32_t) ram_val, (generic_u32_t) dst_val, (generic_u32_t) value);
+
+    incr_pc(size_to_span(tmpsize));
 
     return (RETURN_OK);
 }
@@ -679,30 +698,40 @@ generic_u32_t CMPI(opcode code)
 
 generic_u32_t MOVEP(opcode code)
 {
-    return 0;
+    WARNING("Unmenaged operation, code: %X\n", code);
+
+    return (RETURN_OK);
 }
 
 
 generic_u32_t BTST(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t BCHG(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t BCLR(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t BSET(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
@@ -936,13 +965,56 @@ generic_u32_t NOT(opcode code)
 
 generic_u32_t EXT(opcode code)
 {
-    return 0;
+    generic_u32_t regptr = (code & 0x0007);
+    opsize          size = (code & 0x0040) == 0 ? WORD : LONG;
+
+    generic_u32_t value = read_datareg(regptr);
+
+    generic_32_t extval = sign_extended(value, size == WORD ? BYTE : WORD);
+
+    write_datareg(regptr, (generic_u32_t) extval, &size);
+
+    set_srflags(ext, size, 0, 0, (generic_u32_t) extval);
+
+    return (RETURN_OK);
 }
 
 
 generic_u32_t NBCD(opcode code)
 {
-    return 0;
+    generic_32_t lo_val, hi_val;
+    bit carry;
+
+    generic_u32_t dst = (code & SRC_MASK);
+    opsize       size = BYTE;
+    ADDRMode     mode = (code & 0b0000000000111000) >> 3;
+    ea_direction dir  = NORMAL;
+
+    generic_u32_t val = read_EA(&dst, &size, &mode, &dir);
+
+    lo_val = 10 - (val & 0x0000000F) - (get_extended() ? 1 : 0);
+    carry = lo_val < 10;
+
+    if (lo_val >= 10)
+        lo_val = 0;
+
+    hi_val = 10 - ((val >> 4) & 0x0000000F) - (carry ? 1 : 0);
+    carry = hi_val < 10;
+
+    if (hi_val >= 10)
+        hi_val = 0;
+
+    generic_32_t result = (hi_val << 4) + lo_val;
+
+    write_EA(&dst, (generic_u32_t)(val & 0x000000FF), &size, &mode);
+
+    set_carry(carry);
+    set_extended(carry);
+
+    if (result != 0)
+        set_zero(0);
+
+    return (RETURN_OK);
 }
 
 
@@ -981,14 +1053,18 @@ generic_u32_t PEA(opcode code)
 
 generic_u32_t ILLEGAL(opcode code)
 {
-    PANIC("[TRAP] Executed trap exception, code: %d, mnemonic: %s\n", IllegalInstruction, trap_code_toString(IllegalInstruction));
-    return 0;
+    ignore_param(code);
+
+    TRAPEXC("Executed trap exception, code: %d, mnemonic: %s\n", IllegalInstruction, trap_code_toString(IllegalInstruction));
+    return (RETURN_OK);
 }
 
 
 generic_u32_t TAS(opcode code)
 {
-    return 0;
+    WARNING("Unmenaged operation, code: %X\n", code);
+
+    return (RETURN_OK);
 }
 
 
@@ -1030,7 +1106,7 @@ generic_u32_t TRAP(opcode code)
 {
     generic_u16_t vector = code & 0x000F;
 
-    PANIC("[TRAP] Raised trap exception: code %d, mnemonic: %s\n", 0x20 + vector, trap_code_toString(0x20 + vector));
+    TRAPEXC("Raised trap exception: code %d, mnemonic: %s\n", 0x20 + vector, trap_code_toString(0x20 + vector));
 
     return (RETURN_ERR);
 }
@@ -1074,7 +1150,7 @@ generic_u32_t MOVEUSP(opcode code)
 {
     if (!get_supervisor())
     {
-        PANIC("[TRAP] Executed trap exception, code: %d, mnemonic: %s\n", PrivilegeViolation, trap_code_toString(PrivilegeViolation));
+        TRAPEXC("Executed trap exception, code: %d, mnemonic: %s\n", PrivilegeViolation, trap_code_toString(PrivilegeViolation));
     }
 
     generic_u32_t addr_reg  = (code & SRC_MASK);
@@ -1098,12 +1174,17 @@ generic_u32_t MOVEUSP(opcode code)
 generic_u32_t RESET(opcode code)
 {
     // ??
+
+    WARNING("Unmenaged operation, code: %X\n", code);
+
     return (RETURN_OK);
 }
 
 
 generic_u32_t NOP(opcode code)
 {
+    ignore_param(code);
+
     return (RETURN_OK);
 }
 
@@ -1111,27 +1192,56 @@ generic_u32_t NOP(opcode code)
 generic_u32_t STOP(opcode code)
 {
     // ??
+
+    WARNING("Unmenaged operation, code: %X\n", code);
+
     return (RETURN_OK);
 }
 
 
 generic_u32_t RTE(opcode code)
 {
-    return 0;
+    ignore_param(code);
+
+    if (get_supervisor())
+    {
+        srflags sr = pop_word();
+
+        set_pc(pop_long());
+
+        set_sr(sr);
+    }
+    else
+    {
+        TRAPEXC("Executed trap exception, code: %d, mnemonic: %s\n", PrivilegeViolation, trap_code_toString(PrivilegeViolation));
+    }
+
+    return (RETURN_OK_PC_NO_INCR);
 }
 
 
 generic_u32_t RTS(opcode code)
 {
-    return 0;
+    if (JSR_CALL_COUNTER == 0) //like return in C-like main func
+    {
+        PANIC("RTS instruction invoked in main label, code: 0x%X\n", code);
+    }
+
+    set_pc(pop_long());
+
+    JSR_CALL_COUNTER--;
+
+    return (RETURN_OK_PC_NO_INCR);
 }
 
 
 generic_u32_t TRAPV(opcode code)
 {
+    ignore_param(code);
+
     if (get_overflow())
     {
-        PANIC("[TRAP] Executed trap exception, code: %d, mnemonic: %s\n", TRAPVInstruction, trap_code_toString(TRAPVInstruction));
+        TRAPEXC("Executed trap exception, code: %d, mnemonic: %s\n", TRAPVInstruction, trap_code_toString(TRAPVInstruction));
     }
 
     return (RETURN_OK);
@@ -1140,13 +1250,46 @@ generic_u32_t TRAPV(opcode code)
 
 generic_u32_t RTR(opcode code)
 {
-    return 0;
+    ignore_param(code);
+
+    srflags ccr   = pop_word();
+    srflags srval = get_sr();
+
+    srval = (srval & 0xFFE0) | (ccr & 0x001F);
+
+    set_sr(srval);
+    set_pc(pop_long());
+
+    return (RETURN_OK_PC_NO_INCR);
 }
 
 
 generic_u32_t JSR(opcode code)
 {
-    return 0;
+    ADDRMode      mode     = (code & ADDRMODE_MASK);
+    generic_u32_t addr_reg = (code & SRC_MASK);
+
+    generic_u32_t jmp_addr;
+
+    if (mode == ABSLong || mode == ADDRESS)
+    {
+        generic_u32_t ram_ptr = read_addrreg(addr_reg);
+        opsize size = LONG;
+        jmp_addr = read_ram(&ram_ptr, &size);
+        incr_pc(LONG_SPAN);
+    }
+    else
+    {
+        PANIC("Unmenaged mode\n");
+    }
+
+    push_long(get_pc());
+
+    set_pc(jmp_addr);
+
+    JSR_CALL_COUNTER++;
+
+    return (RETURN_OK_PC_NO_INCR);
 }
 
 
@@ -1162,7 +1305,6 @@ generic_u32_t JMP(opcode code)
         generic_u32_t ram_ptr = get_pc() + WORD_SPAN;
         opsize size = LONG;
         jmp_addr = read_ram(&ram_ptr, &size);
-        incr_pc(LONG_SPAN);
     }
     else if (mode == ADDRESS)
     {
@@ -1172,18 +1314,20 @@ generic_u32_t JMP(opcode code)
     }
     else
     {
-        PANIC("[PANIC] Unmenaged mode\n");
+        PANIC("Unmenaged mode\n");
     }
 
-    set_pc(jmp_addr - WORD_SPAN); //prevent pc incr
+    set_pc(jmp_addr);
 
-    return (RETURN_OK);
+    return (RETURN_OK_PC_NO_INCR);
 }
 
 
 generic_u32_t MOVEM(opcode code)
 {
     // wtf is this?? maybe later
+
+    WARNING("Unmenaged operation, code: %X\n", code);
 
     return (RETURN_OK);
 }
@@ -1209,7 +1353,7 @@ generic_u32_t CHK(opcode code)
         (signDVAL < 0)         ? set_negative(1) : set_negative(get_negative());
         (signDVAL > signVALUE) ? set_negative(0) : set_negative(get_negative());
 
-        PANIC("[TRAP] Executed trap exception, code: %d, mnemonic: %s\n", CHKInstruction, trap_code_toString(CHKInstruction));
+        TRAPEXC("Executed trap exception, code: %d, mnemonic: %s\n", CHKInstruction, trap_code_toString(CHKInstruction));
     }
 
 
@@ -1244,13 +1388,51 @@ generic_u32_t LEA(opcode code)
 // GROUP 0x05
 generic_u32_t DBcc(opcode code)
 {
-    return 0;
+    opsize size = WORD;
+    CCm condition = (code & 0x0F00) >> 8;
+
+    if (!eval_cc(condition))
+    {
+        generic_u32_t dst  = code & 0x0007;
+        generic_u32_t dval = read_datareg(dst);
+
+        generic_32_t new_dval = sign_extended(dval, size) - 1;
+
+        write_datareg(dst, (generic_u32_t) new_dval, &size);
+
+        if (new_dval != -1)
+        {
+            generic_32_t  disp;
+            generic_u32_t ramptr = get_pc() + WORD_SPAN;
+            opsize        size   = WORD;
+            disp = sign_extended(read_ram(&ramptr, &size), WORD);
+
+            generic_u32_t pc = get_pc();
+            pc += WORD_SPAN;
+
+            set_pc(pc + disp);
+        }
+        else incr_pc(WORD_SPAN);
+    }
+
+    return (RETURN_OK_PC_NO_INCR);
 }
 
 
 generic_u32_t Scc(opcode code)
 {
-    return 0;
+    generic_u32_t dst = (code & SRC_MASK);
+    opsize       size = BYTE;
+    ADDRMode     mode = (code & 0b0000000000111000) >> 3;
+
+    CCm condition = (code & 0x0F00) >> 8;
+
+    if (eval_cc(condition))
+        write_EA(&dst, 0x000000FF, &size, &mode);
+    else
+        write_EA(&dst, 0x000000FF, &size, &mode);
+
+    return (RETURN_OK);
 }
 
 
@@ -1334,20 +1516,40 @@ generic_u32_t BRA(opcode code)
         opsize        dummy   = WORD;
 
         disp = sign_extended(read_ram(&ram_ptr, &dummy), WORD);
-        pc -= 2;
     }
     else
         disp = sign_extended((generic_u32_t) disp, WORD);
 
-    set_pc((generic_u32_t)(pc + disp));
+    set_pc(pc + disp);
 
-    return (RETURN_OK);
+    return (RETURN_OK_PC_NO_INCR);
 }
 
 
 generic_u32_t BSR(opcode code)
 {
-    return 0;
+    generic_u32_t pc = get_pc();
+
+    generic_u32_t disp = code & 0x00FF;
+
+    if (disp == 0)
+    {
+        generic_u32_t ramptr = get_pc() + WORD_SPAN;
+        opsize        size   = WORD;
+        disp = sign_extended(read_ram(&ramptr, &size), WORD);
+        push_long(pc + LONG_SPAN);
+    }
+    else
+    {
+        disp = sign_extended(disp, WORD);
+        push_long(pc + WORD_SPAN);
+    }
+
+    set_pc(pc + disp);
+
+    JSR_CALL_COUNTER++;
+
+    return (RETURN_OK);
 }
 
 
@@ -1414,7 +1616,7 @@ generic_u32_t DIVU(opcode code)
     // opsize   *size      = (opsize *)        a[4];
     // ea_direction *direction = (ea_direction *)  a[5];
 
-    if (*sVal == 0) { PANIC("[PANIC! (DIVU)], Division by zero\n") }
+    if (*sVal == 0) { TRAPEXC("Executed trap exception, code: %d, mnemonic: %s\n", DivideByZero, trap_code_toString(DivideByZero)); }
 
     opsize size = WORD;
 
@@ -1459,7 +1661,7 @@ generic_u32_t DIVS(opcode code)
     signed_dVal = sign_extended(*dVal, WORD);
     signed_sVal = sign_extended(*sVal, WORD);
 
-    if (signed_sVal == 0) { PANIC("[PANIC! (DIVS)], Division by zero\n") }
+    if (signed_sVal == 0) { TRAPEXC("Executed trap exception, code: %d, mnemonic: %s\n", DivideByZero, trap_code_toString(DivideByZero)); }
 
 
     _val = (generic_32_t) signed_dVal / signed_sVal;
@@ -1486,7 +1688,7 @@ generic_u32_t DIVS(opcode code)
 
 generic_u32_t SBCD(opcode code)
 {
-    return 0;
+    return xBCD(code, SUBTRACTION);
 }
 
 
@@ -1748,7 +1950,7 @@ generic_u32_t CMP(opcode code)
     {
         opsize tmpsize = size;
         if (tmpsize == BYTE) tmpsize = WORD; //byte can't be wrote in ram
-        generic_u32_t ram_ptr = get_pc() + WORD_SPAN;
+        generic_u32_t ram_ptr = get_pc() + size_to_span(tmpsize);;
         generic_u32_t imm_val = read_ram(&ram_ptr, &tmpsize);
         signSRC = sign_extended(imm_val, tmpsize);
 
@@ -1838,13 +2040,43 @@ generic_u32_t MULS(opcode code)
 
 generic_u32_t ABCD(opcode code)
 {
-    return 0;
+    return xBCD(code, ADDICTION);
 }
 
 
 generic_u32_t EXG(opcode code)
 {
-    return 0;
+    generic_u32_t rX = (code & 0x0007);
+    generic_u32_t rY = (code & 0x0E00) >> 9;
+    bit mode         = (bit)((code & 0x00F8) >> 3);
+
+    generic_u32_t x, y;
+    switch (mode)
+    {
+        case 0x08:      // Data Register exg Data Register
+            x = read_datareg(rX);
+            y = read_datareg(rY);
+            write_datareg(rX, y, NULL);
+            write_datareg(rY, x, NULL);
+            break;
+        case 0x09:      // Address Register exg Address Register
+            x = read_addrreg(rX);
+            y = read_addrreg(rY);
+            write_addrreg(rX, y, NULL);
+            write_addrreg(rY, x, NULL);
+            break;
+        case 0x11:      // Data Register exg Address Register
+            x = read_addrreg(rX);
+            y = read_datareg(rY);
+            write_addrreg(rX, y, NULL);
+            write_datareg(rY, x, NULL);
+            break;
+        default:
+            PANIC("Unmenaged mode\n");
+            break;
+    }
+
+    return (RETURN_OK);
 }
 
 
@@ -1993,49 +2225,152 @@ generic_u32_t ADD(opcode code)
 // GROUP 0x0E
 generic_u32_t ASR(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t ASL(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t LSR(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t LSL(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t ROXR(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t ROXL(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t ROR(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
 generic_u32_t ROL(opcode code)
 {
+    ignore_param(code);
+
     return 0;
 }
 
 
+
+//abcd-sbcd
+generic_u32_t xBCD(opcode code, BCD_type type)
+{
+    generic_u32_t srcval, dstval, result;
+
+    generic_u32_t srcptr = (code & 0x0007);
+    generic_u32_t dstptr = (code & 0x0E00) >> 9;
+
+    if ((code & 0x0008) == DATAREG)
+    {
+        srcval = read_datareg(srcptr) & 0x000000FF;
+        dstval = read_datareg(dstptr) & 0x000000FF;
+        result = perform_BCD(type, srcval, dstval);
+
+        opsize size = BYTE;
+        write_datareg(dstptr, result, &size);
+    }
+    else //MEMORYPD
+    {
+        generic_u32_t src_ram_ptr, dst_ram_ptr;
+
+        decr_addr_reg(srcptr, BYTE);
+        decr_addr_reg(dstptr, BYTE);
+
+        src_ram_ptr = read_addrreg(srcptr);
+        dst_ram_ptr = read_addrreg(dstptr);
+
+        srcval = read_byte(src_ram_ptr);
+        dstval = read_byte(dst_ram_ptr);
+
+        result = perform_BCD(type, srcval, dstval);
+
+        write_byte(dst_ram_ptr, (generic_u8_t) (result & 0x000000FF));
+    }
+
+    return (RETURN_OK);
+}
+
+generic_u32_t perform_BCD(BCD_type type, generic_u32_t src, generic_u32_t dest)
+{
+    generic_32_t lo_val, hi_val;
+    bit carry;
+
+    if (type == ADDICTION)
+    {
+        lo_val = (generic_32_t)((src & 0x000F) + (dest & 0x000F) + (get_extended() ? 1 : 0));
+        carry = lo_val > 9;
+
+        if (lo_val > 9)
+            lo_val -= 10;
+
+        hi_val = (generic_32_t)(((src >> 4) & 0x000F) + ((dest >> 4) & 0x000F) + (carry ? 1 : 0));
+        carry = hi_val > 9;
+
+        if (hi_val > 9)
+            hi_val -= 10;
+    }
+    else
+    {
+        lo_val = (generic_32_t)((dest & 0x000F) - (src & 0x000F) - (get_extended() ? 1 : 0));
+        carry = lo_val < 0;
+
+        if (lo_val < 0)
+            lo_val += 10;
+
+        hi_val = (generic_32_t)(((dest >> 4) & 0x000F) - ((src >> 4) & 0x000F) - (carry ? 1 : 0));
+        carry = hi_val < 0;
+
+        if (hi_val < 0)
+            hi_val += 10;
+    }
+
+    generic_32_t result = (hi_val << 4) + lo_val;
+
+    set_carry(carry);
+    set_extended(carry);
+
+    if (result != 0)
+        set_zero(0);
+
+    return (generic_u32_t)(result & 0x000000FF);
+}
+
+
+//dumbest way to ignore param 'code' :D
+generic_u32_t ignore_param(generic_u32_t code) { return code; }
