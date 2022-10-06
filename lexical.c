@@ -1,6 +1,6 @@
-#line 2 "../stray68K/assembler/lexical.c"
+#line 2 "lexical.c"
 
-#line 4 "../stray68K/assembler/lexical.c"
+#line 4 "lexical.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1121,10 +1121,10 @@ static const flex_int16_t yy_chk[1359] =
 
 void m68kasm_error(void *scanner, Statement *statement, const char *message);
 
-#line 1125 "../stray68K/assembler/lexical.c"
+#line 1125 "lexical.c"
 /* Regular expression. */
 
-#line 1128 "../stray68K/assembler/lexical.c"
+#line 1128 "lexical.c"
 
 #define INITIAL 0
 #define OPERANDS 1
@@ -1403,7 +1403,7 @@ YY_DECL
 
 #line 49 "../stray68K/assembler/lexical.l"
  /* Ignore whitespace */
-#line 1407 "../stray68K/assembler/lexical.c"
+#line 1407 "lexical.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -2650,7 +2650,7 @@ YY_RULE_SETUP
 #line 461 "../stray68K/assembler/lexical.l"
 ECHO;
 	YY_BREAK
-#line 2654 "../stray68K/assembler/lexical.c"
+#line 2654 "lexical.c"
 
 	case YY_END_OF_BUFFER:
 		{

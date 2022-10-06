@@ -2,9 +2,9 @@
 #define m68kasm_HEADER_H 1
 #define m68kasm_IN_HEADER 1
 
-#line 6 "../stray68K/assembler/lexical.h"
+#line 6 "lexical.h"
 
-#line 8 "../stray68K/assembler/lexical.h"
+#line 8 "lexical.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -717,6 +717,6 @@ extern int yylex \
 #line 461 "../stray68K/assembler/lexical.l"
 
 
-#line 721 "../stray68K/assembler/lexical.h"
+#line 721 "lexical.h"
 #undef m68kasm_IN_HEADER
 #endif /* m68kasm_HEADER_H */

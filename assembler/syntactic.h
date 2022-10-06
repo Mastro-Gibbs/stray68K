@@ -35,8 +35,8 @@
    especially those whose name start with YY_ or yy_.  They are
    private implementation details that can be changed or removed.  */
 
-#ifndef YY_M68KASM_SYNTACTIC_H_INCLUDED
-# define YY_M68KASM_SYNTACTIC_H_INCLUDED
+#ifndef YY_M68KASM_STRAY68K_ASSEMBLER_SYNTACTIC_H_INCLUDED
+# define YY_M68KASM_STRAY68K_ASSEMBLER_SYNTACTIC_H_INCLUDED
 /* Debug traces.  */
 #ifndef M68KASM_DEBUG
 # if defined YYDEBUG
@@ -53,7 +53,7 @@
 extern int m68kasm_debug;
 #endif
 /* "%code requires" blocks.  */
-#line 30 "syntactic.y"
+#line 30 "../stray68K/assembler/syntactic.y"
 
 
 #include "clowncommon.h"
@@ -418,7 +418,7 @@ typedef struct ListMetadata
 } ListMetadata;
 
 
-#line 422 "syntactic.h"
+#line 422 "../stray68K/assembler/syntactic.h"
 
 /* Token kinds.  */
 #ifndef M68KASM_TOKENTYPE
@@ -602,7 +602,7 @@ typedef struct ListMetadata
 #if ! defined M68KASM_STYPE && ! defined M68KASM_STYPE_IS_DECLARED
 union M68KASM_STYPE
 {
-#line 420 "syntactic.y"
+#line 420 "../stray68K/assembler/syntactic.y"
 
 	unsigned long unsigned_long;
 	char *string;
@@ -614,7 +614,7 @@ union M68KASM_STYPE
 	ListMetadata list_metadata;
 	Expression expression;
 
-#line 618 "syntactic.h"
+#line 618 "../stray68K/assembler/syntactic.h"
 
 };
 typedef union M68KASM_STYPE M68KASM_STYPE;
@@ -628,13 +628,13 @@ typedef union M68KASM_STYPE M68KASM_STYPE;
 int m68kasm_parse (void *scanner, Statement *statement);
 
 /* "%code provides" blocks.  */
-#line 395 "syntactic.y"
+#line 395 "../stray68K/assembler/syntactic.y"
 
 
 void DestroyExpression(Expression *expression);
 void DestroyStatement(Statement *statement);
 
 
-#line 639 "syntactic.h"
+#line 639 "../stray68K/assembler/syntactic.h"
 
-#endif /* !YY_M68KASM_SYNTACTIC_H_INCLUDED  */
+#endif /* !YY_M68KASM_STRAY68K_ASSEMBLER_SYNTACTIC_H_INCLUDED  */
