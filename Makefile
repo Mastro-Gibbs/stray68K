@@ -33,7 +33,6 @@ SOURCES       = ../stray68K/ARCH.c \
 		../stray68K/assembler/strcmpci.c \
 		../stray68K/assembler/syntactic.c \
 		../stray68K/cpu.c \
-		../stray68K/loader.c \
 		../stray68K/main.c \
 		../stray68K/memory.c \
 		../stray68K/opcode.c \
@@ -48,7 +47,6 @@ OBJECTS       = $(OBJECTS_DIR)/ARCH.o \
 		$(OBJECTS_DIR)/strcmpci.o \
 		$(OBJECTS_DIR)/syntactic.o \
 		$(OBJECTS_DIR)/cpu.o \
-		$(OBJECTS_DIR)/loader.o \
 		$(OBJECTS_DIR)/main.o \
 		$(OBJECTS_DIR)/memory.o \
 		$(OBJECTS_DIR)/opcode.o \
@@ -79,8 +77,6 @@ cleanassembler:
 	-$(DEL_FILE) $(ASSRMBLER_DIR)/lexical.c $(ASSRMBLER_DIR)/lexical.h $(ASSRMBLER_DIR)/syntactic.c $(ASSRMBLER_DIR)/syntactic.h
 
 cleanall: clean cleanassembler
-	-$(DEL_DIR)  $(OBJECTS_DIR)
-	-$(DEL_DIR)  $(BUILD_DIR)
 
 
 ####### Create dirs
@@ -109,8 +105,7 @@ $(OBJECTS_DIR)/ARCH.o: ../stray68K/ARCH.c ../stray68K/ARCH.h \
 		../stray68K/opcode.h \
 		../stray68K/enums.h \
 		../stray68K/utils.h \
-		../stray68K/memory.h \
-		../stray68K/loader.h
+		../stray68K/memory.h 
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/ARCH.o ../stray68K/ARCH.c
 
 $(OBJECTS_DIR)/assembler.o: ../stray68K/assembler/assembler.c ../stray68K/assembler/assembler.h \
@@ -151,16 +146,6 @@ $(OBJECTS_DIR)/cpu.o: ../stray68K/cpu.c ../stray68K/cpu.h \
 		../stray68K/memory.h
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/cpu.o ../stray68K/cpu.c
 
-$(OBJECTS_DIR)/loader.o: ../stray68K/loader.c ../stray68K/loader.h \
-		../stray68K/motorolatypes.h \
-		../stray68K/utils.h \
-		../stray68K/enums.h \
-		../stray68K/memory.h \
-		../stray68K/cpu.h \
-		../stray68K/opcode_handlers.h \
-		../stray68K/opcode.h
-	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/loader.o ../stray68K/loader.c
-
 $(OBJECTS_DIR)/main.o: ../stray68K/main.c ../stray68K/strayemu.h \
 		../stray68K/ARCH.h \
 		../stray68K/cpu.h \
@@ -170,7 +155,6 @@ $(OBJECTS_DIR)/main.o: ../stray68K/main.c ../stray68K/strayemu.h \
 		../stray68K/enums.h \
 		../stray68K/utils.h \
 		../stray68K/memory.h \
-		../stray68K/loader.h \
 		../stray68K/assembler/assembler.h \
 		../stray68K/assembler/clowncommon.h \
 		../stray68K/assembler/semantic.h \

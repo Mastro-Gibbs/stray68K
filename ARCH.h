@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include "cpu.h"
 #include "memory.h"
-#include "loader.h"
 
 
 #define RAM_SIZE 0xFFFFFFFF

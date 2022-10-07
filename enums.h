@@ -93,6 +93,13 @@ typedef enum __direction__mode__
 } direction_mode;
 
 
+typedef enum __rotation_direction__
+{
+    LEFT  = 1,
+    RIGHT = 0
+} Rot;
+
+
 typedef enum __storing__direction__
 {
     MEMORY_REGISTER = 0x00,

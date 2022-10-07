@@ -43,17 +43,17 @@ generic_u32_t ORI(opcode code);       //ok
 generic_u32_t ANDItoCCR(opcode code); //ok
 generic_u32_t ANDItoSR(opcode code);  //ok
 generic_u32_t ANDI(opcode code);      //ok
-generic_u32_t SUBI(opcode code);      // +/-
-generic_u32_t ADDI(opcode code);      // +/-
+generic_u32_t SUBI(opcode code);      //ok
+generic_u32_t ADDI(opcode code);      //ok
 generic_u32_t EORItoCCR(opcode code); //ok
 generic_u32_t EORItoSR(opcode code);  //ok
 generic_u32_t EORI(opcode code);      //ok
 generic_u32_t CMPI(opcode code);      //ok
 generic_u32_t MOVEP(opcode code);     // maybe next -warn
-generic_u32_t BTST(opcode code);
-generic_u32_t BCHG(opcode code);
-generic_u32_t BCLR(opcode code);
-generic_u32_t BSET(opcode code);
+generic_u32_t BTST(opcode code);      //ok
+generic_u32_t BCHG(opcode code);      //ok
+generic_u32_t BCLR(opcode code);      //ok
+generic_u32_t BSET(opcode code);      //ok
 
 
 // GROUP 0x01
@@ -93,7 +93,7 @@ generic_u32_t RTR(opcode code);        //ok
 generic_u32_t JSR(opcode code);        //ok
 generic_u32_t JMP(opcode code);        //ok
 generic_u32_t MOVEM(opcode code);      // wtf -warn
-generic_u32_t CHK(opcode code);        //ok, but so strange eh
+generic_u32_t CHK(opcode code);        // ok -warn
 generic_u32_t LEA(opcode code);        //ok
 
 
@@ -149,19 +149,31 @@ generic_u32_t ADD(opcode code);   //ok
 
 
 // GROUP 0x0E
-generic_u32_t ASR(opcode code);
-generic_u32_t ASL(opcode code);
-generic_u32_t LSR(opcode code);
-generic_u32_t LSL(opcode code);
-generic_u32_t ROXR(opcode code);
-generic_u32_t ROXL(opcode code);
-generic_u32_t ROR(opcode code);
-generic_u32_t ROL(opcode code);
+generic_u32_t ASR(opcode code);   //ok
+generic_u32_t ASL(opcode code);   //ok
+generic_u32_t LSR(opcode code);   //ok
+generic_u32_t LSL(opcode code);   //ok
+generic_u32_t ROXR(opcode code);  //ok
+generic_u32_t ROXL(opcode code);  //ok
+generic_u32_t ROR(opcode code);   //ok
+generic_u32_t ROL(opcode code);   //ok
+
+
+//Bxxx
+generic_u32_t Bxxx(opcode code);
 
 
 //abcd-sbcd
 generic_u32_t xBCD(opcode code, BCD_type type);
 generic_u32_t perform_BCD(BCD_type type, generic_u32_t src, generic_u32_t dest);
+
+
+//A-Lxx
+generic_u32_t ALxx(generic_u32_t code);
+
+//Roxx
+generic_u32_t ROxx(generic_u32_t code);
+
 
 
 //dumbest way to ignore param 'code' :D

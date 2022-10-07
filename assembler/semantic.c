@@ -158,6 +158,7 @@ static void AssembleLine(SemanticState *state, const char *source_line);
 #define ATTRIBUTE_PRINTF(a, b)
 #endif
 
+int can_write_simhalt = 1;
 
 static char hexToChar(unsigned char c)
 {
@@ -199,6 +200,18 @@ static char hexToChar(unsigned char c)
 		return '0';
 	}
 } 
+
+
+void write_simhalt(SemanticState *state)
+{
+    if (can_write_simhalt)
+    {
+        fprintf(state->output_file, "%c", '!');
+        fprintf(state->output_file, "%c", '\n');
+
+        can_write_simhalt = 0;
+    }
+}
 
 
 static void ErrorMessageCommon(SemanticState *state)
@@ -3610,7 +3623,6 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 	fprintf(state->output_file, "%c", hexToChar((machine_code & 0x000000F0) >> 4));
 	fprintf(state->output_file, "%c", hexToChar(machine_code & 0x0000000F));
 
-
 	/* Output the data for the operands. */
 	for (i = 0; i < CC_COUNT_OF(operands_to_output); ++i)
 	{
@@ -3758,6 +3770,11 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 					state->program_counter += bytes_to_write;
 
+                    if ((machine_code & 0b1111000111000000) == 0x41C0) //OPCODE_LEA
+                    {
+                        value += 1; //must set span of 1 byte for simhalt space
+                    }
+
 					while (bytes_to_write-- > 0)
 					{
 						fprintf(state->output_file, "%c", hexToChar(value >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
@@ -3778,7 +3795,6 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 						fprintf(state->output_file, "%c", hexToChar(operand->main_register >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
 						fprintf(state->output_file, "%c", hexToChar(operand->main_register >> (8 * bytes_to_write) & 0x000000000000000F));
 					}
-
 					
 					break;
 				}
@@ -3839,12 +3855,20 @@ static void ProcessOrg(SemanticState *state, StatementOrg *org)
     unsigned int orgv;
     unsigned int bytes_to_write;
 
-    if (org->value.shared.unsigned_long > 0x00FFFFFF)
-        SemanticError(state, "Value cannot be higher than $00FFFFFF, but was $%lX.", org->value.shared.unsigned_long);
+    if (state->location->previous != NULL)
+        SemanticError(state, "Org (not mandatory) must be written only in the main file, found in file %s.\n", state->location->file_path);
+
+    if (state->program_counter != 0)
+        SemanticError(state, "ORG (not mandatory) must be written as the first statement, found at line %ld.\n", state->location->line_number);
+
+    if (org->value.shared.unsigned_long > 0x0000FFFE)
+        SemanticError(state, "Value cannot be higher than $0000FFFE, but was $%lX.", org->value.shared.unsigned_long);
 
     state->program_counter = org->value.shared.unsigned_long;
 
     orgv = (unsigned int) (org->value.shared.unsigned_long & 0x00000000FFFFFFFF);
+
+    fprintf(state->output_file, "%c", 'o');
 
     bytes_to_write = 4;
     while (bytes_to_write-- > 0)
@@ -3860,6 +3884,8 @@ static void ProcessOrg(SemanticState *state, StatementOrg *org)
 static void ProcessDc(SemanticState *state, StatementDc *dc)
 {
 	ExpressionListNode *expression_list_node;
+
+    write_simhalt(state);
 
 	for (expression_list_node = dc->values; expression_list_node != NULL; expression_list_node = expression_list_node->next)
 	{
@@ -3899,6 +3925,8 @@ static void ProcessDcb(SemanticState *state, StatementDcb *dcb)
 	{
 		unsigned long value;
 		unsigned long i;
+
+        write_simhalt(state);
 
 		if (!ResolveExpression(state, &dcb->value, &value, cc_true))
 			value = 0;
@@ -4051,7 +4079,7 @@ static void ProcessIf(SemanticState *state, Expression *expression)
 
 static void ProcessStatement(SemanticState *state, Statement *statement, const char *label)
 {
-	/* Update both copies of the program counter. */
+    /* Update both copies of the program counter. */
 	Dictionary_LookUp(&state->dictionary, PROGRAM_COUNTER_OF_STATEMENT, sizeof(PROGRAM_COUNTER_OF_STATEMENT) - 1)->shared.unsigned_long = state->program_counter;
 	Dictionary_LookUp(&state->dictionary, PROGRAM_COUNTER_OF_EXPRESSION, sizeof(PROGRAM_COUNTER_OF_EXPRESSION) - 1)->shared.unsigned_long = state->program_counter;
 
@@ -4122,7 +4150,7 @@ static void ProcessStatement(SemanticState *state, Statement *statement, const c
 			break;
 
 		case STATEMENT_TYPE_DC:
-			ProcessDc(state, &statement->shared.dc);
+            ProcessDc(state, &statement->shared.dc);
 			break;
 
 		case STATEMENT_TYPE_DCB:

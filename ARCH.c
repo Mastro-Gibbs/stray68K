@@ -1,10 +1,26 @@
 #include "ARCH.h"
+
 #include <string.h>
+#include <termios.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <regex.h>
+
+#define SEPARATOR      '\n'
+#define SIMHALT_SYMBOL '!'
+#define ORG_SYMBOL     'o'
+#define ORG_DEFAULT     0x00000000
+
 
 void  __load_bytecode__(char *filename);
-void  __set_simhalt__(generic_u32_t addr);
-bit __is_halt__();
+bit   __is_halt__();
 void  __turn_off__();
+
+
+generic_u32_t loader_data_size = 0;
+regex_t       hex_rx;
+const char    *hex_regex = "[0-9a-fA-F!]+";
 
 
 arch_t        ARCH;
@@ -12,8 +28,11 @@ generic_u32_t simhalt = 0;
 generic_u32_t orgptr  = 0;
 
 
+static struct termios oldt, newt;
 
-void begin()
+
+
+void _begin()
 {
     ARCH.cpu = init_cpu();
     ARCH.ram = init_ram(RAM_SIZE);
@@ -30,11 +49,19 @@ void __turn_off__()
 }
 
 
-void ORG(generic_u32_t org) { orgptr = org; set_pc(orgptr); }
+/* ORG */
+void _set_ORG(generic_u32_t org) { orgptr = org; set_pc(orgptr); }
+
+
+/* SIMHALT */
+void _set_simhalt(generic_u32_t addr) { simhalt = addr; }
+
+bit __is_halt__() { return (get_pc() != simhalt || get_pc() < simhalt) ? 0 : 1; }
+
 
 
 /* LOADER */
-bit is_valid_file(char *filename)
+bit _is_valid_file(char *filename)
 {
     FILE    *fp;
     char    *line = NULL;
@@ -52,109 +79,153 @@ bit is_valid_file(char *filename)
     return 1;
 }
 
-generic_u32_t __extract_ORG__(char *filename)
+generic_u32_t _extract_ORG(char *filename)
 {
-    FILE    *fp;
-    char    *line = NULL;
-    size_t  len   = 0;
+    FILE   *fp;
+    char   *line = NULL;
+    char   *end  = NULL;
+    size_t len   = 0;
 
-    char  org[9];
-    char* end = NULL;
-    long  value;
+    generic_u32_t value = ORG_DEFAULT;
+
+    char org[9];
 
     fp = fopen(filename, "r");
 
     getline(&line, &len, fp);
 
-    strncpy(org, line, 8);
-    value = strtol(org, &end, 16);
+    if (line[0] == ORG_SYMBOL)
+    {
+        strncpy(org, line+1, 8);
+        value = (generic_u32_t) strtol(org, &end, 16);
+    }
 
     fclose(fp);
 
-    return (generic_u32_t) value;
+    return value;
 }
 
-void  __load_bytecode__(char *filename)
+generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
 {
-    if (is_valid_file(filename))
-    {
-        generic_u32_t org = __extract_ORG__(filename);
+    generic_u8_t *bytecode = NULL;
 
-        if (org != LOAD_ERROR)
+    FILE  *fp;
+    fp = fopen(filename, "r");
+
+    if (regcomp(&hex_rx, hex_regex, REG_EXTENDED) == 1)
+    {
+        PANIC("Could not compile regex %s\n", hex_regex);
+    }
+
+    int  reti;
+    char ch;
+    while((ch = fgetc(fp)) != EOF)
+    {
+        reti = regexec(&hex_rx, &ch, 0, NULL, 0);
+        if (!reti)
         {
-            ORG(org);
-
-            generic_u32_t ram_ptr = load_executable(filename);
-
-            __set_simhalt__(ram_ptr);
+            loader_data_size++;
         }
-        else { PANIC(" Error incomes while loading an invalid bytecode\n"); }
     }
+
+    loader_data_size = ((loader_data_size - ((*org) ? 9 : 0)) / 2) + 1;
+
+    fclose(fp);
+
+    bytecode = calloc(loader_data_size, sizeof (* bytecode));
+
+    fp = fopen(filename, "r");
+
+    char symbol[3];
+    symbol[2] = '\0';
+
+    generic_u32_t pos = 0,
+                  validator = ((*org) ? 10 : 0);
+
+    while (validator--) fgetc(fp);
+
+    while((ch = fgetc(fp)) != EOF)
+    {
+        if (ch == SIMHALT_SYMBOL)
+        {
+            bytecode[pos++] = ch;
+        }
+        else if (ch != SEPARATOR)
+        {
+            symbol[0] = ch;
+            symbol[1] = fgetc(fp);
+
+            char *end = NULL;
+
+            generic_u8_t val = strtol(symbol, &end, 16);
+
+            bytecode[pos++] = (generic_u8_t) val;
+        }
+    }
+    fclose(fp);
+
+    return bytecode;
 }
 
-
-
-/* SIMHALT */
-void __set_simhalt__(generic_u32_t addr) { simhalt = addr; write_long(addr, 0xFFFFFFFF); }
-
-bit __is_halt__() { return (get_pc() != simhalt || get_pc() < simhalt) ? 0 : 1; }
-
-
-
-
-/* EMULATOR */
-int emulate(int argc,  char** argv)
+void __load_bytecode__(char *filename)
 {
-    bit describe_code = 0;
-
-    if (argc < 3)
-        return (EXIT_FAILURE);
-
-    if (argc > 3 && strlen(argv[3]) == 2)
+    if (_is_valid_file(filename))
     {
-        if (argv[3][0] == '-' && argv[3][1] == 'd')
-            describe_code = 1;
-        else
-            fputs("Option not reconized.\n", stdout);
+        generic_u32_t org = _extract_ORG(filename);
+        _set_ORG(org);
+
+        generic_u8_t *bytecode = _read_bytecode(filename, &org);
+
+        generic_u32_t simhalt = 0;
+
+        if (bytecode)
+        {
+            generic_u32_t span = 0;
+            for (generic_u32_t iter = 0; iter < loader_data_size; iter++)
+            {
+                generic_u8_t c = bytecode[iter];
+
+                if (c == SIMHALT_SYMBOL) simhalt = ((generic_u32_t)(get_pc() + span));
+
+                write_byte(get_pc() + span, c);
+                span += BYTE_SPAN;
+            }
+
+            free(bytecode);
+            regfree(&hex_rx);
+
+            _set_simhalt((simhalt) ? simhalt : ((generic_u32_t)(get_pc() + span)));
+        }
+        else { PANIC("Error incomes while loading an invalid bytecode\n"); }
     }
-
-    begin();
-
-    ARCH.load(argv[2]);
-
-    system("clear");
-    printf("\033[01m\033[37mInitial system status:\033[0m\n\n");
-    ARCH.cpu->show();
-    printf("\n");
-    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
-    fflush(stdout);
-
-    while(!ARCH.is_halt())
-    {
-        ARCH.cpu->exec(describe_code);
-    }
-
-    system("clear");
-    printf("\033[01m\033[37mFinal system status:\033[0m\n\n");
-    ARCH.cpu->show();
-    printf("\n");
-    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
-    fflush(stdout);
-
-    ARCH.turnoff();
-
-    return (EXIT_SUCCESS);
 }
 
 
 
-int _wait_()
+/* EMULATOR UTILS*/
+
+void _enable_single_char()
+{
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+
+    newt.c_lflag &= ~(ICANON);
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+}
+
+void _disable_single_char()
+{
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
+}
+
+int _wait()
 {
     char c;
     generic_u32_t mbegin, mend;
 
     fputs(
-        "----------------------- Execution Options ------------------------\n"
+        "\n----------------------- Execution Options ------------------------\n"
         "[\033[01m\033[37mc\033[0m] \033[01m\033[37mcpu\033[0m | "
         "[\033[01m\033[37mm\033[0m] \033[01m\033[37mram\033[0m | "
         "[\033[01m\033[37mb\033[0m] \033[01m\033[37mboth\033[0m | "
@@ -166,7 +237,9 @@ int _wait_()
     fflush(stdout);
     fflush(stdin);
 
-    scanf(" %c", &c);
+    _enable_single_char();
+    c = getchar();
+    _disable_single_char();
 
     if (c == 'c')
     {
@@ -225,6 +298,50 @@ int _wait_()
 }
 
 
+/* EMULATOR */
+int emulate(int argc,  char** argv)
+{
+    bit describe_code = 0;
+
+    if (argc < 3)
+        return (EXIT_FAILURE);
+
+    if (argc > 3 && strlen(argv[3]) == 2)
+    {
+        if (argv[3][0] == '-' && argv[3][1] == 'd')
+            describe_code = 1;
+        else
+            fputs("Option not reconized.\n", stdout);
+    }
+
+    _begin();
+
+    ARCH.load(argv[2]);
+
+    system("clear");
+    printf("\033[01m\033[37mInitial system status:\033[0m\n\n");
+    ARCH.cpu->show();
+    printf("\n");
+    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
+    fflush(stdout);
+
+    while(!ARCH.is_halt())
+    {
+        ARCH.cpu->exec(describe_code);
+    }
+
+    system("clear");
+    printf("\033[01m\033[37mFinal system status:\033[0m\n\n");
+    ARCH.cpu->show();
+    printf("\n");
+    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
+    fflush(stdout);
+
+    ARCH.turnoff();
+
+    return (EXIT_SUCCESS);
+}
+
 int emulate_sbs(int argc, char **argv) // aka step-by-step
 {
     bit print = 1;
@@ -241,7 +358,7 @@ int emulate_sbs(int argc, char **argv) // aka step-by-step
             fputs("Option not reconized.\n", stdout);
     }
 
-    begin();
+    _begin();
 
     ARCH.load(argv[2]);
 
@@ -254,12 +371,12 @@ int emulate_sbs(int argc, char **argv) // aka step-by-step
 
     while(!ARCH.is_halt())
     {
-        if (print) { print = _wait_(); }
+        if (print) { print = _wait(); }
 
         ARCH.cpu->exec(describe_code);
     }
 
-    if (print) { _wait_(); }
+    if (print) { _wait(); }
 
     system("clear");
     printf("\033[01m\033[37mFinal system status:\033[0m\n\n");

@@ -10,28 +10,34 @@
 
 
 #include <stdio.h>
-#define TRAPEXC(fmt, ...) do {                           \
-                            printf("[TRAP] ");           \
-                            printf (fmt, ##__VA_ARGS__); \
-                            fflush(stdout);              \
-                        } while (0);                     \
-                        destroy_cpu();                   \
-                        destroy_ram();                   \
+#define TRAPEXC(...) do {                                                   \
+                            system("clear");                                \
+                            cpu_t *cpu = init_cpu();                        \
+                            cpu->show();                                    \
+                            printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
+                            printf("Raised trap exception: \n       \033[01m\033[37mcode\033[0m:     %d\n       \033[01m\033[37mmnemonic\033[0m: %s\n", ##__VA_ARGS__);\
+                            fflush(stdout);                                 \
+                        } while (0);                                        \
+                        destroy_cpu();                                      \
+                        destroy_ram();                                      \
                         exit(-1);
 
-#define PANIC(fmt, ...) do {                             \
-                            printf("[PANIC] ");          \
-                            printf (fmt, ##__VA_ARGS__); \
-                            fflush(stdout);              \
-                        } while (0);                     \
-                        destroy_cpu();                   \
-                        destroy_ram();                   \
+#define PANIC(fmt, ...) do {                                           \
+                            system("clear");                           \
+                            cpu_t *cpu = init_cpu();                   \
+                            cpu->show();                               \
+                            printf("[\033[01m\033[91mPANIC\033[0m] "); \
+                            printf (fmt, ##__VA_ARGS__);               \
+                            fflush(stdout);                            \
+                        } while (0);                                   \
+                        destroy_cpu();                                 \
+                        destroy_ram();                                 \
                         exit(-1);
 
-#define WARNING(fmt, ...) do {                           \
-                            printf("[WARN] ");           \
-                            printf (fmt, ##__VA_ARGS__); \
-                            fflush(stdout);              \
+#define WARNING(fmt, ...) do {                                        \
+                            printf("[\033[01m\033[93mWARN\033[0m] "); \
+                            printf (fmt, ##__VA_ARGS__);              \
+                            fflush(stdout);                           \
                         } while (0);
 
 
