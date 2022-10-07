@@ -219,16 +219,27 @@ static void ErrorMessageCommon(SemanticState *state)
 	const Location *location;
 
 	for (location = state->location; location != NULL; location = location->previous)
-		fprintf(stderr, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+        fprintf(stderr, "\tOn line %lu of '%s'...\n", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
 
-	fprintf(stderr, "\n%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+    fprintf(stderr, "\t\033[01m\033[37m%s\033[0m\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+}
+
+static void SimpleSemanticWarning(const char *fmt, ...)
+{
+    va_list args;
+
+    fputs("[\033[93mWARNING\033[0m] ", stderr);
+
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
 }
 
 ATTRIBUTE_PRINTF(2, 3) static void SemanticWarning(SemanticState *state, const char *fmt, ...)
 {
 	va_list args;
 
-	fputs("Warning: ", stderr);
+    fputs("[\033[93mWARNING\033[0m] ", stderr);
 
 	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
@@ -241,7 +252,7 @@ ATTRIBUTE_PRINTF(2, 3) static void SemanticError(SemanticState *state, const cha
 {
 	va_list args;
 
-	fputs("Error: ", stderr);
+    fputs("[\033[91mERROR\033[0m] ", stderr);
 
 	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
@@ -256,7 +267,7 @@ ATTRIBUTE_PRINTF(2, 3) static void InternalError(SemanticState *state, const cha
 {
 	va_list args;
 
-	fputs("Internal error: ", stderr);
+    fputs("[\033[91mINTERNAL ERROR\033[0m] ", stderr);
 
 	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
@@ -282,7 +293,7 @@ void m68kasm_warning(void *scanner, Statement *statement, const char *message)
 
 	(void)statement;
 
-	fprintf(stderr, "Warning: %s", message);
+    fprintf(stderr, "[\033[93mASM WARNING\033[0m] %s", message);
 
 	ErrorMessageCommon(state);
 }
@@ -293,7 +304,7 @@ void m68kasm_error(void *scanner, Statement *statement, const char *message)
 
 	(void)statement;
 
-	fprintf(stderr, "Error: %s", message);
+    fprintf(stderr, "[\033[91mASM ERROR\033[0m] %s", message);
 
 	ErrorMessageCommon(state);
 }
@@ -3856,28 +3867,33 @@ static void ProcessOrg(SemanticState *state, StatementOrg *org)
     unsigned int bytes_to_write;
 
     if (state->location->previous != NULL)
-        SemanticError(state, "Org (not mandatory) must be written only in the main file, found in file %s.\n", state->location->file_path);
-
-    if (state->program_counter != 0)
-        SemanticError(state, "ORG (not mandatory) must be written as the first statement, found at line %ld.\n", state->location->line_number);
-
-    if (org->value.shared.unsigned_long > 0x0000FFFE)
-        SemanticError(state, "Value cannot be higher than $0000FFFE, but was $%lX.", org->value.shared.unsigned_long);
-
-    state->program_counter = org->value.shared.unsigned_long;
-
-    orgv = (unsigned int) (org->value.shared.unsigned_long & 0x00000000FFFFFFFF);
-
-    fprintf(state->output_file, "%c", 'o');
-
-    bytes_to_write = 4;
-    while (bytes_to_write-- > 0)
     {
-        fprintf(state->output_file, "%c", hexToChar(orgv >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
-        fprintf(state->output_file, "%c", hexToChar(orgv >> (8 * bytes_to_write) & 0x000000000000000F));
+        SimpleSemanticWarning("ORG must be written only in the main file, found in file %s. Ignoring istruction.\n\n", state->location->file_path);
     }
+    else
+    {
+        if (state->program_counter != 0)
+            SemanticError(state, "ORG (not mandatory) must be written as the first statement, found at line %ld.\n", state->location->line_number);
+        else if (org->value.shared.unsigned_long > 0x0000FFFE)
+            SemanticError(state, "Value cannot be higher than $0000FFFE, but was $%lX.", org->value.shared.unsigned_long);
+        else
+        {
+            state->program_counter = org->value.shared.unsigned_long;
 
-    fprintf(state->output_file, "%c", '\n');
+            orgv = (unsigned int) (org->value.shared.unsigned_long & 0x00000000FFFFFFFF);
+
+            fprintf(state->output_file, "%c", 'o');
+
+            bytes_to_write = 4;
+            while (bytes_to_write-- > 0)
+            {
+                fprintf(state->output_file, "%c", hexToChar(orgv >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
+                fprintf(state->output_file, "%c", hexToChar(orgv >> (8 * bytes_to_write) & 0x000000000000000F));
+            }
+
+            fprintf(state->output_file, "%c", '\n');
+        }
+    }
 }
 
 
@@ -3936,31 +3952,57 @@ static void ProcessDcb(SemanticState *state, StatementDcb *dcb)
 	}
 }
 
+
+static cc_bool is_recursive_include(SemanticState *state, const StatementInclude *include)
+{
+    Location *curr = state->location->previous;
+
+    while (curr != NULL)
+    {
+        if (strcmp(curr->file_path, include->path))
+            return cc_true;
+
+        curr = curr->previous;
+    }
+
+    return cc_false;
+}
+
+
 static void ProcessInclude(SemanticState *state, const StatementInclude *include)
 {
 	FILE* const input_file = fopen_backslash(include->path, "r");
 
-	if (input_file == NULL)
-	{
-		SemanticError(state, "File '%s' could not be opened.", include->path);
-	}
-	else
-	{
-		/* Add file path and line number to the location list. */
-		Location location;
+    if (!is_recursive_include(state, include))
+    {
+        if (input_file == NULL)
+        {
+            SemanticError(state, "File '%s' could not be opened.", include->path);
+        }
+        else
+        {
+            /* Add file path and line number to the location list. */
+            Location location;
 
-		location.file_path = include->path;
-		location.line_number = 0;
+            location.file_path = include->path;
+            location.line_number = 0;
 
-		location.previous = state->location;
-		state->location = &location;
+            location.previous = state->location;
+            state->location = &location;
 
-		AssembleFile(state, input_file);
+            AssembleFile(state, input_file);
 
-		state->location = state->location->previous;
+            state->location = state->location->previous;
 
-		fclose(input_file);
-	}
+            fclose(input_file);
+        }
+    }
+    else
+    {
+        SemanticError(state, "Recursive include detected, file %s.\n", include->path);
+        state->end = cc_true;
+        state->success = cc_false;
+    }
 }
 
 static void ProcessIncbin(SemanticState *state, StatementIncbin *incbin)
@@ -5211,103 +5253,106 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
 					/* Perform first pass, and create a list of fix-ups if needed. */
 					AssembleFile(&state, input_file);
 
-					if (state.current_if_level != 0)
-						SemanticError(&state, "An IF statement somewhere is missing its ENDC/ENDIF.");
+                    if (state.success)
+                    {
+                        if (state.current_if_level != 0)
+                            SemanticError(&state, "An IF statement somewhere is missing its ENDC/ENDIF.");
 
-					if (m68kasm_lex_destroy(state.flex_state) != 0)
-						InternalError(&state, "m68kasm_lex_destroy failed.");
+                        if (m68kasm_lex_destroy(state.flex_state) != 0)
+                            InternalError(&state, "m68kasm_lex_destroy failed.");
 
-					/* Filter variables out from the symbol table, (variables cannot be used before they are declared, since their values are position-dependent). */
-					Dictionary_Filter(&state.dictionary, DictionaryFilterDeleteVariables, NULL);
+                        /* Filter variables out from the symbol table, (variables cannot be used before they are declared, since their values are position-dependent). */
+                        Dictionary_Filter(&state.dictionary, DictionaryFilterDeleteVariables, NULL);
 
-					/* Process the fix-ups, reassembling instructions and reprocessing directives that could not be done in the first pass. */
-					state.doing_fix_up = cc_true;
+                        /* Process the fix-ups, reassembling instructions and reprocessing directives that could not be done in the first pass. */
+                        state.doing_fix_up = cc_true;
 
-					for (;;)
-					{
-						cc_bool a_fix_up_has_been_fixed;
-						FixUp **fix_up_pointer;
+                        for (;;)
+                        {
+                            cc_bool a_fix_up_has_been_fixed;
+                            FixUp **fix_up_pointer;
 
-						a_fix_up_has_been_fixed = cc_false;
+                            a_fix_up_has_been_fixed = cc_false;
 
-						fix_up_pointer = &state.fix_up_list_head;
+                            fix_up_pointer = &state.fix_up_list_head;
 
-						while (*fix_up_pointer != NULL)
-						{
-							FixUp *fix_up = *fix_up_pointer;
+                            while (*fix_up_pointer != NULL)
+                            {
+                                FixUp *fix_up = *fix_up_pointer;
 
-							/* Reset some state to how it was at the time the statement was first processed. */
-							state.program_counter = fix_up->program_counter;
-							fseek(state.output_file, fix_up->output_position, SEEK_SET);
-							state.last_global_label = DuplicateStringAndHandleError(&state, fix_up->last_global_label);
-							state.source_line = fix_up->source_line;
-							state.location = &fix_up->location;
+                                /* Reset some state to how it was at the time the statement was first processed. */
+                                state.program_counter = fix_up->program_counter;
+                                fseek(state.output_file, fix_up->output_position, SEEK_SET);
+                                state.last_global_label = DuplicateStringAndHandleError(&state, fix_up->last_global_label);
+                                state.source_line = fix_up->source_line;
+                                state.location = &fix_up->location;
 
-							state.fix_up_needed = cc_false;
+                                state.fix_up_needed = cc_false;
 
-							/* Re-process statement. */
-							ProcessStatement(&state, &fix_up->statement, fix_up->label);
+                                /* Re-process statement. */
+                                ProcessStatement(&state, &fix_up->statement, fix_up->label);
 
-							/* If this fix-up has been fixed, we're done with it, so we can delete it. */
-							/* Alternatively, just delete the fix-ups if this is the final pass, since they won't be needed anymore. */
-							if (!state.fix_up_needed || state.doing_final_pass)
-							{
-								Location *location;
+                                /* If this fix-up has been fixed, we're done with it, so we can delete it. */
+                                /* Alternatively, just delete the fix-ups if this is the final pass, since they won't be needed anymore. */
+                                if (!state.fix_up_needed || state.doing_final_pass)
+                                {
+                                    Location *location;
 
-								*fix_up_pointer = fix_up->next;
+                                    *fix_up_pointer = fix_up->next;
 
-								/* We're done with this statement: delete it. */
-								DestroyStatement(&fix_up->statement);
-								free(fix_up->last_global_label);
-								free(fix_up->source_line);
-								free(fix_up->label);
+                                    /* We're done with this statement: delete it. */
+                                    DestroyStatement(&fix_up->statement);
+                                    free(fix_up->last_global_label);
+                                    free(fix_up->source_line);
+                                    free(fix_up->label);
 
-								location = fix_up->location.previous;
+                                    location = fix_up->location.previous;
 
-								while (location != NULL)
-								{
-									Location *previous_location = location->previous;
-									free(location->file_path);
-									free(location);
-									location = previous_location;
-								}
+                                    while (location != NULL)
+                                    {
+                                        Location *previous_location = location->previous;
+                                        free(location->file_path);
+                                        free(location);
+                                        location = previous_location;
+                                    }
 
-								free(fix_up);
+                                    free(fix_up);
 
-								a_fix_up_has_been_fixed = cc_true;
-							}
-							else
-							{
-								fix_up_pointer = &fix_up->next;
-							}
-						}
+                                    a_fix_up_has_been_fixed = cc_true;
+                                }
+                                else
+                                {
+                                    fix_up_pointer = &fix_up->next;
+                                }
+                            }
 
-						/* Once the final pass has ended, we can exit this infinite loop. */
-						if (state.doing_final_pass)
-							break;
+                            /* Once the final pass has ended, we can exit this infinite loop. */
+                            if (state.doing_final_pass)
+                                break;
 
-						/* If no more fix-ups can be fixed, then do one final pass to print errors. */
-						if (!a_fix_up_has_been_fixed)
-							state.doing_final_pass = cc_true;
-					}
+                            /* If no more fix-ups can be fixed, then do one final pass to print errors. */
+                            if (!a_fix_up_has_been_fixed)
+                                state.doing_final_pass = cc_true;
+                        }
 
-					free(state.last_global_label);
+                        free(state.last_global_label);
 
-					/* Produce asm68k symbol file, if requested. */
-					if (symbol_file != NULL)
-					{
-						/* Some kind of header. */
-						fputc('M', symbol_file);
-						fputc('N', symbol_file);
-						fputc('D', symbol_file);
-						fputc(1, symbol_file);
-						fputc(0, symbol_file);
-						fputc(0, symbol_file);
-						fputc(0, symbol_file);
-						fputc(0, symbol_file);
+                        /* Produce asm68k symbol file, if requested. */
+                        if (symbol_file != NULL)
+                        {
+                            /* Some kind of header. */
+                            fputc('M', symbol_file);
+                            fputc('N', symbol_file);
+                            fputc('D', symbol_file);
+                            fputc(1, symbol_file);
+                            fputc(0, symbol_file);
+                            fputc(0, symbol_file);
+                            fputc(0, symbol_file);
+                            fputc(0, symbol_file);
 
-						Dictionary_Filter(&state.dictionary, DictionaryFilterProduceSymbolFile, symbol_file);
-					}
+                            Dictionary_Filter(&state.dictionary, DictionaryFilterProduceSymbolFile, symbol_file);
+                        }
+                    }
 				}
 			}
 		}

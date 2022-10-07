@@ -138,13 +138,22 @@ int assemble(int argc, char **argv)
             }
 			else
 			{
+                char *tmp = "tmp";
+                char *output_file_tmp_path;
+                if((output_file_tmp_path = malloc(strlen(output_file_path) + strlen(tmp) + 1)) != NULL){
+                    output_file_tmp_path[0] = '\0';
+                    strcat(output_file_tmp_path, output_file_path);
+                    strcat(output_file_tmp_path, tmp);
+                }
+
                 FILE *input_file;
 				FILE *output_file;
+                FILE *output_file_tmp;
 
                 input_file = fopen(input_file_path, "r");
-				output_file = fopen(output_file_path, "w");
+                output_file_tmp = fopen(output_file_tmp_path, "w");
 
-				if (output_file == NULL)
+                if (output_file_tmp == NULL)
 				{
 					ERROR("Could not open output file.");
 				}
@@ -177,14 +186,41 @@ int assemble(int argc, char **argv)
 							ERROR("Could not open symbol file.");
 					}
 
-                    if (!ClownAssembler_Assemble(input_file, output_file, listing_file, symbol_file, input_file_path, debug, case_insensitive, equ_set_descope_local_labels))
-						ERROR("Could not assemble.");
+                    if (!ClownAssembler_Assemble(input_file, output_file_tmp, listing_file, symbol_file, input_file_path, debug, case_insensitive, equ_set_descope_local_labels))
+                    {
+                        ERROR("Could not assemble.");
+                    }
+                    else
+                    {
+                        fclose(output_file_tmp);
+
+                        output_file_tmp = fopen(output_file_tmp_path, "r");
+                        output_file     = fopen(output_file_path, "w");
+
+                        if (output_file == NULL || output_file_tmp == NULL)
+                        {
+                            ERROR("Could not open output file.");
+                        }
+                        else
+                        {
+                            char ch;
+                            while((ch = fgetc(output_file_tmp)) != EOF)
+                                  fputc(ch, output_file);
+
+                            fclose(output_file);
+                        }
+                    }
 
 					if (listing_file != NULL)
 						fclose(listing_file);
 
-					fclose(output_file);
+                    fclose(output_file_tmp);
+
+                    remove(output_file_tmp_path);
 				}
+
+                if (output_file_tmp_path)
+                    free(output_file_tmp_path);
 
 				fclose(input_file);
 			}

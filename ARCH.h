@@ -10,13 +10,13 @@
 #define RAM_SIZE 0xFFFFFFFF
 
 
-typedef struct __ARCH__68000
+typedef struct __ARCH__68000__
 {
     cpu_t *cpu;
     ram_t *ram;
 
     void  (*load)    (char *filename);
-    bit (*is_halt) ();
+    bit   (*is_halt) ();
     void  (*turnoff) ();    
 } arch_t;
 
