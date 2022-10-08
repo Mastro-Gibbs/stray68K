@@ -90,6 +90,7 @@ typedef struct SemanticState
 	cc_bool success;
 	FILE *output_file;
 	FILE *listing_file;
+    char *root_path;
 	cc_bool equ_set_descope_local_labels;
 	unsigned long program_counter;
 	FixUp *fix_up_list_head;
@@ -333,6 +334,62 @@ static char* DuplicateString(const char *string)
 	return duplicated_string;
 }
 
+static char* ExtractPathRoot(const char *path)
+{
+    char *root;
+
+    if (path == NULL)
+        root = NULL;
+    else
+    {
+        int index = -1;
+        size_t  i = 0;
+        for(i = 0; i <= strlen(path); i++)
+        {
+            if(path[i] == '/')
+                index = i;
+        }
+
+        if (index != -1)
+        {
+            root = malloc(index + 2);
+
+            if (root != NULL)
+                memcpy(root, path, index+1);
+
+            root[index+1] = '\0';
+        }
+        else root = NULL;
+    }
+
+    return root;
+}
+
+static char* GenerateFixedPath(SemanticState *state, const char *includepath)
+{
+    char* fixed;
+
+    if (includepath == NULL || state->root_path == NULL)
+    {
+        fixed = NULL;
+    }
+    else
+    {
+        const size_t strsize = strlen(includepath) + strlen(state->root_path) + 1;
+
+        fixed = malloc(strsize);
+
+        if (fixed != NULL)
+        {
+            memcpy(fixed, state->root_path, strlen(state->root_path));
+            memcpy(fixed+strlen(state->root_path), includepath, strlen(includepath));
+            fixed[strsize-1] = '\0';
+        }
+    }
+
+    return fixed;
+}
+
 static char* DuplicateStringAndHandleError(SemanticState *state, const char *string)
 {
 	char *duplicated_string;
@@ -350,6 +407,20 @@ static char* DuplicateStringAndHandleError(SemanticState *state, const char *str
 	}
 
 	return duplicated_string;
+}
+
+static char* backslash(const char* path)
+{
+    char* const path_copy = DuplicateString(path);
+
+    char *backslash;
+
+    backslash = path_copy;
+
+    while ((backslash = strchr(backslash, '\\')) != NULL)
+        *backslash++ = '/';
+
+    return path_copy;
 }
 
 static FILE* fopen_backslash(const char *path, const char *mode)
@@ -3781,11 +3852,6 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 					state->program_counter += bytes_to_write;
 
-                    if ((machine_code & 0b1111000111000000) == 0x41C0) //OPCODE_LEA
-                    {
-                        value += 1; //must set span of 1 byte for simhalt space
-                    }
-
 					while (bytes_to_write-- > 0)
 					{
 						fprintf(state->output_file, "%c", hexToChar(value >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
@@ -3868,14 +3934,14 @@ static void ProcessOrg(SemanticState *state, StatementOrg *org)
 
     if (state->location->previous != NULL)
     {
-        SimpleSemanticWarning("ORG must be written only in the main file, found in file %s. Ignoring istruction.\n\n", state->location->file_path);
+        SimpleSemanticWarning("ORG should be written only in the main file, found in file %s. Ignoring istruction.\n\n", state->location->file_path);
     }
     else
     {
         if (state->program_counter != 0)
             SemanticError(state, "ORG (not mandatory) must be written as the first statement, found at line %ld.\n", state->location->line_number);
         else if (org->value.shared.unsigned_long > 0x0000FFFE)
-            SemanticError(state, "Value cannot be higher than $0000FFFE, but was $%lX.", org->value.shared.unsigned_long);
+            SemanticError(state, "ORG value cannot be higher than $0000FFFE, but was $%lX.", org->value.shared.unsigned_long);
         else
         {
             state->program_counter = org->value.shared.unsigned_long;
@@ -3971,38 +4037,54 @@ static cc_bool is_recursive_include(SemanticState *state, const StatementInclude
 
 static void ProcessInclude(SemanticState *state, const StatementInclude *include)
 {
-	FILE* const input_file = fopen_backslash(include->path, "r");
+    char *bpath = backslash(include->path);
+    char *fixed_path;
 
-    if (!is_recursive_include(state, include))
+    if (state->root_path != NULL)
+        fixed_path = GenerateFixedPath(state, bpath);
+    else
+        fixed_path = NULL;
+
+    if (fixed_path != NULL)
     {
-        if (input_file == NULL)
+        FILE* const input_file = fopen(fixed_path, "r");
+
+        if (!is_recursive_include(state, include))
         {
-            SemanticError(state, "File '%s' could not be opened.", include->path);
+            if (input_file == NULL)
+            {
+                SemanticError(state, "File '%s' could not be opened.", include->path);
+            }
+            else
+            {
+                /* Add file path and line number to the location list. */
+                Location location;
+
+                location.file_path = include->path;
+                location.line_number = 0;
+
+                location.previous = state->location;
+                state->location = &location;
+
+                AssembleFile(state, input_file);
+
+                state->location = state->location->previous;
+
+                fclose(input_file);
+            }
         }
         else
         {
-            /* Add file path and line number to the location list. */
-            Location location;
-
-            location.file_path = include->path;
-            location.line_number = 0;
-
-            location.previous = state->location;
-            state->location = &location;
-
-            AssembleFile(state, input_file);
-
-            state->location = state->location->previous;
-
             fclose(input_file);
+            SemanticError(state, "Recursive include detected, file %s.\n", include->path);
+            state->end = cc_true;
+            state->success = cc_false;
         }
+        free(fixed_path);
     }
-    else
-    {
-        SemanticError(state, "Recursive include detected, file %s.\n", include->path);
-        state->end = cc_true;
-        state->success = cc_false;
-    }
+
+    free(bpath);
+
 }
 
 static void ProcessIncbin(SemanticState *state, StatementIncbin *incbin)
@@ -5213,6 +5295,7 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
 	state.false_if_level = 0;
 	state.mode = MODE_NORMAL;
 	state.end = cc_false;
+    state.root_path = ExtractPathRoot(input_file_path);
 
 	/* Set the location path (note that we're taking care to not do this before the state is fully initialised). */
 	location.file_path = DuplicateStringAndHandleError(&state, input_file_path);
@@ -5361,6 +5444,7 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
 	}
 
 	free(location.file_path);
+    free(state.root_path);
 
 	return state.success;
 }

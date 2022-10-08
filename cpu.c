@@ -409,11 +409,11 @@ void  write_addrreg(generic_u32_t reg, generic_u32_t val, opsize *size)
         switch (static_size)
         {
             case BYTE:
-                cpu->data_r[reg] = (cpu->addr_r[reg] & 0xFFFFFF00) | (val & 0x000000FF);
+                cpu->addr_r[reg] = (cpu->addr_r[reg] & 0xFFFFFF00) | (val & 0x000000FF);
             break;
 
             case WORD:
-                cpu->data_r[reg] = (cpu->addr_r[reg] & 0xFFFF0000) | (val & 0x0000FFFF);
+                cpu->addr_r[reg] = (cpu->addr_r[reg] & 0xFFFF0000) | (val & 0x0000FFFF);
             break;
 
             case LONG:

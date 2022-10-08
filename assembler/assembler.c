@@ -112,7 +112,7 @@ int assemble(int argc, char **argv)
 	if (argc < 2 || print_usage)
 	{
 		fputs(
-			"clownassembler: an assembler for the Motorola 68000.\n"
+            "assembler: an assembler for the Motorola 68000.\n"
 			"\n"
 			"Options:\n"
             " -i [path] - Input file.\n"
@@ -128,13 +128,13 @@ int assemble(int argc, char **argv)
 	{
 		if (output_file_path == NULL)
 		{
-			ERROR("Output file path must be specified with '-o'.");
+            ASSSEMBLER_ERROR("Output file path must be specified with '-o'.");
 		}
 		else
 		{
             if (input_file_path == NULL)
             {
-                ERROR("Could not open input file.");
+                ASSSEMBLER_ERROR("Could not open input file.");
             }
 			else
 			{
@@ -155,7 +155,7 @@ int assemble(int argc, char **argv)
 
                 if (output_file_tmp == NULL)
 				{
-					ERROR("Could not open output file.");
+                    ASSSEMBLER_ERROR("Could not open output file.");
 				}
 				else
 				{
@@ -171,7 +171,7 @@ int assemble(int argc, char **argv)
 						listing_file = fopen(listing_file_path, "w");
 
 						if (listing_file == NULL)
-							ERROR("Could not open listing file.");
+                            ASSSEMBLER_ERROR("Could not open listing file.");
 					}
 
 					if (symbol_file_path == NULL)
@@ -183,12 +183,12 @@ int assemble(int argc, char **argv)
 						symbol_file = fopen(symbol_file_path, "wb");
 
 						if (symbol_file == NULL)
-							ERROR("Could not open symbol file.");
+                            ASSSEMBLER_ERROR("Could not open symbol file.");
 					}
 
                     if (!ClownAssembler_Assemble(input_file, output_file_tmp, listing_file, symbol_file, input_file_path, debug, case_insensitive, equ_set_descope_local_labels))
                     {
-                        ERROR("Could not assemble.");
+                        ASSSEMBLER_ERROR("Could not assemble.");
                     }
                     else
                     {
@@ -199,7 +199,7 @@ int assemble(int argc, char **argv)
 
                         if (output_file == NULL || output_file_tmp == NULL)
                         {
-                            ERROR("Could not open output file.");
+                            ASSSEMBLER_ERROR("Could not open output file.");
                         }
                         else
                         {

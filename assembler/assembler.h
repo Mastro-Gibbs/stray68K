@@ -4,7 +4,7 @@
 #include "clowncommon.h"
 #include "semantic.h"
 
-#define ERROR(message) do { fputs("[\033[31m\033[01mERROR\033[0m] " message "\n", stderr); exit_code = EXIT_FAILURE;} while (0)
+#define ASSSEMBLER_ERROR(message) do { fputs("[\033[31m\033[01mASSEMBLER ERROR\033[0m] " message "\n", stderr); exit_code = EXIT_FAILURE;} while (0)
 
 
 

@@ -54,7 +54,7 @@ void _set_ORG(generic_u32_t org) { orgptr = org; set_pc(orgptr); }
 
 
 /* SIMHALT */
-void _set_simhalt(generic_u32_t addr) { simhalt = addr; }
+void _set_simhalt(generic_u32_t addr) { if (simhalt == 0) simhalt = addr; }
 
 bit __is_halt__() { return (get_pc() != simhalt || get_pc() < simhalt) ? 0 : 1; }
 
@@ -71,10 +71,12 @@ bit _is_valid_file(char *filename)
     fp = fopen(filename, "r");
 
     if (fp == NULL)
-        { PANIC(" File not found!\n"); }
+        ARCH_ERROR("File not found, be sure to pass correct path.")
 
     if ((read = getline(&line, &len, fp)) == -1)
-        { PANIC(" Empty file!\n"); }
+        ARCH_ERROR("Empty file!")
+
+    fclose(fp);
 
     return 1;
 }
@@ -113,9 +115,7 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
     fp = fopen(filename, "r");
 
     if (regcomp(&hex_rx, hex_regex, REG_EXTENDED) == 1)
-    {
-        PANIC("Could not compile regex %s\n", hex_regex);
-    }
+        ARCH_ERROR("Could not compile regex %s", hex_regex)
 
     int  reti;
     char ch;
@@ -144,11 +144,13 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
 
     while (validator--) fgetc(fp);
 
+    generic_u32_t meta_pc = *org;
+
     while((ch = fgetc(fp)) != EOF)
     {
         if (ch == SIMHALT_SYMBOL)
         {
-            bytecode[pos++] = ch;
+            _set_simhalt(meta_pc);
         }
         else if (ch != SEPARATOR)
         {
@@ -160,6 +162,8 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
             generic_u8_t val = strtol(symbol, &end, 16);
 
             bytecode[pos++] = (generic_u8_t) val;
+
+            meta_pc += BYTE_SPAN;
         }
     }
     fclose(fp);
@@ -169,40 +173,94 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
 
 void __load_bytecode__(char *filename)
 {
-    if (_is_valid_file(filename))
+    generic_u32_t org = _extract_ORG(filename);
+    _set_ORG(org);
+
+    generic_u8_t *bytecode = _read_bytecode(filename, &org);
+
+    if (bytecode)
     {
-        generic_u32_t org = _extract_ORG(filename);
-        _set_ORG(org);
-
-        generic_u8_t *bytecode = _read_bytecode(filename, &org);
-
-        generic_u32_t simhalt = 0;
-
-        if (bytecode)
+        generic_u32_t span = 0;
+        for (generic_u32_t iter = 0; iter < loader_data_size; iter++)
         {
-            generic_u32_t span = 0;
-            for (generic_u32_t iter = 0; iter < loader_data_size; iter++)
-            {
-                generic_u8_t c = bytecode[iter];
+            generic_u8_t c = bytecode[iter];
 
-                if (c == SIMHALT_SYMBOL) simhalt = ((generic_u32_t)(get_pc() + span));
-
-                write_byte(get_pc() + span, c);
-                span += BYTE_SPAN;
-            }
-
-            free(bytecode);
-            regfree(&hex_rx);
-
-            _set_simhalt((simhalt) ? simhalt : ((generic_u32_t)(get_pc() + span)));
+            write_byte(get_pc() + span, c);
+            span += BYTE_SPAN;
         }
-        else { PANIC("Error incomes while loading an invalid bytecode\n"); }
+
+        free(bytecode);
+        regfree(&hex_rx);
+
+        _set_simhalt((generic_u32_t)(get_pc() + span));
     }
+    else ARCH_ERROR("Error incomes while loading an invalid bytecode")
 }
 
 
 
 /* EMULATOR UTILS*/
+
+struct ExecArgs
+{
+    bit  descr;
+    bit  quiet;
+    char *path;
+};
+
+struct ExecArgs parse_args(int argc, char **argv)
+{
+    if (argc < 3)
+    {
+        fputs(
+        "stray68K: emulator for Motorola 68000.\n"
+        "\n"
+        "Options:\n"
+        " -a [opts|args]   -Invoke assembler. See below.\n"
+        " -e [path]        -Input executable file. To generate it use assembler options.\n"
+        " -s [path]        -Like option '-e' but run executable file step by step.\n"
+        " -[e|s] [path] -d -Like options '-e' and '-s' but prints opcode and mnemonic.\n"
+        " -[e|s] [path] -q -Like options '-e' and '-s' but but avoid to print system status (quiet).\n"
+        "\n"
+        "Step by step mode options asked from stdin:\n"
+        "   'c' -Print a snapshot of the cpu.\n"
+        "   'm' -Print a snapshot of the ram, asks for start and end addresses to extract a ram slice.\n"
+        "   'b' -Options c and m combined together.\n"
+        "   'a' -Options b combined with auto ram slice printing.\n"
+        "   's' -Skip current step.\n"
+        "   't' -Full skip steps. The execution proceeds to the end.\n"
+        "\n\n",
+        stdout);
+
+        ARCH_ERROR("Too few params")
+    }
+
+    _is_valid_file(argv[2]);
+
+    struct ExecArgs ea;
+
+    ea.path = argv[2];
+    ea.descr = 0;
+    ea.quiet = 0;
+
+    for (generic_32_t i = 3; i < argc; i++)
+    {
+        if (strlen(argv[i]) >= 2)
+        {
+            if (argv[i][0] == '-' && argv[i][1] == 'd')
+                ea.descr = 1;
+
+            if (argv[i][0] == '-' && argv[i][1] == 'q')
+                ea.quiet = 1;
+        }
+        else ARCH_ERROR("Invalid param");
+    }
+
+    if (ea.quiet && ea.descr)
+        ARCH_ERROR("Cannot combine '-d' and '-q' options")
+
+    return ea;
+}
 
 void _enable_single_char()
 {
@@ -274,8 +332,8 @@ int _wait()
         system("clear");
         ARCH.cpu->show();
         printf("\n");
-        ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
-        printf("\n");
+        ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x21);
+        printf("\n\n");
     }
     else if (c == 's')
     {
@@ -297,93 +355,71 @@ int _wait()
     return 1;
 }
 
+void printf_sstatus(char *state)
+{
+    system("clear");
+
+    printf("\033[01m\033[37m%s", state);
+    printf(":\033[0m\n\n");
+
+    ARCH.cpu->show();
+    printf("\n");
+    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x21);
+    printf("\n");
+
+    fflush(stdout);
+}
+
+
 
 /* EMULATOR */
 int emulate(int argc,  char** argv)
 {
-    bit describe_code = 0;
-
-    if (argc < 3)
-        return (EXIT_FAILURE);
-
-    if (argc > 3 && strlen(argv[3]) == 2)
-    {
-        if (argv[3][0] == '-' && argv[3][1] == 'd')
-            describe_code = 1;
-        else
-            fputs("Option not reconized.\n", stdout);
-    }
+    struct ExecArgs ea = parse_args(argc, argv);
 
     _begin();
 
-    ARCH.load(argv[2]);
+    ARCH.load(ea.path);
 
-    system("clear");
-    printf("\033[01m\033[37mInitial system status:\033[0m\n\n");
-    ARCH.cpu->show();
-    printf("\n");
-    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
-    fflush(stdout);
+    if (!ea.quiet)
+        printf_sstatus("Initial system status");
 
     while(!ARCH.is_halt())
     {
-        ARCH.cpu->exec(describe_code);
+        ARCH.cpu->exec(ea.descr);
     }
 
-    system("clear");
-    printf("\033[01m\033[37mFinal system status:\033[0m\n\n");
-    ARCH.cpu->show();
-    printf("\n");
-    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
-    fflush(stdout);
+    if (!ea.quiet)
+        printf_sstatus("Final system status");
 
     ARCH.turnoff();
 
     return (EXIT_SUCCESS);
 }
 
+
 int emulate_sbs(int argc, char **argv) // aka step-by-step
 {
     bit print = 1;
-    bit describe_code = 0;
 
-    if (argc < 3)
-        return (EXIT_FAILURE);
-
-    if (argc > 3 && strlen(argv[3]) == 2)
-    {
-        if (argv[3][0] == '-' && argv[3][1] == 'd')
-            describe_code = 1;
-        else
-            fputs("Option not reconized.\n", stdout);
-    }
+    struct ExecArgs ea = parse_args(argc, argv);
 
     _begin();
 
-    ARCH.load(argv[2]);
+    ARCH.load(ea.path);
 
-    system("clear");
-    printf("\033[01m\033[37mInitial system status:\033[0m\n\n");
-    ARCH.cpu->show();
-    printf("\n");
-    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
-    fflush(stdout);
+    printf_sstatus("Initial system status");
 
     while(!ARCH.is_halt())
     {
         if (print) { print = _wait(); }
 
-        ARCH.cpu->exec(describe_code);
+        ARCH.cpu->exec(ea.descr);
     }
 
     if (print) { _wait(); }
 
-    system("clear");
-    printf("\033[01m\033[37mFinal system status:\033[0m\n\n");
-    ARCH.cpu->show();
-    printf("\n");
-    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x11);
-    fflush(stdout);
+    printf_sstatus("Final system status");
 
     ARCH.turnoff();
 

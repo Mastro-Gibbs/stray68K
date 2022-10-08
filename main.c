@@ -9,9 +9,11 @@ void usage()
         "stray68K: emulator for Motorola 68000.\n"
         "\n"
         "Options:\n"
+        " -a [opts|args]   -Invoke assembler. See below.\n"
         " -e [path]        -Input executable file. To generate it use assembler options.\n"
         " -s [path]        -Like option '-e' but run executable file step by step.\n"
         " -[e|s] [path] -d -Like options '-e' and '-s' but prints opcode and mnemonic.\n"
+        " -[e|s] [path] -q -Like options '-e' and '-s' but but avoid to print system status (quiet).\n"
         "\n"
         "Step by step mode options asked from stdin:\n"
         "   'c' -Print a snapshot of the cpu.\n"
@@ -21,7 +23,7 @@ void usage()
         "   's' -Skip current step.\n"
         "   't' -Full skip steps. The execution proceeds to the end.\n"
         "\n\n"
-        "assembler: an assembler for the Motorola 68000. (thanks to Clownacy)\n"
+        "Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)\n"
         "\n"
         "Options:\n"
         " -i [path] -Input file\n"
@@ -49,10 +51,13 @@ int main(int argc,  char** argv)
                     exit_code = emulate(argc, argv);
                 else if (argv[1][1] == 's')
                     exit_code = emulate_sbs(argc, argv);
-                else if (argv[1][1] == 'c')
+                else if (argv[1][1] == 'a')
                     exit_code = assemble(argc, argv);
                 else
-                   usage();
+                {
+                    ARCH_ERROR("Unrecognised option %s", argv[1])
+                    usage();
+                }
             }
             else
                 usage();

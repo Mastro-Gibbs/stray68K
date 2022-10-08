@@ -238,7 +238,7 @@ generic_u32_t read_EA(generic_u32_t *addr, opsize *size, ADDRMode *mode, ea_dire
                 break;
 
             default:
-                { PANIC("Addressing mode not handled! (read_EA)\n") }
+                PANIC("Addressing mode not handled! (read_EA)")
                 break;
         }
     else switch (*mode) {
@@ -273,8 +273,24 @@ generic_u32_t read_EA(generic_u32_t *addr, opsize *size, ADDRMode *mode, ea_dire
             val = read_ram(&ptr, size);
             break;
 
+        case ADDRESSDisp:
+        {
+            generic_u32_t ramptr  = get_pc() + WORD_SPAN;
+            opsize        tmpsize = WORD;
+
+            generic_u32_t disp = read_ram(&ramptr, &tmpsize);
+
+            ptr = read_addrreg(*addr) + disp;
+
+            val = read_ram(&ptr, size);
+
+            incr_pc(size_to_span(tmpsize));
+
+            break;
+        }
+
         default:
-            { PANIC("Addressing mode not handled! (read_EA)\n") }
+            PANIC("Addressing mode not handled! (read_EA)")
             break;
     }
 
@@ -315,8 +331,36 @@ void write_EA(generic_u32_t *addr, generic_u32_t val, opsize *size, ADDRMode *mo
 
             break;
 
+        case ADDRESSDisp:
+        {
+            generic_u32_t ramptr  = get_pc() + WORD_SPAN;
+            opsize        tmpsize = WORD;
+
+            generic_u32_t disp   = read_ram(&ramptr, &tmpsize);
+
+            ptr = read_addrreg(*addr) + disp;
+
+            switch (*size) {
+                case BYTE:
+                    write_byte(ptr, val);
+                    break;
+                case WORD:
+                    write_word(ptr, val);
+                    break;
+                case LONG:
+                    write_long(ptr, val);
+                    break;
+                default:
+                    break;
+            }
+
+            incr_pc(size_to_span(tmpsize));
+
+            break;
+        }
+
         default:
-            { PANIC("Writing an invalid Effective Address!\n") }
+            PANIC("Writing an invalid Effective Address, %d!", *mode)
             break;
     }
 }
@@ -405,5 +449,100 @@ char* trap_code_toString(generic_u32_t trapcode)
             return "PrivilegeViolation";
         default:
             return "CustomException";
+    }
+}
+
+
+void iotask()
+{
+    generic_u32_t d0_val = read_datareg(0) & 0x000000FF;
+    generic_u32_t d1_val = read_datareg(1);
+    generic_u32_t d2_val = read_datareg(2) & 0x000000FF;
+
+    generic_32_t  value;
+    opsize        size;
+
+    switch (d2_val) {
+        case 0x01:
+            size = BYTE;
+            break;
+        case 0x02:
+            size = WORD;
+            break;
+        default:
+            size = LONG;
+    }
+
+    switch (d0_val)
+    {
+        case PRINTINT:
+        {
+            value = sign_extended(d1_val, size);
+            printf("%d", value);
+            break;
+        }
+
+        case PRINTINTLN:
+        {
+            value = sign_extended(d1_val, size);
+            printf("%d\n", value);
+            break;
+        }
+
+        case UPRINTINT:
+        {
+            printf("%d", d1_val);
+            break;
+        }
+
+        case UPRINTINTLN:
+        {
+            printf("%d\n", d1_val);
+            break;
+        }
+
+        case SCANINT:
+        {
+            generic_u32_t ip;
+            scanf(" %u", &ip);
+            write_datareg(1, ip, NULL);
+            break;
+        }
+
+        case PRINTSTR:
+        {
+            generic_u32_t ramptr = read_addrreg(0);
+            char c;
+
+            //IO_TASK_EMPTY()
+            do
+            {
+                c = read_byte(ramptr++);
+                printf("%c", c);
+
+            } while ((c & 0xFF) != 0b00000000);
+
+            break;
+        }
+
+        case PRINTSTRLN:
+        {
+            generic_u32_t ramptr = read_addrreg(0);
+            char c;
+
+            //IO_TASK_EMPTY()
+            do
+            {
+                c = read_byte(ramptr++);
+                printf("%c", c);
+
+            } while ((c & 0xFF) != 0b00000000);
+            printf("\n");
+
+            break;
+        }
+
+        default:
+            break;
     }
 }

@@ -134,4 +134,30 @@ typedef enum __bcd_type__
     SUBTRACTION = 1
 } BCD_type;
 
+
+
+
+typedef enum __custom_trap_behavior__
+{
+    PRINTINT     = 0,
+    PRINTINTLN   = 1,
+    UPRINTINT    = 2,
+    UPRINTINTLN  = 3,
+    SCANINT      = 4,
+    PRINTSTR     = 5,
+    PRINTSTRLN   = 6
+
+} CustomTrap;
+
+
+typedef enum __known_masks__
+{
+    DST_MASK      = 0b0000111000000000,
+    SRC_MASK      = 0b0000000000000111,
+    SIZE_MASK     = 0b0000000011000000,
+    ADDRMODE_MASK = 0b0000000000111111
+
+} KnownMasks;
+
+
 #endif // __ENUMS_H__68000

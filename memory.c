@@ -44,14 +44,14 @@ void destroy_ram()
 void check_addr(generic_u32_t ptr, generic_u8_t limit)
 {
     if (ptr > ram->size - limit)
-        { PANIC("PANIC! %s\naddress: 0x%X\nlimit: 0x%X\nfinal address: 0x%X\n",
-                "Segmentation fault: reading illegal memory address", ptr, ram->size, ptr + limit) }
+        PANIC("Segmentation fault: reading illegal memory address\naddress: 0x%X\nlimit: 0x%X\nfinal address: 0x%X",
+              ptr, ram->size, ptr + limit)
 }
 
 void check_inst()
 {
     if (!ram)
-        { PANIC("PANIC! %s\n", "Segmentation fault: memory not initialized") }
+        PANIC("Segmentation fault: memory not initialized")
 }
 
 

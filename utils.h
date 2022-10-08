@@ -10,17 +10,18 @@
 
 
 #include <stdio.h>
-#define TRAPEXC(...) do {                                                   \
-                            system("clear");                                \
-                            cpu_t *cpu = init_cpu();                        \
-                            cpu->show();                                    \
-                            printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
-                            printf("Raised trap exception: \n       \033[01m\033[37mcode\033[0m:     %d\n       \033[01m\033[37mmnemonic\033[0m: %s\n", ##__VA_ARGS__);\
-                            fflush(stdout);                                 \
-                        } while (0);                                        \
-                        destroy_cpu();                                      \
-                        destroy_ram();                                      \
-                        exit(-1);
+#define TRAPEXC(...) do {                                               \
+                        system("clear");                                \
+                        cpu_t *cpu = init_cpu();                        \
+                        cpu->show();                                    \
+                        printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
+                        printf("Raised trap exception: \n       \033[01m\033[37mcode\033[0m:     %d\n       \033[01m\033[37mmnemonic\033[0m: %s\n", ##__VA_ARGS__);\
+                        fflush(stdout);                                 \
+                        destroy_cpu();                                  \
+                        destroy_ram();                                  \
+                        exit(-1);                                       \
+                    } while (0);
+
 
 #define PANIC(fmt, ...) do {                                           \
                             system("clear");                           \
@@ -28,17 +29,43 @@
                             cpu->show();                               \
                             printf("[\033[01m\033[91mPANIC\033[0m] "); \
                             printf (fmt, ##__VA_ARGS__);               \
+                            printf("\n");                              \
                             fflush(stdout);                            \
-                        } while (0);                                   \
-                        destroy_cpu();                                 \
-                        destroy_ram();                                 \
-                        exit(-1);
+                            destroy_cpu();                             \
+                            destroy_ram();                             \
+                            exit(-1);                                  \
+                        } while (0);
+
 
 #define WARNING(fmt, ...) do {                                        \
                             printf("[\033[01m\033[93mWARN\033[0m] "); \
                             printf (fmt, ##__VA_ARGS__);              \
+                            printf("\n");                             \
                             fflush(stdout);                           \
                         } while (0);
+
+
+#define ARCH_ERROR(fmt, ...) do {                                      \
+                            printf("[\033[01m\033[91mEMULATOR ERROR\033[0m] "); \
+                            printf (fmt, ##__VA_ARGS__);               \
+                            printf("\n");                              \
+                            fflush(stdout);                            \
+                            destroy_cpu();                             \
+                            destroy_ram();                             \
+                            exit(-1);                                  \
+                        } while (0);
+
+
+#define IO_TASK(fmt, ...) do {                                  \
+                        printf("[\033[01m\033[95mIO\033[0m] "); \
+                        printf (fmt, ##__VA_ARGS__);            \
+                        fflush(stdout);                         \
+                    } while (0);
+
+#define IO_TASK_EMPTY() do {                                    \
+                        printf("[\033[01m\033[95mIO\033[0m] "); \
+                        fflush(stdout);                         \
+                    } while (0);
 
 
 #define bprintf(x)                                               \
@@ -134,15 +161,8 @@ char* trap_code_toString(generic_u32_t trapcode);
 #define roxr  2521591
 
 
+void iotask();
 
-typedef enum __known_masks__
-{
-    DST_MASK      = 0b0000111000000000,
-    SRC_MASK      = 0b0000000000000111,
-    SIZE_MASK     = 0b0000000011000000,
-    ADDRMODE_MASK = 0b0000000000111111
-
-} KnownMasks;
 
 
 #endif // __UTILS_H__68000

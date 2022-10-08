@@ -2,9 +2,6 @@
 #define __MOTOROLATYPES_H__68000
 
 
-#define LOAD_ERROR 0xFFFFFFFF
-
-
 typedef unsigned short int opcode;
 typedef unsigned char      opgroup;
 

@@ -290,7 +290,7 @@ generic_u32_t run_opcode(opcode code, bit describe_code)
 {
     opcode_t *tmp = get_opcode_t(code);
 
-    if (tmp == NULL) { PANIC("Instruction code 0x%X not reconized\n", code); }
+    if (tmp == NULL) PANIC("Instruction code 0x%X not reconized", code)
 
     if (describe_code)
     {
@@ -716,7 +716,7 @@ generic_u32_t CMPI(opcode code)
 
 generic_u32_t MOVEP(opcode code)
 {
-    WARNING("Unmenaged operation, code: %X\n", code);
+    WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
@@ -763,7 +763,7 @@ generic_u32_t MOVE(opcode code)
     if (size == WORD2)      size = WORD;
     else if (size == BYTE2) size = BYTE;
 
-    if ((code & ADDRMODE_MASK) == IMMEDIATE) // move.l #<val>,Rd
+    if ((code & ADDRMODE_MASK) == IMMEDIATE) // move.s #<val>,Rd
     {
         opsize tmpsize = size;
         if (tmpsize == BYTE) tmpsize = WORD; //byte can't be wrote in ram
@@ -807,7 +807,7 @@ generic_u32_t MOVEA(opcode code)
 {
     /* hack:
          call 'move' with dst_mode as 001 aka ADDRReg.
-         for sure this code will go into the 'move' proc's else branch
+         for sure this code will go into the 'move' proc's if true branch
     */
 
     return MOVE(code);
@@ -1065,14 +1065,15 @@ generic_u32_t ILLEGAL(opcode code)
 {
     ignore_param(code);
 
-    TRAPEXC(IllegalInstruction, trap_code_toString(IllegalInstruction));
+    TRAPEXC(IllegalInstruction, trap_code_toString(IllegalInstruction))
+
     return (RETURN_OK);
 }
 
 
 generic_u32_t TAS(opcode code)
 {
-    WARNING("Unmenaged operation, code: %X\n", code);
+    WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
@@ -1114,9 +1115,13 @@ generic_u32_t TST(opcode code)
 
 generic_u32_t TRAP(opcode code)
 {
-    generic_u16_t vector = code & 0x000F;
+    generic_u16_t vector = (generic_u16_t)(code & 0x0000000F);
 
-    TRAPEXC(0x20 + vector, trap_code_toString(0x20 + vector));
+    if (vector == 0x000F)
+        iotask();
+    else
+        TRAPEXC(0x20 + vector, trap_code_toString(0x20 + vector))
+
 
     return (RETURN_ERR);
 }
@@ -1159,9 +1164,7 @@ generic_u32_t UNLK(opcode code)
 generic_u32_t MOVEUSP(opcode code)
 {
     if (!get_supervisor())
-    {
-        TRAPEXC(PrivilegeViolation, trap_code_toString(PrivilegeViolation));
-    }
+        TRAPEXC(PrivilegeViolation, trap_code_toString(PrivilegeViolation))
 
     generic_u32_t addr_reg  = (code & SRC_MASK);
     generic_u32_t direction = (code & 0b00000000000001000) >> 3;
@@ -1183,7 +1186,7 @@ generic_u32_t MOVEUSP(opcode code)
 
 generic_u32_t RESET(opcode code)
 {
-    WARNING("Unmenaged operation, code: %X\n", code);
+    WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
@@ -1199,7 +1202,7 @@ generic_u32_t NOP(opcode code)
 
 generic_u32_t STOP(opcode code)
 {
-    WARNING("Unmenaged operation, code: %X\n", code);
+    WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
@@ -1217,10 +1220,8 @@ generic_u32_t RTE(opcode code)
 
         set_sr(sr);
     }
-    else
-    {
-        TRAPEXC(PrivilegeViolation, trap_code_toString(PrivilegeViolation));
-    }
+    else TRAPEXC(PrivilegeViolation, trap_code_toString(PrivilegeViolation))
+
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1229,9 +1230,7 @@ generic_u32_t RTE(opcode code)
 generic_u32_t RTS(opcode code)
 {
     if (JSR_CALL_COUNTER == 0) //like return in C-like main func
-    {
-        PANIC("RTS instruction invoked in main label, code: 0x%X\n", code);
-    }
+        PANIC("RTS instruction invoked in main label, code: 0x%X", code)
 
     set_pc(pop_long());
 
@@ -1246,9 +1245,8 @@ generic_u32_t TRAPV(opcode code)
     ignore_param(code);
 
     if (get_overflow())
-    {
-        TRAPEXC(TRAPVInstruction, trap_code_toString(TRAPVInstruction));
-    }
+        TRAPEXC(TRAPVInstruction, trap_code_toString(TRAPVInstruction))
+
 
     return (RETURN_OK);
 }
@@ -1284,10 +1282,8 @@ generic_u32_t JSR(opcode code)
         jmp_addr = read_ram(&ram_ptr, &size);
         incr_pc(LONG_SPAN);
     }
-    else
-    {
-        PANIC("Unmenaged mode\n");
-    }
+    else PANIC("Unmenaged mode")
+
 
     push_long(get_pc());
 
@@ -1318,10 +1314,8 @@ generic_u32_t JMP(opcode code)
         opsize size = LONG;
         jmp_addr = read_ram(&ram_ptr, &size);
     }
-    else
-    {
-        PANIC("Unmenaged mode\n");
-    }
+    else PANIC("Unmenaged mode")
+
 
     set_pc(jmp_addr);
 
@@ -1333,7 +1327,7 @@ generic_u32_t MOVEM(opcode code)
 {
     // wtf is this?? maybe later
 
-    WARNING("Unmenaged operation, code: %X\n", code);
+    WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
@@ -1341,7 +1335,7 @@ generic_u32_t MOVEM(opcode code)
 
 generic_u32_t CHK(opcode code)
 {
-    WARNING("Operation maybe include bugs\n");
+    WARNING("Operation maybe include bugs")
 
     generic_u32_t addr_reg = (code & SRC_MASK);
     generic_u32_t data_reg = (code & DST_MASK) >> 9;
@@ -1361,7 +1355,7 @@ generic_u32_t CHK(opcode code)
         (signDVAL < 0)         ? set_negative(1) : set_negative(get_negative());
         (signDVAL > signVALUE) ? set_negative(0) : set_negative(get_negative());
 
-        TRAPEXC(CHKInstruction, trap_code_toString(CHKInstruction));
+        TRAPEXC(CHKInstruction, trap_code_toString(CHKInstruction))
     }
 
     return (RETURN_OK);
@@ -1379,10 +1373,7 @@ generic_u32_t LEA(opcode code)
 
         write_addrreg(addr_reg, label, NULL);
     }
-    else
-    {
-        PANIC("Unmenaged mode 0x%X\n", mode);
-    }
+    else PANIC("Unmenaged mode 0x%X\n", mode)
 
     incr_pc(LONG_SPAN); // memory readF
 
@@ -1623,7 +1614,7 @@ generic_u32_t DIVU(opcode code)
     // opsize   *size      = (opsize *)        a[4];
     // ea_direction *direction = (ea_direction *)  a[5];
 
-    if (*sVal == 0) { TRAPEXC(DivideByZero, trap_code_toString(DivideByZero)); }
+    if (*sVal == 0) TRAPEXC(DivideByZero, trap_code_toString(DivideByZero))
 
     opsize size = WORD;
 
@@ -1668,7 +1659,7 @@ generic_u32_t DIVS(opcode code)
     signed_dVal = sign_extended(*dVal, WORD);
     signed_sVal = sign_extended(*sVal, WORD);
 
-    if (signed_sVal == 0) { TRAPEXC(DivideByZero, trap_code_toString(DivideByZero)); }
+    if (signed_sVal == 0) TRAPEXC(DivideByZero, trap_code_toString(DivideByZero))
 
 
     _val = (generic_32_t) signed_dVal / signed_sVal;
@@ -2079,7 +2070,7 @@ generic_u32_t EXG(opcode code)
             write_datareg(rY, x, NULL);
             break;
         default:
-            PANIC("Unmenaged mode\n");
+            PANIC("Unmenaged mode")
             break;
     }
 
@@ -2446,7 +2437,7 @@ generic_u32_t ALxx(generic_u32_t code)
     switch (size) {
         case BYTE2:
             /* cannot reach this case, i really hope :D */
-            { PANIC("ALxx size invalid\n"); }
+            PANIC("ALxx size invalid")
             break;
 
         case WORD2: //same as ROxx
@@ -2560,7 +2551,7 @@ generic_u32_t ROxx(generic_u32_t code)
     switch (size) {
         case BYTE2:
             /* cannot reach this case, i really hope :D */
-            { PANIC("ROxx size invalid\n"); }
+            PANIC("ROxx size invalid\n")
             break;
 
         case WORD2: //ROxx to memory
