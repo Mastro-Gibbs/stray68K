@@ -292,6 +292,12 @@ typedef struct StatementDc
 	ExpressionListNode *values;
 } StatementDc;
 
+typedef struct StatementDs
+{
+    Size size;
+    Expression value;
+} StatementDs;
+
 typedef struct StatementDcb
 {
 	Size size;
@@ -335,6 +341,7 @@ typedef struct Statement
 		STATEMENT_TYPE_INSTRUCTION,
 		STATEMENT_TYPE_ORG,
 		STATEMENT_TYPE_DC,
+        STATEMENT_TYPE_DS,
 		STATEMENT_TYPE_DCB,
 		STATEMENT_TYPE_INCLUDE,
 		STATEMENT_TYPE_INCBIN,
@@ -364,6 +371,7 @@ typedef struct Statement
 		StatementInstruction instruction;
 		StatementOrg org;
 		StatementDc dc;
+        StatementDs ds;
 		StatementDcb dcb;
 		StatementInclude include;
 		StatementIncbin incbin;
@@ -548,6 +556,7 @@ static void DestroyStatementInstruction(StatementInstruction *instruction);
 %token TOKEN_DIRECTIVE_ROR
 %token TOKEN_DIRECTIVE_ORG
 %token TOKEN_DIRECTIVE_DC
+%token TOKEN_DIRECTIVE_DS
 %token TOKEN_DIRECTIVE_DCB
 %token TOKEN_DIRECTIVE_REPT
 %token TOKEN_DIRECTIVE_ENDR
@@ -638,6 +647,12 @@ statement
 		statement->shared.dc.size = $2;
 		statement->shared.dc.values = $3.head;
 	}
+    | TOKEN_DIRECTIVE_DS size expression
+    {
+        statement->type = STATEMENT_TYPE_DS;
+        statement->shared.ds.size = $2;
+        statement->shared.ds.value = $3;
+    }
 	| TOKEN_DIRECTIVE_DCB size expression ',' expression
 	{
 		statement->type = STATEMENT_TYPE_DCB;

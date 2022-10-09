@@ -220,7 +220,7 @@ static void ErrorMessageCommon(SemanticState *state)
 	const Location *location;
 
 	for (location = state->location; location != NULL; location = location->previous)
-        fprintf(stderr, "\tOn line %lu of '%s'...\n", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+        fprintf(stderr, "\nOn line %lu of '%s'...\n", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
 
     fprintf(stderr, "\t\033[01m\033[37m%s\033[0m\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
 }
@@ -3995,6 +3995,36 @@ static void ProcessDc(SemanticState *state, StatementDc *dc)
 	}
 }
 
+static void ProcessDs(SemanticState *state, StatementDs *ds)
+{
+    unsigned long supposed_max_ram_size;
+    unsigned long pc;
+    unsigned long value;
+
+    supposed_max_ram_size = 0x0000000000FFFFFF;
+    pc = state->program_counter;
+    value = ds->value.shared.unsigned_long;
+
+    if (value > (supposed_max_ram_size - pc))
+    {
+        SemanticError(state, "%s", "Invalid block size");
+    }
+    else if (value == 0)
+    {
+        SemanticWarning(state, "%s", "Allocating 0 block of memory");
+    }
+    else
+    {
+        write_simhalt(state);
+
+        unsigned long i;
+
+        for (i = 0; i < value; ++i)
+            OutputDcValue(state, ds->size, 0);
+    }
+
+}
+
 static void ProcessDcb(SemanticState *state, StatementDcb *dcb)
 {
 	unsigned long repetitions;
@@ -4078,7 +4108,6 @@ static void ProcessInclude(SemanticState *state, const StatementInclude *include
             fclose(input_file);
             SemanticError(state, "Recursive include detected, file %s.\n", include->path);
             state->end = cc_true;
-            state->success = cc_false;
         }
         free(fixed_path);
     }
@@ -4213,6 +4242,7 @@ static void ProcessStatement(SemanticState *state, Statement *statement, const c
 		case STATEMENT_TYPE_ORG:
 		case STATEMENT_TYPE_INSTRUCTION:
 		case STATEMENT_TYPE_DC:
+        case STATEMENT_TYPE_DS:
 		case STATEMENT_TYPE_DCB:
 		case STATEMENT_TYPE_INCLUDE:
 		case STATEMENT_TYPE_INCBIN:
@@ -4276,6 +4306,10 @@ static void ProcessStatement(SemanticState *state, Statement *statement, const c
 		case STATEMENT_TYPE_DC:
             ProcessDc(state, &statement->shared.dc);
 			break;
+
+        case STATEMENT_TYPE_DS:
+            ProcessDs(state, &statement->shared.ds);
+            break;
 
 		case STATEMENT_TYPE_DCB:
 			ProcessDcb(state, &statement->shared.dcb);

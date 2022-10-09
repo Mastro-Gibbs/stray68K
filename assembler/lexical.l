@@ -179,6 +179,7 @@ hexadecimal       {hexadecimal_digit}+
 <INITIAL>ror             BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ROR;
 <INITIAL>org             BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ORG;
 <INITIAL>dc              BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DC;
+<INITIAL>ds              BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DS;
 <INITIAL>dcb             BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DCB;
 <INITIAL>rept            BEGIN(OPERANDS); return TOKEN_DIRECTIVE_REPT;
 <INITIAL>endr            BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ENDR;
