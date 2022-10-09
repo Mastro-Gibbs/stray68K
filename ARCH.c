@@ -26,6 +26,7 @@ const char    *hex_regex = "[0-9a-fA-F!]+";
 arch_t        ARCH;
 generic_u32_t simhalt = 0;
 generic_u32_t orgptr  = 0;
+generic_u32_t last_written_byte = 0;
 
 
 static struct termios oldt, newt;
@@ -189,6 +190,8 @@ void __load_bytecode__(char *filename)
             span += BYTE_SPAN;
         }
 
+        last_written_byte = get_pc() + span;
+
         free(bytecode);
         regfree(&hex_rx);
 
@@ -332,7 +335,7 @@ int _wait()
         system("clear");
         ARCH.cpu->show();
         printf("\n");
-        ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x21);
+        ARCH.ram->show(orgptr, (last_written_byte | 0x0000000F) + 0x11);
         printf("\n\n");
     }
     else if (c == 's')
@@ -357,14 +360,12 @@ int _wait()
 
 void printf_sstatus(char *state)
 {
-    system("clear");
-
     printf("\033[01m\033[37m%s", state);
     printf(":\033[0m\n\n");
 
     ARCH.cpu->show();
     printf("\n");
-    ARCH.ram->show(orgptr, (simhalt | 0x0000000F) + 0x21);
+    ARCH.ram->show(orgptr, (last_written_byte | 0x0000000F) + 0x11);
     printf("\n");
 
     fflush(stdout);
@@ -390,7 +391,7 @@ int emulate(int argc,  char** argv)
     }
 
     if (!ea.quiet)
-        printf_sstatus("Final system status");
+        printf_sstatus("\nFinal system status");
 
     ARCH.turnoff();
 

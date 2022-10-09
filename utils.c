@@ -453,7 +453,12 @@ char* trap_code_toString(generic_u32_t trapcode)
 }
 
 
-void iotask()
+
+
+
+
+
+void iotask(bit descr)
 {
     generic_u32_t d0_val = read_datareg(0) & 0x000000FF;
     generic_u32_t d1_val = read_datareg(1);
@@ -478,26 +483,26 @@ void iotask()
         case PRINTINT:
         {
             value = sign_extended(d1_val, size);
-            printf("%d", value);
+            IO_TASK(descr, "%d", value);
             break;
         }
 
         case PRINTINTLN:
         {
             value = sign_extended(d1_val, size);
-            printf("%d\n", value);
+            IO_TASK(descr, "%d\n", value);
             break;
         }
 
         case UPRINTINT:
         {
-            printf("%d", d1_val);
+            IO_TASK(descr, "%d", d1_val);
             break;
         }
 
         case UPRINTINTLN:
         {
-            printf("%d\n", d1_val);
+            IO_TASK(descr, "%d\n", d1_val);
             break;
         }
 
@@ -514,7 +519,7 @@ void iotask()
             generic_u32_t ramptr = read_addrreg(0);
             char c;
 
-            //IO_TASK_EMPTY()
+            IO_TASK_EMPTY(descr)
             do
             {
                 c = read_byte(ramptr++);
@@ -530,7 +535,7 @@ void iotask()
             generic_u32_t ramptr = read_addrreg(0);
             char c;
 
-            //IO_TASK_EMPTY()
+            IO_TASK_EMPTY(descr)
             do
             {
                 c = read_byte(ramptr++);

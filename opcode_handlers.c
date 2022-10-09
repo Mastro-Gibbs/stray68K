@@ -286,13 +286,17 @@ opcode_t* get_opcode_t(opcode code)
  *
  */
 
+static bit describe = 0;
+
 generic_u32_t run_opcode(opcode code, bit describe_code)
 {
     opcode_t *tmp = get_opcode_t(code);
 
     if (tmp == NULL) PANIC("Instruction code 0x%X not reconized", code)
 
-    if (describe_code)
+    describe = describe_code;
+
+    if (describe)
     {
         opcode Code = code;
 
@@ -1118,7 +1122,7 @@ generic_u32_t TRAP(opcode code)
     generic_u16_t vector = (generic_u16_t)(code & 0x0000000F);
 
     if (vector == 0x000F)
-        iotask();
+        iotask(describe);
     else
         TRAPEXC(0x20 + vector, trap_code_toString(0x20 + vector))
 

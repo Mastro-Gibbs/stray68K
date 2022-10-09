@@ -56,15 +56,17 @@
                         } while (0);
 
 
-#define IO_TASK(fmt, ...) do {                                  \
-                        printf("[\033[01m\033[95mIO\033[0m] "); \
-                        printf (fmt, ##__VA_ARGS__);            \
-                        fflush(stdout);                         \
+#define IO_TASK(descr, fmt, ...) do {                               \
+                        if (descr)                                  \
+                            printf("[\033[01m\033[95mIO\033[0m] "); \
+                        printf (fmt, ##__VA_ARGS__);                \
+                        fflush(stdout);                             \
                     } while (0);
 
-#define IO_TASK_EMPTY() do {                                    \
-                        printf("[\033[01m\033[95mIO\033[0m] "); \
-                        fflush(stdout);                         \
+#define IO_TASK_EMPTY(descr) do {                                   \
+                        if (descr)                                  \
+                            printf("[\033[01m\033[95mIO\033[0m] "); \
+                        fflush(stdout);                             \
                     } while (0);
 
 
@@ -161,7 +163,7 @@ char* trap_code_toString(generic_u32_t trapcode);
 #define roxr  2521591
 
 
-void iotask();
+void iotask(bit descr);
 
 
 
