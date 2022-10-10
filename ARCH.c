@@ -69,6 +69,16 @@ bit _is_valid_file(char *filename)
     size_t  len   = 0;
     ssize_t read;
 
+    const char* ldot = strrchr(filename, '.');
+    if (ldot != NULL)
+    {
+        size_t length = strlen("B68");
+        if (strncmp(ldot + 1, "B68", length) != 0)
+        {
+            ARCH_ERROR("File extension not valid, be sure to pass '.B68' format.")
+        }
+    }
+
     fp = fopen(filename, "r");
 
     if (fp == NULL)
@@ -143,7 +153,7 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
     generic_u32_t pos = 0,
                   validator = ((*org) ? 10 : 0);
 
-    while (validator--) fgetc(fp);
+    fseek(fp, validator, SEEK_SET);
 
     generic_u32_t meta_pc = *org;
 

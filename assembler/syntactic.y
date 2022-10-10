@@ -2110,6 +2110,7 @@ void DestroyStatement(Statement *statement)
 		case STATEMENT_TYPE_END:
 		case STATEMENT_TYPE_RSRESET:
 		case STATEMENT_TYPE_ORG:
+        case STATEMENT_TYPE_DS:
 			break;
 
 		case STATEMENT_TYPE_INSTRUCTION:

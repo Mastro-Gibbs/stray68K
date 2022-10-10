@@ -220,9 +220,9 @@ static void ErrorMessageCommon(SemanticState *state)
 	const Location *location;
 
 	for (location = state->location; location != NULL; location = location->previous)
-        fprintf(stderr, "\nOn line %lu of '%s'...\n", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+        fprintf(stderr, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
 
-    fprintf(stderr, "\t\033[01m\033[37m%s\033[0m\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+    fprintf(stderr, "\n\t\033[01m\033[37m%s\033[0m\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
 }
 
 static void SimpleSemanticWarning(const char *fmt, ...)
@@ -365,7 +365,26 @@ static char* ExtractPathRoot(const char *path)
     return root;
 }
 
-static char* GenerateFixedPath(SemanticState *state, const char *includepath)
+static char* DuplicateStringAndHandleError(SemanticState *state, const char *string)
+{
+	char *duplicated_string;
+
+	if (string == NULL)
+	{
+		duplicated_string = NULL;
+	}
+	else
+	{
+		duplicated_string = DuplicateString(string);
+
+		if (duplicated_string == NULL)
+			OutOfMemoryError(state);
+	}
+
+	return duplicated_string;
+}
+
+static char* PRIVATE_GenerateFixedPath(SemanticState *state, const char *includepath)
 {
     char* fixed;
 
@@ -390,39 +409,35 @@ static char* GenerateFixedPath(SemanticState *state, const char *includepath)
     return fixed;
 }
 
-static char* DuplicateStringAndHandleError(SemanticState *state, const char *string)
-{
-	char *duplicated_string;
-
-	if (string == NULL)
-	{
-		duplicated_string = NULL;
-	}
-	else
-	{
-		duplicated_string = DuplicateString(string);
-
-		if (duplicated_string == NULL)
-			OutOfMemoryError(state);
-	}
-
-	return duplicated_string;
-}
-
-static char* backslash(const char* path)
+static char* GenerateFixedPath(SemanticState *state, const char* path)
 {
     char* const path_copy = DuplicateString(path);
 
     char *backslash;
+    char *fixed_path;
 
     backslash = path_copy;
 
     while ((backslash = strchr(backslash, '\\')) != NULL)
         *backslash++ = '/';
 
-    return path_copy;
+    if (state->root_path != NULL)
+        fixed_path = PRIVATE_GenerateFixedPath(state, path_copy);
+    else
+        fixed_path = NULL;
+
+    free(path_copy);
+
+    return fixed_path;
 }
 
+
+/*
+ * unused func, previously used in ProcessInclude & ProcessIncBin
+ *
+ * replaced by 'static char* GenerateFixedPath(SemanticState *state, const char* path)'
+ *
+ *
 static FILE* fopen_backslash(const char *path, const char *mode)
 {
 	FILE *file;
@@ -449,6 +464,7 @@ static FILE* fopen_backslash(const char *path, const char *mode)
 
 	return file;
 }
+*/
 
 static Dictionary_Entry* LookupSymbol(SemanticState *state, const char *identifier)
 {
@@ -4067,13 +4083,7 @@ static cc_bool is_recursive_include(SemanticState *state, const StatementInclude
 
 static void ProcessInclude(SemanticState *state, const StatementInclude *include)
 {
-    char *bpath = backslash(include->path);
-    char *fixed_path;
-
-    if (state->root_path != NULL)
-        fixed_path = GenerateFixedPath(state, bpath);
-    else
-        fixed_path = NULL;
+    char *fixed_path = GenerateFixedPath(state, include->path);
 
     if (fixed_path != NULL)
     {
@@ -4111,70 +4121,102 @@ static void ProcessInclude(SemanticState *state, const StatementInclude *include
         }
         free(fixed_path);
     }
-
-    free(bpath);
-
 }
 
 static void ProcessIncbin(SemanticState *state, StatementIncbin *incbin)
 {
-	FILE* const input_file = fopen_backslash(incbin->path, "rb");
+    char *fixed_path = GenerateFixedPath(state, incbin->path);
 
-	if (input_file == NULL)
-	{
-		SemanticError(state, "File '%s' could not be opened.", incbin->path);
-	}
-	else
-	{
-		unsigned long value;
+    if (fixed_path != NULL)
+    {
+        FILE* const input_file = fopen(fixed_path, "r");
 
-		if (!ResolveExpression(state, &incbin->start, &value, cc_true))
-		{
-			SemanticError(state, "Start value must be evaluable on the first pass.");
-			value = 0;
-		}
+        if (input_file == NULL)
+        {
+            SemanticError(state, "File '%s' could not be opened.", incbin->path);
+        }
+        else
+        {
+            unsigned long value, seek_pos, exit;
+            unsigned long j;
 
-		if (fseek(input_file, value, SEEK_SET) != 0)
-			SemanticError(state, "Start value is not a valid location in the file.");
+            if (!ResolveExpression(state, &incbin->start, &value, cc_true))
+            {
+                SemanticError(state, "Start value must be evaluable on the first pass.");
+                value = 0;
+            }
 
-		if (incbin->has_length)
-		{
-			unsigned long length;
-			unsigned long i;
+            seek_pos = 0;
+            if (value != 0)
+            {
+                char character;
+                exit = 0;
 
-			if (!ResolveExpression(state, &incbin->length, &length, cc_true))
-			{
-				SemanticError(state, "Length value must be evaluable on the first pass.");
-				length = 0;
-			}
+                for (; exit < value;)
+                {
+                    character = fgetc(input_file);
+                    ++seek_pos;
 
-			for (i = 0; i < length; ++i)
-			{
-				const int character = fgetc(input_file);
+                    if (character == '\n') ++exit;
+                }
+            }
 
-				if (character == EOF)
-				{
-					SemanticError(state, "Length value is larger than the remaining number of bytes in the file.");
-					break;
-				}
+            if (fseek(input_file, seek_pos, SEEK_SET) != 0)
+                SemanticError(state, "Start value is not a valid location in the file.");
 
-				++state->program_counter;
-				fputc(character, state->output_file);
-			}
-		}
-		else
-		{
-			int character;
+            if (incbin->has_length)
+            {
+                unsigned long length;
 
-			while ((character = fgetc(input_file)) != EOF)
-			{
-				++state->program_counter;
-				fputc(character, state->output_file);
-			}
-		}
+                if (!ResolveExpression(state, &incbin->length, &length, cc_true))
+                {
+                    SemanticError(state, "Length value must be evaluable on the first pass.");
+                    length = 0;
+                }
 
-		fclose(input_file);
-	}
+                j = 0;
+                while (length)
+                {
+                    const char character = fgetc(input_file);
+
+                    if (character == EOF)
+                    {
+                        SemanticError(state, "Length value is larger than the remaining number of instructions in the file.");
+                        break;
+                    }
+
+                    if (character != '\n' && ++j == 2)
+                    {
+                        ++state->program_counter;
+                        j = 0;
+                    }
+
+                    if (character == '\n') --length;
+
+                    fputc(character, state->output_file);
+                }
+            }
+            else
+            {
+                char character;
+
+                j = 0;
+                while ((character = fgetc(input_file)) != EOF)
+                {
+                    if (character != '\n' && ++j == 2)
+                    {
+                        ++state->program_counter;
+                        j = 0;
+                    }
+
+                    fputc(character, state->output_file);
+                }
+            }
+
+            fclose(input_file);
+        }
+        free(fixed_path);
+    }
 }
 
 static void ProcessRept(SemanticState *state, StatementRept *rept)
