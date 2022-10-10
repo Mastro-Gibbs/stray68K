@@ -32,8 +32,8 @@ Just clone and invoke makefile
         
         Options:
          -a [opts|args]   -Invoke assembler. See below.
-         -e [path]        -Input executable file. To generate it use assembler options.
-         -s [path]        -Like option '-e' but run executable file step by step.
+         -e [path]        -Input executable file. To generate it use assembler options, must be .B68 file extesion.
+         -s [path]        -Like option '-e' but run executable file step by step, must be .B68 file extesion.
          -[e|s] [path] -d -Like options '-e' and '-s' but prints opcode and mnemonic.
          -[e|s] [path] -q -Like options '-e' and '-s' but but avoid to print system status (quiet).
         
@@ -48,8 +48,8 @@ Just clone and invoke makefile
         Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)
         
         Options:
-         -i [path] -Input file
-         -o [path] -Output file.
+         -i [path] -Input file, must be .X68 file extesion.
+         -o [path] -Output file, must be .B68 file extesion.
          -l [path] -Listing file. Optional.
          -s [path] -asm68k-style symbol file. Optional.
          -c        -Enable case-insensitive mode.
