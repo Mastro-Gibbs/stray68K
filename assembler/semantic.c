@@ -424,7 +424,7 @@ static char* GenerateFixedPath(SemanticState *state, const char* path)
     if (state->root_path != NULL)
         fixed_path = PRIVATE_GenerateFixedPath(state, path_copy);
     else
-        fixed_path = NULL;
+        fixed_path = DuplicateString(path);
 
     free(path_copy);
 
@@ -4071,7 +4071,7 @@ static cc_bool is_recursive_include(SemanticState *state, const StatementInclude
 
     while (curr != NULL)
     {
-        if (strcmp(curr->file_path, include->path))
+        if (strncmp(curr->file_path, include->path, strlen(curr->file_path)) == 0)
             return cc_true;
 
         curr = curr->previous;
