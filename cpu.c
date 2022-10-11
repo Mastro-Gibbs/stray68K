@@ -74,7 +74,7 @@ void __show__()
     char d = 0x30, a = 0x30;
     char id[3];
 
-    printf("\033[01m\033[37mCPU status:\033[0m\n");
+    printf("\n                                                      [\033[01m\033[37mCPU STATUS\033[0m]\n\n");
 
     id[2] = '\0';
 

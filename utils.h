@@ -58,14 +58,14 @@
 
 #define IO_TASK(descr, fmt, ...) do {                               \
                         if (descr)                                  \
-                            printf("[\033[01m\033[95mIO\033[0m] "); \
+                            printf("\n[\033[01m\033[95mIO\033[0m] "); \
                         printf (fmt, ##__VA_ARGS__);                \
                         fflush(stdout);                             \
                     } while (0);
 
 #define IO_TASK_EMPTY(descr) do {                                   \
                         if (descr)                                  \
-                            printf("[\033[01m\033[95mIO\033[0m] "); \
+                            printf("\n[\033[01m\033[95mIO\033[0m] "); \
                         fflush(stdout);                             \
                     } while (0);
 

@@ -293,16 +293,27 @@ void _disable_single_char()
 
 void printf_sstatus(char *state)
 {
+    system("clear");
+
+    generic_u32_t _start = orgptr;
+    generic_u32_t _end   = (last_written_byte | 0x0000000F) + 0x11;
+    generic_u32_t _ptr   = get_pc();
+
     if (state != NULL)
     {
         printf("\033[01m\033[37m%s", state);
-        printf(":\033[0m\n\n");
+        printf(":\033[0m\n");
+    }
+    else
+    {
+        _start = (_ptr & 0xFFFFFFF0) - 0x20;
+        _end   = (_ptr | 0x0000000F) + 0x31;
     }
 
     ARCH.cpu->show();
     printf("\n");
 
-    ARCH.ram->show(orgptr, (last_written_byte | 0x0000000F) + 0x11, get_pc());
+    ARCH.ram->show(_start, _end, _ptr);
     printf("\n");
 
     printf("\033[01m\033[37mHalt\033[0m:     0x%X\n", simhalt);
@@ -339,8 +350,6 @@ int _wait(struct ExecArgs *ea, struct ExecArgs *copy)
 
             case 'n': //goto next istr, print cpu & ram
             {
-                system("clear");
-
                 printf_sstatus(NULL);
 
                 loop = 0;

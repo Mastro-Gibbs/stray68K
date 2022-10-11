@@ -118,23 +118,93 @@ void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr)
 {
     if ((_end * 128) > (ram->size - 1)) return;
 
-    printf("\033[01m\033[37mRAM status:\033[0m\n");
+    printf("\n                        [\033[01m\033[37mRAM STATUS\033[0m]\n\n");
 
-    printf(" \033[01m\033[37mAddresses\033[0m | 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+    printf(" \033[01m\033[37mAddresses\033[0m | ");
+
+    switch (_ptr & 0x0000000F) {
+        case 0x00:
+            printf("\033[93m00\033[0m 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x01:
+            printf("00 \033[93m01\033[0m 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x02:
+            printf("00 01 \033[93m02\033[0m 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x03:
+            printf("00 01 02 \033[93m03\033[0m 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x04:
+            printf("00 01 02 03 \033[93m04\033[0m 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x05:
+            printf("00 01 02 03 04 \033[93m05\033[0m 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x06:
+            printf("00 01 02 03 04 05 \033[93m06\033[0m 07 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x07:
+            printf("00 01 02 03 04 05 06 \033[93m07\033[0m 08 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x08:
+            printf("00 01 02 03 04 05 06 07 \033[93m08\033[0m 09 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x09:
+            printf("00 01 02 03 04 05 06 07 08 \033[93m09\033[0m 0A 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x0A:
+            printf("00 01 02 03 04 05 06 07 08 09 \033[93m0A\033[0m 0B 0C 0D 0E 0F\n");
+            break;
+
+        case 0x0B:
+            printf("00 01 02 03 04 05 06 07 08 09 0A \033[93m0B\033[0m 0C 0D 0E 0F\n");
+            break;
+
+        case 0x0C:
+            printf("00 01 02 03 04 05 06 07 08 09 0A 0B \033[93m0C\033[0m 0D 0E 0F\n");
+            break;
+
+        case 0x0D:
+            printf("00 01 02 03 04 05 06 07 08 09 0A 0B 0C \033[93m0D\033[0m 0E 0F\n");
+            break;
+
+        case 0x0E:
+            printf("00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D \033[93m0E\033[0m 0F\n");
+            break;
+
+        case 0x0F:
+            printf("00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E \033[93m0F\033[0m\n");
+            break;
+    }
+
     printf("-----------|------------------------------------------------\n");
+
+    if (_ptr == _start || (_ptr > _start && _ptr < (_start + 0x10))) printf("\033[93m");
 
     printf("0x");
     short int i = 4;
     do {
         generic_u8_t inner = _start >> (8 * (i - 1));
 
-        if (!inner || inner < 0xF) printf("0");
+        if (!inner || inner <= 0xF) printf("0");
 
         printf("%X", inner);
 
         i--;
     } while (i);
 
+    if (_ptr == _start || (_ptr > _start && _ptr < (_start + 0x10))) printf("\033[0m");
 
     printf(" | ");
 
@@ -160,18 +230,22 @@ void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr)
         }
 
         if (j % 16 == 0 && (i+1) < _end) {
+            if (_ptr == i || (_ptr > i && _ptr < (i + 0x10))) printf("\033[93m");
+
             printf("\n0x");
 
             short int k = 4;
             do {
                 generic_u8_t inner = (i+1) >> (8 * (k - 1));
 
-                if (!inner || inner < 0xF) printf("0");
+                if (!inner || inner <= 0xF) printf("0");
 
                 printf("%X", inner);
 
                 k--;
             } while (k);
+
+            if (_ptr == i || (_ptr > i && _ptr < (i + 0x10))) printf("\033[0m");
 
             printf(" | ");
         }
