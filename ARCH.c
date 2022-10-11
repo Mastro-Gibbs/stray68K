@@ -84,7 +84,8 @@ bit _is_valid_file(char *filename)
     if (fp == NULL)
         ARCH_ERROR("File not found, be sure to pass correct path.")
 
-    if ((read = getline(&line, &len, fp)) == -1)
+    read = getline(&line, &len, fp);
+    if (read == -1)
         ARCH_ERROR("Empty file!")
 
     fclose(fp);
@@ -239,7 +240,7 @@ struct ExecArgs parse_args(int argc, char **argv)
         "   'c' -Print a snapshot of the cpu.\n"
         "   'm' -Print a snapshot of the ram, asks for start and end addresses to extract a ram slice.\n"
         "   'b' -Options c and m combined together.\n"
-        "   'a' -Options b combined with auto ram slice printing.\n"
+        "   'n' -Options b combined with auto ram slice printing.\n"
         "   's' -Skip current step.\n"
         "   't' -Full skip steps. The execution proceeds to the end.\n"
         "\n\n",
@@ -290,95 +291,96 @@ void _disable_single_char()
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }
 
-int _wait()
+void printf_sstatus(char *state)
 {
-    char c;
-    generic_u32_t mbegin, mend;
+    if (state != NULL)
+    {
+        printf("\033[01m\033[37m%s", state);
+        printf(":\033[0m\n\n");
+    }
 
+    ARCH.cpu->show();
+    printf("\n");
+
+    ARCH.ram->show(orgptr, (last_written_byte | 0x0000000F) + 0x11, get_pc());
+    printf("\n");
+
+    printf("\033[01m\033[37mHalt\033[0m:     0x%X\n", simhalt);
+
+    fflush(stdout);
+}
+
+int _wait(struct ExecArgs *ea, struct ExecArgs *copy)
+{
     fputs(
-        "\n----------------------- Execution Options ------------------------\n"
-        "[\033[01m\033[37mc\033[0m] \033[01m\033[37mcpu\033[0m | "
-        "[\033[01m\033[37mm\033[0m] \033[01m\033[37mram\033[0m | "
-        "[\033[01m\033[37mb\033[0m] \033[01m\033[37mboth\033[0m | "
-        "[\033[01m\033[37ma\033[0m] \033[01m\033[37mauto\033[0m | "
-        "[\033[01m\033[37ms\033[0m] \033[01m\033[37mskip\033[0m | "
+        "\n------------------- Execution Options -------------------\n"
+        "[\033[01m\033[37ms\033[0m] \033[01m\033[37mstack\033[0m | "
+        "[\033[01m\033[37mn\033[0m] \033[01m\033[37mnext\033[0m | "
+        "[\033[01m\033[37mk\033[0m] \033[01m\033[37mskip\033[0m | "
         "[\033[01m\033[37mt\033[0m] \033[01m\033[37mfull skip\033[0m\n",
     stdout);
 
     fflush(stdout);
     fflush(stdin);
 
-    _enable_single_char();
-    c = getchar();
-    _disable_single_char();
+    char opt;
+    bit loop = 1;
+    int res  = 1;
 
-    if (c == 'c')
+    while (loop)
     {
-        system("clear");
-        ARCH.cpu->show();
-        printf("\n");
-    }
-    else if (c == 'm')
-    {
-        printf("Enter start ram address: (hex) ");
-        scanf("%X", &mbegin);
-        printf("Enter final ram address: (hex) ");
-        scanf("%X", &mend);
-        system("clear");
-        ARCH.ram->show(mbegin, (mend | 0x0000000F) + 0x11);
-        printf("\n");
-    }
-    else if (c == 'b')
-    {
-        printf("Enter start ram address: (hex) ");
-        scanf("%X", &mbegin);
-        printf("Enter final ram address: (hex) ");
-        scanf("%X", &mend);
-        system("clear");
-        ARCH.cpu->show();
-        printf("\n");
-        ARCH.ram->show(mbegin, (mend | 0x0000000F) + 0x1);
-        printf("\n");
-    }
-    else if (c == 'a')
-    {
-        system("clear");
-        ARCH.cpu->show();
-        printf("\n");
-        ARCH.ram->show(orgptr, (last_written_byte | 0x0000000F) + 0x11);
-        printf("\n\n");
-    }
-    else if (c == 's')
-    {
-        system("clear");
-        printf("Skip selected, the execution proceeds.\n");
-    }
-    else if (c == 't')
-    {
-        system("clear");
-        printf("Full skip selected, the execution proceeds to the end.\n");
-        return 0;
-    }
-    else
-    {
-        system("clear");
-        printf("\nInvalid option or skip selected, the execution proceeds.\n");
+        _enable_single_char();
+        opt = getchar();
+        _disable_single_char();
+
+        switch (opt) {
+            case 's': //stack;
+                break;
+
+            case 'n': //goto next istr, print cpu & ram
+            {
+                system("clear");
+
+                printf_sstatus(NULL);
+
+                loop = 0;
+                ea->descr = copy->descr;
+                break;
+            }
+
+            case 'k': //skip
+            {
+                system("clear");
+                printf("Skip selected, the execution proceeds.\n");
+
+                loop = 0;
+                ea->descr = copy->descr;
+                break;
+            }
+
+            case 't': //terminate
+            {
+                system("clear");
+                printf("Full skip selected, the execution proceeds to the end.\n");
+
+                res = 0;
+                loop = 0;
+                ea->descr = 0;
+                break;
+            }
+
+            case '\n': //catch \n and do nothing here
+            { break; }
+
+            default: //otherelse
+            {
+                printf("\nInvalid option.\n");
+                break;
+            }
+        }
     }
 
-    return 1;
-}
-
-void printf_sstatus(char *state)
-{
-    printf("\033[01m\033[37m%s", state);
-    printf(":\033[0m\n\n");
-
-    ARCH.cpu->show();
-    printf("\n");
-    ARCH.ram->show(orgptr, (last_written_byte | 0x0000000F) + 0x11);
-    printf("\n");
-
-    fflush(stdout);
+    return res;
 }
 
 
@@ -413,7 +415,8 @@ int emulate_sbs(int argc, char **argv) // aka step-by-step
 {
     bit print = 1;
 
-    struct ExecArgs ea = parse_args(argc, argv);
+    struct ExecArgs ea   = parse_args(argc, argv);
+    struct ExecArgs copy = ea;
 
     _begin();
 
@@ -423,12 +426,12 @@ int emulate_sbs(int argc, char **argv) // aka step-by-step
 
     while(!ARCH.is_halt())
     {
-        if (print) { print = _wait(); }
+        if (print) { print = _wait(&ea, &copy); }
 
         ARCH.cpu->exec(ea.descr);
     }
 
-    if (print) { _wait(); }
+    if (print) { _wait(&ea, &copy); }
 
     printf_sstatus("Final system status");
 

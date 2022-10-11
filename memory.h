@@ -13,7 +13,7 @@ typedef struct __memory__
     generic_u8_t *ram;
     generic_u32_t size;
 
-    void (*show) (generic_u32_t _start, generic_u32_t _end);
+    void (*show) (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr);
 
 } ram_t;
 
@@ -24,15 +24,11 @@ void   destroy_ram();
 
 
 /* MEMORY READ */
-generic_u8_t* read_chunk(generic_u32_t pointer, generic_u32_t length);
-
 generic_u8_t  read_byte(generic_u32_t pointer);
 generic_u16_t read_word(generic_u32_t pointer);
 generic_u32_t read_long(generic_u32_t pointer);
 
 /* MEMORY WRITE */
-void write_chunk(generic_u32_t pointer, generic_u8_t *value, generic_u32_t size);
-
 void write_byte(generic_u32_t pointer, generic_u8_t  value);
 void write_word(generic_u32_t pointer, generic_u16_t value);
 void write_long(generic_u32_t pointer, generic_u32_t value);

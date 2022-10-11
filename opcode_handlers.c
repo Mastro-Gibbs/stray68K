@@ -2,6 +2,9 @@
 
 #include <stdlib.h>
 
+//dumbest way to unmark func param as unused
+#define UNUSED(x) (void)(x);
+
 #define INSTRUCTION_SET_GROUPS_COUNT 14
 
 #define GROUP_0x00_LEN  21
@@ -300,8 +303,8 @@ generic_u32_t run_opcode(opcode code, bit describe_code)
     {
         opcode Code = code;
 
-        bprintf_ht(Code);
-        printf("\033[01m\033[37mCode\033[0m:     0x%.4X\n", Code);
+        bprintf_ht_4s(Code)
+        printf(" -> 0x%.4X (hex)\n", Code);
         printf("\033[01m\033[37mMnemonic\033[0m: %s\n", tmp->mnemonic);
         fflush(stdout);
     }
@@ -451,7 +454,7 @@ void set_srflags(const generic_u32_t mnemonic, opsize size, generic_u32_t src, g
 // GROUP 0x00
 generic_u32_t ORItoCCR(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u8_t bits  = read_byte(addr);
@@ -467,7 +470,7 @@ generic_u32_t ORItoCCR(opcode code)
 
 generic_u32_t ORItoSR(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = read_word(addr);
@@ -506,7 +509,7 @@ generic_u32_t ORI(opcode code)
 
 generic_u32_t ANDItoCCR(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = (generic_u16_t) (read_byte(addr) & 0x001F) | 0xFFE0;
@@ -522,7 +525,7 @@ generic_u32_t ANDItoCCR(opcode code)
 
 generic_u32_t ANDItoSR(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = read_word(addr);
@@ -639,7 +642,7 @@ generic_u32_t ADDI(opcode code)
 
 generic_u32_t EORItoCCR(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = (generic_u16_t) (read_byte(addr) & 0x001F) | 0xFFE0;
@@ -655,7 +658,7 @@ generic_u32_t EORItoCCR(opcode code)
 
 generic_u32_t EORItoSR(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     generic_u32_t addr = (generic_u32_t) (get_pc() + WORD_SPAN);
     generic_u16_t bits = read_word(addr);
@@ -1067,7 +1070,7 @@ generic_u32_t PEA(opcode code)
 
 generic_u32_t ILLEGAL(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     TRAPEXC(IllegalInstruction, trap_code_toString(IllegalInstruction))
 
@@ -1198,7 +1201,7 @@ generic_u32_t RESET(opcode code)
 
 generic_u32_t NOP(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     return (RETURN_OK);
 }
@@ -1214,7 +1217,7 @@ generic_u32_t STOP(opcode code)
 
 generic_u32_t RTE(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     if (get_supervisor())
     {
@@ -1246,7 +1249,7 @@ generic_u32_t RTS(opcode code)
 
 generic_u32_t TRAPV(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     if (get_overflow())
         TRAPEXC(TRAPVInstruction, trap_code_toString(TRAPVInstruction))
@@ -1258,7 +1261,7 @@ generic_u32_t TRAPV(opcode code)
 
 generic_u32_t RTR(opcode code)
 {
-    ignore_param(code);
+    UNUSED(code)
 
     srflags ccr   = pop_word();
     srflags srval = get_sr();
@@ -2678,6 +2681,3 @@ generic_u32_t ROxx(generic_u32_t code)
     return (RETURN_OK);
 }
 
-
-//dumbest way to ignore param 'code' :D
-generic_u32_t ignore_param(generic_u32_t code) { return code; }

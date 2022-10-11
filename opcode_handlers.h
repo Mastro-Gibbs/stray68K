@@ -177,6 +177,6 @@ generic_u32_t ROxx(generic_u32_t code);
 
 
 //dumbest way to ignore param 'code' :D
-generic_u32_t ignore_param(generic_u32_t code);
+generic_u32_t UNUSED(generic_u32_t code);
 
 #endif // __OPCODE_HANDLERS_H__68000

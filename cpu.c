@@ -58,7 +58,14 @@ void destroy_cpu()
 
 generic_u32_t __exec__(bit describe_code)
 {
-    return run_opcode(read_word(get_pc()), describe_code);
+    generic_u32_t istruction_ptr = get_pc();
+
+    if ((istruction_ptr % 2) != 0)
+        PANIC("Segmentation fault while reading next istruction on odd address");
+
+    generic_u16_t code = read_word(istruction_ptr);
+
+    return run_opcode(code, describe_code);
 }
 
 
@@ -66,6 +73,9 @@ void __show__()
 {
     char d = 0x30, a = 0x30;
     char id[3];
+
+    printf("\033[01m\033[37mCPU status:\033[0m\n");
+
     id[2] = '\0';
 
     id[0] = 'D';
@@ -265,7 +275,6 @@ bit get_zero()
 }
 
 void  set_zero(bit bit)
-
 {
     if (bit)
         cpu->sr |= ZERO;

@@ -1,7 +1,7 @@
 #include "memory.h"
 
 
-void __show_ram__ (generic_u32_t _start, generic_u32_t _end);
+void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr);
 
 
 ram_t *ram = NULL;
@@ -56,19 +56,6 @@ void check_inst()
 
 
 /* MEMORY READ */
-generic_u8_t* read_chunk(generic_u32_t pointer, generic_u32_t length)
-{
-    check_inst();
-    check_addr(pointer, length);
-
-    generic_u8_t *read = malloc(sizeof (generic_u8_t) * length);
-
-    for (generic_u32_t iter = 0; iter < length; iter++)
-        read[iter] = ram->ram[pointer + iter];
-
-    return read;
-}
-
 generic_u8_t read_byte(generic_u32_t pointer)
 {
     check_inst();
@@ -96,15 +83,6 @@ generic_u32_t read_long(generic_u32_t pointer)
 
 
 /* MEMORY WRITE */
-void write_chunk(generic_u32_t pointer, generic_u8_t *value, generic_u32_t size)
-{
-    check_inst();
-    check_addr(pointer, size);
-
-    for (generic_u32_t iter = 0; iter < size; iter++)
-        ram->ram[pointer + iter] = value[iter];
-}
-
 void write_byte(generic_u32_t pointer, generic_u8_t value)
 {
     check_inst();
@@ -136,9 +114,11 @@ void write_long(generic_u32_t pointer, generic_u32_t value)
 
 
 
-void __show_ram__ (generic_u32_t _start, generic_u32_t _end)
+void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr)
 {
     if ((_end * 128) > (ram->size - 1)) return;
+
+    printf("\033[01m\033[37mRAM status:\033[0m\n");
 
     printf(" \033[01m\033[37mAddresses\033[0m | 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F\n");
     printf("-----------|------------------------------------------------\n");
@@ -164,10 +144,20 @@ void __show_ram__ (generic_u32_t _start, generic_u32_t _end)
 
         generic_u8_t b = ram->ram[i];
 
-        if (!b || b <= 0xF) printf("0");
+        if (i == _ptr || i == (_ptr + 1))
+        {
+            if (!b || b <= 0xF) printf("\033[01m\033[93m0\033[0m");
 
-        printf("%X", ram->ram[i]);
-        printf(" ");
+            printf("\033[01m\033[93m%X\033[0m", b);
+            printf(" ");
+        }
+        else
+        {
+            if (!b || b <= 0xF) printf("0");
+
+            printf("%X", b);
+            printf(" ");
+        }
 
         if (j % 16 == 0 && (i+1) < _end) {
             printf("\n0x");

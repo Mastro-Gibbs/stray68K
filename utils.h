@@ -77,7 +77,7 @@
     printf(#x ": ");                                             \
     while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
     putchar('\n');                                               \
-  } while (0)
+  } while (0);
 
 
 #define bprintf_ht(x)                                            \
@@ -89,7 +89,17 @@
     printf("\033[0m: ");                                         \
     while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
     putchar('\n');                                               \
-  } while (0)
+  } while (0);
+
+#define bprintf_ht_4s(x)                                         \
+  do {                                                           \
+    unsigned long long a__ = (x);                                \
+    size_t bits__ = sizeof(x) * 8;                               \
+    printf("\033[01m\033[37m");                                  \
+    printf(#x);                                                  \
+    printf("\033[0m:     ");                                     \
+    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
+  } while (0);
 
 
 generic_u32_t most_significant_byte(opsize size);
