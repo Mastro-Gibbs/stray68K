@@ -13,7 +13,7 @@
 #define ORG_DEFAULT     0x00000000
 
 
-void  __load_bytecode__(char *filename);
+void  __load_bytecode__(struct EmulationState *state);
 bit   __is_halt__();
 void  __turn_off__();
 
@@ -28,9 +28,30 @@ generic_u32_t simhalt = 0;
 generic_u32_t orgptr  = 0;
 generic_u32_t last_written_byte = 0;
 
-
 static struct termios oldt, newt;
 
+
+#define EMULATE_STD 0
+#define EMULATE_SBS 1
+
+#define BEGIN_STATE 0
+#define EXEC_STATE  1
+#define FINAL_STATE 2
+
+struct EmulationState
+{
+    generic_u8_t state; //initial, execution, final
+    generic_u8_t type;
+
+    struct
+    {
+        bit  descr;
+        bit  quiet;
+        char *path;
+    } ExecArgs;
+
+    bit sbs_print;
+};
 
 
 void _begin()
@@ -183,8 +204,10 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
     return bytecode;
 }
 
-void __load_bytecode__(char *filename)
+void __load_bytecode__(struct EmulationState *state)
 {
+    char *filename = state->ExecArgs.path;
+
     generic_u32_t org = _extract_ORG(filename);
     _set_ORG(org);
 
@@ -214,15 +237,7 @@ void __load_bytecode__(char *filename)
 
 
 /* EMULATOR UTILS*/
-
-struct ExecArgs
-{
-    bit  descr;
-    bit  quiet;
-    char *path;
-};
-
-struct ExecArgs parse_args(int argc, char **argv)
+void parse_args(struct EmulationState *state, int argc, char **argv)
 {
     if (argc < 3)
     {
@@ -230,17 +245,13 @@ struct ExecArgs parse_args(int argc, char **argv)
         "stray68K: emulator for Motorola 68000.\n"
         "\n"
         "Options:\n"
-        " -a [opts|args]   -Invoke assembler. See below.\n"
-        " -e [path]        -Input executable file. To generate it use assembler options.\n"
-        " -s [path]        -Like option '-e' but run executable file step by step.\n"
-        " -[e|s] [path] -d -Like options '-e' and '-s' but prints opcode and mnemonic.\n"
-        " -[e|s] [path] -q -Like options '-e' and '-s' but but avoid to print system status (quiet).\n"
+        " -a [opts|args]  -Invoke assembler. See below.\n"
+        " -e [path]  [-q] -Input executable file. To generate it use assembler options. [-q] mean qiuet opt.\n"
+        " -s [path]  [-d] -Like option '-e' but run executable file step by step (debug mode). [-d] mean descriptive opt.\n"
         "\n"
-        "Step by step mode options asked from stdin:\n"
-        "   'c' -Print a snapshot of the cpu.\n"
-        "   'm' -Print a snapshot of the ram, asks for start and end addresses to extract a ram slice.\n"
-        "   'b' -Options c and m combined together.\n"
-        "   'n' -Options b combined with auto ram slice printing.\n"
+        "step-by-step mode options asked from stdin:\n"
+        "   's' -Asks for offsets and print current stack.\n"
+        "   'n' -Execute next istruction.\n"
         "   's' -Skip current step.\n"
         "   't' -Full skip steps. The execution proceeds to the end.\n"
         "\n\n",
@@ -251,29 +262,52 @@ struct ExecArgs parse_args(int argc, char **argv)
 
     _is_valid_file(argv[2]);
 
-    struct ExecArgs ea;
-
-    ea.path = argv[2];
-    ea.descr = 0;
-    ea.quiet = 0;
+    state->ExecArgs.path  = argv[2];
+    state->ExecArgs.descr = 0;
+    state->ExecArgs.quiet = 0;
 
     for (generic_32_t i = 3; i < argc; i++)
     {
         if (strlen(argv[i]) >= 2)
         {
             if (argv[i][0] == '-' && argv[i][1] == 'd')
-                ea.descr = 1;
+                state->ExecArgs.descr = 1;
 
-            if (argv[i][0] == '-' && argv[i][1] == 'q')
-                ea.quiet = 1;
+            else if (argv[i][0] == '-' && argv[i][1] == 'q')
+                state->ExecArgs.quiet = 1;
+
+            else ARCH_ERROR("Invalid param '%s' at position %d.", argv[i], i);
         }
-        else ARCH_ERROR("Invalid param");
     }
 
-    if (ea.quiet && ea.descr)
-        ARCH_ERROR("Cannot combine '-d' and '-q' options")
+    if (state->type == EMULATE_SBS && state->ExecArgs.quiet)
+        ARCH_ERROR("Cannot use quiet option (-q) in step-by-step mode.")
 
-    return ea;
+    if (state->type == EMULATE_STD && state->ExecArgs.descr)
+        ARCH_ERROR("Cannot use descriptive option (-d) in normal mode.")
+
+    if (state->ExecArgs.descr && state->ExecArgs.quiet)
+        ARCH_ERROR("Cannot combine '-d' and '-q' options.")
+}
+
+struct EmulationState get_state(int argc, char **argv)
+{
+    struct EmulationState state;
+
+    state.state = BEGIN_STATE;
+    state.sbs_print = 0;
+
+    if (argv[1][1] == 'e')
+        state.type = EMULATE_STD;
+    else
+    {
+        state.sbs_print = 1;
+        state.type = EMULATE_SBS;
+    }
+
+    parse_args(&state, argc, argv);
+
+    return state;
 }
 
 void _enable_single_char()
@@ -291,128 +325,175 @@ void _disable_single_char()
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }
 
-void printf_sstatus(char *state)
+void printf_sstatus(struct EmulationState *state)
 {
-    system("clear");
-
-    generic_u32_t _start = orgptr;
-    generic_u32_t _end   = (last_written_byte | 0x0000000F) + 0x11;
-    generic_u32_t _ptr   = get_pc();
-
-    if (state != NULL)
+    if (!state->ExecArgs.quiet)
     {
-        printf("\033[01m\033[37m%s", state);
-        printf(":\033[0m\n");
+        if (state->type == EMULATE_SBS && state->sbs_print) system("clear");
+
+        generic_u32_t _start = orgptr;
+        generic_u32_t _end   = (last_written_byte | 0x0000000F) + 0x11;
+        generic_u32_t _ptr   = get_pc();
+        char *pcptr_color    = "";
+        char *halt_color     = "\033[37m";
+
+        if (state->state == BEGIN_STATE)
+        {
+            printf("\033[01m\033[37mInitial State:\033[0m");
+            pcptr_color = "\033[92m";
+        }
+        else if (state->state == EXEC_STATE)
+        {
+            printf("\033[01m\033[37mExecution State:\033[0m");
+            _start = (_ptr & 0xFFFFFFF0) - 0x20;
+            _end   = (_ptr | 0x0000000F) + 0x31;
+            pcptr_color    = "\033[93m";
+
+        }
+        else if (state->state == FINAL_STATE)
+        {
+            printf("\033[01m\033[37mFinal State:\033[0m");
+            pcptr_color    = "\033[91m";
+            halt_color     = "\033[91m";
+        }
+
+        ARCH.cpu->show();
+        printf("\n");
+
+        ARCH.ram->show(_start, _end, _ptr, pcptr_color);
+        printf("\n");
+
+        printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, simhalt);
+
+        fflush(stdout);
     }
-    else
-    {
-        _start = (_ptr & 0xFFFFFFF0) - 0x20;
-        _end   = (_ptr | 0x0000000F) + 0x31;
-    }
-
-    ARCH.cpu->show();
-    printf("\n");
-
-    ARCH.ram->show(_start, _end, _ptr);
-    printf("\n");
-
-    printf("\033[01m\033[37mHalt\033[0m:     0x%X\n", simhalt);
-
-    fflush(stdout);
 }
 
-int _wait(struct ExecArgs *ea, struct ExecArgs *copy)
+void _wait(struct EmulationState *state)
 {
-    fputs(
-        "\n------------------- Execution Options -------------------\n"
-        "[\033[01m\033[37ms\033[0m] \033[01m\033[37mstack\033[0m | "
-        "[\033[01m\033[37mn\033[0m] \033[01m\033[37mnext\033[0m | "
-        "[\033[01m\033[37mk\033[0m] \033[01m\033[37mskip\033[0m | "
-        "[\033[01m\033[37mt\033[0m] \033[01m\033[37mfull skip\033[0m\n",
-    stdout);
-
-    fflush(stdout);
-    fflush(stdin);
-
-    char opt;
-    bit loop = 1;
-    int res  = 1;
-
-    while (loop)
+    if (state->sbs_print)
     {
-        _enable_single_char();
-        opt = getchar();
-        _disable_single_char();
+        fputs(
+            "\n---------------- Execution Options ----------------\n"
+            "[\033[01m\033[37ms\033[0m] \033[01m\033[37mstack\033[0m | "
+            "[\033[01m\033[37mn\033[0m] \033[01m\033[37mnext\033[0m | "
+            "[\033[01m\033[37mk\033[0m] \033[01m\033[37mskip\033[0m | "
+            "[\033[01m\033[37mt\033[0m] \033[01m\033[37mfull skip\033[0m\n",
+        stdout);
 
-        switch (opt) {
-            case 's': //stack;
-                break;
+        fflush(stdout);
+        fflush(stdin);
 
-            case 'n': //goto next istr, print cpu & ram
-            {
-                printf_sstatus(NULL);
+        char opt;
+        bit loop = 1;
 
-                loop = 0;
-                ea->descr = copy->descr;
-                break;
-            }
+        while (loop)
+        {
+            _enable_single_char();
+            opt = getchar();
+            _disable_single_char();
 
-            case 'k': //skip
-            {
-                system("clear");
-                printf("Skip selected, the execution proceeds.\n");
+            switch (opt) {
+                case 's': //stack;
+                {
+                    generic_u32_t _top = 0, _bottom = 0x00FFFFFF;
 
-                loop = 0;
-                ea->descr = copy->descr;
-                break;
-            }
+                    printf("\nInsert stack top address: ");
+                    scanf("%X", &_top);
+                    printf("Insert stack bottom address: ");
+                    scanf("%X", &_bottom);
 
-            case 't': //terminate
-            {
-                system("clear");
-                printf("Full skip selected, the execution proceeds to the end.\n");
+                    if (_bottom > RAM_SIZE || (((_bottom & 0x0000000F) + 1) % 4) != 0)
+                    {
+                        printf("Invalid bottom index");
+                    }
+                    else
+                    {
+                        ARCH.ram->stack(_top, _bottom);
+                    }
 
-                res = 0;
-                loop = 0;
-                ea->descr = 0;
-                break;
-            }
+                    break;
+                }
 
-            case '\n': //catch \n and do nothing here
-            { break; }
+                case 'n': //goto next istr, print cpu & ram
+                {
+                    printf_sstatus(state);
 
-            default: //otherelse
-            {
-                printf("\nInvalid option.\n");
-                break;
+                    loop = 0;
+                    break;
+                }
+
+                case 'k': //skip
+                {
+                    system("clear");
+                    printf("Skip selected, the execution proceeds.\n");
+
+                    loop = 0;
+                    break;
+                }
+
+                case 't': //terminate
+                {
+                    system("clear");
+                    printf("Full skip selected, the execution proceeds to the end.\n");
+
+                    loop = 0;
+
+                    state->sbs_print      = 0;
+                    state->ExecArgs.descr = 0;
+                    break;
+                }
+
+                default: //catch \n and do nothing here
+                { break; }
             }
         }
     }
-
-    return res;
 }
 
 
 
 /* EMULATOR */
-int emulate(int argc,  char** argv)
+int emulate_std(struct EmulationState *state)
 {
-    struct ExecArgs ea = parse_args(argc, argv);
-
     _begin();
 
-    ARCH.load(ea.path);
+    ARCH.load(state);
 
-    if (!ea.quiet)
-        printf_sstatus("Initial system status");
+    printf_sstatus(state);
+
+    state->state = EXEC_STATE;
+    while(!ARCH.is_halt())
+    {
+        ARCH.cpu->exec(state->ExecArgs.descr);
+    }
+    state->state = FINAL_STATE;
+
+    printf_sstatus(state);
+
+    ARCH.turnoff();
+
+    return (EXIT_SUCCESS);
+}
+
+int emulate_sbs(struct EmulationState *state) // aka step-by-step
+{
+    _begin();
+    ARCH.load(state);
+
+    printf_sstatus(state);
+    state->state = EXEC_STATE;
 
     while(!ARCH.is_halt())
     {
-        ARCH.cpu->exec(ea.descr);
+        _wait(state);
+
+        ARCH.cpu->exec(state->ExecArgs.descr);
     }
 
-    if (!ea.quiet)
-        printf_sstatus("\nFinal system status");
+    state->state = FINAL_STATE;
+    _wait(state);
+    printf_sstatus(state);
 
     ARCH.turnoff();
 
@@ -420,35 +501,15 @@ int emulate(int argc,  char** argv)
 }
 
 
-int emulate_sbs(int argc, char **argv) // aka step-by-step
+int emulate(int argc, char** argv)
 {
-    bit print = 1;
+    struct EmulationState state = get_state(argc, argv);
 
-    struct ExecArgs ea   = parse_args(argc, argv);
-    struct ExecArgs copy = ea;
-
-    _begin();
-
-    ARCH.load(ea.path);
-
-    printf_sstatus("Initial system status");
-
-    while(!ARCH.is_halt())
-    {
-        if (print) { print = _wait(&ea, &copy); }
-
-        ARCH.cpu->exec(ea.descr);
-    }
-
-    if (print) { _wait(&ea, &copy); }
-
-    printf_sstatus("Final system status");
-
-    ARCH.turnoff();
-
-    return (EXIT_SUCCESS);
+    if (state.type == EMULATE_STD)
+        return emulate_std(&state);
+    else
+        return emulate_sbs(&state);
 }
-
 
 
 

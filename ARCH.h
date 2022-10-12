@@ -7,7 +7,10 @@
 #include "memory.h"
 
 
-#define RAM_SIZE 0xFFFFFFFF
+#define RAM_SIZE 0x00FFFFFF
+
+
+struct EmulationState;
 
 
 typedef struct __ARCH__68000__
@@ -15,7 +18,7 @@ typedef struct __ARCH__68000__
     cpu_t *cpu;
     ram_t *ram;
 
-    void  (*load)    (char *filename);
+    void  (*load)    (struct EmulationState *state);
     bit   (*is_halt) ();
     void  (*turnoff) ();    
 } arch_t;
@@ -23,8 +26,6 @@ typedef struct __ARCH__68000__
 
 
 int emulate(int argc, char **argv);
-
-int emulate_sbs(int argc, char **argv);
 
 
 

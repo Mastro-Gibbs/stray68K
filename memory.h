@@ -13,7 +13,8 @@ typedef struct __memory__
     generic_u8_t *ram;
     generic_u32_t size;
 
-    void (*show) (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr);
+    void (*show)  (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr, char *pcptr_color);
+    void (*stack) (generic_u32_t _top, generic_u32_t _bottom);
 
 } ram_t;
 

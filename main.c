@@ -9,17 +9,13 @@ void usage()
         "stray68K: emulator for Motorola 68000.\n"
         "\n"
         "Options:\n"
-        " -a [opts|args]   -Invoke assembler. See below.\n"
-        " -e [path]        -Input executable file. To generate it use assembler options, must be .B68 file extesion.\n"
-        " -s [path]        -Like option '-e' but run executable file step by step, must be .B68 file extesion.\n"
-        " -[e|s] [path] -d -Like options '-e' and '-s' but prints opcode and mnemonic.\n"
-        " -[e|s] [path] -q -Like options '-e' and '-s' but but avoid to print system status (quiet).\n"
+        " -a [opts|args]  -Invoke assembler. See below.\n"
+        " -e [path]  [-q] -Input executable file. To generate it use assembler options. [-q] mean qiuet opt.\n"
+        " -s [path]  [-d] -Like option '-e' but run executable file step by step (debug mode). [-d] mean descriptive opt.\n"
         "\n"
-        "Step by step mode options asked from stdin:\n"
-        "   'c' -Print a snapshot of the cpu.\n"
-        "   'm' -Print a snapshot of the ram, asks for start and end addresses to extract a ram slice.\n"
-        "   'b' -Options c and m combined together.\n"
-        "   'a' -Options b combined with auto ram slice printing.\n"
+        "step-by-step mode options asked from stdin:\n"
+        "   's' -Asks for offsets and print current stack.\n"
+        "   'n' -Execute next istruction.\n"
         "   's' -Skip current step.\n"
         "   't' -Full skip steps. The execution proceeds to the end.\n"
         "\n\n"
@@ -47,15 +43,13 @@ int main(int argc,  char** argv)
         {
             if (argv[1][0] == '-')
             {
-                if (argv[1][1] == 'e')
+                if (argv[1][1] == 'e' || argv[1][1] == 's')
                     exit_code = emulate(argc, argv);
-                else if (argv[1][1] == 's')
-                    exit_code = emulate_sbs(argc, argv);
                 else if (argv[1][1] == 'a')
                     exit_code = assemble(argc, argv);
                 else
                 {
-                    ARCH_ERROR("Unrecognised option %s", argv[1])
+                    ARCH_ERROR("Unrecognised option %s at position 1", argv[1])
                     usage();
                 }
             }
