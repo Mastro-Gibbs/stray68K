@@ -1,34 +1,13 @@
 #ifndef __CPU_H__68000
 #define __CPU_H__68000
 
-#include "opcode_handlers.h"
+#include "motorolatypes.h"
+#include "handler.h"
 
 #include <stdlib.h>
 
 
-typedef struct __cpu__
-{
-    generic_u32_t data_r[8];  // D0..D7 -> data registers
-
-    generic_u32_t addr_r[7];  // A0..A6 -> address registers
-
-    generic_u32_t  usp;        // aka A7 -> user stack pointer
-
-    generic_u32_t  ssp;        // system stack pointer
-
-    generic_u32_t  pc;         // program counter
-
-    srflags sr;        // status register flags
-
-
-    generic_u32_t (*exec) (bit describe_code); // runner
-
-    void (*show)();
-
-} cpu_t;
-
-
-cpu_t* init_cpu();
+m68k_cpu* init_cpu();
 void   reset_cpu();
 void   destroy_cpu();
 

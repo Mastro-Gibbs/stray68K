@@ -1,19 +1,26 @@
-#include "memory.h"
+#include "ram.h"
 
 
 void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr, char *pcptr_color);
 void __show_ram_stack__ (generic_u32_t _top, generic_u32_t _bottom);
 
 
-ram_t *ram = NULL;
+m68k_ram *ram = NULL;
 
 
-ram_t* init_ram(generic_u32_t size)
+m68k_ram* init_ram(generic_u32_t size)
 {
     if (!ram)
     {
         ram = malloc(sizeof (*ram));
+
+        if (!ram)
+            PANIC("Cannot init ram, aborting.")
+
         ram->ram = calloc(size, sizeof (generic_u8_t));
+
+        if (!ram->ram)
+            PANIC("Cannot init ram, aborting.")
 
         ram->size = size;
 

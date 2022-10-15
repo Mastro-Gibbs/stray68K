@@ -1,12 +1,20 @@
-#include "opcode_handlers.h"
+#include "handler.h"
 
 #include <stdlib.h>
+
+
+//handler return types
+#define RETURN_OK_PC_NO_INCR 2
+#define RETURN_OK            1
+#define RETURN_ERR           0
+
 
 //dumbest way to unmark func param as unused
 #define UNUSED(x) (void)(x);
 
-#define INSTRUCTION_SET_GROUPS_COUNT 14
 
+//opcode werehouse utils
+#define INSTRUCTION_SET_GROUPS_COUNT 14
 #define GROUP_0x00_LEN  21
 #define GROUP_0x01_LEN  1
 #define GROUP_0x02_LEN  2
@@ -23,11 +31,175 @@
 #define GROUP_0x0E_LEN 16
 
 
-opcodes_ds *codemap = NULL;
+m68k_codemap *codemap = NULL;
 
 
 generic_u32_t JSR_CALL_COUNTER;
 
+
+/*
+ * BEGIN PROTOS
+ *
+ */
+// GROUP 0x00
+generic_u32_t ORItoCCR(opcode code);  //ok
+generic_u32_t ORItoSR(opcode code);   //ok
+generic_u32_t ORI(opcode code);       //ok
+generic_u32_t ANDItoCCR(opcode code); //ok
+generic_u32_t ANDItoSR(opcode code);  //ok
+generic_u32_t ANDI(opcode code);      //ok
+generic_u32_t SUBI(opcode code);      //ok
+generic_u32_t ADDI(opcode code);      //ok
+generic_u32_t EORItoCCR(opcode code); //ok
+generic_u32_t EORItoSR(opcode code);  //ok
+generic_u32_t EORI(opcode code);      //ok
+generic_u32_t CMPI(opcode code);      //ok
+generic_u32_t MOVEP(opcode code);     // maybe next -warn
+generic_u32_t BTST(opcode code);      //ok
+generic_u32_t BCHG(opcode code);      //ok
+generic_u32_t BCLR(opcode code);      //ok
+generic_u32_t BSET(opcode code);      //ok
+
+
+// GROUP 0x01
+generic_u32_t MOVE(opcode code);   //ok
+
+
+// GROUP 0x02-0x03
+generic_u32_t MOVEA(opcode code);  //ok
+
+
+// group 0X04
+generic_u32_t MOVEfromSR(opcode code); //ok
+generic_u32_t MOVEtoCCR(opcode code);  //ok
+generic_u32_t MOVEtoSR(opcode code);   //ok
+generic_u32_t NEGX(opcode code);       //ok
+generic_u32_t CLR(opcode code);        //ok
+generic_u32_t NEG(opcode code);        //ok
+generic_u32_t NOT(opcode code);        //ok
+generic_u32_t EXT(opcode code);        //ok
+generic_u32_t NBCD(opcode code);       //ok
+generic_u32_t SWAP(opcode code);       //ok
+generic_u32_t PEA(opcode code);        //ok
+generic_u32_t ILLEGAL(opcode code);    //ok
+generic_u32_t TAS(opcode code);        // ?? -warn
+generic_u32_t TST(opcode code);        //ok
+generic_u32_t TRAP(opcode code);       //ok
+generic_u32_t LINK(opcode code);       //ok
+generic_u32_t UNLK(opcode code);       //ok
+generic_u32_t MOVEUSP(opcode code);    //ok
+generic_u32_t RESET(opcode code);      // ?? -warn
+generic_u32_t NOP(opcode code);        //ok
+generic_u32_t STOP(opcode code);       // ?? -warn
+generic_u32_t RTE(opcode code);        //ok
+generic_u32_t RTS(opcode code);        //ok
+generic_u32_t TRAPV(opcode code);      //ok
+generic_u32_t RTR(opcode code);        //ok
+generic_u32_t JSR(opcode code);        //ok
+generic_u32_t JMP(opcode code);        //ok
+generic_u32_t MOVEM(opcode code);      // wtf -warn
+generic_u32_t CHK(opcode code);        // ok -warn
+generic_u32_t LEA(opcode code);        //ok
+
+
+// GROUP 0x05
+generic_u32_t DBcc(opcode code);      //ok
+generic_u32_t Scc(opcode code);       //ok
+generic_u32_t ADDQ(opcode code);      //ok
+generic_u32_t SUBQ(opcode code);      //ok
+
+
+// GROUP 0x06
+generic_u32_t BRA(opcode code);      //ok
+generic_u32_t BSR(opcode code);      //ok
+generic_u32_t Bcc(opcode code);      //ok
+
+
+// GROUP 0x07
+generic_u32_t MOVEQ(opcode code);     //ok
+
+
+// GROUP 0x08
+generic_u32_t DIVU(opcode code);   //ok
+generic_u32_t DIVS(opcode code);   //ok
+generic_u32_t SBCD(opcode code);   //ok
+generic_u32_t OR(opcode code);     //ok
+
+
+// GROUP 0x09
+generic_u32_t SUBA(opcode code);  //ok
+generic_u32_t SUBX(opcode code);  //ok
+generic_u32_t SUB(opcode code);   //ok
+
+
+// GROUP 0x0B
+generic_u32_t CMPA(opcode code);  //ok
+generic_u32_t CMPM(opcode code);  //ok
+generic_u32_t EOR(opcode code);   //ok
+generic_u32_t CMP(opcode code);   //ok
+
+
+// GROUP 0x0C
+generic_u32_t MULU(opcode code);  //ok
+generic_u32_t MULS(opcode code);  //ok
+generic_u32_t ABCD(opcode code);  //ok
+generic_u32_t EXG(opcode code);   //ok
+generic_u32_t AND(opcode code);   //ok
+
+
+// GROUP 0x0D
+generic_u32_t ADDA(opcode code);  //ok
+generic_u32_t ADDX(opcode code);  //ok
+generic_u32_t ADD(opcode code);   //ok
+
+
+// GROUP 0x0E
+generic_u32_t ASR(opcode code);   //ok
+generic_u32_t ASL(opcode code);   //ok
+generic_u32_t LSR(opcode code);   //ok
+generic_u32_t LSL(opcode code);   //ok
+generic_u32_t ROXR(opcode code);  //ok
+generic_u32_t ROXL(opcode code);  //ok
+generic_u32_t ROR(opcode code);   //ok
+generic_u32_t ROL(opcode code);   //ok
+
+
+//Bxxx
+generic_u32_t Bxxx(opcode code);
+
+
+//abcd-sbcd
+generic_u32_t xBCD(opcode code, BCD_type type);
+generic_u32_t perform_BCD(BCD_type type, generic_u32_t src, generic_u32_t dest);
+
+
+//A-Lxx
+generic_u32_t ALxx(generic_u32_t code);
+
+//Roxx
+generic_u32_t ROxx(generic_u32_t code);
+
+/*
+ * END PROTOS
+ *
+ */
+
+
+m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemonic, generic_u32_t (*handler)(const opcode))
+{
+    m68k_opcode *newopcode = malloc(sizeof (*newopcode));
+
+    if (!newopcode)
+        PANIC("Internal error (generate opcode), aborting.")
+
+    newopcode->code     = bitcode;
+    newopcode->mask     = mask;
+    newopcode->mnemonic = mnemonic;
+    newopcode->handler  = handler;
+
+    return newopcode;
+
+}
 
 void init_codes()
 {
@@ -37,11 +209,16 @@ void init_codes()
     {
         codemap = malloc(sizeof (*codemap) * INSTRUCTION_SET_GROUPS_COUNT);
 
+        if (!codemap)
+            PANIC("Internal error (codemap stage 0), aborting.")
+
 
         // GROUP 0x00
         codemap[0].key  = 0x00;
         codemap[0].size = GROUP_0x00_LEN;
         codemap[0].instances     = malloc(sizeof (*codemap[0].instances)  * GROUP_0x00_LEN);
+        if (!codemap[0].instances)
+            PANIC("Internal error (codemap stage 1), aborting.")
         codemap[0].instances[0]  = new_opcode_t(0b0000000000111100, 0b1111111111111111, "ORItoCCR",  ORItoCCR);
         codemap[0].instances[1]  = new_opcode_t(0b0000000001111100, 0b1111111111111111, "ORItoSR",   ORItoSR);
         codemap[0].instances[2]  = new_opcode_t(0b0000000000000000, 0b1111111100000000, "ORI",       ORI);
@@ -69,6 +246,8 @@ void init_codes()
         codemap[1].key  = 0x01;
         codemap[1].size = GROUP_0x01_LEN;
         codemap[1].instances    = malloc(sizeof (*codemap[1].instances)  * GROUP_0x01_LEN);
+        if (!codemap[1].instances)
+            PANIC("Internal error (codemap stage 2), aborting.")
         codemap[1].instances[0] = new_opcode_t(0b0001000000000000, 0b1111000000000000, "MOVE", MOVE);
 
 
@@ -76,6 +255,8 @@ void init_codes()
         codemap[2].key  = 0x02;
         codemap[2].size = GROUP_0x02_LEN;
         codemap[2].instances    = malloc(sizeof (*codemap[2].instances)  * GROUP_0x02_LEN);
+        if (!codemap[2].instances)
+            PANIC("Internal error (codemap stage 3), aborting.")
         codemap[2].instances[0] = new_opcode_t(0b0010000001000000, 0b1111000111000000, "MOVEA", MOVEA);
         codemap[2].instances[1] = new_opcode_t(0b0010000000000000, 0b1111000000000000, "MOVE",  MOVE);
 
@@ -84,6 +265,8 @@ void init_codes()
         codemap[3].key  = 0x03;
         codemap[3].size = GROUP_0x03_LEN;
         codemap[3].instances    = malloc(sizeof (*codemap[3].instances)  * GROUP_0x03_LEN);
+        if (!codemap[3].instances)
+            PANIC("Internal error (codemap stage 4), aborting.")
         codemap[3].instances[0] = new_opcode_t(0b0011000001000000, 0b1111000111000000, "MOVEA", MOVEA);
         codemap[3].instances[1] = new_opcode_t(0b0011000000000000, 0b1111000000000000, "MOVE",  MOVE);
 
@@ -92,6 +275,8 @@ void init_codes()
         codemap[4].key  = 0x04;
         codemap[4].size = GROUP_0x04_LEN;
         codemap[4].instances     = malloc(sizeof (*codemap[4].instances)  * GROUP_0x04_LEN);
+        if (!codemap[4].instances)
+            PANIC("Internal error (codemap stage 5), aborting.")
         codemap[4].instances[0]  = new_opcode_t(0b0100000011000000, 0b1111111111000000, "MOVEfromSR", MOVEfromSR);
         codemap[4].instances[1]  = new_opcode_t(0b0100010011000000, 0b1111111111000000, "MOVEtoCCR",  MOVEtoCCR);
         codemap[4].instances[2]  = new_opcode_t(0b0100011011000000, 0b1111111111000000, "MOVEtoSR",   MOVEtoSR);
@@ -128,6 +313,8 @@ void init_codes()
         codemap[5].key  = 0x05;
         codemap[5].size = GROUP_0x05_LEN;
         codemap[5].instances    = malloc(sizeof (*codemap[5].instances)  * GROUP_0x05_LEN);
+        if (!codemap[5].instances)
+            PANIC("Internal error (codemap stage 6), aborting.")
         codemap[5].instances[0] = new_opcode_t(0b0101000011001000, 0b1111000011111000, "DBcc", DBcc);
         codemap[5].instances[1] = new_opcode_t(0b0101000011000000, 0b1111000011000000, "Scc",  Scc);
         codemap[5].instances[2] = new_opcode_t(0b0101000000000000, 0b1111000100000000, "ADDQ", ADDQ);
@@ -138,6 +325,8 @@ void init_codes()
         codemap[6].key = 0x06;
         codemap[6].size = GROUP_0x06_LEN;
         codemap[6].instances    = malloc(sizeof (*codemap[6].instances)  * GROUP_0x06_LEN);
+        if (!codemap[6].instances)
+            PANIC("Internal error (codemap stage 7), aborting.")
         codemap[6].instances[0] = new_opcode_t(0b0110000000000000, 0b1111111100000000, "BRA", BRA);
         codemap[6].instances[1] = new_opcode_t(0b0110000100000000, 0b1111111100000000, "BSR", BSR);
         codemap[6].instances[2] = new_opcode_t(0b0110000000000000, 0b1111000000000000, "Bcc", Bcc);
@@ -147,6 +336,8 @@ void init_codes()
         codemap[7].key  = 0x07;
         codemap[7].size = GROUP_0x07_LEN;
         codemap[7].instances    = malloc(sizeof (*codemap[7].instances)  * GROUP_0x07_LEN);
+        if (!codemap[7].instances)
+            PANIC("Internal error (codemap stage 8), aborting.")
         codemap[7].instances[0] = new_opcode_t(0b0111000000000000, 0b1111000100000000, "MOVEQ", MOVEQ);
 
 
@@ -154,6 +345,8 @@ void init_codes()
         codemap[8].key  = 0x08;
         codemap[8].size = GROUP_0x08_LEN;
         codemap[8].instances    = malloc(sizeof (*codemap[8].instances)  * GROUP_0x08_LEN);
+        if (!codemap[8].instances)
+            PANIC("Internal error (codemap stage 9), aborting.")
         codemap[8].instances[0] = new_opcode_t(0b1000000011000000, 0b1111000111000000, "DIVU", DIVU);
         codemap[8].instances[1] = new_opcode_t(0b1000000111000000, 0b1111000111000000, "DIVS", DIVS);
         codemap[8].instances[2] = new_opcode_t(0b1000000100000000, 0b1111000111110000, "SBCD", SBCD);
@@ -164,6 +357,8 @@ void init_codes()
         codemap[9].key  = 0x09;
         codemap[9].size = GROUP_0x09_LEN;
         codemap[9].instances    = malloc(sizeof (*codemap[9].instances)  * GROUP_0x09_LEN);
+        if (!codemap[9].instances)
+            PANIC("Internal error (codemap stage 10), aborting.")
         codemap[9].instances[0] = new_opcode_t(0b1001000011000000, 0b1111000011000000, "SUBA", SUBA);
         codemap[9].instances[1] = new_opcode_t(0b1001000100000000, 0b1111000100110000, "SUBX", SUBX);
         codemap[9].instances[2] = new_opcode_t(0b1001000000000000, 0b1111000000000000, "SUB",  SUB);
@@ -173,6 +368,8 @@ void init_codes()
         codemap[10].key  = 0x0B;
         codemap[10].size = GROUP_0x0B_LEN;
         codemap[10].instances    = malloc(sizeof (*codemap[10].instances) * GROUP_0x0B_LEN);
+        if (!codemap[10].instances)
+            PANIC("Internal error (codemap stage 11), aborting.")
         codemap[10].instances[0] = new_opcode_t(0b1011000011000000, 0b1111000011000000, "CMPA", CMPA);
         codemap[10].instances[1] = new_opcode_t(0b1011000100001000, 0b1111000100111000, "CMPM", CMPM);
         codemap[10].instances[2] = new_opcode_t(0b1011000100000000, 0b1111000100000000, "EOR",  EOR);
@@ -183,6 +380,8 @@ void init_codes()
         codemap[11].key  = 0x0C;
         codemap[11].size = GROUP_0x0C_LEN;
         codemap[11].instances    = malloc(sizeof (*codemap[11].instances) * GROUP_0x0C_LEN);
+        if (!codemap[11].instances)
+            PANIC("Internal error (codemap stage 12), aborting.")
         codemap[11].instances[0] = new_opcode_t(0b1100000011000000, 0b1111000111000000, "MULU", MULU);
         codemap[11].instances[1] = new_opcode_t(0b1100000111000000, 0b1111000111000000, "MULS", MULS);
         codemap[11].instances[2] = new_opcode_t(0b1100000100000000, 0b1111000111110000, "ABCD", ABCD);
@@ -194,6 +393,8 @@ void init_codes()
         codemap[12].key  = 0x0D;
         codemap[12].size = GROUP_0x0D_LEN;
         codemap[12].instances    = malloc(sizeof (*codemap[12].instances) * GROUP_0x0D_LEN);
+        if (!codemap[12].instances)
+            PANIC("Internal error (codemap stage 13), aborting.")
         codemap[12].instances[0] = new_opcode_t(0b1101000011000000, 0b1111000011000000, "ADDA", ADDA);
         codemap[12].instances[1] = new_opcode_t(0b1101000100000000, 0b1111000100110000, "ADDX", ADDX);
         codemap[12].instances[2] = new_opcode_t(0b1101000000000000, 0b1111000000000000, "ADD",  ADD);
@@ -203,6 +404,8 @@ void init_codes()
         codemap[13].key  = 0x0E;
         codemap[13].size = GROUP_0x0E_LEN;
         codemap[13].instances     = malloc(sizeof (*codemap[13].instances) * GROUP_0x0E_LEN);
+        if (!codemap[13].instances)
+            PANIC("Internal error (codemap stage 14), aborting.")
         codemap[13].instances[0]  = new_opcode_t(0b1110000011000000, 0b1111111111000000, "ASR",  ASR);
         codemap[13].instances[1]  = new_opcode_t(0b1110000111000000, 0b1111111111000000, "ASL",  ASL);
         codemap[13].instances[2]  = new_opcode_t(0b1110001011000000, 0b1111111111000000, "LSR",  LSR);
@@ -232,7 +435,7 @@ void destroy_codes()
 
         for (outer = 0; outer < INSTRUCTION_SET_GROUPS_COUNT; outer++)
         {
-            opcodes_ds *reference = &codemap[outer];
+            m68k_codemap *reference = &codemap[outer];
 
             if (reference)
             {
@@ -260,13 +463,13 @@ void destroy_codes()
  * FINDER
  *
  */
-opcode_t* get_opcode_t(opcode code)
+m68k_opcode* get_opcode_t(opcode code)
 {
-    opgroup code_group_id = (opgroup)((code & 0xF000) >> 12);
+    generic_u8_t code_group_id = (generic_u8_t)((code & 0xF000) >> 12);
 
     if (code_group_id < 0x0F && code_group_id != 0x0A)
     {
-        opcodes_ds *tmp = NULL;
+        m68k_codemap *tmp = NULL;
 
         if (code_group_id > 0x09)
             tmp = &codemap[code_group_id - 0x01];
@@ -293,7 +496,7 @@ static bit describe = 0;
 
 generic_u32_t run_opcode(opcode code, bit describe_code)
 {
-    opcode_t *tmp = get_opcode_t(code);
+    m68k_opcode *tmp = get_opcode_t(code);
 
     if (tmp == NULL) PANIC("Instruction code 0x%X not reconized", code)
 
@@ -318,7 +521,10 @@ generic_u32_t run_opcode(opcode code, bit describe_code)
 }
 
 
-
+/*
+ * DYNAMIC SETTER FOR SR
+ *
+ */
 void set_srflags(const generic_u32_t mnemonic, opsize size, generic_u32_t src, generic_u32_t dst, generic_u32_t res)
 {
     generic_u32_t msb  = most_significant_byte(size);

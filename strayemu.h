@@ -3,10 +3,8 @@
 
 #include "ARCH.h"
 #include "assembler/assembler.h"
+#include "utils.h"
 
-
-/* EMULATOR */
-int emulate(int argc,  char** argv);
-int emulate_sbs(int argc, char **argv); // aka step-by-step
+#include <stdlib.h>
 
 #endif // __STRAYEMU_H__68000

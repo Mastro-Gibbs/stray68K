@@ -33,10 +33,9 @@ SOURCES       = ../stray68K/ARCH.c \
 		../stray68K/assembler/strcmpci.c \
 		../stray68K/assembler/syntactic.c \
 		../stray68K/cpu.c \
+		../stray68K/handler.c \
 		../stray68K/main.c \
-		../stray68K/memory.c \
-		../stray68K/opcode.c \
-		../stray68K/opcode_handlers.c \
+		../stray68K/ram.c \
 		../stray68K/utils.c 
 
 OBJECTS       = $(OBJECTS_DIR)/ARCH.o \
@@ -48,9 +47,8 @@ OBJECTS       = $(OBJECTS_DIR)/ARCH.o \
 		$(OBJECTS_DIR)/syntactic.o \
 		$(OBJECTS_DIR)/cpu.o \
 		$(OBJECTS_DIR)/main.o \
-		$(OBJECTS_DIR)/memory.o \
-		$(OBJECTS_DIR)/opcode.o \
-		$(OBJECTS_DIR)/opcode_handlers.o \
+		$(OBJECTS_DIR)/ram.o \
+		$(OBJECTS_DIR)/handler.o \
 		$(OBJECTS_DIR)/utils.o
 
 TARGET        = $(BUILD_DIR)/stray68K
@@ -100,12 +98,11 @@ $(ASSRMBLER_DIR)/syntactic.c $(ASSRMBLER_DIR)/syntactic.h: $(ASSRMBLER_DIR)/synt
 
 $(OBJECTS_DIR)/ARCH.o: ../stray68K/ARCH.c ../stray68K/ARCH.h \
 		../stray68K/cpu.h \
-		../stray68K/opcode_handlers.h \
 		../stray68K/motorolatypes.h \
-		../stray68K/opcode.h \
+		../stray68K/handler.h \
 		../stray68K/enums.h \
 		../stray68K/utils.h \
-		../stray68K/memory.h 
+		../stray68K/ram.h 
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/ARCH.o ../stray68K/ARCH.c
 
 $(OBJECTS_DIR)/assembler.o: ../stray68K/assembler/assembler.c ../stray68K/assembler/assembler.h \
@@ -138,57 +135,48 @@ $(OBJECTS_DIR)/syntactic.o: ../stray68K/assembler/syntactic.c ../stray68K/assemb
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/syntactic.o ../stray68K/assembler/syntactic.c
 
 $(OBJECTS_DIR)/cpu.o: ../stray68K/cpu.c ../stray68K/cpu.h \
-		../stray68K/opcode_handlers.h \
+		../stray68K/handler.h \
 		../stray68K/motorolatypes.h \
-		../stray68K/opcode.h \
 		../stray68K/enums.h \
 		../stray68K/utils.h \
-		../stray68K/memory.h
+		../stray68K/ram.h
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/cpu.o ../stray68K/cpu.c
 
 $(OBJECTS_DIR)/main.o: ../stray68K/main.c ../stray68K/strayemu.h \
 		../stray68K/ARCH.h \
 		../stray68K/cpu.h \
-		../stray68K/opcode_handlers.h \
+		../stray68K/handler.h \
 		../stray68K/motorolatypes.h \
-		../stray68K/opcode.h \
 		../stray68K/enums.h \
 		../stray68K/utils.h \
-		../stray68K/memory.h \
+		../stray68K/ram.h \
 		../stray68K/assembler/assembler.h \
 		../stray68K/assembler/clowncommon.h \
 		../stray68K/assembler/semantic.h \
 		../stray68K/assembler/syntactic.h
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/main.o ../stray68K/main.c
 
-$(OBJECTS_DIR)/memory.o: ../stray68K/memory.c ../stray68K/memory.h \
+$(OBJECTS_DIR)/ram.o: ../stray68K/ram.c ../stray68K/ram.h \
 		../stray68K/motorolatypes.h \
 		../stray68K/utils.h \
 		../stray68K/enums.h \
 		../stray68K/cpu.h \
-		../stray68K/opcode_handlers.h \
-		../stray68K/opcode.h
-	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/memory.o ../stray68K/memory.c
+		../stray68K/handler.h 
+	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/ram.o ../stray68K/ram.c
 
-$(OBJECTS_DIR)/opcode.o: ../stray68K/opcode.c ../stray68K/opcode.h \
-		../stray68K/motorolatypes.h
-	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/opcode.o ../stray68K/opcode.c
-
-$(OBJECTS_DIR)/opcode_handlers.o: ../stray68K/opcode_handlers.c ../stray68K/opcode_handlers.h \
+$(OBJECTS_DIR)/handler.o: ../stray68K/handler.c ../stray68K/handler.h \
 		../stray68K/motorolatypes.h \
-		../stray68K/opcode.h \
 		../stray68K/enums.h \
 		../stray68K/utils.h \
-		../stray68K/memory.h \
+		../stray68K/ram.h \
 		../stray68K/cpu.h
-	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/opcode_handlers.o ../stray68K/opcode_handlers.c
+	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/handler.o ../stray68K/handler.c
 
 $(OBJECTS_DIR)/utils.o: ../stray68K/utils.c ../stray68K/utils.h \
 		../stray68K/motorolatypes.h \
 		../stray68K/enums.h \
-		../stray68K/memory.h \
+		../stray68K/ram.h \
 		../stray68K/cpu.h \
-		../stray68K/opcode_handlers.h \
-		../stray68K/opcode.h
+		../stray68K/handler.h 
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/utils.o ../stray68K/utils.c
 

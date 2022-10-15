@@ -1,10 +1,13 @@
 #include <stdio.h>
-#include "strayemu.h"
 #include <string.h>
 
+#include "strayemu.h"
 
-void usage()
+int usage(char *param)
 {
+    if (param)
+        fprintf(stderr, "Unrecognised option %s.\n", param);
+
     fputs(
         "stray68K: emulator for Motorola 68000.\n"
         "\n"
@@ -30,38 +33,33 @@ void usage()
         " -b        -Enable Bison's debug output.\n"
         " -d        -Allow EQU/SET to descope local labels.\n"
         , stdout);
+
+    return (EXIT_FAILURE);
+}
+
+
+int run(int argc, char **argv)
+{
+    int exit_code = EXIT_FAILURE;
+
+    if (argc == 1) return usage(NULL);
+
+    if (strlen(argv[1]) != 2) return usage(argv[1]);
+
+    if (argv[1][0] != '-') return usage(argv[1]);
+
+    if (argv[1][1] == 'e' || argv[1][1] == 's')
+        exit_code = emulate(argc, argv);
+    else if (argv[1][1] == 'a')
+        exit_code = assemble(argc, argv);
+    else return usage(argv[1]);
+
+    return (exit_code);
 }
 
 
 int main(int argc,  char** argv)
 {
-    int exit_code = EXIT_FAILURE;
-
-    if (argc > 1)
-    {
-        if (strlen(argv[1]) == 2)
-        {
-            if (argv[1][0] == '-')
-            {
-                if (argv[1][1] == 'e' || argv[1][1] == 's')
-                    exit_code = emulate(argc, argv);
-                else if (argv[1][1] == 'a')
-                    exit_code = assemble(argc, argv);
-                else
-                {
-                    ARCH_ERROR("Unrecognised option %s at position 1", argv[1])
-                    usage();
-                }
-            }
-            else
-                usage();
-        }
-        else
-            usage();
-    }
-    else
-        usage();
-
-    return (exit_code);
+    return run(argc, argv);
 }
 

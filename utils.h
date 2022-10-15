@@ -3,7 +3,7 @@
 
 #include "motorolatypes.h"
 #include "enums.h"
-#include "memory.h"
+#include "ram.h"
 #include "cpu.h"
 
 #include <stdlib.h>
@@ -12,7 +12,7 @@
 #include <stdio.h>
 #define TRAPEXC(...) do {                                               \
                         system("clear");                                \
-                        cpu_t *cpu = init_cpu();                        \
+                        m68k_cpu *cpu = init_cpu();                     \
                         cpu->show();                                    \
                         printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
                         printf("Raised trap exception: \n       \033[01m\033[37mcode\033[0m:     %d\n       \033[01m\033[37mmnemonic\033[0m: %s\n", ##__VA_ARGS__);\
@@ -25,7 +25,7 @@
 
 #define PANIC(fmt, ...) do {                                           \
                             system("clear");                           \
-                            cpu_t *cpu = init_cpu();                   \
+                            m68k_cpu *cpu = init_cpu();                \
                             cpu->show();                               \
                             printf("[\033[01m\033[91mPANIC\033[0m] "); \
                             printf (fmt, ##__VA_ARGS__);               \
@@ -67,6 +67,12 @@
                         if (descr)                                  \
                             printf("\n[\033[01m\033[95mIO\033[0m] "); \
                         fflush(stdout);                             \
+                    } while (0);
+
+#define SBS_DEBUGGER(fmt, ...)do {                                \
+                        printf("\n[\033[01m\033[94mDEBUGGER\033[0m] "); \
+                        printf (fmt, ##__VA_ARGS__);              \
+                        fflush(stdout);                           \
                     } while (0);
 
 

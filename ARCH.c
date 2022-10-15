@@ -6,11 +6,56 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <regex.h>
+#include <stdlib.h>
+
+#include "cpu.h"
+#include "ram.h"
+
+#define RAM_SIZE 0x00FFFFFF
 
 #define SEPARATOR      '\n'
 #define SIMHALT_SYMBOL '!'
 #define ORG_SYMBOL     'o'
 #define ORG_DEFAULT     0x00000000
+
+#define EMULATE_STD 0
+#define EMULATE_SBS 1
+
+#define BEGIN_STATE 0
+#define EXEC_STATE  1
+#define FINAL_STATE 2
+
+#define TRUE        1
+#define FALSE       0
+
+struct EmulationState
+{
+    generic_u8_t state; //initial, execution, final
+    generic_u8_t type;
+
+    struct
+    {
+        bit  descr;
+        bit  quiet;
+        char *path;
+    } ExecArgs;
+
+    bit sbs_print;
+};
+
+
+
+typedef struct __ARCH__68000__
+{
+    m68k_cpu *cpu;
+    m68k_ram *ram;
+
+    void  (*load)    (struct EmulationState *state);
+    bit   (*is_halt) ();
+    void  (*turnoff) ();
+} arch_t;
+
+
 
 
 void  __load_bytecode__(struct EmulationState *state);
@@ -28,30 +73,8 @@ generic_u32_t simhalt = 0;
 generic_u32_t orgptr  = 0;
 generic_u32_t last_written_byte = 0;
 
+
 static struct termios oldt, newt;
-
-
-#define EMULATE_STD 0
-#define EMULATE_SBS 1
-
-#define BEGIN_STATE 0
-#define EXEC_STATE  1
-#define FINAL_STATE 2
-
-struct EmulationState
-{
-    generic_u8_t state; //initial, execution, final
-    generic_u8_t type;
-
-    struct
-    {
-        bit  descr;
-        bit  quiet;
-        char *path;
-    } ExecArgs;
-
-    bit sbs_print;
-};
 
 
 void _begin()
@@ -119,7 +142,7 @@ generic_u32_t _extract_ORG(char *filename)
     FILE   *fp;
     char   *line = NULL;
     char   *end  = NULL;
-    size_t len   = 0;
+    size_t  len   = 0, read = 0;
 
     generic_u32_t value = ORG_DEFAULT;
 
@@ -127,10 +150,13 @@ generic_u32_t _extract_ORG(char *filename)
 
     fp = fopen(filename, "r");
 
-    getline(&line, &len, fp);
+    read = getline(&line, &len, fp);
 
     if (line[0] == ORG_SYMBOL)
     {
+        if (read != 10)
+            ARCH_ERROR("Error incomes while loading an invalid bytecode, line: 1. (Invalid ORG)")
+
         strncpy(org, line+1, 8);
         value = (generic_u32_t) strtol(org, &end, 16);
     }
@@ -263,18 +289,18 @@ void parse_args(struct EmulationState *state, int argc, char **argv)
     _is_valid_file(argv[2]);
 
     state->ExecArgs.path  = argv[2];
-    state->ExecArgs.descr = 0;
-    state->ExecArgs.quiet = 0;
+    state->ExecArgs.descr = FALSE;
+    state->ExecArgs.quiet = FALSE;
 
     for (generic_32_t i = 3; i < argc; i++)
     {
         if (strlen(argv[i]) >= 2)
         {
             if (argv[i][0] == '-' && argv[i][1] == 'd')
-                state->ExecArgs.descr = 1;
+                state->ExecArgs.descr = TRUE;
 
             else if (argv[i][0] == '-' && argv[i][1] == 'q')
-                state->ExecArgs.quiet = 1;
+                state->ExecArgs.quiet = TRUE;
 
             else ARCH_ERROR("Invalid param '%s' at position %d.", argv[i], i);
         }
@@ -290,39 +316,24 @@ void parse_args(struct EmulationState *state, int argc, char **argv)
         ARCH_ERROR("Cannot combine '-d' and '-q' options.")
 }
 
-struct EmulationState get_state(int argc, char **argv)
+struct EmulationState obtain_emulation_state(int argc, char **argv)
 {
     struct EmulationState state;
 
     state.state = BEGIN_STATE;
-    state.sbs_print = 0;
+    state.sbs_print = FALSE;
 
     if (argv[1][1] == 'e')
         state.type = EMULATE_STD;
     else
     {
-        state.sbs_print = 1;
+        state.sbs_print = TRUE;
         state.type = EMULATE_SBS;
     }
 
     parse_args(&state, argc, argv);
 
     return state;
-}
-
-void _enable_single_char()
-{
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-
-    newt.c_lflag &= ~(ICANON);
-
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-}
-
-void _disable_single_char()
-{
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }
 
 void printf_sstatus(struct EmulationState *state)
@@ -385,27 +396,32 @@ void _wait(struct EmulationState *state)
         fflush(stdin);
 
         char opt;
-        bit loop = 1;
+        bit loop = TRUE;
 
         while (loop)
         {
-            _enable_single_char();
+            tcgetattr(STDIN_FILENO, &oldt);
+            newt = oldt;
+            newt.c_lflag &= ~(ICANON);
+            tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
             opt = getchar();
-            _disable_single_char();
+
+            tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
 
             switch (opt) {
                 case 's': //stack;
                 {
                     generic_u32_t _top = 0, _bottom = 0x00FFFFFF;
 
-                    printf("\nInsert stack top address: ");
+                    SBS_DEBUGGER("Insert stack top address: ");
                     scanf("%X", &_top);
-                    printf("Insert stack bottom address: ");
+                    SBS_DEBUGGER("Insert stack bottom address: ");
                     scanf("%X", &_bottom);
 
                     if (_bottom > RAM_SIZE || (((_bottom & 0x0000000F) + 1) % 4) != 0)
                     {
-                        printf("Invalid bottom index");
+                        SBS_DEBUGGER("Invalid bottom index");
                     }
                     else
                     {
@@ -419,28 +435,28 @@ void _wait(struct EmulationState *state)
                 {
                     printf_sstatus(state);
 
-                    loop = 0;
+                    loop = FALSE;
                     break;
                 }
 
                 case 'k': //skip
                 {
                     system("clear");
-                    printf("Skip selected, the execution proceeds.\n");
+                    SBS_DEBUGGER("Skip selected, the execution proceeds.\n");
 
-                    loop = 0;
+                    loop = FALSE;
                     break;
                 }
 
                 case 't': //terminate
                 {
                     system("clear");
-                    printf("Full skip selected, the execution proceeds to the end.\n");
+                    SBS_DEBUGGER("Full skip selected, the execution proceeds to the end.\n");
 
-                    loop = 0;
+                    loop = FALSE;
 
-                    state->sbs_print      = 0;
-                    state->ExecArgs.descr = 0;
+                    state->sbs_print      = FALSE;
+                    state->ExecArgs.descr = FALSE;
                     break;
                 }
 
@@ -503,7 +519,7 @@ int emulate_sbs(struct EmulationState *state) // aka step-by-step
 
 int emulate(int argc, char** argv)
 {
-    struct EmulationState state = get_state(argc, argv);
+    struct EmulationState state = obtain_emulation_state(argc, argv);
 
     if (state.type == EMULATE_STD)
         return emulate_std(&state);

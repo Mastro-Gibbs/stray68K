@@ -8,13 +8,16 @@ generic_u32_t __exec__(bit describe_code);
 void     __show__();
 
 
-cpu_t *cpu = NULL;
+m68k_cpu *cpu = NULL;
 
-cpu_t* init_cpu()
+m68k_cpu* init_cpu()
 {
     if (!cpu)
     {
         cpu = malloc(sizeof (*cpu));
+
+        if (!cpu)
+            PANIC("Cannot init cpu, aborting.")
 
         reset_cpu();
 
