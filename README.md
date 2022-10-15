@@ -31,17 +31,15 @@ Just clone and invoke makefile
         stray68K: emulator for Motorola 68000.
         
         Options:
-        -a [opts|args]  -Invoke assembler. See below.\n"
-        -e [path]  [-q] -Input executable file. To generate it use assembler options. [-q] mean qiuet opt.\n"
-        -s [path]  [-s] -Like option '-e' but run executable file step-by-step (debug mode). [-d] mean descriptive opt.\n"
+        -a [opts|args]  -Invoke assembler. See below.
+        -e [path]  [-q] -Input executable file. To generate it use assembler options. [-q] mean qiuet opt.
+        -s [path]  [-s] -Like option '-e' but run executable file step-by-step (debug mode). [-d] mean descriptive opt.
            
         step-by-step mode options asked from stdin:
-           'c' -Print a snapshot of the cpu.
-           'm' -Print a snapshot of the ram, asks for start and end addresses to extract a ram slice.
-           'b' -Options c and m combined together.
-           'a' -Options b combined with auto ram slice printing.
-           's' -Skip current step.
-           't' -Full skip steps. The execution proceeds to the end.
+            's' -Asks for offsets and print current stack.
+            'n' -Execute next istruction.
+            's' -Skip current step.
+            't' -Full skip steps. The execution proceeds to the end.
         
         Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)
         
