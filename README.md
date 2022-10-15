@@ -95,5 +95,5 @@ Just clone and invoke makefile
 [AGPLV3](https://github.com/Mastro-Gibbs/stray68K/blob/main/LICENSE)
 
 - Assembler License  
-[AGPLV3](https://github.com/Mastro-Gibbs/stray68K/blob/main/assembler/LICENCE.txt)
+[AGPLV3](https://github.com/Mastro-Gibbs/stray68K/blob/main/src/assembler/LICENCE.txt)
 
