@@ -22,7 +22,7 @@ YACC          = bison
 OBJECTS_DIR   = objects
 BUILD_DIR     = build
 ASSEMBLER_DIR = ../stray68K/assembler
-ARCH_DIR      = ../stray68K/arch
+ARCH_DIR      = ../stray68K/emulator
 
 ####### Files
 
