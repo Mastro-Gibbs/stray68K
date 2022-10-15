@@ -37,7 +37,7 @@ Just clone and invoke makefile
   $ cd build
   ```
 
-  Enjoy. See [Usage].(https://github.com/Mastro-Gibbs/stray68K#usage)
+  Enjoy. See [Usage](https://github.com/Mastro-Gibbs/stray68K#usage).
 
 ---
 
