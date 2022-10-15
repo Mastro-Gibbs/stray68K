@@ -1,4 +1,4 @@
-#include "ARCH.h"
+#include "emulator.h"
 
 #include <string.h>
 #include <termios.h>

@@ -1,9 +1,10 @@
 #ifndef __STRAYEMU_H__68000
 #define __STRAYEMU_H__68000
 
-#include "ARCH.h"
-#include "../assembler/assembler.h"
-#include "utils.h"
+#include "emulator/emulator.h"
+#include "emulator/utils.h"
+
+#include "assembler/assembler.h"
 
 #include <stdlib.h>
 

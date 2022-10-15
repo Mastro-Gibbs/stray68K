@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "strayemu.h"
+#include "stray_m68k.h"
 
 int usage(char *param)
 {
