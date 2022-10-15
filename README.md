@@ -14,7 +14,9 @@
 
 ## Description
               
-Stray motorola 68000 emulator, include assembler and emulator
+Stray motorola 68000 emulator, include assembler and emulator   
+
+About 25k, but what? :)
 
 ---
 
