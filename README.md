@@ -28,7 +28,7 @@ Just clone and invoke makefile
   $ git clone https://github.com/Mastro-Gibbs/stray68K.git
   ```
   ```bash
-  $ cd stray68k
+  $ cd stray68K
   ```
   ```bash
   $ make
@@ -37,7 +37,7 @@ Just clone and invoke makefile
   $ cd build
   ```
 
-  Enjoy.
+  Enjoy. See [Usage].(https://github.com/Mastro-Gibbs/stray68K#usage)
 
 ---
 
