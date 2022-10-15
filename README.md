@@ -22,7 +22,22 @@ About 25k, but what? :)
 
 ## Compiling
 
-Just clone and invoke makefile
+Just clone and invoke makefile   
+
+  ```bash
+  $ git clone https://github.com/Mastro-Gibbs/stray68K.git
+  ```
+  ```bash
+  $ cd stray68k
+  ```
+  ```bash
+  $ make
+  ```
+  ```bash
+  $ cd build
+  ```
+
+  Enjoy.
 
 ---
 
