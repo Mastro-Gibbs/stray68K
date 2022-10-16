@@ -1,9 +1,24 @@
+/**
+ * Author: Stefano Fattore
+ *
+ * This header contains some enums mainly used in 'handler.c' functions
+ *
+ *
+ *
+ */
+
 #ifndef __ENUMS_H__68000
 #define __ENUMS_H__68000
 
 #include "motorolatypes.h"
 
 
+/*
+ * OPERATION SIZE AS PROGRAM COUNTER SPAN
+ *
+ * Simply, op bytes count
+ *
+ */
 typedef enum __operation_size_span__
 {
     BYTE_SPAN = 0x01,
@@ -14,6 +29,13 @@ typedef enum __operation_size_span__
 
 
 
+/*
+ * Known mask for op sizes.
+ *
+ * BYTE2 and WORD2 are special case!
+ *
+ */
+
 typedef enum __operation_size__
 {
     BYTE  = 0b00000000, // 00
@@ -21,24 +43,33 @@ typedef enum __operation_size__
     LONG  = 0b00000010, // 10
     BYTE2 = 0b00000001, // 01
     WORD2 = 0b00000011  // 11
-
-
 } opsize;
 
 
+
+/*
+ * Enum for ccr bits position
+ *
+ */
 typedef enum __status_register_flags__
 {
-    CARRY    = 0x01,
-    OVERFLOW = 0x02,
-    ZERO     = 0x04,
-    NEGATIVE = 0x08,
-    EXTEND   = 0x10,
+    CARRY      = 0x01,
+    OVERFLOW   = 0x02,
+    ZERO       = 0x04,
+    NEGATIVE   = 0x08,
+    EXTEND     = 0x10,
     SUPERVISOR = 0x2000,
     TRACE      = 0x8000
 
 } srflag_bits;
 
 
+
+
+/*
+ * Condition codes
+ *
+ */
 typedef enum __condition_mnemonics__
 {
     T = 0x00,		// True
@@ -61,6 +92,11 @@ typedef enum __condition_mnemonics__
 } CCm;
 
 
+
+/*
+ * Addressing mode enum
+ *
+ */
 typedef enum __addressing_mode__
 {
     DATAReg         = 0b00000000,   // Dn
@@ -79,6 +115,16 @@ typedef enum __addressing_mode__
 } ADDRMode;
 
 
+
+
+/*
+ * Enum that rapresents a particular bit in some ops
+ *
+ * Es. ADD op
+ *
+ * If it's set, source and destination bits are swapped
+ *
+ */
 typedef enum __effective_address_type__
 {
     NORMAL   = 0x00,
@@ -86,6 +132,14 @@ typedef enum __effective_address_type__
 } ea_direction;
 
 
+
+/*
+ * Enum that rapresents data direction:
+ *
+ * 1) to datareg
+ * 2) to memory with pre decrement
+ *
+ */
 typedef enum __direction__mode__
 {
     DATAREG   = 0x00,
@@ -93,6 +147,11 @@ typedef enum __direction__mode__
 } direction_mode;
 
 
+
+/*
+ * Enum used for bit rol, shift and etc..
+ *
+ */
 typedef enum __rotation_direction__
 {
     LEFT  = 1,
@@ -100,6 +159,12 @@ typedef enum __rotation_direction__
 } Rot;
 
 
+
+/*
+ *
+ *
+ *
+ */
 typedef enum __storing__direction__
 {
     MEMORY_REGISTER = 0x00,
@@ -110,6 +175,11 @@ typedef enum __storing__direction__
 } Sdirection;
 
 
+
+/*
+ * Trap vector
+ *
+ */
 typedef enum __trap__vector__
 {
     BusError           = 2,
@@ -121,6 +191,13 @@ typedef enum __trap__vector__
     PrivilegeViolation = 8
 } TrapVec;
 
+
+
+/*
+ * Stupid enum to ignore a block of code in 'void **eval_OP_EA(opcode code)'
+ *
+ *
+ */
 enum __ignore_direction__
 {
     IGNORE_DIRECTION = 0,
@@ -128,6 +205,14 @@ enum __ignore_direction__
 };
 
 
+
+/*
+ * type of xBCD operation:
+ *
+ * 1) ABCD
+ * 2) SBCD
+ *
+ */
 typedef enum __bcd_type__
 {
     ADDICTION   = 0,
@@ -136,7 +221,11 @@ typedef enum __bcd_type__
 
 
 
-
+/*
+ * Codes used to invoke sys primitives through TRAP #15
+ *
+ *
+ */
 typedef enum __custom_trap_behavior__
 {
     PRINTINT     = 0,
@@ -150,6 +239,10 @@ typedef enum __custom_trap_behavior__
 } CustomTrap;
 
 
+/*
+ * Some frequently used masks
+ *
+ */
 typedef enum __known_masks__
 {
     DST_MASK      = 0b0000111000000000,

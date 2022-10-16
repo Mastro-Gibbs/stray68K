@@ -1,7 +1,7 @@
 #include "utils.h"
 
 generic_u32_t most_significant_byte(opsize size)
-{
+{    
     switch (size)
     {
         case BYTE:
@@ -519,7 +519,7 @@ void iotask(bit descr)
             generic_u32_t ramptr = read_addrreg(0);
             char c;
 
-            IO_TASK_EMPTY(descr)
+            IO_TASK_TAG(descr)
             do
             {
                 c = read_byte(ramptr++);
@@ -535,7 +535,7 @@ void iotask(bit descr)
             generic_u32_t ramptr = read_addrreg(0);
             char c;
 
-            IO_TASK_EMPTY(descr)
+            IO_TASK_TAG(descr)
             do
             {
                 c = read_byte(ramptr++);

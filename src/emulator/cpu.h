@@ -1,3 +1,13 @@
+/**
+ * Author: Stefano Fattore
+ *
+ * This header contains some protos to menage cpu struct (Read-Write regs, pc, stacks).
+ *
+ * Some protos are used to menage CC register.
+ *
+ *
+ */
+
 #ifndef __CPU_H__68000
 #define __CPU_H__68000
 

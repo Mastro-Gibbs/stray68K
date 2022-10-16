@@ -7,9 +7,12 @@
 #include "cpu.h"
 
 #include <stdlib.h>
-
-
 #include <stdio.h>
+
+/*
+ * MACRO used to raise a critical trap code.
+ *
+ */
 #define TRAPEXC(...) do {                                               \
                         system("clear");                                \
                         m68k_cpu *cpu = init_cpu();                     \
@@ -23,6 +26,10 @@
                     } while (0);
 
 
+/*
+ * MACRO used to turn system into PANIC mode aka something that the sys don't know how to handle it.
+ *
+ */
 #define PANIC(fmt, ...) do {                                           \
                             system("clear");                           \
                             m68k_cpu *cpu = init_cpu();                \
@@ -37,6 +44,10 @@
                         } while (0);
 
 
+/*
+ * MACRO emit WARNING message like an operation that may present bugs or unmenaged operation.
+ *
+ */
 #define WARNING(fmt, ...) do {                                        \
                             printf("[\033[01m\033[93mWARN\033[0m] "); \
                             printf (fmt, ##__VA_ARGS__);              \
@@ -45,7 +56,14 @@
                         } while (0);
 
 
-#define ARCH_ERROR(fmt, ...) do {                                      \
+/*
+ * MACRO used to raise a condition that blocks normal emulation flow,
+ * like a ByteCode mistake loading.
+ *
+ * This will call exit()
+ *
+ */
+#define EMULATOR_ERROR(fmt, ...) do {                                      \
                             printf("[\033[01m\033[91mEMULATOR ERROR\033[0m] "); \
                             printf (fmt, ##__VA_ARGS__);               \
                             printf("\n");                              \
@@ -56,19 +74,32 @@
                         } while (0);
 
 
-#define IO_TASK(descr, fmt, ...) do {                               \
-                        if (descr)                                  \
-                            printf("\n[\033[01m\033[95mIO\033[0m] "); \
-                        printf (fmt, ##__VA_ARGS__);                \
-                        fflush(stdout);                             \
+/*
+ * MACRO used to prepend a tag to IO emulator.
+ *
+ */
+#define IO_TASK(descr, fmt, ...) do {                                 \
+                        IO_TASK_TAG(descr)                            \
+                        printf (fmt, ##__VA_ARGS__);                  \
+                        fflush(stdout);                               \
                     } while (0);
 
-#define IO_TASK_EMPTY(descr) do {                                   \
-                        if (descr)                                  \
+/*
+ * MACRO used to prepend a tag to IO emulator loop.
+ * It's different from the previous macro because this one allows to print sequences of chars (strings).
+ *
+ */
+#define IO_TASK_TAG(descr) do {                                       \
+                        if (descr)                                    \
                             printf("\n[\033[01m\033[95mIO\033[0m] "); \
-                        fflush(stdout);                             \
+                        fflush(stdout);                               \
                     } while (0);
 
+
+/*
+ * MACRO used to prepend a tag to step-by-step mode.
+ *
+ */
 #define SBS_DEBUGGER(fmt, ...)do {                                \
                         printf("\n[\033[01m\033[94mDEBUGGER\033[0m] "); \
                         printf (fmt, ##__VA_ARGS__);              \
@@ -76,6 +107,10 @@
                     } while (0);
 
 
+/*
+ * MACRO used to print bits of number.
+ *
+ */
 #define bprintf(x)                                               \
   do {                                                           \
     unsigned long long a__ = (x);                                \
@@ -86,6 +121,10 @@
   } while (0);
 
 
+/*
+ * MACRO used to print bits of number with bit's highlight.
+ *
+ */
 #define bprintf_ht(x)                                            \
   do {                                                           \
     unsigned long long a__ = (x);                                \
@@ -97,6 +136,11 @@
     putchar('\n');                                               \
   } while (0);
 
+
+/*
+ * MACRO used to print bits of number with bit's highlight and 4 space tab.
+ *
+ */
 #define bprintf_ht_4s(x)                                         \
   do {                                                           \
     unsigned long long a__ = (x);                                \
@@ -108,36 +152,11 @@
   } while (0);
 
 
-generic_u32_t most_significant_byte(opsize size);
-generic_u32_t mask_by_opsize(opsize size);
-generic_u32_t hash (const char* word);
-generic_32_t  sign_extended(generic_u32_t val, opsize size);
 
-
-/* OPCODE DECODER */
-void** eval_OP_EA(opcode code, bit ignore_direction);
-void   free_eval_OP_EA_array(void** array);
-
-
-/* IO EA */
-generic_u32_t read_ram(generic_u32_t *addr, opsize *size);
-generic_u32_t read_EA (generic_u32_t *addr, opsize *size, ADDRMode *mode, ea_direction *dir);
-void          write_EA(generic_u32_t *addr, generic_u32_t val, opsize *size, ADDRMode *mode);
-void          should_incr_pc(opsize *size, ADDRMode *mode);
-
-
-
-/* MISC */
-opsize_span size_to_span(opsize size);
-bit is_ram_op(ADDRMode *mode);
-bit is_addr_to_data_op(ADDRMode *mode);
-
-
-/* TRAP */
-char* trap_code_toString(generic_u32_t trapcode);
-
-// DEFINE MNEMONIC HASHING VALUES, COMPUTED WITH 'generic_u32_t hash (const char* word)' func
-
+/*
+ * DEFINING MNEMONIC HASHING VALUES, COMPUTED WITH 'generic_u32_t hash (const char* word)' func
+ *
+ */
 #define ori   78534
 #define andi  2013554
 #define eori  2134113
@@ -179,7 +198,39 @@ char* trap_code_toString(generic_u32_t trapcode);
 #define roxr  2521591
 
 
-void iotask(bit descr);
+
+
+// -------------------- BEGIN PROTS ------------------------ //
+
+
+
+generic_u32_t most_significant_byte(opsize size);
+generic_u32_t mask_by_opsize(opsize size);
+generic_u32_t hash (const char* word);
+generic_32_t  sign_extended(generic_u32_t val, opsize size);
+
+
+/* OPCODE DECODER */
+void** eval_OP_EA(opcode code, bit ignore_direction);
+void   free_eval_OP_EA_array(void** array);
+
+
+/* IO EA */
+generic_u32_t read_ram(generic_u32_t *addr, opsize *size);
+generic_u32_t read_EA (generic_u32_t *addr, opsize *size, ADDRMode *mode, ea_direction *dir);
+void          write_EA(generic_u32_t *addr, generic_u32_t val, opsize *size, ADDRMode *mode);
+void          should_incr_pc(opsize *size, ADDRMode *mode);
+
+
+/* MISC */
+opsize_span size_to_span(opsize size);
+bit is_ram_op(ADDRMode *mode);
+bit is_addr_to_data_op(ADDRMode *mode);
+
+
+/* TRAP */
+char* trap_code_toString(generic_u32_t trapcode);
+void  iotask(bit descr);
 
 
 

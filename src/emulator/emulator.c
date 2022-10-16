@@ -119,18 +119,18 @@ bit _is_valid_file(char *filename)
         size_t length = strlen("B68");
         if (strncmp(ldot + 1, "B68", length) != 0)
         {
-            ARCH_ERROR("File extension not valid, be sure to pass '.B68' format.")
+            EMULATOR_ERROR("File extension not valid, be sure to pass '.B68' format.")
         }
     }
 
     fp = fopen(filename, "r");
 
     if (fp == NULL)
-        ARCH_ERROR("File not found, be sure to pass correct path.")
+        EMULATOR_ERROR("File not found, be sure to pass correct path.")
 
     read = getline(&line, &len, fp);
     if (read == -1)
-        ARCH_ERROR("Empty file!")
+        EMULATOR_ERROR("Empty file!")
 
     fclose(fp);
 
@@ -155,7 +155,7 @@ generic_u32_t _extract_ORG(char *filename)
     if (line[0] == ORG_SYMBOL)
     {
         if (read != 10)
-            ARCH_ERROR("Error incomes while loading an invalid bytecode, line: 1. (Invalid ORG)")
+            EMULATOR_ERROR("Error incomes while loading an invalid bytecode, line: 1. (Invalid ORG)")
 
         strncpy(org, line+1, 8);
         value = (generic_u32_t) strtol(org, &end, 16);
@@ -174,7 +174,7 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
     fp = fopen(filename, "r");
 
     if (regcomp(&hex_rx, hex_regex, REG_EXTENDED) == 1)
-        ARCH_ERROR("Could not compile regex %s", hex_regex)
+        EMULATOR_ERROR("Could not compile regex %s", hex_regex)
 
     int  reti;
     char ch;
@@ -257,7 +257,7 @@ void __load_bytecode__(struct EmulationState *state)
 
         _set_simhalt((generic_u32_t)(get_pc() + span));
     }
-    else ARCH_ERROR("Error incomes while loading an invalid bytecode")
+    else EMULATOR_ERROR("Error incomes while loading an invalid bytecode")
 }
 
 
@@ -283,7 +283,7 @@ void parse_args(struct EmulationState *state, int argc, char **argv)
         "\n\n",
         stdout);
 
-        ARCH_ERROR("Too few params")
+        EMULATOR_ERROR("Too few params")
     }
 
     _is_valid_file(argv[2]);
@@ -302,18 +302,18 @@ void parse_args(struct EmulationState *state, int argc, char **argv)
             else if (argv[i][0] == '-' && argv[i][1] == 'q')
                 state->ExecArgs.quiet = TRUE;
 
-            else ARCH_ERROR("Invalid param '%s' at position %d.", argv[i], i);
+            else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
         }
     }
 
     if (state->type == EMULATE_SBS && state->ExecArgs.quiet)
-        ARCH_ERROR("Cannot use quiet option (-q) in step-by-step mode.")
+        EMULATOR_ERROR("Cannot use quiet option (-q) in step-by-step mode.")
 
     if (state->type == EMULATE_STD && state->ExecArgs.descr)
-        ARCH_ERROR("Cannot use descriptive option (-d) in normal mode.")
+        EMULATOR_ERROR("Cannot use descriptive option (-d) in normal mode.")
 
     if (state->ExecArgs.descr && state->ExecArgs.quiet)
-        ARCH_ERROR("Cannot combine '-d' and '-q' options.")
+        EMULATOR_ERROR("Cannot combine '-d' and '-q' options.")
 }
 
 struct EmulationState obtain_emulation_state(int argc, char **argv)
