@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <regex.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "cpu.h"
 #include "ram.h"
@@ -40,6 +41,7 @@ struct EmulationMachine
     {
         bit  descr;
         bit  quiet;
+        bit  timer;
         char *path;
     } ExecArgs;
 
@@ -65,6 +67,13 @@ struct EmulationMachine
             struct termios oldt;
             struct termios newt;
         } Waiting;
+
+        struct
+        {
+            struct timespec t_begin;
+            struct timespec t_end;
+            generic_u64_t   delta_t;
+        } Timer;
 
     } Machine;
 
@@ -239,9 +248,9 @@ void parse_args(struct EmulationMachine *es, int argc, char **argv)
         "stray68K: emulator for Motorola 68000.\n"
         "\n"
         "Options:\n"
-        " -a [opts|args]  -Invoke assembler. See below.\n"
-        " -e [path]  [-q] -Input executable file. To generate it use assembler options. [-q] mean qiuet opt.\n"
-        " -s [path]  [-d] -Like option '-e' but run executable file step by step (debug mode). [-d] mean descriptive opt.\n"
+        " -a [opts|args]     -Invoke assembler. See below.\n"
+        " -e [path]  [-q|-t] -Input executable file. To generate it use assembler options. [-q] mean qiuet opt.\n"
+        " -s [path]  [-d]    -Like option '-e' but run executable file step by step (debug mode). [-d] mean descriptive opt.\n"
         "\n"
         "step-by-step mode options asked from stdin:\n"
         "   's' -Asks for offsets and print current stack.\n"
@@ -259,6 +268,7 @@ void parse_args(struct EmulationMachine *es, int argc, char **argv)
     es->ExecArgs.path  = argv[2];
     es->ExecArgs.descr = FALSE;
     es->ExecArgs.quiet = FALSE;
+    es->ExecArgs.timer = FALSE;
 
     for (generic_32_t i = 3; i < argc; i++)
     {
@@ -270,12 +280,18 @@ void parse_args(struct EmulationMachine *es, int argc, char **argv)
             else if (argv[i][0] == '-' && argv[i][1] == 'q')
                 es->ExecArgs.quiet = TRUE;
 
+            else if (argv[i][0] == '-' && argv[i][1] == 't')
+                es->ExecArgs.timer = TRUE;
+
             else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
         }
     }
 
     if (es->EmuType == EMULATE_SBS && es->ExecArgs.quiet)
         EMULATOR_ERROR("Cannot use quiet option (-q) in step-by-step mode.")
+
+    if (es->EmuType == EMULATE_SBS && es->ExecArgs.timer)
+        EMULATOR_ERROR("Cannot use timer option (-t) in step-by-step mode.")
 
     if (es->EmuType == EMULATE_STD && es->ExecArgs.descr)
         EMULATOR_ERROR("Cannot use descriptive option (-d) in normal mode.")
@@ -297,6 +313,8 @@ struct EmulationMachine obtain_emulation_state(int argc, char **argv)
 
     es.State = BEGIN_STATE;
     es.Machine.sbs_print = FALSE;
+
+    es.Machine.Timer.delta_t = 0;
 
     if (argv[1][1] == 'e')
         es.EmuType = EMULATE_STD;
@@ -352,6 +370,13 @@ void printf_sstatus(struct EmulationMachine *es)
         printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, es->Machine.simhalt);
 
         fflush(stdout);
+    }
+
+    if (es->State == FINAL_STATE && es->Machine.Timer.delta_t)
+    {
+        printf("\033[01m\033[37mTimer\033[0m: %.3fms -> %.3fs\n",
+               (generic_f64_t) es->Machine.Timer.delta_t / (generic_f64_t) 1000,
+               (generic_f64_t) es->Machine.Timer.delta_t / (generic_f64_t) 1000000);
     }
 }
 
@@ -458,12 +483,17 @@ int emulate(int argc, char** argv)
 
     es.State = EXECUTION_STATE;
 
+    clock_gettime(CLOCK_MONOTONIC_RAW, &es.Machine.Timer.t_begin);
     while((get_pc() != es.Machine.simhalt || get_pc() < es.Machine.simhalt))
     {
         _wait(&es);
 
         es.Machine.cpu->exec(es.ExecArgs.descr);
     }
+    clock_gettime(CLOCK_MONOTONIC_RAW, &es.Machine.Timer.t_end);
+
+    es.Machine.Timer.delta_t = (es.Machine.Timer.t_end.tv_sec - es.Machine.Timer.t_begin.tv_sec) * 1000000 +
+                               (es.Machine.Timer.t_end.tv_nsec - es.Machine.Timer.t_begin.tv_nsec) / 1000;
 
     es.State = FINAL_STATE;
 

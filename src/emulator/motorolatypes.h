@@ -11,10 +11,15 @@ typedef unsigned char      bit;
 
 
 /* UTILS */
+typedef double             generic_f64_t;
+typedef float              generic_f32_t;
+
+typedef unsigned long      generic_u64_t;
 typedef unsigned int       generic_u32_t;
 typedef unsigned short int generic_u16_t;
 typedef unsigned char      generic_u8_t;
 
+typedef long      generic_64_t;
 typedef int       generic_32_t;
 typedef short int generic_16_t;
 typedef char      generic_8_t;

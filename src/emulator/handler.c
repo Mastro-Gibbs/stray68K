@@ -757,7 +757,6 @@ generic_u32_t ANDI(opcode code)
     generic_u32_t addr      = get_pc() + WORD_SPAN;
     generic_u32_t andi_mask = read_ram(&addr, &size);
 
-
     switch (size) {
         case BYTE:
             andi_mask |= 0xFFFFFF00;
@@ -918,7 +917,7 @@ generic_u32_t CMPI(opcode code)
     if (tmpsize == BYTE) tmpsize = WORD;
 
     generic_32_t dst_val  = sign_extended(read_EA(&dst, &size, &mode, &dummy_dir), size);
-    generic_u32_t addr    = get_pc() + size_to_span(tmpsize);
+    generic_u32_t addr    = get_pc() + WORD_SPAN;
     generic_32_t ram_val  = sign_extended(read_ram(&addr, &tmpsize), size);
 
     generic_32_t value = dst_val - ram_val;
