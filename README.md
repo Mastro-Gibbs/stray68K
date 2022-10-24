@@ -51,7 +51,7 @@ Just clone and invoke makefile
          -a [opts|args]     -Invoke assembler. See below.
          -e [path]  [-q|-t] -Input executable file. To generate it use assembler options.
                              [-q] mean quiet option.
-                             [-q] mean timer option.
+                             [-t] mean timer option.
 
          -s [path]  [-d]    -Like option '-e' but run executable file step by step (debug mode).
                              [-d] mean descriptive opt.
