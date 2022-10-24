@@ -809,6 +809,8 @@ generic_u32_t SUBI(opcode code)
 
     set_srflags(subi, size, sVal, dVal, (generic_u32_t) res);
 
+    incr_pc(size_to_span(tmps));
+
     return (RETURN_OK);
 }
 
@@ -841,6 +843,8 @@ generic_u32_t ADDI(opcode code)
     write_EA(&dReg, (generic_u32_t) res, &size, &mode);
 
     set_srflags(addi, size, sVal, dVal, (generic_u32_t) res);
+
+    incr_pc(size_to_span(tmps));
 
     return (RETURN_OK);
 }

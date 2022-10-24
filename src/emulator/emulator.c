@@ -18,20 +18,23 @@
 #define ORG_SYMBOL     'o'
 #define ORG_DEFAULT     0x00000000
 
-#define EMULATE_STD 0
-#define EMULATE_SBS 1
-
-#define BEGIN_STATE 0
-#define EXEC_STATE  1
-#define FINAL_STATE 2
-
 #define TRUE        1
 #define FALSE       0
 
-struct EmulationState
+struct EmulationMachine
 {
-    generic_u8_t state; //initial, execution, final
-    generic_u8_t type;
+    enum
+    {
+        EMULATE_STD = 0,
+        EMULATE_SBS = 1
+    } EmuType;
+
+    enum
+    {
+        BEGIN_STATE     = 0,
+        EXECUTION_STATE = 1,
+        FINAL_STATE     = 2
+    } State;
 
     struct
     {
@@ -40,68 +43,32 @@ struct EmulationState
         char *path;
     } ExecArgs;
 
-    bit sbs_print;
+    struct
+    {
+        generic_u32_t size;
+        regex_t       hex_rx;
+        const char    *hex_regex;
+    } Loader;
+
+    struct
+    {
+        m68k_cpu *cpu;
+        m68k_ram *ram;
+
+        bit           sbs_print;
+        generic_u32_t simhalt;
+        generic_u32_t orgptr;
+        generic_u32_t lwb;
+
+        struct
+        {
+            struct termios oldt;
+            struct termios newt;
+        } Waiting;
+
+    } Machine;
+
 };
-
-
-
-typedef struct __ARCH__68000__
-{
-    m68k_cpu *cpu;
-    m68k_ram *ram;
-
-    void  (*load)    (struct EmulationState *state);
-    bit   (*is_halt) ();
-    void  (*turnoff) ();
-} arch_t;
-
-
-
-
-void  __load_bytecode__(struct EmulationState *state);
-bit   __is_halt__();
-void  __turn_off__();
-
-
-generic_u32_t loader_data_size = 0;
-regex_t       hex_rx;
-const char    *hex_regex = "[0-9a-fA-F!]+";
-
-
-arch_t        ARCH;
-generic_u32_t simhalt = 0;
-generic_u32_t orgptr  = 0;
-generic_u32_t last_written_byte = 0;
-
-
-static struct termios oldt, newt;
-
-
-void _begin()
-{
-    ARCH.cpu = init_cpu();
-    ARCH.ram = init_ram(RAM_SIZE);
-
-    ARCH.load    = __load_bytecode__;
-    ARCH.is_halt = __is_halt__;
-    ARCH.turnoff = __turn_off__;
-}
-
-void __turn_off__()
-{
-    destroy_cpu();
-    destroy_ram();
-}
-
-
-/* ORG */
-void _set_ORG(generic_u32_t org) { orgptr = org; set_pc(orgptr); }
-
-
-/* SIMHALT */
-void _set_simhalt(generic_u32_t addr) { if (simhalt == 0) simhalt = addr; }
-
-bit __is_halt__() { return (get_pc() != simhalt || get_pc() < simhalt) ? 0 : 1; }
 
 
 
@@ -166,32 +133,32 @@ generic_u32_t _extract_ORG(char *filename)
     return value;
 }
 
-generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
+generic_u8_t* _read_bytecode(struct EmulationMachine *es, char *filename)
 {
     generic_u8_t *bytecode = NULL;
 
     FILE  *fp;
     fp = fopen(filename, "r");
 
-    if (regcomp(&hex_rx, hex_regex, REG_EXTENDED) == 1)
-        EMULATOR_ERROR("Could not compile regex %s", hex_regex)
+    if (regcomp(&es->Loader.hex_rx, es->Loader.hex_regex, REG_EXTENDED) == 1)
+        EMULATOR_ERROR("Could not compile regex %s", es->Loader.hex_regex)
 
     int  reti;
     char ch;
     while((ch = fgetc(fp)) != EOF)
     {
-        reti = regexec(&hex_rx, &ch, 0, NULL, 0);
+        reti = regexec(&es->Loader.hex_rx, &ch, 0, NULL, 0);
         if (!reti)
         {
-            loader_data_size++;
+            es->Loader.size++;
         }
     }
 
-    loader_data_size = ((loader_data_size - ((*org) ? 9 : 0)) / 2) + 1;
+    es->Loader.size = ((es->Loader.size - ((es->Machine.orgptr) ? 9 : 0)) / 2) + 1;
 
     fclose(fp);
 
-    bytecode = calloc(loader_data_size, sizeof (* bytecode));
+    bytecode = calloc(es->Loader.size, sizeof (* bytecode));
 
     fp = fopen(filename, "r");
 
@@ -199,17 +166,17 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
     symbol[2] = '\0';
 
     generic_u32_t pos = 0,
-                  validator = ((*org) ? 10 : 0);
+                  validator = ((es->Machine.orgptr) ? 10 : 0);
 
     fseek(fp, validator, SEEK_SET);
 
-    generic_u32_t meta_pc = *org;
+    generic_u32_t meta_pc = es->Machine.orgptr;
 
     while((ch = fgetc(fp)) != EOF)
     {
         if (ch == SIMHALT_SYMBOL)
         {
-            _set_simhalt(meta_pc);
+            if (es->Machine.simhalt == 0) es->Machine.simhalt = meta_pc;
         }
         else if (ch != SEPARATOR)
         {
@@ -230,19 +197,19 @@ generic_u8_t* _read_bytecode(char *filename, generic_u32_t *org)
     return bytecode;
 }
 
-void __load_bytecode__(struct EmulationState *state)
+void __load_bytecode__(struct EmulationMachine *es)
 {
-    char *filename = state->ExecArgs.path;
+    char *filename = es->ExecArgs.path;
 
-    generic_u32_t org = _extract_ORG(filename);
-    _set_ORG(org);
+    es->Machine.orgptr = _extract_ORG(filename);
+    set_pc(es->Machine.orgptr);
 
-    generic_u8_t *bytecode = _read_bytecode(filename, &org);
+    generic_u8_t *bytecode = _read_bytecode(es, filename);
 
     if (bytecode)
     {
         generic_u32_t span = 0;
-        for (generic_u32_t iter = 0; iter < loader_data_size; iter++)
+        for (generic_u32_t iter = 0; iter < es->Loader.size; iter++)
         {
             generic_u8_t c = bytecode[iter];
 
@@ -250,12 +217,13 @@ void __load_bytecode__(struct EmulationState *state)
             span += BYTE_SPAN;
         }
 
-        last_written_byte = get_pc() + span;
+        es->Machine.lwb = get_pc() + span;
 
         free(bytecode);
-        regfree(&hex_rx);
+        regfree(&es->Loader.hex_rx);
 
-        _set_simhalt((generic_u32_t)(get_pc() + span));
+        if (es->Machine.simhalt == 0) es->Machine.simhalt = es->Machine.lwb;
+
     }
     else EMULATOR_ERROR("Error incomes while loading an invalid bytecode")
 }
@@ -263,7 +231,7 @@ void __load_bytecode__(struct EmulationState *state)
 
 
 /* EMULATOR UTILS*/
-void parse_args(struct EmulationState *state, int argc, char **argv)
+void parse_args(struct EmulationMachine *es, int argc, char **argv)
 {
     if (argc < 3)
     {
@@ -288,72 +256,79 @@ void parse_args(struct EmulationState *state, int argc, char **argv)
 
     _is_valid_file(argv[2]);
 
-    state->ExecArgs.path  = argv[2];
-    state->ExecArgs.descr = FALSE;
-    state->ExecArgs.quiet = FALSE;
+    es->ExecArgs.path  = argv[2];
+    es->ExecArgs.descr = FALSE;
+    es->ExecArgs.quiet = FALSE;
 
     for (generic_32_t i = 3; i < argc; i++)
     {
         if (strlen(argv[i]) >= 2)
         {
             if (argv[i][0] == '-' && argv[i][1] == 'd')
-                state->ExecArgs.descr = TRUE;
+                es->ExecArgs.descr = TRUE;
 
             else if (argv[i][0] == '-' && argv[i][1] == 'q')
-                state->ExecArgs.quiet = TRUE;
+                es->ExecArgs.quiet = TRUE;
 
             else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
         }
     }
 
-    if (state->type == EMULATE_SBS && state->ExecArgs.quiet)
+    if (es->EmuType == EMULATE_SBS && es->ExecArgs.quiet)
         EMULATOR_ERROR("Cannot use quiet option (-q) in step-by-step mode.")
 
-    if (state->type == EMULATE_STD && state->ExecArgs.descr)
+    if (es->EmuType == EMULATE_STD && es->ExecArgs.descr)
         EMULATOR_ERROR("Cannot use descriptive option (-d) in normal mode.")
 
-    if (state->ExecArgs.descr && state->ExecArgs.quiet)
+    if (es->ExecArgs.descr && es->ExecArgs.quiet)
         EMULATOR_ERROR("Cannot combine '-d' and '-q' options.")
 }
 
-struct EmulationState obtain_emulation_state(int argc, char **argv)
+struct EmulationMachine obtain_emulation_state(int argc, char **argv)
 {
-    struct EmulationState state;
+    struct EmulationMachine es;
 
-    state.state = BEGIN_STATE;
-    state.sbs_print = FALSE;
+    es.Machine.orgptr  = ORG_DEFAULT;
+    es.Machine.simhalt = 0;
+    es.Machine.lwb     = 0;
+
+    es.Loader.size = 0;
+    es.Loader.hex_regex = "[0-9a-fA-F!]+";
+
+    es.State = BEGIN_STATE;
+    es.Machine.sbs_print = FALSE;
 
     if (argv[1][1] == 'e')
-        state.type = EMULATE_STD;
+        es.EmuType = EMULATE_STD;
     else
     {
-        state.sbs_print = TRUE;
-        state.type = EMULATE_SBS;
+        es.Machine.sbs_print = TRUE;
+        es.EmuType = EMULATE_SBS;
     }
 
-    parse_args(&state, argc, argv);
+    parse_args(&es, argc, argv);
 
-    return state;
+    return es;
 }
 
-void printf_sstatus(struct EmulationState *state)
+void printf_sstatus(struct EmulationMachine *es)
 {
-    if (!state->ExecArgs.quiet)
+    if (!es->ExecArgs.quiet)
     {
-        if (state->type == EMULATE_SBS && state->sbs_print) system("clear");
+        if (es->EmuType == EMULATE_SBS && es->Machine.sbs_print) system("clear");
 
-        generic_u32_t _start = orgptr;
-        generic_u32_t _end   = (last_written_byte | 0x0000000F) + 0x11;
+        generic_u32_t _start = es->Machine.orgptr;
+        generic_u32_t _end   = (es->Machine.lwb | 0x0000000F) + 0x11;
         generic_u32_t _ptr   = get_pc();
         char *pcptr_color    = "";
         char *halt_color     = "\033[37m";
 
-        if (state->state == BEGIN_STATE)
+        if (es->State == BEGIN_STATE)
         {
             printf("\033[01m\033[37mInitial State:\033[0m");
             pcptr_color = "\033[92m";
         }
-        else if (state->state == EXEC_STATE)
+        else if (es->State == EXECUTION_STATE)
         {
             printf("\033[01m\033[37mExecution State:\033[0m");
             _start = (_ptr & 0xFFFFFFF0) - 0x20;
@@ -361,28 +336,28 @@ void printf_sstatus(struct EmulationState *state)
             pcptr_color    = "\033[93m";
 
         }
-        else if (state->state == FINAL_STATE)
+        else if (es->State == FINAL_STATE)
         {
             printf("\033[01m\033[37mFinal State:\033[0m");
             pcptr_color    = "\033[91m";
             halt_color     = "\033[91m";
         }
 
-        ARCH.cpu->show();
+        es->Machine.cpu->show();
         printf("\n");
 
-        ARCH.ram->show(_start, _end, _ptr, pcptr_color);
+        es->Machine.ram->show(_start, _end, _ptr, pcptr_color);
         printf("\n");
 
-        printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, simhalt);
+        printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, es->Machine.simhalt);
 
         fflush(stdout);
     }
 }
 
-void _wait(struct EmulationState *state)
+void _wait(struct EmulationMachine *es)
 {
-    if (state->sbs_print)
+    if (es->Machine.sbs_print)
     {
         fputs(
             "\n---------------- Execution Options ----------------\n"
@@ -400,14 +375,14 @@ void _wait(struct EmulationState *state)
 
         while (loop)
         {
-            tcgetattr(STDIN_FILENO, &oldt);
-            newt = oldt;
-            newt.c_lflag &= ~(ICANON);
-            tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+            tcgetattr(STDIN_FILENO, &es->Machine.Waiting.oldt);
+            es->Machine.Waiting.newt = es->Machine.Waiting.oldt;
+            es->Machine.Waiting.newt.c_lflag &= ~(ICANON);
+            tcsetattr(STDIN_FILENO, TCSANOW, &es->Machine.Waiting.newt);
 
             opt = getchar();
 
-            tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+            tcsetattr(STDIN_FILENO, TCSANOW, &es->Machine.Waiting.oldt);
 
             switch (opt) {
                 case 's': //stack;
@@ -425,7 +400,7 @@ void _wait(struct EmulationState *state)
                     }
                     else
                     {
-                        ARCH.ram->stack(_top, _bottom);
+                        es->Machine.ram->stack(_top, _bottom);
                     }
 
                     break;
@@ -433,7 +408,7 @@ void _wait(struct EmulationState *state)
 
                 case 'n': //goto next istr, print cpu & ram
                 {
-                    printf_sstatus(state);
+                    printf_sstatus(es);
 
                     loop = FALSE;
                     break;
@@ -455,8 +430,8 @@ void _wait(struct EmulationState *state)
 
                     loop = FALSE;
 
-                    state->sbs_print      = FALSE;
-                    state->ExecArgs.descr = FALSE;
+                    es->Machine.sbs_print = FALSE;
+                    es->ExecArgs.descr = FALSE;
                     break;
                 }
 
@@ -470,61 +445,36 @@ void _wait(struct EmulationState *state)
 
 
 /* EMULATOR */
-int emulate_std(struct EmulationState *state)
-{
-    _begin();
-
-    ARCH.load(state);
-
-    printf_sstatus(state);
-
-    state->state = EXEC_STATE;
-    while(!ARCH.is_halt())
-    {
-        ARCH.cpu->exec(state->ExecArgs.descr);
-    }
-    state->state = FINAL_STATE;
-
-    printf_sstatus(state);
-
-    ARCH.turnoff();
-
-    return (EXIT_SUCCESS);
-}
-
-int emulate_sbs(struct EmulationState *state) // aka step-by-step
-{
-    _begin();
-    ARCH.load(state);
-
-    printf_sstatus(state);
-    state->state = EXEC_STATE;
-
-    while(!ARCH.is_halt())
-    {
-        _wait(state);
-
-        ARCH.cpu->exec(state->ExecArgs.descr);
-    }
-
-    state->state = FINAL_STATE;
-    _wait(state);
-    printf_sstatus(state);
-
-    ARCH.turnoff();
-
-    return (EXIT_SUCCESS);
-}
-
-
 int emulate(int argc, char** argv)
 {
-    struct EmulationState state = obtain_emulation_state(argc, argv);
+    struct EmulationMachine es = obtain_emulation_state(argc, argv);
 
-    if (state.type == EMULATE_STD)
-        return emulate_std(&state);
-    else
-        return emulate_sbs(&state);
+    es.Machine.cpu = init_cpu();
+    es.Machine.ram = init_ram(RAM_SIZE);
+
+    __load_bytecode__(&es);
+
+    printf_sstatus(&es);
+
+    es.State = EXECUTION_STATE;
+
+    while((get_pc() != es.Machine.simhalt || get_pc() < es.Machine.simhalt))
+    {
+        _wait(&es);
+
+        es.Machine.cpu->exec(es.ExecArgs.descr);
+    }
+
+    es.State = FINAL_STATE;
+
+    _wait(&es);
+
+    printf_sstatus(&es);
+
+    destroy_cpu();
+    destroy_ram();
+
+    return (EXIT_SUCCESS);
 }
 
 

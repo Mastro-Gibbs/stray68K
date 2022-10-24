@@ -23,7 +23,8 @@ m68k_cpu* init_cpu()
 
         init_codes();
     }
-    return cpu;
+
+    return (cpu);
 }
 
 
@@ -45,7 +46,6 @@ void reset_cpu()
 
         cpu->exec = __exec__;
         cpu->show = __show__;
-
     }
 }
 
@@ -350,7 +350,7 @@ generic_u32_t read_datareg(generic_u32_t reg)
     if (reg < 8)
         return cpu->data_r[reg];
 
-    return 0;
+    return (0);
 }
 
 /*
@@ -399,7 +399,7 @@ generic_u32_t read_addrreg(generic_u32_t reg)
             return get_supervisor() ? cpu->ssp : cpu->usp;
     }
 
-    return 0;
+    return (0);
 }
 
 /*
@@ -527,7 +527,7 @@ generic_u16_t pop_word()
     stack += WORD_SPAN;
     write_addrreg(7, stack, NULL);
 
-    return value;
+    return (value);
 }
 
 generic_u32_t pop_long()
@@ -537,7 +537,7 @@ generic_u32_t pop_long()
     stack += LONG_SPAN;
     write_addrreg(7, stack, NULL);
 
-    return value;
+    return (value);
 }
 
 void push_word(generic_u16_t word)
@@ -570,7 +570,7 @@ void set_usp(generic_u32_t ptr)
 
 generic_u32_t get_usp()
 {
-    return cpu->usp;
+    return (cpu->usp);
 }
 
 
@@ -622,6 +622,6 @@ void set_pc(generic_u32_t pc) { cpu->pc = pc; }
 
 void incr_pc(bit bits) { cpu->pc += bits; }
 
-generic_u32_t get_pc() { return cpu->pc; }
+generic_u32_t get_pc() { return (cpu->pc); }
 
 

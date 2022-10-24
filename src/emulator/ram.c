@@ -44,7 +44,9 @@ void destroy_ram()
 {
     if (ram)
     {
-        free(ram->ram);
+        if (ram->ram)
+            free(ram->ram);
+
         free(ram);
     }
 }
