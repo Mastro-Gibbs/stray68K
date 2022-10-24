@@ -360,6 +360,9 @@ void printf_sstatus(struct EmulationMachine *es)
         }
         else if (es->State == FINAL_STATE)
         {
+            if (es->EmuType == EMULATE_STD)
+                printf("-------------------------------------------------------------------------------------------------------------------------\n");
+
             printf("\033[01m\033[37mFinal State:\033[0m");
             pcptr_color    = "\033[91m";
             halt_color     = "\033[91m";
@@ -371,13 +374,18 @@ void printf_sstatus(struct EmulationMachine *es)
         es->Machine.ram->show(_start, _end, _ptr, pcptr_color);
         printf("\n");
 
-        printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, es->Machine.simhalt);
+        if (es->EmuType == EMULATE_STD && es->State == FINAL_STATE)
+            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, es->Machine.simhalt);
+        else if (es->EmuType == EMULATE_SBS)
+            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, es->Machine.simhalt);
 
         fflush(stdout);
     }
 
-    if (es->State == FINAL_STATE && es->Machine.Timer.delta_t)
+    if (es->State == FINAL_STATE && es->ExecArgs.timer)
     {
+        if (!es->ExecArgs.quiet)
+            printf("-------------------------------------------------------------------------------------------------------------------------\n");
         printf("\033[01m\033[37mTimer\033[0m: %.3fms -> %.3fs\n",
                (generic_f64_t) es->Machine.Timer.delta_t / (generic_f64_t) 1000,
                (generic_f64_t) es->Machine.Timer.delta_t / (generic_f64_t) 1000000);
