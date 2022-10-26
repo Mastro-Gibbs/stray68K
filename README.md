@@ -109,7 +109,7 @@ Just clone and invoke makefile
   ```
 - To perform a ```execution``` with JSON encoding output
   ```bash
-  $ ./stray68K -e <output_file_path>.B68 -j cpu time concat -q
+  $ ./stray68K -e <output_file_path>.B68 -j cpu chrono concat -q
   ```
 - To perform a ```execution step by step```
   ```bash
