@@ -35,7 +35,7 @@ int usage(char *param)
         "**JSON encoding commands**\n"
         " [cpu]      -Mean cpu encoding.\n"
         " [ram]      -Mean ram encoding.\n"
-        " [chrono]   -Mean chrono encoding (ms).\n"
+        " [chrono]   -Mean chrono encoding (ns).\n"
         " [code]     -Mean operation code encoding (base 10).\n"
         " [mnemonic] -Mean mnemonic operation encoding.\n"
         " [concat]   -Perform JSON concat, must pass at least two listed above commands.\n"

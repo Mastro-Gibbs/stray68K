@@ -11,7 +11,7 @@
 void init_codes();
 void destroy_codes();
 
-void pre_set_runner(struct EmulationMachine *em);
+void preset_handler(struct EmulationMachine *em);
 u32 run_opcode(struct EmulationMachine *em);
 
 

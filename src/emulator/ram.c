@@ -8,19 +8,28 @@ void __show_ram_stack__ (u32 _top, u32 _bottom);
 m68k_ram *ram = NULL;
 
 
-m68k_ram* init_ram(u32 size)
+
+m68k_ram* init_ram(struct EmulationMachine *em, u32 size)
 {
     if (!ram)
     {
         ram = malloc(sizeof (*ram));
 
         if (!ram)
-            PANIC("Cannot init ram, aborting.")
+        {
+            em->State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Cannot init ram, aborting.");
+            return (NULL);
+        }
 
         ram->ram = calloc(size, sizeof (u8));
 
         if (!ram->ram)
-            PANIC("Cannot init ram, aborting.")
+        {
+            em->State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Cannot init ram, aborting.");
+            return (NULL);
+        }
 
         ram->size = size;
 
@@ -56,6 +65,7 @@ void destroy_ram()
     }
 }
 
+/*
 void check_addr(u32 ptr, u8 limit)
 {
     if (ptr > ram->size)
@@ -67,7 +77,7 @@ void check_addr(u32 ptr, u8 limit)
         PANIC(panic_str)
     }
 }
-
+*/
 
 /* MEMORY READ */
 u8 read_byte(u32 pointer)

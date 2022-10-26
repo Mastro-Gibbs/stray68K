@@ -2,10 +2,8 @@
 
 #include <stdlib.h>
 
-
-static bit               describe = 0;
-struct EmulationMachine  *mach    = NULL;
-struct __m68k__codemap__ *codemap = NULL;
+struct EmulationMachine  *emulation = NULL;
+struct __m68k__codemap__ *codemap   = NULL;
 
 
 //handler return types
@@ -38,43 +36,43 @@ struct __m68k__codemap__ *codemap = NULL;
 
 #define SET_NEGATIVE(bit) do { \
                             if (bit) \
-                                mach->Machine.cpu->sr |= NEGATIVE; \
+                                emulation->Machine.cpu->sr |= NEGATIVE; \
                             else \
-                                mach->Machine.cpu->sr &= ~NEGATIVE; \
+                                emulation->Machine.cpu->sr &= ~NEGATIVE; \
                           } while(0);
 
 #define SET_ZERO(bit) do { \
                         if (bit) \
-                            mach->Machine.cpu->sr |= ZERO; \
+                            emulation->Machine.cpu->sr |= ZERO; \
                         else \
-                            mach->Machine.cpu->sr &= ~ZERO; \
+                            emulation->Machine.cpu->sr &= ~ZERO; \
                       } while(0);
 
 #define SET_OVERFLOW(bit) do { \
                             if (bit) \
-                                mach->Machine.cpu->sr |= OVERFLOW; \
+                                emulation->Machine.cpu->sr |= OVERFLOW; \
                             else \
-                                mach->Machine.cpu->sr &= ~OVERFLOW; \
+                                emulation->Machine.cpu->sr &= ~OVERFLOW; \
                           } while(0);
 
 
 #define SET_CARRY(bit) do { \
                           if (bit) \
-                              mach->Machine.cpu->sr |= CARRY; \
+                              emulation->Machine.cpu->sr |= CARRY; \
                           else \
-                              mach->Machine.cpu->sr &= ~CARRY; \
+                              emulation->Machine.cpu->sr &= ~CARRY; \
                        } while(0);
 
 #define SET_EXTENDED(bit) do{ \
                               if (bit) \
-                                  mach->Machine.cpu->sr |= EXTEND; \
+                                  emulation->Machine.cpu->sr |= EXTEND; \
                               else \
-                                  mach->Machine.cpu->sr &= ~EXTEND; \
+                                  emulation->Machine.cpu->sr &= ~EXTEND; \
                           } while(0);
 
 
 
-#define INCR_PC(bits) mach->Machine.cpu->pc += bits
+#define INCR_PC(bits) emulation->Machine.cpu->pc += bits
 
 
 
@@ -116,7 +114,7 @@ struct __m68k__codemap__ *codemap = NULL;
                                                                 SET_ZERO((res & mask) == 0);  \
                                                                 SET_OVERFLOW((srcMSB == resMSB) && (dstMSB != resMSB));  \
                                                                 SET_CARRY((srcMSB && resMSB) || (srcMSB && !dstMSB) || (!dstMSB && resMSB));  \
-                                                                SET_EXTENDED(mach->Machine.cpu->sr & CARRY);  \
+                                                                SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 break;  \
                                                             case addi:  \
                                                             case addq:  \
@@ -126,7 +124,7 @@ struct __m68k__codemap__ *codemap = NULL;
                                                                 SET_ZERO((res & mask) == 0);  \
                                                                 SET_OVERFLOW((srcMSB == dstMSB) && (srcMSB != resMSB));  \
                                                                 SET_CARRY((srcMSB && !resMSB) || (srcMSB && dstMSB) || (dstMSB && !resMSB));  \
-                                                                SET_EXTENDED(mach->Machine.cpu->sr & CARRY);  \
+                                                                SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 break;  \
                                                             case cmpi:  \
                                                             case cmpm:  \
@@ -142,14 +140,14 @@ struct __m68k__codemap__ *codemap = NULL;
                                                                 SET_ZERO((res & mask) == 0);  \
                                                                 SET_OVERFLOW(srcMSB && resMSB);  \
                                                                 SET_CARRY(srcMSB || resMSB);  \
-                                                                SET_EXTENDED(mach->Machine.cpu->sr & CARRY);  \
+                                                                SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 break;  \
                                                             case neg:  \
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
                                                                 SET_OVERFLOW(srcMSB && resMSB);  \
                                                                 SET_CARRY((res & mask) != 0);  \
-                                                                SET_EXTENDED(mach->Machine.cpu->sr & CARRY);  \
+                                                                SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 break;  \
                                                             case not:  \
                                                             case ext:  \
@@ -158,7 +156,7 @@ struct __m68k__codemap__ *codemap = NULL;
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
                                                                 SET_CARRY(0);  \
-                                                                SET_EXTENDED(mach->Machine.cpu->sr & CARRY);  \
+                                                                SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 break;  \
                                                             case asl:  \
                                                             case asr:  \
@@ -169,7 +167,7 @@ struct __m68k__codemap__ *codemap = NULL;
                                                                 if (src != 0)  \
                                                                 {  \
                                                                     SET_CARRY(dst != 0);  \
-                                                                    SET_EXTENDED(mach->Machine.cpu->sr & CARRY);  \
+                                                                    SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 }  \
                                                                 else SET_CARRY(0);  \
                                                                 break;  \
@@ -187,7 +185,7 @@ struct __m68k__codemap__ *codemap = NULL;
                                                                 if (src != 0)  \
                                                                 {  \
                                                                     SET_CARRY(dst != 0);  \
-                                                                    SET_EXTENDED(mach->Machine.cpu->sr & CARRY);  \
+                                                                    SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 }  \
                                                                 else SET_CARRY(0);  \
                                                                 \
@@ -215,11 +213,11 @@ u32 ORItoCCR(opcode code)
 {
     UNUSED(code)
 
-    u32 addr = (u32) (mach->Machine.cpu->pc + WORD_SPAN);
+    u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
     u8 bits  = read_byte(addr);
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
-    mach->Machine.cpu->sr = (flags | bits);
+    emulation->Machine.cpu->sr = (flags | bits);
 
     INCR_PC(BYTE_SPAN);
 
@@ -231,11 +229,11 @@ u32 ORItoSR(opcode code)
 {
     UNUSED(code)
 
-    u32 addr = (u32) (mach->Machine.cpu->pc + WORD_SPAN);
+    u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
     u16 bits = read_word(addr);
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
-    mach->Machine.cpu->sr = (flags | bits);
+    emulation->Machine.cpu->sr = (flags | bits);
 
     INCR_PC(BYTE_SPAN);
 
@@ -251,7 +249,7 @@ u32 ORI(opcode code)
 
     u32 value;
     READ_EFFECTIVE_ADDRESS(value, dst, size, mode, NORMAL);
-    u32 addr     = mach->Machine.cpu->pc + WORD_SPAN;
+    u32 addr     = emulation->Machine.cpu->pc + WORD_SPAN;
     u32 ori_mask = read_ram(&addr, &size);
 
     value |= ori_mask;
@@ -270,11 +268,11 @@ u32 ANDItoCCR(opcode code)
 {
     UNUSED(code)
 
-    u32 addr = (u32) (mach->Machine.cpu->pc + WORD_SPAN);
+    u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
     u16 bits = (u16) (read_byte(addr) & 0x001F) | 0xFFE0;
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
-    mach->Machine.cpu->sr = (flags & bits);
+    emulation->Machine.cpu->sr = (flags & bits);
 
     INCR_PC(BYTE_SPAN);
 
@@ -286,11 +284,11 @@ u32 ANDItoSR(opcode code)
 {
     UNUSED(code)
 
-    u32 addr = (u32) (mach->Machine.cpu->pc + WORD_SPAN);
+    u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
     u16 bits = read_word(addr);
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
-    mach->Machine.cpu->sr = (flags | bits);
+    emulation->Machine.cpu->sr = (flags | bits);
 
     INCR_PC(BYTE_SPAN);
 
@@ -306,7 +304,7 @@ u32 ANDI(opcode code)
 
     u32 value;
     READ_EFFECTIVE_ADDRESS(value, dst, size, mode, NORMAL);
-    u32 addr      = mach->Machine.cpu->pc + WORD_SPAN;
+    u32 addr      = emulation->Machine.cpu->pc + WORD_SPAN;
     u32 andi_mask = read_ram(&addr, &size);
 
     switch (size) {
@@ -339,7 +337,7 @@ u32 SUBI(opcode code)
     if (size == BYTE)
         tmps = WORD;
 
-    u32 ramptr = mach->Machine.cpu->pc + WORD_SPAN;
+    u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
     u32 sVal   = read_ram(&ramptr, &tmps);
     u32 dVal;
 
@@ -373,7 +371,7 @@ u32 ADDI(opcode code)
     if (size == BYTE)
         tmps = WORD;
 
-    u32 ramptr = mach->Machine.cpu->pc + WORD_SPAN;
+    u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
     u32 sVal   = read_ram(&ramptr, &tmps);
     u32 dVal;
 
@@ -403,11 +401,11 @@ u32 EORItoCCR(opcode code)
 {
     UNUSED(code)
 
-    u32 addr = (u32) (mach->Machine.cpu->pc + WORD_SPAN);
+    u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
     u16 bits = (u16) (read_byte(addr) & 0x001F) | 0xFFE0;
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
-    mach->Machine.cpu->sr = (flags ^ bits);
+    emulation->Machine.cpu->sr = (flags ^ bits);
 
     INCR_PC(BYTE_SPAN);
 
@@ -419,11 +417,11 @@ u32 EORItoSR(opcode code)
 {
     UNUSED(code)
 
-    u32 addr = (u32) (mach->Machine.cpu->pc + WORD_SPAN);
+    u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
     u16 bits = read_word(addr);
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
-    mach->Machine.cpu->sr = (flags ^ bits);
+    emulation->Machine.cpu->sr = (flags ^ bits);
 
     INCR_PC(BYTE_SPAN);
 
@@ -440,7 +438,7 @@ u32 EORI(opcode code)
     u32 value;
     READ_EFFECTIVE_ADDRESS(value, dst, size, mode, NORMAL);
 
-    u32 addr      = mach->Machine.cpu->pc + WORD_SPAN;
+    u32 addr      = emulation->Machine.cpu->pc + WORD_SPAN;
     u32 eori_mask = read_ram(&addr, &size);
 
     value ^= eori_mask;
@@ -469,7 +467,7 @@ u32 CMPI(opcode code)
     READ_EFFECTIVE_ADDRESS(val, dst, size, mode, NORMAL);
 
     SING_EXTENDED(dst_val, val, size);
-    u32 addr    = mach->Machine.cpu->pc + WORD_SPAN;
+    u32 addr    = emulation->Machine.cpu->pc + WORD_SPAN;
     SING_EXTENDED(ram_val, read_ram(&addr, &tmpsize), size);
 
     s32 value = dst_val - ram_val;
@@ -536,7 +534,7 @@ u32 MOVE(opcode code)
         opsize tmpsize = size;
         if (tmpsize == BYTE) tmpsize = WORD; //byte can't be wrote in ram
 
-        u32 ram_ptr = mach->Machine.cpu->pc + WORD_SPAN;
+        u32 ram_ptr = emulation->Machine.cpu->pc + WORD_SPAN;
         rVal = read_ram(&ram_ptr, &tmpsize);
 
         WRITE_EFFECTIVE_ADDRESS(dst_reg, rVal, tmpsize, dst_mode);
@@ -591,7 +589,7 @@ u32 MOVEfromSR(opcode code)
     u32 dst  = (u32) (code & dst_mask);
     ADDRMode mode = (code & mode_mask) >> 3;
 
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
     opsize  size  = WORD;
 
     WRITE_EFFECTIVE_ADDRESS(dst, flags, size, mode);
@@ -608,7 +606,7 @@ u32 MOVEtoCCR(opcode code)
     u32 src  = (u32) (code & dst_mask);
     ADDRMode mode = (code & mode_mask) >> 3;
 
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
     switch (mode) {
         case DATAReg:
@@ -618,7 +616,7 @@ u32 MOVEtoCCR(opcode code)
             break;
     }
 
-    mach->Machine.cpu->sr = (flags);
+    emulation->Machine.cpu->sr = (flags);
 
     return (RETURN_OK);
 }
@@ -632,7 +630,7 @@ u32 MOVEtoSR(opcode code)
     u32 src  = (u32) (code & dst_mask);
     ADDRMode mode = (code & mode_mask) >> 3;
 
-    srflags flags = mach->Machine.cpu->sr;
+    srflags flags = emulation->Machine.cpu->sr;
 
     switch (mode) {
         case DATAReg:
@@ -642,7 +640,7 @@ u32 MOVEtoSR(opcode code)
             break;
     }
 
-    mach->Machine.cpu->sr = (flags);
+    emulation->Machine.cpu->sr = (flags);
 
     return (RETURN_OK);
 }
@@ -660,7 +658,7 @@ u32 NEGX(opcode code)
     s32  signValue;
     SING_EXTENDED(signValue, src_value, size);
 
-    s32 result = 0 - (signValue + ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0));
+    s32 result = 0 - (signValue + ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0));
 
     WRITE_EFFECTIVE_ADDRESS(dst, (u32) result, size, mode);
 
@@ -775,7 +773,7 @@ u32 NBCD(opcode code)
     u32 val;
     READ_EFFECTIVE_ADDRESS(val, dst, size, mode, NORMAL);
 
-    lo_val = 10 - (val & 0x0000000F) - ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0);
+    lo_val = 10 - (val & 0x0000000F) - ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
     carry = lo_val < 10;
 
     if (lo_val >= 10)
@@ -838,8 +836,8 @@ u32 ILLEGAL(opcode code)
 {
     UNUSED(code)
 
-    mach->State = TRAP_STATE;
-    sprintf(mach->Machine.Exception.trap_cause,
+    emulation->State = TRAP_STATE;
+    sprintf(emulation->Machine.Exception.trap_cause,
             "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
             IllegalInstruction, trap_code_toString(IllegalInstruction));
 
@@ -895,13 +893,13 @@ u32 TRAP(opcode code)
 
     if (vector == 0x000F)
     {
-        iotask(describe);
+        iotask(emulation->ExecArgs.descr);
         return (RETURN_OK);
     }
     else
     {
-        mach->State = TRAP_STATE;
-        sprintf(mach->Machine.Exception.trap_cause,
+        emulation->State = TRAP_STATE;
+        sprintf(emulation->Machine.Exception.trap_cause,
                 "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
                 0x20 + vector, trap_code_toString(0x20 + vector));
     }
@@ -917,12 +915,12 @@ u32 LINK(opcode code)
     u32 reg = code & reg_mask;
     s16 val;
 
-    SING_EXTENDED(val, read_word(mach->Machine.cpu->pc + WORD_SPAN), WORD);
+    SING_EXTENDED(val, read_word(emulation->Machine.cpu->pc + WORD_SPAN), WORD);
     u32 rVal = read_addrreg(reg);
 
     push_long(rVal);
 
-    u32 sp = ((mach->Machine.cpu->sr & SUPERVISOR) ? 1 : 0) ? mach->Machine.cpu->ssp : mach->Machine.cpu->usp;
+    u32 sp = ((emulation->Machine.cpu->sr & SUPERVISOR) ? 1 : 0) ? emulation->Machine.cpu->ssp : emulation->Machine.cpu->usp;
 
     write_addrreg(reg, sp, NULL);
 
@@ -948,10 +946,10 @@ u32 UNLK(opcode code)
 
 u32 MOVEUSP(opcode code)
 {
-    if (!((mach->Machine.cpu->sr & SUPERVISOR) ? 1 : 0))
+    if (!((emulation->Machine.cpu->sr & SUPERVISOR) ? 1 : 0))
     {
-        mach->State = TRAP_STATE;
-        sprintf(mach->Machine.Exception.trap_cause,
+        emulation->State = TRAP_STATE;
+        sprintf(emulation->Machine.Exception.trap_cause,
                 "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
                 PrivilegeViolation, trap_code_toString(PrivilegeViolation));
 
@@ -964,11 +962,11 @@ u32 MOVEUSP(opcode code)
 
     if (direction == MEMORY_REGISTER)
     {
-        mach->Machine.cpu->usp = (read_addrreg(addr_reg));
+        emulation->Machine.cpu->usp = (read_addrreg(addr_reg));
     }
     else
     {
-        write_addrreg(addr_reg, mach->Machine.cpu->usp, NULL);
+        write_addrreg(addr_reg, emulation->Machine.cpu->usp, NULL);
     }
 
 
@@ -1004,18 +1002,18 @@ u32 RTE(opcode code)
 {
     UNUSED(code)
 
-    if ((mach->Machine.cpu->sr & SUPERVISOR) ? 1 : 0)
+    if ((emulation->Machine.cpu->sr & SUPERVISOR) ? 1 : 0)
     {
         srflags sr = pop_word();
 
-        mach->Machine.cpu->pc = (pop_long());
+        emulation->Machine.cpu->pc = (pop_long());
 
-        mach->Machine.cpu->sr = (sr);
+        emulation->Machine.cpu->sr = (sr);
     }
     else
     {
-        mach->State = TRAP_STATE;
-        sprintf(mach->Machine.Exception.trap_cause,
+        emulation->State = TRAP_STATE;
+        sprintf(emulation->Machine.Exception.trap_cause,
                 "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
                 PrivilegeViolation, trap_code_toString(PrivilegeViolation));
 
@@ -1028,17 +1026,17 @@ u32 RTE(opcode code)
 
 u32 RTS(opcode code)
 {
-    if (mach->Machine.ExecData.JSR_CALL_COUNTER == 0) //like return in C-like main func
+    if (emulation->Machine.ExecData.JSR_CALL_COUNTER == 0) //like return in C-like main func
     {
-        mach->State = PANIC_STATE;
-        sprintf(mach->Machine.Exception.panic_cause, "RTS instruction invoked in main label, code: 0x%X", code);
+        emulation->State = PANIC_STATE;
+        sprintf(emulation->Machine.Exception.panic_cause, "RTS instruction invoked in main label, code: 0x%X", code);
 
         return (RETURN_ERR);
     }
 
-    mach->Machine.cpu->pc = (pop_long());
+    emulation->Machine.cpu->pc = (pop_long());
 
-    mach->Machine.ExecData.JSR_CALL_COUNTER--;
+    emulation->Machine.ExecData.JSR_CALL_COUNTER--;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1048,10 +1046,10 @@ u32 TRAPV(opcode code)
 {
     UNUSED(code)
 
-    if ((mach->Machine.cpu->sr & OVERFLOW))
+    if ((emulation->Machine.cpu->sr & OVERFLOW))
     {
-        mach->State = TRAP_STATE;
-        sprintf(mach->Machine.Exception.trap_cause,
+        emulation->State = TRAP_STATE;
+        sprintf(emulation->Machine.Exception.trap_cause,
                 "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
                 TRAPVInstruction, trap_code_toString(TRAPVInstruction));
 
@@ -1067,12 +1065,12 @@ u32 RTR(opcode code)
     UNUSED(code)
 
     srflags ccr   = pop_word();
-    srflags srval = mach->Machine.cpu->sr;
+    srflags srval = emulation->Machine.cpu->sr;
 
     srval = (srval & 0xFFE0) | (ccr & 0x001F);
 
-    mach->Machine.cpu->sr = (srval);
-    mach->Machine.cpu->pc = (pop_long());
+    emulation->Machine.cpu->sr = (srval);
+    emulation->Machine.cpu->pc = (pop_long());
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1094,18 +1092,18 @@ u32 JSR(opcode code)
     }
     else
     {
-        mach->State = PANIC_STATE;
-        sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+        emulation->State = PANIC_STATE;
+        sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
     }
 
 
-    push_long(mach->Machine.cpu->pc);
+    push_long(emulation->Machine.cpu->pc);
 
-    mach->Machine.cpu->pc = (jmp_addr);
+    emulation->Machine.cpu->pc = (jmp_addr);
 
-    mach->Machine.ExecData.JSR_CALL_COUNTER++;
+    emulation->Machine.ExecData.JSR_CALL_COUNTER++;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1120,7 +1118,7 @@ u32 JMP(opcode code)
 
     if (mode == ABSLong)
     {
-        u32 ram_ptr = mach->Machine.cpu->pc + WORD_SPAN;
+        u32 ram_ptr = emulation->Machine.cpu->pc + WORD_SPAN;
         opsize size = LONG;
         jmp_addr = read_ram(&ram_ptr, &size);
     }
@@ -1132,14 +1130,14 @@ u32 JMP(opcode code)
     }
     else
     {
-        mach->State = PANIC_STATE;
-        sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+        emulation->State = PANIC_STATE;
+        sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
     }
 
 
-    mach->Machine.cpu->pc = (jmp_addr);
+    emulation->Machine.cpu->pc = (jmp_addr);
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1179,8 +1177,8 @@ u32 CHK(opcode code)
         if (signDVAL > signVALUE) SET_NEGATIVE(0)
 
         {
-            mach->State = TRAP_STATE;
-            sprintf(mach->Machine.Exception.trap_cause,
+            emulation->State = TRAP_STATE;
+            sprintf(emulation->Machine.Exception.trap_cause,
                     "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
                     CHKInstruction, trap_code_toString(CHKInstruction));
 
@@ -1199,14 +1197,14 @@ u32 LEA(opcode code)
 
     if (mode == ABSLong)
     {
-        u32 label = read_long(mach->Machine.cpu->pc + WORD_SPAN);
+        u32 label = read_long(emulation->Machine.cpu->pc + WORD_SPAN);
 
         write_addrreg(addr_reg, label, NULL);
     }
     else
     {
-        mach->State = PANIC_STATE;
-        sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+        emulation->State = PANIC_STATE;
+        sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
     }
@@ -1239,14 +1237,14 @@ u32 DBcc(opcode code)
         if (new_dval != -1)
         {
             s32  disp;
-            u32 ramptr = mach->Machine.cpu->pc + WORD_SPAN;
+            u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
             opsize        size   = WORD;
             SING_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
 
-            u32 pc = mach->Machine.cpu->pc;
+            u32 pc = emulation->Machine.cpu->pc;
             pc += WORD_SPAN;
 
-            mach->Machine.cpu->pc = (pc + disp);
+            emulation->Machine.cpu->pc = (pc + disp);
         }
         else INCR_PC(WORD_SPAN);
     }
@@ -1353,7 +1351,7 @@ u32 SUBQ(opcode code)
 // GROUP 0x06
 u32 BRA(opcode code)
 {
-    u32 pc   = mach->Machine.cpu->pc;
+    u32 pc   = emulation->Machine.cpu->pc;
     s32  disp = (code & 0x00FF);
 
     if (disp == 0)
@@ -1366,7 +1364,7 @@ u32 BRA(opcode code)
     else
         SING_EXTENDED(disp, (u32) disp, WORD);
 
-    mach->Machine.cpu->pc = (pc + disp);
+    emulation->Machine.cpu->pc = (pc + disp);
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1374,13 +1372,13 @@ u32 BRA(opcode code)
 
 u32 BSR(opcode code)
 {
-    u32 pc = mach->Machine.cpu->pc;
+    u32 pc = emulation->Machine.cpu->pc;
 
     u32 disp = code & 0x00FF;
 
     if (disp == 0)
     {
-        u32 ramptr = mach->Machine.cpu->pc + WORD_SPAN;
+        u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
         opsize        size   = WORD;
         SING_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
         push_long(pc + LONG_SPAN);
@@ -1391,9 +1389,9 @@ u32 BSR(opcode code)
         push_long(pc + WORD_SPAN);
     }
 
-    mach->Machine.cpu->pc = (pc + disp);
+    emulation->Machine.cpu->pc = (pc + disp);
 
-    mach->Machine.ExecData.JSR_CALL_COUNTER++;
+    emulation->Machine.ExecData.JSR_CALL_COUNTER++;
 
     return (RETURN_OK);
 }
@@ -1405,12 +1403,12 @@ u32 Bcc(opcode code)
 
     if (eval_cc(condition))
     {
-        u32 pc   = mach->Machine.cpu->pc;
+        u32 pc   = emulation->Machine.cpu->pc;
         s32  disp = (code & 0x00FF);
 
         if (disp == 0)
         {
-            u32 ramptr = mach->Machine.cpu->pc + WORD_SPAN;
+            u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
             opsize        size   = WORD;
             SING_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
         }
@@ -1419,7 +1417,7 @@ u32 Bcc(opcode code)
             SING_EXTENDED(disp, disp, WORD);
         }
 
-        mach->Machine.cpu->pc = (pc + disp);
+        emulation->Machine.cpu->pc = (pc + disp);
     }
     else
     {
@@ -1464,8 +1462,8 @@ u32 DIVU(opcode code)
 
     if (*sVal == 0)
     {
-        mach->State = TRAP_STATE;
-        sprintf(mach->Machine.Exception.trap_cause,
+        emulation->State = TRAP_STATE;
+        sprintf(emulation->Machine.Exception.trap_cause,
                 "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
                 DivideByZero, trap_code_toString(DivideByZero));
 
@@ -1519,8 +1517,8 @@ u32 DIVS(opcode code)
 
     if (signed_sVal == 0)
     {
-        mach->State = TRAP_STATE;
-        sprintf(mach->Machine.Exception.trap_cause,
+        emulation->State = TRAP_STATE;
+        sprintf(emulation->Machine.Exception.trap_cause,
                 "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
                 DivideByZero, trap_code_toString(DivideByZero));
 
@@ -1640,7 +1638,7 @@ u32 SUBX(opcode code)
         case DATAREG:
             SING_EXTENDED(signDST, read_datareg(dst_reg), size);
             SING_EXTENDED(signSRC, read_datareg(src_reg), size);
-            result  = signDST - signSRC - ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0);
+            result  = signDST - signSRC - ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
             SET_SRFLAGS(addx, size, (u32) signSRC, (u32) signDST, (u32) result);
             break;
 
@@ -1650,7 +1648,7 @@ u32 SUBX(opcode code)
 
             SING_EXTENDED(signDST, read_ram(&dst_reg, &size), size);
             SING_EXTENDED(signSRC, read_ram(&src_reg, &size), size);
-            result  = signDST - signSRC - ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0);
+            result  = signDST - signSRC - ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
 
             WRITE_EFFECTIVE_ADDRESS(dst_reg, (u32) result, size, ADDRESSPreDecr);
             SET_SRFLAGS(addx, size, (u32) signSRC, (u32) signDST, (u32) result);
@@ -1721,7 +1719,7 @@ u32 CMPA(opcode code)
 
     if (mode == IMMEDIATE)
     {
-        u32 ram_ptr = mach->Machine.cpu->pc + WORD_SPAN;
+        u32 ram_ptr = emulation->Machine.cpu->pc + WORD_SPAN;
         u32 imm_val = read_ram(&ram_ptr, &size);
         SING_EXTENDED(signSRC, imm_val, size);
 
@@ -1823,7 +1821,7 @@ u32 CMP(opcode code)
 
         INCR_PC(size_to_span(size));
 
-        u32 ram_ptr = mach->Machine.cpu->pc + size_to_span(size);
+        u32 ram_ptr = emulation->Machine.cpu->pc + size_to_span(size);
         u32 imm_val = read_ram(&ram_ptr, &tmpsize);
         SING_EXTENDED(signSRC, imm_val, tmpsize);
 
@@ -1945,8 +1943,8 @@ u32 EXG(opcode code)
             break;
         default:
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
             return (RETURN_ERR);
         }
@@ -2037,7 +2035,7 @@ u32 ADDX(opcode code)
         case DATAREG:
             SING_EXTENDED(signDST, read_datareg(dst_reg), size);
             SING_EXTENDED(signSRC, read_datareg(src_reg), size);
-            result  = signDST + signSRC + ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0);
+            result  = signDST + signSRC + ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
             SET_SRFLAGS(addx, size, (u32) signSRC, (u32) signDST, (u32) result);
             break;
 
@@ -2047,7 +2045,7 @@ u32 ADDX(opcode code)
 
             SING_EXTENDED(signDST, read_ram(&dst_reg, &size), size);
             SING_EXTENDED(signSRC, read_ram(&src_reg, &size), size);
-            result  = signDST + signSRC + ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0);
+            result  = signDST + signSRC + ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
 
             WRITE_EFFECTIVE_ADDRESS(dst_reg, (u32) result, size, ADDRESSPreDecr);
             SET_SRFLAGS(addx, size, (u32) signSRC, (u32) signDST, (u32) result);
@@ -2166,7 +2164,7 @@ u32 Bxxx(opcode code)
 
     if (mode)
     {
-        u32 ramptr = mach->Machine.cpu->pc + WORD_SPAN;
+        u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
         opsize tmpsize = WORD;
 
         sVal = read_ram(&ramptr, &tmpsize) & 0x000000FF;
@@ -2263,7 +2261,7 @@ u32 perform_BCD(BCD_type type, u32 src, u32 dest)
 
     if (type == ADDICTION)
     {
-        lo_val = (s32)((src & 0x000F) + (dest & 0x000F) + ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0));
+        lo_val = (s32)((src & 0x000F) + (dest & 0x000F) + ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0));
         carry = lo_val > 9;
 
         if (lo_val > 9)
@@ -2277,7 +2275,7 @@ u32 perform_BCD(BCD_type type, u32 src, u32 dest)
     }
     else
     {
-        lo_val = (s32)((dest & 0x000F) - (src & 0x000F) - ((mach->Machine.cpu->sr & EXTEND) ? 1 : 0));
+        lo_val = (s32)((dest & 0x000F) - (src & 0x000F) - ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0));
         carry = lo_val < 0;
 
         if (lo_val < 0)
@@ -2316,8 +2314,8 @@ u32 ALxx(u32 code)
         case BYTE2:
         /* cannot reach this case, i really hope :D */
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "ALxx invalid size 0x%X", BYTE);
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "ALxx invalid size 0x%X", BYTE);
 
             return (RETURN_ERR);
         }
@@ -2432,8 +2430,8 @@ u32 ROxx(u32 code)
         case BYTE2:
         /* cannot reach this case, i really hope :D */
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "ROxx invalid size 0x%X", BYTE);
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "ROxx invalid size 0x%X", BYTE);
 
             return (RETURN_ERR);
         }
@@ -2455,7 +2453,7 @@ u32 ROxx(u32 code)
                 u32 bso    = value & 0x00008000;
                 u32 result = value << 1;
 
-                bit isext = extend ? (mach->Machine.cpu->sr & EXTEND) : bso != 0;
+                bit isext = extend ? (emulation->Machine.cpu->sr & EXTEND) : bso != 0;
 
                 if (isext)
                     result |= 0x00000001;
@@ -2469,7 +2467,7 @@ u32 ROxx(u32 code)
                 u32 bso    = value & 0x00000001;
                 u32 result = value >> 1;
 
-                bit isext = extend ? (mach->Machine.cpu->sr & EXTEND) : bso != 0;
+                bit isext = extend ? (emulation->Machine.cpu->sr & EXTEND) : bso != 0;
 
                 if (isext)
                     result |= 0x00008000;
@@ -2504,7 +2502,7 @@ u32 ROxx(u32 code)
 
             if (rot_dir == LEFT)
             {
-                bit extendbit = (mach->Machine.cpu->sr & EXTEND);
+                bit extendbit = (emulation->Machine.cpu->sr & EXTEND);
 
                 for (u32 r = 0; r < sVal; r++)
                 {
@@ -2526,7 +2524,7 @@ u32 ROxx(u32 code)
             }
             else
             {
-                bit extendbit = (mach->Machine.cpu->sr & EXTEND);
+                bit extendbit = (emulation->Machine.cpu->sr & EXTEND);
 
                 for (u32 r = 0; r < sVal; r++)
                 {
@@ -2564,8 +2562,8 @@ m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemon
 
     if (!newopcode)
     {
-        mach->State = PANIC_STATE;
-        sprintf(mach->Machine.Exception.panic_cause, "Internal error (generate opcode), aborting.");
+        emulation->State = PANIC_STATE;
+        sprintf(emulation->Machine.Exception.panic_cause, "Internal error (generate opcode), aborting.");
 
         return (NULL);
     }
@@ -2587,8 +2585,8 @@ void init_codes()
 
         if (!codemap)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 0), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 0), aborting.");
             return;
         }
 
@@ -2599,8 +2597,8 @@ void init_codes()
         codemap[0].instances     = malloc(sizeof (*codemap[0].instances)  * GROUP_0x00_LEN);
         if (!codemap[0].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 1), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 1), aborting.");
             return;
         }
         codemap[0].instances[0]  = new_opcode_t(0b0000000000111100, 0b1111111111111111, "ORItoCCR",  ORItoCCR);
@@ -2632,8 +2630,8 @@ void init_codes()
         codemap[1].instances    = malloc(sizeof (*codemap[1].instances)  * GROUP_0x01_LEN);
         if (!codemap[1].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 2), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 2), aborting.");
             return;
         }
         codemap[1].instances[0] = new_opcode_t(0b0001000000000000, 0b1111000000000000, "MOVE", MOVE);
@@ -2645,8 +2643,8 @@ void init_codes()
         codemap[2].instances    = malloc(sizeof (*codemap[2].instances)  * GROUP_0x02_LEN);
         if (!codemap[2].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 3), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 3), aborting.");
             return;
         }
         codemap[2].instances[0] = new_opcode_t(0b0010000001000000, 0b1111000111000000, "MOVEA", MOVEA);
@@ -2659,8 +2657,8 @@ void init_codes()
         codemap[3].instances    = malloc(sizeof (*codemap[3].instances)  * GROUP_0x03_LEN);
         if (!codemap[3].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 4), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 4), aborting.");
             return;
         }
         codemap[3].instances[0] = new_opcode_t(0b0011000001000000, 0b1111000111000000, "MOVEA", MOVEA);
@@ -2673,8 +2671,8 @@ void init_codes()
         codemap[4].instances     = malloc(sizeof (*codemap[4].instances)  * GROUP_0x04_LEN);
         if (!codemap[4].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 5), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 5), aborting.");
             return;
         }
         codemap[4].instances[0]  = new_opcode_t(0b0100000011000000, 0b1111111111000000, "MOVEfromSR", MOVEfromSR);
@@ -2715,8 +2713,8 @@ void init_codes()
         codemap[5].instances    = malloc(sizeof (*codemap[5].instances)  * GROUP_0x05_LEN);
         if (!codemap[5].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 6), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 6), aborting.");
             return;
         }
         codemap[5].instances[0] = new_opcode_t(0b0101000011001000, 0b1111000011111000, "DBcc", DBcc);
@@ -2731,8 +2729,8 @@ void init_codes()
         codemap[6].instances    = malloc(sizeof (*codemap[6].instances)  * GROUP_0x06_LEN);
         if (!codemap[6].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 7), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 7), aborting.");
             return;
         }
         codemap[6].instances[0] = new_opcode_t(0b0110000000000000, 0b1111111100000000, "BRA", BRA);
@@ -2746,8 +2744,8 @@ void init_codes()
         codemap[7].instances    = malloc(sizeof (*codemap[7].instances)  * GROUP_0x07_LEN);
         if (!codemap[7].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 8), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 8), aborting.");
             return;
         }
         codemap[7].instances[0] = new_opcode_t(0b0111000000000000, 0b1111000100000000, "MOVEQ", MOVEQ);
@@ -2759,8 +2757,8 @@ void init_codes()
         codemap[8].instances    = malloc(sizeof (*codemap[8].instances)  * GROUP_0x08_LEN);
         if (!codemap[8].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 9), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 9), aborting.");
             return;
         }
         codemap[8].instances[0] = new_opcode_t(0b1000000011000000, 0b1111000111000000, "DIVU", DIVU);
@@ -2775,8 +2773,8 @@ void init_codes()
         codemap[9].instances    = malloc(sizeof (*codemap[9].instances)  * GROUP_0x09_LEN);
         if (!codemap[9].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 10), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 10), aborting.");
             return;
         }
         codemap[9].instances[0] = new_opcode_t(0b1001000011000000, 0b1111000011000000, "SUBA", SUBA);
@@ -2790,8 +2788,8 @@ void init_codes()
         codemap[10].instances    = malloc(sizeof (*codemap[10].instances) * GROUP_0x0B_LEN);
         if (!codemap[10].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 11), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 11), aborting.");
             return;
         }
         codemap[10].instances[0] = new_opcode_t(0b1011000011000000, 0b1111000011000000, "CMPA", CMPA);
@@ -2806,8 +2804,8 @@ void init_codes()
         codemap[11].instances    = malloc(sizeof (*codemap[11].instances) * GROUP_0x0C_LEN);
         if (!codemap[11].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 12), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 12), aborting.");
             return;
         }
         codemap[11].instances[0] = new_opcode_t(0b1100000011000000, 0b1111000111000000, "MULU", MULU);
@@ -2823,8 +2821,8 @@ void init_codes()
         codemap[12].instances    = malloc(sizeof (*codemap[12].instances) * GROUP_0x0D_LEN);
         if (!codemap[12].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 13), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 13), aborting.");
             return;
         }
         codemap[12].instances[0] = new_opcode_t(0b1101000011000000, 0b1111000011000000, "ADDA", ADDA);
@@ -2838,8 +2836,8 @@ void init_codes()
         codemap[13].instances     = malloc(sizeof (*codemap[13].instances) * GROUP_0x0E_LEN);
         if (!codemap[13].instances)
         {
-            mach->State = PANIC_STATE;
-            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 14), aborting.");
+            emulation->State = PANIC_STATE;
+            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 14), aborting.");
             return;
         }
         codemap[13].instances[0]  = new_opcode_t(0b1110000011000000, 0b1111111111000000, "ASR",  ASR);
@@ -2926,11 +2924,7 @@ m68k_opcode* get_opcode_t(opcode code)
  * RUNNER
  *
  */
-void pre_set_runner(struct EmulationMachine *em)
-{
-    describe = em->ExecArgs.descr;
-    mach = em;
-}
+void preset_handler(struct EmulationMachine *em) { emulation = em; }
 
 u32 run_opcode(struct EmulationMachine *em)
 {
@@ -2938,8 +2932,8 @@ u32 run_opcode(struct EmulationMachine *em)
 
     if (tmp == NULL)
     {
-        mach->State = PANIC_STATE;
-        sprintf(mach->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", em->Machine.OpCode.code);
+        emulation->State = PANIC_STATE;
+        sprintf(emulation->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", em->Machine.OpCode.code);
         return (RETURN_ERR);
     }
 

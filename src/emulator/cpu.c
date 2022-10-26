@@ -10,14 +10,18 @@ void __show__();
 
 m68k_cpu *cpu = NULL;
 
-m68k_cpu* init_cpu()
+m68k_cpu* init_cpu(struct EmulationMachine *em)
 {
     if (!cpu)
     {
         cpu = malloc(sizeof (*cpu));
 
         if (!cpu)
-            PANIC("Cannot init cpu, aborting.")
+        {
+            em->State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Cannot init cpu, aborting.");
+            return (NULL);
+        }
 
         reset_cpu();
 
@@ -27,6 +31,7 @@ m68k_cpu* init_cpu()
     return (cpu);
 }
 
+m68k_cpu* get_cpu() { return (cpu); }
 
 void reset_cpu()
 {

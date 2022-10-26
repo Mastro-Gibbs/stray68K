@@ -11,7 +11,7 @@
 
 char* Jcpu()
 {
-    m68k_cpu *cpu = init_cpu();
+    m68k_cpu *cpu = get_cpu();
 
     char *res = NULL;
     char tmp[16];
@@ -151,10 +151,8 @@ char* Jstack(u32 from, u32 to)
 
 char* Jchrono(u64 usec)
 {
-    const int usec_size = snprintf(NULL, 0, "%lu", usec);
-
     char *res;
-    char buf[(usec_size) + 50];
+    char buf[100];
 
     sprintf(buf, "{\"%s\":%lu}", "TIME", usec);
 

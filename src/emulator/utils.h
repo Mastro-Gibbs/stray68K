@@ -14,8 +14,6 @@
  *
  */
 #define TRAPEXC(cause)  do {                                                \
-                            m68k_cpu *cpu = init_cpu();                     \
-                            cpu->show();                                    \
                             printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
                             printf("%s\n", cause);                          \
                             fflush(stdout);                                 \
@@ -29,8 +27,6 @@
  *
  */
 #define PANIC(cause) do {                                          \
-                        m68k_cpu *cpu = init_cpu();                \
-                        cpu->show();                               \
                         printf("[\033[01m\033[91mPANIC\033[0m] "); \
                         printf("%s\n", cause);                     \
                         fflush(stdout);                            \
@@ -286,8 +282,8 @@
                                                                     \
                                                                     default: \
                                                                     { \
-                                                                        mach->State = PANIC_STATE; \
-                                                                        sprintf(mach->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
+                                                                        emulation->State = PANIC_STATE; \
+                                                                        sprintf(emulation->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
                                                                         return (RETURN_ERR); \
                                                                     } \
                                                                 } \
@@ -355,8 +351,8 @@
                                                                 \
                                                                 default: \
                                                                 { \
-                                                                    mach->State = PANIC_STATE; \
-                                                                    sprintf(mach->Machine.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
+                                                                    emulation->State = PANIC_STATE; \
+                                                                    sprintf(emulation->Machine.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
                                                                     return (RETURN_ERR); \
                                                                 } \
                                                             } \

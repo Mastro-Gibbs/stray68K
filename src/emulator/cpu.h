@@ -16,9 +16,10 @@
 
 #include <stdlib.h>
 
-m68k_cpu* init_cpu();
-void   reset_cpu();
-void   destroy_cpu();
+m68k_cpu* init_cpu(struct EmulationMachine *em);
+m68k_cpu* get_cpu();
+void      reset_cpu();
+void      destroy_cpu();
 
 
 /* REGS */

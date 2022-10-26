@@ -71,7 +71,7 @@ Just clone and invoke makefile
         JSON encoding commands
         [cpu]      -Mean cpu encoding.
         [ram]      -Mean ram encoding.
-        [chrono]   -Mean chrono encoding (ms).
+        [chrono]   -Mean chrono encoding (ns).
         [code]     -Mean operation code encoding (base 10).
         [mnemonic] -Mean mnemonic operation encoding.
         [concat]   -Perform JSON concat, must pass at least two listed above commands.

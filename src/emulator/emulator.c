@@ -206,7 +206,7 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
             "**JSON encoding commands**\n"
             " [cpu]      -Mean cpu encoding.\n"
             " [ram]      -Mean ram encoding.\n"
-            " [chrono]   -Mean chrono encoding (ms).\n"
+            " [chrono]   -Mean chrono encoding (ns).\n"
             " [code]     -Mean operation code encoding (base 10).\n"
             " [mnemonic] -Mean mnemonic operation encoding.\n"
             " [concat]   -Perform JSON concat, must pass at least two listed above commands.\n"
@@ -346,6 +346,16 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 
     parse_args(&em, argc, argv);
 
+    em.Machine.cpu = init_cpu(&em);
+
+    if (em.State == PANIC_STATE)
+    { PANIC(em.Machine.Exception.panic_cause); exit(EXIT_FAILURE); }
+
+    em.Machine.ram = init_ram(&em, RAM_SIZE);
+
+    if (em.State == PANIC_STATE)
+    { PANIC(em.Machine.Exception.panic_cause); exit(EXIT_FAILURE); }
+
     return em;
 }
 
@@ -354,17 +364,13 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 int emulate(int argc, char** argv)
 {
     struct EmulationMachine em = obtain_emulation_machine(argc, argv);
-
-    em.Machine.cpu = init_cpu();
-    em.Machine.ram = init_ram(RAM_SIZE);
+    preset_handler(&em);
 
     __load_bytecode__(&em);
 
     printf_sstatus(&em);
 
     em.State = EXECUTION_STATE;
-
-    pre_set_runner(&em);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
     while((em.Machine.cpu->pc != em.Machine.ExecData.simhalt || em.Machine.cpu->pc < em.Machine.ExecData.simhalt))
@@ -374,7 +380,7 @@ int emulate(int argc, char** argv)
             clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_end);
 
             em.Machine.Chrono.dt = (em.Machine.Chrono.t_end.tv_sec - em.Machine.Chrono.t_begin.tv_sec) * 1000000 +
-                                  (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
+                                   (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
 
             switch (em.State) {
                 case PANIC_STATE:
@@ -397,7 +403,7 @@ int emulate(int argc, char** argv)
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_end);
 
     em.Machine.Chrono.dt = (em.Machine.Chrono.t_end.tv_sec - em.Machine.Chrono.t_begin.tv_sec) * 1000000 +
-                          (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
+                           (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
 
     em.State = FINAL_STATE;
 
