@@ -488,7 +488,7 @@
                                             case IMMEDIATE: \
                                             { \
                                                 if (tmpsize == BYTE) tmpsize = WORD; \
-                                                set_pc(get_pc() + size_to_span(size)); \
+                                                set_pc(get_pc() + size_to_span(tmpsize)); \
                                                 break; \
                                             } \
                                             case ADDRESSPostIncr: \
