@@ -6,3 +6,4 @@ assembler/lexical.c
 assembler/lexical.h
 assembler/syntactic.c
 assembler/syntactic.h
+.idea/
