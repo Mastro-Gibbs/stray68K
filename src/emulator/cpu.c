@@ -64,7 +64,11 @@ u32 __exec__(struct EmulationMachine *em)
     u32 istruction_ptr = em->Machine.cpu->pc;
 
     if ((istruction_ptr % 2) != 0)
-        PANIC("Segmentation fault while reading next istruction on odd address");
+    {
+        em->State = PANIC_STATE;
+        sprintf(em->Machine.Exception.panic_cause, "Segmentation fault while reading next istruction on odd address");
+        return (RETURN_ERR);
+    }
 
     em->Machine.OpCode.code = read_word(istruction_ptr);;
 

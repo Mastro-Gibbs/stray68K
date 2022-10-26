@@ -56,12 +56,16 @@ void destroy_ram()
     }
 }
 
-
 void check_addr(u32 ptr, u8 limit)
 {
     if (ptr > ram->size)
-        PANIC("Segmentation fault: reading illegal memory address\naddress: 0x%X\nlimit: 0x%X\nfinal address: 0x%X",
-              ptr, ram->size, ptr + limit)
+    {
+        char panic_str[200];
+        sprintf(panic_str, "Segmentation fault: reading illegal memory address\naddress: 0x%X\nlimit: 0x%X\nfinal address: 0x%X",
+                 ptr, ram->size, ptr + limit);
+
+        PANIC(panic_str)
+    }
 }
 
 

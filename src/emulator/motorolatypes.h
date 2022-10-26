@@ -4,6 +4,11 @@
 #include <regex.h>
 #include <termios.h>
 
+//handler return types
+#define RETURN_OK_PC_NO_INCR 2
+#define RETURN_OK            1
+#define RETURN_ERR           0
+
 #define TRUE        1
 #define FALSE       0
 
@@ -108,7 +113,10 @@ struct EmulationMachine
     {
         BEGIN_STATE     = 0,
         EXECUTION_STATE = 1,
-        FINAL_STATE     = 2
+        FINAL_STATE     = 2,
+        PANIC_STATE     = 3,
+        WARNING_STATE   = 4,
+        TRAP_STATE      = 5
     } State;
 
     struct
@@ -118,9 +126,10 @@ struct EmulationMachine
             bit enable;
             bit cpu;
             bit ram;
-            bit timer;
-            bit menm;
+            bit chrono;
+            bit mnem;
             bit ocode;
+            bit concat;
         } JSON;
 
         bit  descr;
@@ -148,26 +157,32 @@ struct EmulationMachine
             u32 orgptr;
             u32 lwb;
             u32 JSR_CALL_COUNTER;
-        } Data;
+        } ExecData;
 
         struct
         {
             struct termios oldt;
             struct termios newt;
-        } Waiting;
+        } Expecter;
 
         struct
         {
             struct timespec t_begin;
             struct timespec t_end;
             u64 dt;
-        } Timer;
+        } Chrono;
 
         struct
         {
             u16  code;
             char *mnemonic;
         } OpCode;
+
+        struct
+        {
+            char panic_cause[150];
+            char trap_cause [250];
+        } Exception;
 
     } Machine;
 

@@ -6,9 +6,9 @@
 	███████║   ██║   ██║  ██║██║  ██║   ██║   ╚██████╔╝╚█████╔╝██║  ██╗
 	╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚════╝ ╚═╝  ╚═╝
 
-[![forthebadge](https://img.shields.io/badge/C-BASED-gray?style=for-the-badge&logo=c&labelColor=0000FF&logoColor=darkgray)]()
-[![forthebadge](https://img.shields.io/badge/Yacc-BASED-gray?style=for-the-badge&labelColor=0000FF&logoColor=darkgray)]()
-[![forthebadge](https://img.shields.io/badge/Lex-BASED-gray?style=for-the-badge&labelColor=0000FF&logoColor=darkgray)]()
+[![forthebadge](https://img.shields.io/badge/BASED-gray?style=for-the-badge&logo=c&labelColor=546CAF)]()
+[![forthebadge](https://img.shields.io/badge/Yacc-BASED-gray?style=for-the-badge&labelColor=991030&logoColor=darkgray)]()
+[![forthebadge](https://img.shields.io/badge/Lex-BASED-gray?style=for-the-badge&labelColor=10AA10&logoColor=darkgray)]()
 
 ---                                                     
 
@@ -43,24 +43,44 @@ Just clone and invoke makefile
 
 ## Usage
 
-- Commands & Options|Arguments
+- Commands & Options|Arguments aka man-page
   ```bash
-        stray68K: emulator for Motorola 68000.
-        
-        Options:
-         -a [opts|args]     -Invoke assembler. See below.
-         -e [path]  [-q|-t] -Input executable file. To generate it use assembler options.
-                             [-q] mean quiet option.
-                             [-t] mean timer option.
+        stray68K an emulator for Motorola 68000.
 
-         -s [path]  [-d]    -Like option '-e' but run executable file step by step (debug mode).
-                             [-d] mean descriptive opt.
-           
-        step-by-step mode options asked from stdin:
-            's' -Asks for offsets and print current stack.
-            'n' -Execute next istruction.
-            's' -Skip current step.
-            't' -Full skip steps. The execution proceeds to the end.
+        Modality
+        -Assembler:
+          -a [opts|args] -Invoke assembler. See help.
+        -Emulator:
+          -e [path] -STANDARD MODE. Input executable file. To generate it use assembler options.
+          -s [path] -STEP-BY-STEP MODE. Like option '-e' but run executable file step by step (debug mode).
+
+        Emulator options list
+        [-q] -Mean quiet output.
+              This option is prohibited in STEP-BY-STEP MODE.
+        [-d] -Mean descriptive output.
+              This option is prohibited in STANDARD MODE.
+        [-t] -Perform a chrono calculation and print it.
+              This option is prohibited in STEP-BY-STEP MODE.
+        [-j] -Perform JSON machine encoding output.
+
+        You cannot combine '-d' and '-q' options.
+        You cannot combine '-j' and '-t' options.
+        You cannot use JSON encoding option (-j) alone.
+        You cannot use JSON chrono encoding (-j chrono) in step-by-step mode.
+
+        JSON encoding commands
+        [cpu]      -Mean cpu encoding.
+        [ram]      -Mean ram encoding.
+        [chrono]   -Mean chrono encoding (ms).
+        [code]     -Mean operation code encoding (base 10).
+        [mnemonic] -Mean mnemonic operation encoding.
+        [concat]   -Perform JSON concat, must pass at least two listed above commands.
+
+        STEP-BY-STEP MODE's options asked from stdin
+        [s] -Asks for offsets and print current stack.
+        [n] -Execute next istruction.
+        [k] -Skip current step.
+        [t] -Full skip steps. The execution proceeds to the end.
         
         Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)
         
@@ -86,6 +106,10 @@ Just clone and invoke makefile
 - To perform a ```execution```
   ```bash
   $ ./stray68K -e <output_file_path>.B68 -q
+  ```
+- To perform a ```execution``` with JSON encoding output
+  ```bash
+  $ ./stray68K -e <output_file_path>.B68 -j cpu time concat -q
   ```
 - To perform a ```execution step by step```
   ```bash

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "cpu.h"
 #include "ram.h"
@@ -13,38 +14,38 @@ char* Jcpu()
     m68k_cpu *cpu = init_cpu();
 
     char *res = NULL;
-    char tmp[17];
+    char tmp[16];
     char buf[410];
 
-    tmp[16] = '\0';
+    tmp[15] = '\0';
 
     sprintf(buf, "%s", "{\"CPU\": {");
 
     for (u16 i = 0; i < 8; i++)
     {
-        sprintf(tmp, "\"D%d\": \"%X\",", i, cpu->data_r[i]);
+        sprintf(tmp, "\"D%d\":\"%X\",", i, cpu->data_r[i]);
         strncat(buf, tmp, 17);
     }
 
     for (u16 i = 0; i < 7; i++)
     {
-        sprintf(tmp, "\"A%d\": \"%X\",", i, cpu->addr_r[i]);
+        sprintf(tmp, "\"A%d\":\"%X\",", i, cpu->addr_r[i]);
         strncat(buf, tmp, 17);
     }
 
-    sprintf(tmp, "\"A7\": \"%X\",", read_addrreg(7));
+    sprintf(tmp, "\"A7\":\"%X\",", read_addrreg(7));
     strncat(buf, tmp, 17);
 
-    sprintf(tmp, "\"US\": \"%X\",", cpu->usp);
+    sprintf(tmp, "\"US\":\"%X\",", cpu->usp);
     strncat(buf, tmp, 17);
 
-    sprintf(tmp, "\"SS\": \"%X\",", cpu->ssp);
+    sprintf(tmp, "\"SS\":\"%X\",", cpu->ssp);
     strncat(buf, tmp, 17);
 
-    sprintf(tmp, "\"PC\": \"%X\",", cpu->pc);
+    sprintf(tmp, "\"PC\":\"%X\",", cpu->pc);
     strncat(buf, tmp, 17);
 
-    sprintf(tmp, "\"SR\": \"%X\"", cpu->sr);
+    sprintf(tmp, "\"SR\":\"%X\"", cpu->sr);
     strncat(buf, tmp, 17);
 
     strncat(buf, "}}\0", 3);
@@ -70,7 +71,7 @@ char* Jram(u32 from, u32 to)
 
     tmp[1] = '\0';
 
-    sprintf(buf, "{\"%s\": \"", "RAM");
+    sprintf(buf, "{\"%s\":\"", "RAM");
 
     for (u32 curr = from; curr <= to; curr++)
     {
@@ -114,7 +115,7 @@ char* Jstack(u32 from, u32 to)
 
     tmp[1] = '\0';
 
-    sprintf(buf, "{\"%s\": \"", "STACK");
+    sprintf(buf, "{\"%s\":\"", "STACK");
 
     for (u32 curr = from; curr <= to; curr++)
     {
@@ -155,7 +156,7 @@ char* Jchrono(u64 usec)
     char *res;
     char buf[(usec_size) + 50];
 
-    sprintf(buf, "{\"%s\": %lu}", "TIME", usec);
+    sprintf(buf, "{\"%s\":%lu}", "TIME", usec);
 
     ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
@@ -174,7 +175,7 @@ char* Jmnemonic(char *mnem)
     char *res;
     char buf[60];
 
-    sprintf(buf, "{\"%s\": %s}", "MENMONIC", mnem);
+    sprintf(buf, "{\"%s\":\"%s\"}", "MENMONIC", mnem);
 
     ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
@@ -187,14 +188,16 @@ char* Jmnemonic(char *mnem)
 }
 
 
-char* Jcode(u16 code)
+char* Jcode(u32 code_promoted)
 {
+    u16 code = (u16) code_promoted;
+
     const int usec_size = snprintf(NULL, 0, "%d", code);
 
     char *res;
     char buf[(usec_size) + 50];
 
-    sprintf(buf, "{\"%s\": %d}", "CODE", code);
+    sprintf(buf, "{\"%s\":%d}", "CODE", code);
 
     ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
@@ -206,5 +209,65 @@ char* Jcode(u16 code)
     return res;
 }
 
+
+char* Jconcat(char *dst, char *src)
+{
+    const size_t dsts = strlen(dst);
+    const size_t srcs = strlen(src);
+
+    dst = realloc(dst, dsts + srcs);
+
+    dst[dsts - 1] = ',';
+    memcpy(dst + dsts, src + 1, srcs);
+
+    return dst;
+}
+
+
+char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
+{
+    va_list va_ptr;
+
+    va_start(va_ptr, Jsrc);
+
+    char *src = NULL;
+
+    if (Jsrc == Jcpu)
+        src = Jcpu();
+    else if (Jsrc == Jram)
+    {
+        u32 _start, _end;
+        _start = va_arg(va_ptr, u32);
+        _end   = va_arg(va_ptr, u32);
+
+        src = Jram(_start, _end);
+    }
+    else if (Jsrc == Jchrono)
+        src = Jchrono(va_arg(va_ptr, u64));
+    else if (Jsrc == Jmnemonic)
+        src = Jmnemonic(va_arg(va_ptr, char *));
+    else if (Jsrc == Jcode)
+        src = Jcode(va_arg(va_ptr, u32));
+
+    va_end(va_ptr);
+
+    if (src == NULL)
+    {
+        free(dst);
+        return NULL;
+    }
+
+    const size_t dsts = strlen(dst);
+    const size_t srcs = strlen(src);
+
+    dst = realloc(dst, dsts + srcs);
+
+    dst[dsts - 1] = ',';
+    memcpy(dst + dsts, src + 1, srcs);
+
+    free(src);
+
+    return dst;
+}
 
 

@@ -14,7 +14,11 @@ char* Jchrono(u64 usec);
 
 char* Jmnemonic(char *mnem);
 
-char* Jcode(u16 code);
+char* Jcode(u32 code_promoted);
+
+char* Jconcat(char *dst, char *src);
+
+char* Jconcat2(char *dst, char* (*Jsrc)(), ...);
 
 
 

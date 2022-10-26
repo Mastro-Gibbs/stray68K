@@ -128,9 +128,9 @@ int assemble(int argc, char **argv)
 	if (argc < 2 || print_usage)
 	{
 		fputs(
-            "assembler: an assembler for the Motorola 68000.\n"
+            "**Assembler** an assembler for the Motorola 68000.\n"
 			"\n"
-			"Options:\n"
+            "**Options**\n"
             " -i [path] - Input file.\n"
 			" -o [path] - Output file.\n"
 			" -l [path] - Listing file. Optional.\n"

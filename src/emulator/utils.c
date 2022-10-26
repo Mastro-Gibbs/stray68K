@@ -230,7 +230,7 @@ void iotask(bit descr)
 #include <unistd.h>
 void machine_waiter(struct EmulationMachine *em)
 {
-    if (em->Machine.Data.sbs_debugger)
+    if (em->Machine.ExecData.sbs_debugger)
     {
         fputs(
             "\n---------------- Execution Options ----------------\n"
@@ -248,14 +248,14 @@ void machine_waiter(struct EmulationMachine *em)
 
         while (loop)
         {
-            tcgetattr(STDIN_FILENO, &em->Machine.Waiting.oldt);
-            em->Machine.Waiting.newt = em->Machine.Waiting.oldt;
-            em->Machine.Waiting.newt.c_lflag &= ~(ICANON);
-            tcsetattr(STDIN_FILENO, TCSANOW, &em->Machine.Waiting.newt);
+            tcgetattr(STDIN_FILENO, &em->Machine.Expecter.oldt);
+            em->Machine.Expecter.newt = em->Machine.Expecter.oldt;
+            em->Machine.Expecter.newt.c_lflag &= ~(ICANON);
+            tcsetattr(STDIN_FILENO, TCSANOW, &em->Machine.Expecter.newt);
 
             opt = getchar();
 
-            tcsetattr(STDIN_FILENO, TCSANOW, &em->Machine.Waiting.oldt);
+            tcsetattr(STDIN_FILENO, TCSANOW, &em->Machine.Expecter.oldt);
 
             switch (opt) {
                 case 's': //stack;
@@ -303,7 +303,7 @@ void machine_waiter(struct EmulationMachine *em)
 
                     loop = FALSE;
 
-                    em->Machine.Data.sbs_debugger = FALSE;
+                    em->Machine.ExecData.sbs_debugger = FALSE;
                     em->ExecArgs.descr = FALSE;
                     break;
                 }
@@ -322,55 +322,83 @@ void printf_sstatus(struct EmulationMachine *em)
     {
         if (em->ExecArgs.quiet && em->State != FINAL_STATE) return;
 
-        if (em->Machine.Data.sbs_debugger) system("clear");
+        if (em->Machine.ExecData.sbs_debugger) system("clear");
 
         char *buf = NULL;
 
-        if (em->ExecArgs.JSON.cpu)
+        if (em->ExecArgs.JSON.concat)
         {
-            buf = Jcpu();
-            printf("%s\n", buf);
-            free(buf);
-        }
+            if (em->ExecArgs.JSON.cpu)
+                buf = Jcpu();
+            if (em->ExecArgs.JSON.ram)
+            {
+                u32 _start, _end, _ptr = em->Machine.cpu->pc;
+                _start = (_ptr & 0xFFFFFFF0) - 0x20;
+                _end   = (_ptr | 0x0000000F) + 0x31;
 
-        if (em->ExecArgs.JSON.ram)
+                buf = Jconcat2(buf, Jram, _start, _end);
+            }
+            if (em->ExecArgs.JSON.ocode)
+                buf = Jconcat2(buf, Jcode, em->Machine.OpCode.code);
+            if (em->ExecArgs.JSON.mnem)
+                buf = Jconcat2(buf, Jmnemonic, em->Machine.OpCode.mnemonic);
+            if (em->State == FINAL_STATE && em->ExecArgs.JSON.chrono)
+                buf = Jconcat2(buf, Jchrono, em->Machine.Chrono.dt);
+
+            if (buf)
+            {
+                printf("%s\n", buf);
+                free(buf);
+            }
+        }
+        else
         {
-            u32 _start, _end, _ptr = em->Machine.cpu->pc;
-            _start = (_ptr & 0xFFFFFFF0) - 0x20;
-            _end   = (_ptr | 0x0000000F) + 0x31;
-            buf = Jram(_start, _end);
-            printf("%s\n", buf);
-            free(buf);
-        }
+            if (em->ExecArgs.JSON.cpu)
+            {
+                buf = Jcpu();
+                printf("%s\n", buf);
+                free(buf);
+            }
 
-        if (em->ExecArgs.JSON.ocode)
-        {
-            buf = Jcode(em->Machine.OpCode.code);
-            printf("%s\n", buf);
-            free(buf);
-        }
+            if (em->ExecArgs.JSON.ram)
+            {
+                u32 _start, _end, _ptr = em->Machine.cpu->pc;
+                _start = (_ptr & 0xFFFFFFF0) - 0x20;
+                _end   = (_ptr | 0x0000000F) + 0x31;
 
-        if (em->ExecArgs.JSON.menm)
-        {
-            buf = Jmnemonic(em->Machine.OpCode.mnemonic);
-            printf("%s\n", buf);
-            free(buf);
-        }
+                buf = Jram(_start, _end);
+                printf("%s\n", buf);
+                free(buf);
+            }
 
-        if (em->State == FINAL_STATE && em->ExecArgs.JSON.timer)
-        {
-            buf = Jchrono(em->Machine.Timer.dt);
-            printf("%s\n", buf);
-            free(buf);
-        }
+            if (em->ExecArgs.JSON.ocode)
+            {
+                buf = Jcode(em->Machine.OpCode.code);
+                printf("%s\n", buf);
+                free(buf);
+            }
 
+            if (em->ExecArgs.JSON.mnem)
+            {
+                buf = Jmnemonic(em->Machine.OpCode.mnemonic);
+                printf("%s\n", buf);
+                free(buf);
+            }
+
+            if (em->State == FINAL_STATE && em->ExecArgs.JSON.chrono)
+            {
+                buf = Jchrono(em->Machine.Chrono.dt);
+                printf("%s\n", buf);
+                free(buf);
+            }
+        }
     }
     else if (!em->ExecArgs.quiet)
     {
-        if (em->EmuType == EMULATE_SBS && em->Machine.Data.sbs_debugger) system("clear");
+        if (em->EmuType == EMULATE_SBS && em->Machine.ExecData.sbs_debugger) system("clear");
 
-        u32 _start = em->Machine.Data.orgptr;
-        u32 _end   = (em->Machine.Data.lwb | 0x0000000F) + 0x11;
+        u32 _start = em->Machine.ExecData.orgptr;
+        u32 _end   = (em->Machine.ExecData.lwb | 0x0000000F) + 0x11;
         u32 _ptr   = em->Machine.cpu->pc;
         char *pcptr_color    = "";
         char *halt_color     = "\033[37m";
@@ -405,9 +433,9 @@ void printf_sstatus(struct EmulationMachine *em)
         printf("\n");
 
         if (em->EmuType == EMULATE_STD && em->State == FINAL_STATE)
-            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, em->Machine.Data.simhalt);
+            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, em->Machine.ExecData.simhalt);
         else if (em->EmuType == EMULATE_SBS)
-            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, em->Machine.Data.simhalt);
+            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, em->Machine.ExecData.simhalt);
 
         if (em->ExecArgs.descr)
         {
@@ -426,7 +454,7 @@ void printf_sstatus(struct EmulationMachine *em)
         if (!em->ExecArgs.quiet)
             printf("-------------------------------------------------------------------------------------------------------------------------\n");
         printf("\033[01m\033[37mTimer\033[0m: %.3fms -> %.3fs\n",
-               (f64) em->Machine.Timer.dt / (f64) 1000,
-               (f64) em->Machine.Timer.dt / (f64) 1000000);
+               (f64) em->Machine.Chrono.dt / (f64) 1000,
+               (f64) em->Machine.Chrono.dt / (f64) 1000000);
     }
 }

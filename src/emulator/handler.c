@@ -838,9 +838,12 @@ u32 ILLEGAL(opcode code)
 {
     UNUSED(code)
 
-    TRAPEXC(IllegalInstruction, trap_code_toString(IllegalInstruction))
+    mach->State = TRAP_STATE;
+    sprintf(mach->Machine.Exception.trap_cause,
+            "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+            IllegalInstruction, trap_code_toString(IllegalInstruction));
 
-    return (RETURN_OK);
+    return (RETURN_ERR);
 }
 
 
@@ -891,10 +894,17 @@ u32 TRAP(opcode code)
     u16 vector = (u16)(code & 0x0000000F);
 
     if (vector == 0x000F)
+    {
         iotask(describe);
+        return (RETURN_OK);
+    }
     else
-        TRAPEXC(0x20 + vector, trap_code_toString(0x20 + vector))
-
+    {
+        mach->State = TRAP_STATE;
+        sprintf(mach->Machine.Exception.trap_cause,
+                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                0x20 + vector, trap_code_toString(0x20 + vector));
+    }
 
     return (RETURN_ERR);
 }
@@ -939,7 +949,14 @@ u32 UNLK(opcode code)
 u32 MOVEUSP(opcode code)
 {
     if (!((mach->Machine.cpu->sr & SUPERVISOR) ? 1 : 0))
-        TRAPEXC(PrivilegeViolation, trap_code_toString(PrivilegeViolation))
+    {
+        mach->State = TRAP_STATE;
+        sprintf(mach->Machine.Exception.trap_cause,
+                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                PrivilegeViolation, trap_code_toString(PrivilegeViolation));
+
+        return (RETURN_ERR);
+    }
 
     u32 addr_reg  = (code & SRC_MASK);
     u32 direction = (code & 0b00000000000001000) >> 3;
@@ -995,8 +1012,15 @@ u32 RTE(opcode code)
 
         mach->Machine.cpu->sr = (sr);
     }
-    else TRAPEXC(PrivilegeViolation, trap_code_toString(PrivilegeViolation))
+    else
+    {
+        mach->State = TRAP_STATE;
+        sprintf(mach->Machine.Exception.trap_cause,
+                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                PrivilegeViolation, trap_code_toString(PrivilegeViolation));
 
+        return (RETURN_ERR);
+    }
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1004,12 +1028,17 @@ u32 RTE(opcode code)
 
 u32 RTS(opcode code)
 {
-    if (mach->Machine.Data.JSR_CALL_COUNTER == 0) //like return in C-like main func
-        PANIC("RTS instruction invoked in main label, code: 0x%X", code)
+    if (mach->Machine.ExecData.JSR_CALL_COUNTER == 0) //like return in C-like main func
+    {
+        mach->State = PANIC_STATE;
+        sprintf(mach->Machine.Exception.panic_cause, "RTS instruction invoked in main label, code: 0x%X", code);
+
+        return (RETURN_ERR);
+    }
 
     mach->Machine.cpu->pc = (pop_long());
 
-    mach->Machine.Data.JSR_CALL_COUNTER--;
+    mach->Machine.ExecData.JSR_CALL_COUNTER--;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1020,8 +1049,14 @@ u32 TRAPV(opcode code)
     UNUSED(code)
 
     if ((mach->Machine.cpu->sr & OVERFLOW))
-        TRAPEXC(TRAPVInstruction, trap_code_toString(TRAPVInstruction))
+    {
+        mach->State = TRAP_STATE;
+        sprintf(mach->Machine.Exception.trap_cause,
+                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                TRAPVInstruction, trap_code_toString(TRAPVInstruction));
 
+        return (RETURN_ERR);
+    }
 
     return (RETURN_OK);
 }
@@ -1057,14 +1092,20 @@ u32 JSR(opcode code)
         jmp_addr = read_ram(&ram_ptr, &size);
         INCR_PC(LONG_SPAN);
     }
-    else PANIC("Unmenaged mode")
+    else
+    {
+        mach->State = PANIC_STATE;
+        sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+
+        return (RETURN_ERR);
+    }
 
 
     push_long(mach->Machine.cpu->pc);
 
     mach->Machine.cpu->pc = (jmp_addr);
 
-    mach->Machine.Data.JSR_CALL_COUNTER++;
+    mach->Machine.ExecData.JSR_CALL_COUNTER++;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1089,7 +1130,13 @@ u32 JMP(opcode code)
         opsize size = LONG;
         jmp_addr = read_ram(&ram_ptr, &size);
     }
-    else PANIC("Unmenaged mode")
+    else
+    {
+        mach->State = PANIC_STATE;
+        sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+
+        return (RETURN_ERR);
+    }
 
 
     mach->Machine.cpu->pc = (jmp_addr);
@@ -1131,7 +1178,14 @@ u32 CHK(opcode code)
 
         if (signDVAL > signVALUE) SET_NEGATIVE(0)
 
-        TRAPEXC(CHKInstruction, trap_code_toString(CHKInstruction))
+        {
+            mach->State = TRAP_STATE;
+            sprintf(mach->Machine.Exception.trap_cause,
+                    "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                    CHKInstruction, trap_code_toString(CHKInstruction));
+
+            return (RETURN_ERR);
+        }
     }
 
     return (RETURN_OK);
@@ -1149,7 +1203,13 @@ u32 LEA(opcode code)
 
         write_addrreg(addr_reg, label, NULL);
     }
-    else PANIC("Unmenaged mode 0x%X\n", mode)
+    else
+    {
+        mach->State = PANIC_STATE;
+        sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+
+        return (RETURN_ERR);
+    }
 
     INCR_PC(LONG_SPAN); // memory readF
 
@@ -1333,7 +1393,7 @@ u32 BSR(opcode code)
 
     mach->Machine.cpu->pc = (pc + disp);
 
-    mach->Machine.Data.JSR_CALL_COUNTER++;
+    mach->Machine.ExecData.JSR_CALL_COUNTER++;
 
     return (RETURN_OK);
 }
@@ -1402,7 +1462,15 @@ u32 DIVU(opcode code)
     u32 *dVal = (u32 *) a[2];
     ADDRMode *mode = (ADDRMode *) a[3];
 
-    if (*sVal == 0) TRAPEXC(DivideByZero, trap_code_toString(DivideByZero))
+    if (*sVal == 0)
+    {
+        mach->State = TRAP_STATE;
+        sprintf(mach->Machine.Exception.trap_cause,
+                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                DivideByZero, trap_code_toString(DivideByZero));
+
+        return (RETURN_ERR);
+    }
 
     opsize size = WORD;
 
@@ -1449,7 +1517,15 @@ u32 DIVS(opcode code)
     SING_EXTENDED(signed_dVal, *dVal, WORD);
     SING_EXTENDED(signed_sVal, *sVal, WORD);
 
-    if (signed_sVal == 0) TRAPEXC(DivideByZero, trap_code_toString(DivideByZero))
+    if (signed_sVal == 0)
+    {
+        mach->State = TRAP_STATE;
+        sprintf(mach->Machine.Exception.trap_cause,
+                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                DivideByZero, trap_code_toString(DivideByZero));
+
+        return (RETURN_ERR);
+    }
 
     _val = (s32) signed_dVal / signed_sVal;
 
@@ -1868,8 +1944,12 @@ u32 EXG(opcode code)
             write_datareg(rY, x, NULL);
             break;
         default:
-            PANIC("Unmenaged mode")
-            break;
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+
+            return (RETURN_ERR);
+        }
     }
 
     return (RETURN_OK);
@@ -2234,9 +2314,13 @@ u32 ALxx(u32 code)
 
     switch (size) {
         case BYTE2:
-            /* cannot reach this case, i really hope :D */
-            PANIC("ALxx size invalid")
-            break;
+        /* cannot reach this case, i really hope :D */
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "ALxx invalid size 0x%X", BYTE);
+
+            return (RETURN_ERR);
+        }
 
         case WORD2: //same as ROxx
         {
@@ -2346,9 +2430,13 @@ u32 ROxx(u32 code)
 
     switch (size) {
         case BYTE2:
-            /* cannot reach this case, i really hope :D */
-            PANIC("ROxx size invalid\n")
-            break;
+        /* cannot reach this case, i really hope :D */
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "ROxx invalid size 0x%X", BYTE);
+
+            return (RETURN_ERR);
+        }
 
         case WORD2: //ROxx to memory
         {
@@ -2475,7 +2563,12 @@ m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemon
     m68k_opcode *newopcode = malloc(sizeof (*newopcode));
 
     if (!newopcode)
-        PANIC("Internal error (generate opcode), aborting.")
+    {
+        mach->State = PANIC_STATE;
+        sprintf(mach->Machine.Exception.panic_cause, "Internal error (generate opcode), aborting.");
+
+        return (NULL);
+    }
 
     newopcode->code     = bitcode;
     newopcode->mask     = mask;
@@ -2493,7 +2586,11 @@ void init_codes()
         codemap = malloc(sizeof (*codemap) * INSTRUCTION_SET_GROUPS_COUNT);
 
         if (!codemap)
-            PANIC("Internal error (codemap stage 0), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 0), aborting.");
+            return;
+        }
 
 
         // GROUP 0x00
@@ -2501,7 +2598,11 @@ void init_codes()
         codemap[0].size = GROUP_0x00_LEN;
         codemap[0].instances     = malloc(sizeof (*codemap[0].instances)  * GROUP_0x00_LEN);
         if (!codemap[0].instances)
-            PANIC("Internal error (codemap stage 1), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 1), aborting.");
+            return;
+        }
         codemap[0].instances[0]  = new_opcode_t(0b0000000000111100, 0b1111111111111111, "ORItoCCR",  ORItoCCR);
         codemap[0].instances[1]  = new_opcode_t(0b0000000001111100, 0b1111111111111111, "ORItoSR",   ORItoSR);
         codemap[0].instances[2]  = new_opcode_t(0b0000000000000000, 0b1111111100000000, "ORI",       ORI);
@@ -2530,7 +2631,11 @@ void init_codes()
         codemap[1].size = GROUP_0x01_LEN;
         codemap[1].instances    = malloc(sizeof (*codemap[1].instances)  * GROUP_0x01_LEN);
         if (!codemap[1].instances)
-            PANIC("Internal error (codemap stage 2), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 2), aborting.");
+            return;
+        }
         codemap[1].instances[0] = new_opcode_t(0b0001000000000000, 0b1111000000000000, "MOVE", MOVE);
 
 
@@ -2539,7 +2644,11 @@ void init_codes()
         codemap[2].size = GROUP_0x02_LEN;
         codemap[2].instances    = malloc(sizeof (*codemap[2].instances)  * GROUP_0x02_LEN);
         if (!codemap[2].instances)
-            PANIC("Internal error (codemap stage 3), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 3), aborting.");
+            return;
+        }
         codemap[2].instances[0] = new_opcode_t(0b0010000001000000, 0b1111000111000000, "MOVEA", MOVEA);
         codemap[2].instances[1] = new_opcode_t(0b0010000000000000, 0b1111000000000000, "MOVE",  MOVE);
 
@@ -2549,7 +2658,11 @@ void init_codes()
         codemap[3].size = GROUP_0x03_LEN;
         codemap[3].instances    = malloc(sizeof (*codemap[3].instances)  * GROUP_0x03_LEN);
         if (!codemap[3].instances)
-            PANIC("Internal error (codemap stage 4), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 4), aborting.");
+            return;
+        }
         codemap[3].instances[0] = new_opcode_t(0b0011000001000000, 0b1111000111000000, "MOVEA", MOVEA);
         codemap[3].instances[1] = new_opcode_t(0b0011000000000000, 0b1111000000000000, "MOVE",  MOVE);
 
@@ -2559,7 +2672,11 @@ void init_codes()
         codemap[4].size = GROUP_0x04_LEN;
         codemap[4].instances     = malloc(sizeof (*codemap[4].instances)  * GROUP_0x04_LEN);
         if (!codemap[4].instances)
-            PANIC("Internal error (codemap stage 5), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 5), aborting.");
+            return;
+        }
         codemap[4].instances[0]  = new_opcode_t(0b0100000011000000, 0b1111111111000000, "MOVEfromSR", MOVEfromSR);
         codemap[4].instances[1]  = new_opcode_t(0b0100010011000000, 0b1111111111000000, "MOVEtoCCR",  MOVEtoCCR);
         codemap[4].instances[2]  = new_opcode_t(0b0100011011000000, 0b1111111111000000, "MOVEtoSR",   MOVEtoSR);
@@ -2597,7 +2714,11 @@ void init_codes()
         codemap[5].size = GROUP_0x05_LEN;
         codemap[5].instances    = malloc(sizeof (*codemap[5].instances)  * GROUP_0x05_LEN);
         if (!codemap[5].instances)
-            PANIC("Internal error (codemap stage 6), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 6), aborting.");
+            return;
+        }
         codemap[5].instances[0] = new_opcode_t(0b0101000011001000, 0b1111000011111000, "DBcc", DBcc);
         codemap[5].instances[1] = new_opcode_t(0b0101000011000000, 0b1111000011000000, "Scc",  Scc);
         codemap[5].instances[2] = new_opcode_t(0b0101000000000000, 0b1111000100000000, "ADDQ", ADDQ);
@@ -2609,7 +2730,11 @@ void init_codes()
         codemap[6].size = GROUP_0x06_LEN;
         codemap[6].instances    = malloc(sizeof (*codemap[6].instances)  * GROUP_0x06_LEN);
         if (!codemap[6].instances)
-            PANIC("Internal error (codemap stage 7), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 7), aborting.");
+            return;
+        }
         codemap[6].instances[0] = new_opcode_t(0b0110000000000000, 0b1111111100000000, "BRA", BRA);
         codemap[6].instances[1] = new_opcode_t(0b0110000100000000, 0b1111111100000000, "BSR", BSR);
         codemap[6].instances[2] = new_opcode_t(0b0110000000000000, 0b1111000000000000, "Bcc", Bcc);
@@ -2620,7 +2745,11 @@ void init_codes()
         codemap[7].size = GROUP_0x07_LEN;
         codemap[7].instances    = malloc(sizeof (*codemap[7].instances)  * GROUP_0x07_LEN);
         if (!codemap[7].instances)
-            PANIC("Internal error (codemap stage 8), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 8), aborting.");
+            return;
+        }
         codemap[7].instances[0] = new_opcode_t(0b0111000000000000, 0b1111000100000000, "MOVEQ", MOVEQ);
 
 
@@ -2629,7 +2758,11 @@ void init_codes()
         codemap[8].size = GROUP_0x08_LEN;
         codemap[8].instances    = malloc(sizeof (*codemap[8].instances)  * GROUP_0x08_LEN);
         if (!codemap[8].instances)
-            PANIC("Internal error (codemap stage 9), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 9), aborting.");
+            return;
+        }
         codemap[8].instances[0] = new_opcode_t(0b1000000011000000, 0b1111000111000000, "DIVU", DIVU);
         codemap[8].instances[1] = new_opcode_t(0b1000000111000000, 0b1111000111000000, "DIVS", DIVS);
         codemap[8].instances[2] = new_opcode_t(0b1000000100000000, 0b1111000111110000, "SBCD", SBCD);
@@ -2641,7 +2774,11 @@ void init_codes()
         codemap[9].size = GROUP_0x09_LEN;
         codemap[9].instances    = malloc(sizeof (*codemap[9].instances)  * GROUP_0x09_LEN);
         if (!codemap[9].instances)
-            PANIC("Internal error (codemap stage 10), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 10), aborting.");
+            return;
+        }
         codemap[9].instances[0] = new_opcode_t(0b1001000011000000, 0b1111000011000000, "SUBA", SUBA);
         codemap[9].instances[1] = new_opcode_t(0b1001000100000000, 0b1111000100110000, "SUBX", SUBX);
         codemap[9].instances[2] = new_opcode_t(0b1001000000000000, 0b1111000000000000, "SUB",  SUB);
@@ -2652,7 +2789,11 @@ void init_codes()
         codemap[10].size = GROUP_0x0B_LEN;
         codemap[10].instances    = malloc(sizeof (*codemap[10].instances) * GROUP_0x0B_LEN);
         if (!codemap[10].instances)
-            PANIC("Internal error (codemap stage 11), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 11), aborting.");
+            return;
+        }
         codemap[10].instances[0] = new_opcode_t(0b1011000011000000, 0b1111000011000000, "CMPA", CMPA);
         codemap[10].instances[1] = new_opcode_t(0b1011000100001000, 0b1111000100111000, "CMPM", CMPM);
         codemap[10].instances[2] = new_opcode_t(0b1011000100000000, 0b1111000100000000, "EOR",  EOR);
@@ -2664,7 +2805,11 @@ void init_codes()
         codemap[11].size = GROUP_0x0C_LEN;
         codemap[11].instances    = malloc(sizeof (*codemap[11].instances) * GROUP_0x0C_LEN);
         if (!codemap[11].instances)
-            PANIC("Internal error (codemap stage 12), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 12), aborting.");
+            return;
+        }
         codemap[11].instances[0] = new_opcode_t(0b1100000011000000, 0b1111000111000000, "MULU", MULU);
         codemap[11].instances[1] = new_opcode_t(0b1100000111000000, 0b1111000111000000, "MULS", MULS);
         codemap[11].instances[2] = new_opcode_t(0b1100000100000000, 0b1111000111110000, "ABCD", ABCD);
@@ -2677,7 +2822,11 @@ void init_codes()
         codemap[12].size = GROUP_0x0D_LEN;
         codemap[12].instances    = malloc(sizeof (*codemap[12].instances) * GROUP_0x0D_LEN);
         if (!codemap[12].instances)
-            PANIC("Internal error (codemap stage 13), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 13), aborting.");
+            return;
+        }
         codemap[12].instances[0] = new_opcode_t(0b1101000011000000, 0b1111000011000000, "ADDA", ADDA);
         codemap[12].instances[1] = new_opcode_t(0b1101000100000000, 0b1111000100110000, "ADDX", ADDX);
         codemap[12].instances[2] = new_opcode_t(0b1101000000000000, 0b1111000000000000, "ADD",  ADD);
@@ -2688,7 +2837,11 @@ void init_codes()
         codemap[13].size = GROUP_0x0E_LEN;
         codemap[13].instances     = malloc(sizeof (*codemap[13].instances) * GROUP_0x0E_LEN);
         if (!codemap[13].instances)
-            PANIC("Internal error (codemap stage 14), aborting.")
+        {
+            mach->State = PANIC_STATE;
+            sprintf(mach->Machine.Exception.panic_cause, "Internal error (codemap stage 14), aborting.");
+            return;
+        }
         codemap[13].instances[0]  = new_opcode_t(0b1110000011000000, 0b1111111111000000, "ASR",  ASR);
         codemap[13].instances[1]  = new_opcode_t(0b1110000111000000, 0b1111111111000000, "ASL",  ASL);
         codemap[13].instances[2]  = new_opcode_t(0b1110001011000000, 0b1111111111000000, "LSR",  LSR);
@@ -2783,7 +2936,12 @@ u32 run_opcode(struct EmulationMachine *em)
 {
     m68k_opcode *tmp = get_opcode_t(em->Machine.OpCode.code);
 
-    if (tmp == NULL) PANIC("Instruction code 0x%X not reconized", em->Machine.OpCode.code)
+    if (tmp == NULL)
+    {
+        mach->State = PANIC_STATE;
+        sprintf(mach->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", em->Machine.OpCode.code);
+        return (RETURN_ERR);
+    }
 
     em->Machine.OpCode.mnemonic = tmp->mnemonic;
 

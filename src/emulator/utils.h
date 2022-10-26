@@ -13,35 +13,30 @@
  * MACRO used to raise a critical trap code.
  *
  */
-#define TRAPEXC(...) do {                                               \
-                        system("clear");                                \
-                        m68k_cpu *cpu = init_cpu();                     \
-                        cpu->show();                                    \
-                        printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
-                        printf("Raised trap exception: \n       \033[01m\033[37mcode\033[0m:     %d\n       \033[01m\033[37mmnemonic\033[0m: %s\n", ##__VA_ARGS__);\
-                        fflush(stdout);                                 \
-                        destroy_cpu();                                  \
-                        destroy_ram();                                  \
-                        exit(-1);                                       \
-                    } while (0);
+#define TRAPEXC(cause)  do {                                                \
+                            m68k_cpu *cpu = init_cpu();                     \
+                            cpu->show();                                    \
+                            printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
+                            printf("%s\n", cause);                          \
+                            fflush(stdout);                                 \
+                            destroy_cpu();                                  \
+                            destroy_ram();                                  \
+                        } while (0);
 
 
 /*
  * MACRO used to turn system into PANIC mode aka something that the sys don't know how to handle it.
  *
  */
-#define PANIC(fmt, ...) do {                                           \
-                            system("clear");                           \
-                            m68k_cpu *cpu = init_cpu();                \
-                            cpu->show();                               \
-                            printf("[\033[01m\033[91mPANIC\033[0m] "); \
-                            printf (fmt, ##__VA_ARGS__);               \
-                            printf("\n");                              \
-                            fflush(stdout);                            \
-                            destroy_cpu();                             \
-                            destroy_ram();                             \
-                            exit(-1);                                  \
-                        } while (0);
+#define PANIC(cause) do {                                          \
+                        m68k_cpu *cpu = init_cpu();                \
+                        cpu->show();                               \
+                        printf("[\033[01m\033[91mPANIC\033[0m] "); \
+                        printf("%s\n", cause);                     \
+                        fflush(stdout);                            \
+                        destroy_cpu();                             \
+                        destroy_ram();                             \
+                    } while (0);
 
 
 /*
@@ -218,7 +213,6 @@
                                             break; \
                                         default: \
                                             break; \
-                                    \
                                     } \
                                  } while(0);
 
@@ -291,10 +285,11 @@
                                                                     } \
                                                                     \
                                                                     default: \
-                                                                    {\
-                                                                        PANIC("Addressing mode not handled! (read_EA)") \
-                                                                        break; \
-                                                                    }\
+                                                                    { \
+                                                                        mach->State = PANIC_STATE; \
+                                                                        sprintf(mach->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
+                                                                        return (RETURN_ERR); \
+                                                                    } \
                                                                 } \
                                                             }while (0);
 
@@ -359,8 +354,11 @@
                                                                 } \
                                                                 \
                                                                 default: \
-                                                                    PANIC("Writing an invalid Effective Address, %d!", mode) \
-                                                                    break; \
+                                                                { \
+                                                                    mach->State = PANIC_STATE; \
+                                                                    sprintf(mach->Machine.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
+                                                                    return (RETURN_ERR); \
+                                                                } \
                                                             } \
                                                         } while(0);
 
