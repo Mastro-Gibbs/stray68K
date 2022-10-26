@@ -1,6 +1,6 @@
 #include "utils.h"
 
-generic_u32_t most_significant_byte(opsize size)
+u32 most_significant_byte(opsize size)
 {    
     switch (size)
     {
@@ -19,7 +19,7 @@ generic_u32_t most_significant_byte(opsize size)
 }
 
 
-generic_u32_t mask_by_opsize(opsize size)
+u32 mask_by_opsize(opsize size)
 {
     switch (size)
     {
@@ -38,9 +38,9 @@ generic_u32_t mask_by_opsize(opsize size)
 }
 
 
-generic_u32_t hash (const char* word)
+u32 hash (const char* word)
 {
-    generic_u32_t hash = 0;
+    u32 hash = 0;
     for (int i = 0; word[i] != '\0'; i++)
         hash = (31 * hash) + word[i];
 
@@ -48,348 +48,22 @@ generic_u32_t hash (const char* word)
 }
 
 
-generic_32_t sign_extended(generic_u32_t val, opsize size)
-{
-    int newValue = (int) val;
-    switch (size)
-    {
-        case BYTE:
-            if ((val & 0x80) == 0x80)
-                newValue = (int)(newValue | 0xFFFFFF00);
-            else
-                newValue &= 0x000000ff;
-            break;
-        case WORD:
-            if ((val & 0x8000) == 0x8000)
-                newValue = (int)(newValue | 0xFFFF0000);
-            else
-                newValue &= 0x0000ffff;
-            break;
-        case LONG:
-            break;
-        default:
-            break;
-
-    }
-
-    return newValue;
-}
-
-
-
-/**
- * @brief eval_OP_EA
- * @param code -> opcode
- * @return void ** array containing pointers to extracted parameters, if they exist, otherwise NULL
- */
-void** eval_OP_EA(opcode code, bit ignore_direction)
-{
-#ifndef RESULT_ARRAY
-#define RESULT_ARRAY 6
-#else
-#undef  RESULT_ARRAY
-#define RESULT_ARRAY 6
-#endif
-    generic_u32_t __dst__, __src__;
-
-    void **result_array = malloc(sizeof (void *) * RESULT_ARRAY);
-
-    generic_u32_t *dst_reg   = malloc(sizeof (generic_u32_t));
-    generic_u32_t *src_reg   = NULL;
-    generic_u32_t *dVal      = malloc(sizeof (generic_u32_t));
-    generic_u32_t *sVal      = malloc(sizeof (generic_u32_t));
-    ea_direction  *direction = malloc(sizeof (ea_direction));
-    opsize        *size      = malloc(sizeof (opsize));
-    ADDRMode      *addr_mode = malloc(sizeof (ADDRMode));
-
-
-    bitmask dest_reg_mask  = 0b0000111000000000,
-            direction_mask = 0b0000000100000000,
-            size_mask      = 0b0000000011000000,
-            addr_mask      = 0b0000000000111000,
-            immediate      = 0b0000000000111100,
-            src_reg_mask   = 0b0000000000000111;
-
-
-    *dst_reg   = (code & dest_reg_mask)  >> 9;
-    *direction = (code & direction_mask) >> 8;
-    *size      = (code & size_mask)      >> 6;
-
-
-    if ( (code & immediate) == IMMEDIATE )
-        *addr_mode = IMMEDIATE;
-    else
-    {
-        *addr_mode = (code & addr_mask) >> 3;
-         src_reg = malloc(sizeof (generic_u32_t));
-        *src_reg = (generic_u32_t) (code & src_reg_mask);
-    }
-
-    if (ignore_direction == USE_DIRECTION)
-    {
-        if (*direction == INVERTED)
-        {
-            // SWAPPING dst-src
-            bit tmp;
-            switch (*addr_mode) {
-                case ADDRESS:
-                case ADDRESSPostIncr:
-                case ADDRESSPreDecr:
-                    tmp = *dst_reg;
-                    *dst_reg = *src_reg;
-                    *src_reg = tmp;
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-    else  // invoke muls-mulu-divs-divu, size must be WORD, direction must be NORMAL
-    {
-        *size      = WORD;
-        *direction = NORMAL;
-    }
-
-    __src__ = (src_reg) ? *src_reg : (generic_u32_t) (get_pc() + WORD_SPAN);
-    __dst__ = ((generic_u32_t) *dst_reg);
-
-    *sVal = read_EA(&__src__, size, addr_mode, direction);
-
-    ea_direction tmp_dir = NORMAL;
-
-    if (is_ram_op(addr_mode) || is_addr_to_data_op(addr_mode))
-    {
-        tmp_dir = INVERTED;
-        ADDRMode tmp_mode = DATAReg;
-        *dVal = read_EA(&__dst__, size, &tmp_mode, &tmp_dir);
-    }
-    else if (*direction == INVERTED)
-    {
-        *dVal = read_EA(&__dst__, size, addr_mode, &tmp_dir);
-    }
-    else
-    {
-        *dVal = read_EA(&__dst__, size, addr_mode, direction);
-    }
-
-    result_array[0] = dst_reg;
-    result_array[1] = sVal;
-    result_array[2] = dVal;
-    result_array[3] = addr_mode;
-    result_array[4] = size;
-    result_array[5] = direction;
-
-    if (src_reg) free(src_reg);
-
-    return result_array;
-}
-
-
-void free_eval_OP_EA_array(void** array)
-{
-    if (array)
-    {
-        if (array[0]) { free(array[0]); array[0] = NULL; }
-        if (array[1]) { free(array[1]); array[1] = NULL; }
-        if (array[2]) { free(array[2]); array[2] = NULL; }
-        if (array[3]) { free(array[3]); array[3] = NULL; }
-        if (array[4]) { free(array[4]); array[4] = NULL; }
-        if (array[5]) { free(array[5]); array[5] = NULL; }
-
-        free(array);
-
-        array = NULL;
-    }
-}
-
-
-
-
-
 /* IO EA */
-generic_u32_t read_ram(generic_u32_t *addr, opsize *size)
+u32 read_ram(u32 *addr, opsize *size)
 {
     switch (*size) {
         case BYTE:
-            return (generic_u32_t) read_byte(*addr);
+            return (u32) read_byte(*addr);
         case WORD:
-            return (generic_u32_t) read_word(*addr);
+            return (u32) read_word(*addr);
         default: //LONG
             return read_long(*addr);
     }
 }
 
 
-
-generic_u32_t read_EA(generic_u32_t *addr, opsize *size, ADDRMode *mode, ea_direction *dir)
-{
-    generic_u32_t val;
-    generic_u32_t ptr;
-    opsize        tmpsize = *size;
-
-    if (*dir == INVERTED)
-        switch (*mode) {
-            case DATAReg:
-            case ADDRReg:
-            case ADDRESS:
-            case ADDRESSPostIncr:
-            case ADDRESSPreDecr:
-                val = read_datareg(*addr);
-                break;
-
-            default:
-                PANIC("Addressing mode not handled! (read_EA)")
-                break;
-        }
-    else switch (*mode) {
-        case IMMEDIATE:
-            if (tmpsize == BYTE) tmpsize = WORD; //byte can't read byte in ram
-            val = read_ram(addr, &tmpsize);
-            break;
-
-        case DATAReg:
-            val = read_datareg(*addr);
-            break;
-
-        case ADDRReg:
-            val = read_addrreg(*addr);
-            break;
-
-        case ADDRESS:
-            ptr = read_addrreg(*addr);
-            val = read_ram(&ptr, size);
-            break;
-
-        case ADDRESSPostIncr:
-            ptr = read_addrreg(*addr);
-            val = read_ram(&ptr, size);
-            // incr_addr_reg(*addr, *size);
-            // incr must be done after memory read!
-            break;
-
-        case ADDRESSPreDecr:
-            decr_addr_reg(*addr, *size);
-            ptr = read_addrreg(*addr);
-            val = read_ram(&ptr, size);
-            break;
-
-        case ADDRESSDisp:
-        {
-            generic_u32_t ramptr  = get_pc() + WORD_SPAN;
-            opsize        tmpsize = WORD;
-
-            generic_u32_t disp = read_ram(&ramptr, &tmpsize);
-
-            ptr = read_addrreg(*addr) + disp;
-
-            val = read_ram(&ptr, size);
-
-            incr_pc(size_to_span(tmpsize));
-
-            break;
-        }
-
-        default:
-            PANIC("Addressing mode not handled! (read_EA)")
-            break;
-    }
-
-    return val;
-}
-
-
-void write_EA(generic_u32_t *addr, generic_u32_t val, opsize *size, ADDRMode *mode)
-{
-    generic_u32_t ptr;
-
-    switch (*mode) {
-        case DATAReg:
-            write_datareg(*addr, val, size);
-            break;
-        case ADDRReg:
-        case IMMEDIATE:
-            write_addrreg(*addr, val, size);
-            break;
-        case ADDRESS:
-        case ADDRESSPostIncr:
-        case ADDRESSPreDecr:
-            ptr = read_addrreg(*addr);
-
-            switch (*size) {
-                case BYTE:
-                    write_byte(ptr, val);
-                    break;
-                case WORD:
-                    write_word(ptr, val);
-                    break;
-                case LONG:
-                    write_long(ptr, val);
-                    break;
-                default:
-                    break;
-            }
-
-            break;
-
-        case ADDRESSDisp:
-        {
-            generic_u32_t ramptr  = get_pc() + WORD_SPAN;
-            opsize        tmpsize = WORD;
-
-            generic_u32_t disp   = read_ram(&ramptr, &tmpsize);
-
-            ptr = read_addrreg(*addr) + disp;
-
-            switch (*size) {
-                case BYTE:
-                    write_byte(ptr, val);
-                    break;
-                case WORD:
-                    write_word(ptr, val);
-                    break;
-                case LONG:
-                    write_long(ptr, val);
-                    break;
-                default:
-                    break;
-            }
-
-            incr_pc(size_to_span(tmpsize));
-
-            break;
-        }
-
-        default:
-            PANIC("Writing an invalid Effective Address, %d!", *mode)
-            break;
-    }
-}
-
-
-void should_incr_pc(opsize *size, ADDRMode *mode)
-{
-    opsize tmpsize = *size;
-
-    switch (*mode) {
-        case IMMEDIATE:
-            if (tmpsize == BYTE) tmpsize = WORD;
-            incr_pc(size_to_span(tmpsize));
-            break;
-        case ADDRESSPostIncr:
-        case ADDRESSPreDecr:
-            incr_pc(size_to_span(*size));
-            break;
-
-        default:
-            break;
-    }
-}
-
-
-
-
 /* MISC */
-opsize_span size_to_span(opsize size)
+sspan size_to_span(opsize size)
 {
     switch (size) {
         case BYTE:
@@ -430,7 +104,7 @@ bit is_addr_to_data_op(ADDRMode *mode)
 
 
 /* TRAP */
-char* trap_code_toString(generic_u32_t trapcode)
+char* trap_code_toString(u32 trapcode)
 {
     switch (trapcode) {
         case BusError:
@@ -460,11 +134,11 @@ char* trap_code_toString(generic_u32_t trapcode)
 
 void iotask(bit descr)
 {
-    generic_u32_t d0_val = read_datareg(0) & 0x000000FF;
-    generic_u32_t d1_val = read_datareg(1);
-    generic_u32_t d2_val = read_datareg(2) & 0x000000FF;
+    u32 d0_val = read_datareg(0) & 0x000000FF;
+    u32 d1_val = read_datareg(1);
+    u32 d2_val = read_datareg(2) & 0x000000FF;
 
-    generic_32_t  value;
+    s32  value;
     opsize        size;
 
     switch (d2_val) {
@@ -482,14 +156,14 @@ void iotask(bit descr)
     {
         case PRINTINT:
         {
-            value = sign_extended(d1_val, size);
+            SING_EXTENDED(value, d1_val, size);
             IO_TASK(descr, "%d", value);
             break;
         }
 
         case PRINTINTLN:
         {
-            value = sign_extended(d1_val, size);
+            SING_EXTENDED(value, d1_val, size);
             IO_TASK(descr, "%d\n", value);
             break;
         }
@@ -508,7 +182,7 @@ void iotask(bit descr)
 
         case SCANINT:
         {
-            generic_u32_t ip;
+            u32 ip;
             scanf(" %u", &ip);
             write_datareg(1, ip, NULL);
             break;
@@ -516,7 +190,7 @@ void iotask(bit descr)
 
         case PRINTSTR:
         {
-            generic_u32_t ramptr = read_addrreg(0);
+            u32 ramptr = read_addrreg(0);
             char c;
 
             IO_TASK_TAG(descr)
@@ -532,7 +206,7 @@ void iotask(bit descr)
 
         case PRINTSTRLN:
         {
-            generic_u32_t ramptr = read_addrreg(0);
+            u32 ramptr = read_addrreg(0);
             char c;
 
             IO_TASK_TAG(descr)
@@ -549,5 +223,210 @@ void iotask(bit descr)
 
         default:
             break;
+    }
+}
+
+
+#include <unistd.h>
+void machine_waiter(struct EmulationMachine *em)
+{
+    if (em->Machine.Data.sbs_debugger)
+    {
+        fputs(
+            "\n---------------- Execution Options ----------------\n"
+            "[\033[01m\033[37ms\033[0m] \033[01m\033[37mstack\033[0m | "
+            "[\033[01m\033[37mn\033[0m] \033[01m\033[37mnext\033[0m | "
+            "[\033[01m\033[37mk\033[0m] \033[01m\033[37mskip\033[0m | "
+            "[\033[01m\033[37mt\033[0m] \033[01m\033[37mfull skip\033[0m\n",
+        stdout);
+
+        fflush(stdout);
+        fflush(stdin);
+
+        char opt;
+        bit loop = TRUE;
+
+        while (loop)
+        {
+            tcgetattr(STDIN_FILENO, &em->Machine.Waiting.oldt);
+            em->Machine.Waiting.newt = em->Machine.Waiting.oldt;
+            em->Machine.Waiting.newt.c_lflag &= ~(ICANON);
+            tcsetattr(STDIN_FILENO, TCSANOW, &em->Machine.Waiting.newt);
+
+            opt = getchar();
+
+            tcsetattr(STDIN_FILENO, TCSANOW, &em->Machine.Waiting.oldt);
+
+            switch (opt) {
+                case 's': //stack;
+                {
+                    u32 _top = 0, _bottom = 0x00FFFFFF;
+
+                    SBS_DEBUGGER("Insert stack top address: ");
+                    scanf("%X", &_top);
+                    SBS_DEBUGGER("Insert stack bottom address: ");
+                    scanf("%X", &_bottom);
+
+                    if (_bottom > RAM_SIZE || (((_bottom & 0x0000000F) + 1) % 4) != 0)
+                    {
+                        SBS_DEBUGGER("Invalid bottom index");
+                    }
+                    else
+                    {
+                        em->Machine.ram->stack(_top, _bottom);
+                    }
+
+                    break;
+                }
+
+                case 'n': //goto next istr, print cpu & ram
+                {
+                    printf_sstatus(em);
+
+                    loop = FALSE;
+                    break;
+                }
+
+                case 'k': //skip
+                {
+                    system("clear");
+                    SBS_DEBUGGER("Skip selected, the execution proceeds.\n");
+
+                    loop = FALSE;
+                    break;
+                }
+
+                case 't': //terminate
+                {
+                    system("clear");
+                    SBS_DEBUGGER("Full skip selected, the execution proceeds to the end.\n");
+
+                    loop = FALSE;
+
+                    em->Machine.Data.sbs_debugger = FALSE;
+                    em->ExecArgs.descr = FALSE;
+                    break;
+                }
+
+                default: //catch \n and do nothing here
+                { break; }
+            }
+        }
+    }
+}
+
+#include "JSON.h"
+void printf_sstatus(struct EmulationMachine *em)
+{
+    if (em->ExecArgs.JSON.enable)
+    {
+        if (em->ExecArgs.quiet && em->State != FINAL_STATE) return;
+
+        if (em->Machine.Data.sbs_debugger) system("clear");
+
+        char *buf = NULL;
+
+        if (em->ExecArgs.JSON.cpu)
+        {
+            buf = Jcpu();
+            printf("%s\n", buf);
+            free(buf);
+        }
+
+        if (em->ExecArgs.JSON.ram)
+        {
+            u32 _start, _end, _ptr = em->Machine.cpu->pc;
+            _start = (_ptr & 0xFFFFFFF0) - 0x20;
+            _end   = (_ptr | 0x0000000F) + 0x31;
+            buf = Jram(_start, _end);
+            printf("%s\n", buf);
+            free(buf);
+        }
+
+        if (em->ExecArgs.JSON.ocode)
+        {
+            buf = Jcode(em->Machine.OpCode.code);
+            printf("%s\n", buf);
+            free(buf);
+        }
+
+        if (em->ExecArgs.JSON.menm)
+        {
+            buf = Jmnemonic(em->Machine.OpCode.mnemonic);
+            printf("%s\n", buf);
+            free(buf);
+        }
+
+        if (em->State == FINAL_STATE && em->ExecArgs.JSON.timer)
+        {
+            buf = Jchrono(em->Machine.Timer.dt);
+            printf("%s\n", buf);
+            free(buf);
+        }
+
+    }
+    else if (!em->ExecArgs.quiet)
+    {
+        if (em->EmuType == EMULATE_SBS && em->Machine.Data.sbs_debugger) system("clear");
+
+        u32 _start = em->Machine.Data.orgptr;
+        u32 _end   = (em->Machine.Data.lwb | 0x0000000F) + 0x11;
+        u32 _ptr   = em->Machine.cpu->pc;
+        char *pcptr_color    = "";
+        char *halt_color     = "\033[37m";
+
+        if (em->State == BEGIN_STATE)
+        {
+            printf("\033[01m\033[37mInitial State:\033[0m");
+            pcptr_color = "\033[92m";
+        }
+        else if (em->State == EXECUTION_STATE)
+        {
+            printf("\033[01m\033[37mExecution State:\033[0m");
+            _start = (_ptr & 0xFFFFFFF0) - 0x20;
+            _end   = (_ptr | 0x0000000F) + 0x31;
+            pcptr_color    = "\033[93m";
+
+        }
+        else if (em->State == FINAL_STATE)
+        {
+            if (em->EmuType == EMULATE_STD)
+                printf("-------------------------------------------------------------------------------------------------------------------------\n");
+
+            printf("\033[01m\033[37mFinal State:\033[0m");
+            pcptr_color    = "\033[91m";
+            halt_color     = "\033[91m";
+        }
+
+        em->Machine.cpu->show();
+        printf("\n");
+
+        em->Machine.ram->show(_start, _end, _ptr, pcptr_color);
+        printf("\n");
+
+        if (em->EmuType == EMULATE_STD && em->State == FINAL_STATE)
+            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, em->Machine.Data.simhalt);
+        else if (em->EmuType == EMULATE_SBS)
+            printf("\033[01m\033[37mHalt\033[0m:     %s0x%X\033[0m\n", halt_color, em->Machine.Data.simhalt);
+
+        if (em->ExecArgs.descr)
+        {
+            opcode Code = em->Machine.OpCode.code;
+
+            bprintf_ht_4s(Code)
+            printf(" -> 0x%.4X (hex)\n", Code);
+            printf("\033[01m\033[37mMnemonic\033[0m: %s\n", em->Machine.OpCode.mnemonic);
+        }
+
+        fflush(stdout);
+    }
+
+    if (em->State == FINAL_STATE && em->ExecArgs.timer)
+    {
+        if (!em->ExecArgs.quiet)
+            printf("-------------------------------------------------------------------------------------------------------------------------\n");
+        printf("\033[01m\033[37mTimer\033[0m: %.3fms -> %.3fs\n",
+               (f64) em->Machine.Timer.dt / (f64) 1000,
+               (f64) em->Machine.Timer.dt / (f64) 1000000);
     }
 }

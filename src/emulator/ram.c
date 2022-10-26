@@ -1,14 +1,14 @@
 #include "ram.h"
 
 
-void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr, char *pcptr_color);
-void __show_ram_stack__ (generic_u32_t _top, generic_u32_t _bottom);
+void __show_ram__ (u32 _start, u32 _end, u32 _ptr, char *pcptr_color);
+void __show_ram_stack__ (u32 _top, u32 _bottom);
 
 
 m68k_ram *ram = NULL;
 
 
-m68k_ram* init_ram(generic_u32_t size)
+m68k_ram* init_ram(u32 size)
 {
     if (!ram)
     {
@@ -17,7 +17,7 @@ m68k_ram* init_ram(generic_u32_t size)
         if (!ram)
             PANIC("Cannot init ram, aborting.")
 
-        ram->ram = calloc(size, sizeof (generic_u8_t));
+        ram->ram = calloc(size, sizeof (u8));
 
         if (!ram->ram)
             PANIC("Cannot init ram, aborting.")
@@ -28,14 +28,19 @@ m68k_ram* init_ram(generic_u32_t size)
         ram->stack = __show_ram_stack__;
     }
 
-    return ram;
+    return (ram);
+}
+
+m68k_ram* get_ram()
+{
+    return (ram);
 }
 
 void erase()
 {
     if (ram)
     {
-        for (generic_u32_t iter = 0; iter < ram->size; iter++)
+        for (u32 iter = 0; iter < ram->size; iter++)
             ram->ram[iter] = 0x00;
     }
 }
@@ -52,80 +57,68 @@ void destroy_ram()
 }
 
 
-void check_addr(generic_u32_t ptr, generic_u8_t limit)
+void check_addr(u32 ptr, u8 limit)
 {
     if (ptr > ram->size)
         PANIC("Segmentation fault: reading illegal memory address\naddress: 0x%X\nlimit: 0x%X\nfinal address: 0x%X",
               ptr, ram->size, ptr + limit)
 }
 
-void check_inst()
-{
-    if (!ram)
-        PANIC("Segmentation fault: memory not initialized")
-}
-
 
 /* MEMORY READ */
-generic_u8_t read_byte(generic_u32_t pointer)
+u8 read_byte(u32 pointer)
 {
-    check_inst();
-    check_addr(pointer, BYTE_SPAN);
+    //check_addr(pointer, BYTE_SPAN);
 
     return ram->ram[pointer];
 }
 
-generic_u16_t read_word(generic_u32_t pointer)
+u16 read_word(u32 pointer)
 {
-    check_inst();
-    check_addr(pointer, WORD_SPAN);
+    //check_addr(pointer, WORD_SPAN);
 
-    return (generic_u16_t)((ram->ram[pointer] << 8) + ram->ram[pointer + 1]);
+    return (u16)((ram->ram[pointer] << 8) + ram->ram[pointer + 1]);
 }
 
-generic_u32_t read_long(generic_u32_t pointer)
+u32 read_long(u32 pointer)
 {
-    check_inst();
-    check_addr(pointer, LONG_SPAN);
+    //check_addr(pointer, LONG_SPAN);
 
-    return (generic_u32_t)((ram->ram[pointer] << 24) + (ram->ram[pointer + 1] << 16) + (ram->ram[pointer + 2] << 8) + ram->ram[pointer + 3]);
+    return (u32)((ram->ram[pointer] << 24) + (ram->ram[pointer + 1] << 16) + (ram->ram[pointer + 2] << 8) + ram->ram[pointer + 3]);
 }
 
 
 
 /* MEMORY WRITE */
-void write_byte(generic_u32_t pointer, generic_u8_t value)
+void write_byte(u32 pointer, u8 value)
 {
-    check_inst();
-    check_addr(pointer, BYTE_SPAN);
+    //check_addr(pointer, BYTE_SPAN);
 
     ram->ram[pointer] = value;
 }
 
-void write_word(generic_u32_t pointer, generic_u16_t value)
+void write_word(u32 pointer, u16 value)
 {
-    check_inst();
-    check_addr(pointer, WORD_SPAN);
+    //check_addr(pointer, WORD_SPAN);
 
-    ram->ram[pointer]     = (generic_u8_t)((value >> 8) & 0xFF);
-    ram->ram[pointer + 1] = (generic_u8_t)(value & 0xFF);
+    ram->ram[pointer]     = (u8)((value >> 8) & 0xFF);
+    ram->ram[pointer + 1] = (u8)(value & 0xFF);
 }
 
-void write_long(generic_u32_t pointer, generic_u32_t value)
+void write_long(u32 pointer, u32 value)
 {
-    check_inst();
-    check_addr(pointer, LONG_SPAN);
+    //check_addr(pointer, LONG_SPAN);
 
-    ram->ram[pointer]     = (generic_u8_t)((value >> 24) & 0xFF);
-    ram->ram[pointer + 1] = (generic_u8_t)((value >> 16) & 0xFF);
-    ram->ram[pointer + 2] = (generic_u8_t)((value >> 8)  & 0xFF);
-    ram->ram[pointer + 3] = (generic_u8_t)(value & 0xFF);
+    ram->ram[pointer]     = (u8)((value >> 24) & 0xFF);
+    ram->ram[pointer + 1] = (u8)((value >> 16) & 0xFF);
+    ram->ram[pointer + 2] = (u8)((value >> 8)  & 0xFF);
+    ram->ram[pointer + 3] = (u8)(value & 0xFF);
 }
 
 
 
 
-void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr, char *pcptr_color)
+void __show_ram__ (u32 _start, u32 _end, u32 _ptr, char *pcptr_color)
 {
     if (_start < 0x00FFFF00)
         printf("\n                        [\033[01m\033[37mRAM STATUS\033[0m]\n\n");
@@ -205,7 +198,7 @@ void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr,
     printf("0x");
     short int i = 4;
     do {
-        generic_u8_t inner = _start >> (8 * (i - 1));
+        u8 inner = _start >> (8 * (i - 1));
 
         if (!inner || inner <= 0xF) printf("0");
 
@@ -218,11 +211,11 @@ void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr,
 
     printf(" | ");
 
-    for (generic_u32_t i = _start, j = 1; i < _end; i++, j++)
+    for (u32 i = _start, j = 1; i < _end; i++, j++)
     {
         if (i == ram->size) return;
 
-        generic_u8_t b = ram->ram[i];
+        u8 b = ram->ram[i];
 
         if (i == _ptr || i == (_ptr + 1))
         {
@@ -246,7 +239,7 @@ void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr,
 
             short int k = 4;
             do {
-                generic_u8_t inner = (i+1) >> (8 * (k - 1));
+                u8 inner = (i+1) >> (8 * (k - 1));
 
                 if (!inner || inner <= 0xF) printf("0");
 
@@ -265,7 +258,7 @@ void __show_ram__ (generic_u32_t _start, generic_u32_t _end, generic_u32_t _ptr,
 }
 
 
-void __show_ram_stack__ (generic_u32_t _top, generic_u32_t _bottom)
+void __show_ram_stack__ (u32 _top, u32 _bottom)
 {
     printf("\n     [\033[01m\033[37mSTACK STATUS\033[0m]\n");
 
@@ -275,7 +268,7 @@ void __show_ram_stack__ (generic_u32_t _top, generic_u32_t _bottom)
     printf("0x");
     short int i = 4;
     do {
-        generic_u8_t inner = _top >> (8 * (i - 1));
+        u8 inner = _top >> (8 * (i - 1));
 
         if (!inner || inner <= 0xF) printf("0");
 
@@ -286,11 +279,11 @@ void __show_ram_stack__ (generic_u32_t _top, generic_u32_t _bottom)
 
     printf(" | ");
 
-    for (generic_u32_t i = _top, j = 1; i <= _bottom; i++, j++)
+    for (u32 i = _top, j = 1; i <= _bottom; i++, j++)
     {
         if (i > ram->size || i > _bottom) return;
 
-        generic_u8_t b = ram->ram[i];
+        u8 b = ram->ram[i];
 
         if (!b || b <= 0xF) printf("0");
 
@@ -304,7 +297,7 @@ void __show_ram_stack__ (generic_u32_t _top, generic_u32_t _bottom)
 
             short int k = 4;
             do {
-                generic_u8_t inner = (i+1) >> (8 * (k - 1));
+                u8 inner = (i+1) >> (8 * (k - 1));
 
                 if (!inner || inner <= 0xF) printf("0");
 

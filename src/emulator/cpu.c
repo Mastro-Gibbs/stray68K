@@ -4,8 +4,8 @@
 #include <string.h>
 
 
-generic_u32_t __exec__(bit describe_code);
-void     __show__();
+u32 __exec__(struct EmulationMachine *em);
+void __show__();
 
 
 m68k_cpu *cpu = NULL;
@@ -59,16 +59,16 @@ void destroy_cpu()
 }
 
 
-generic_u32_t __exec__(bit describe_code)
+u32 __exec__(struct EmulationMachine *em)
 {
-    generic_u32_t istruction_ptr = get_pc();
+    u32 istruction_ptr = em->Machine.cpu->pc;
 
     if ((istruction_ptr % 2) != 0)
         PANIC("Segmentation fault while reading next istruction on odd address");
 
-    generic_u16_t code = read_word(istruction_ptr);
+    em->Machine.OpCode.code = read_word(istruction_ptr);;
 
-    return run_opcode(code, describe_code);
+    return run_opcode(em);
 }
 
 
@@ -82,15 +82,15 @@ void __show__()
     id[2] = '\0';
 
     id[0] = 'D';
-    for (generic_u8_t i = 1; i <= 4; i++) // data regs
+    for (u8 i = 1; i <= 4; i++) // data regs
     {
         id[1] = d++;
         printf("\033[01m\033[37m%s\033[0m: 0x", id);
 
-        generic_u8_t iter = 4;
+        u8 iter = 4;
         do
         {
-            generic_u8_t inner = cpu->data_r[i-1] >> (8 * (iter - 1));
+            u8 inner = cpu->data_r[i-1] >> (8 * (iter - 1));
 
             if (!inner || inner <= 0xF) printf("0");
 
@@ -105,15 +105,15 @@ void __show__()
     printf("| ");
 
     id[0] = 'A';
-    for (generic_u8_t i = 1; i <= 4; i++) // addr regs
+    for (u8 i = 1; i <= 4; i++) // addr regs
     {
         id[1] = a++;
         printf("\033[01m\033[37m%s\033[0m: 0x", id);
 
-        generic_u8_t iter = 4;
+        u8 iter = 4;
         do
         {
-            generic_u8_t inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
+            u8 inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
 
             if (!inner || inner <= 0xF) printf("0");
 
@@ -127,15 +127,15 @@ void __show__()
 
     printf("\n");
     id[0] = 'D';
-    for (generic_u8_t i = 5; i <= 8; i++) // data regs
+    for (u8 i = 5; i <= 8; i++) // data regs
     {
         id[1] = d++;
         printf("\033[01m\033[37m%s\033[0m: 0x", id);
 
-        generic_u8_t iter = 4;
+        u8 iter = 4;
         do
         {
-            generic_u8_t inner = cpu->data_r[i-1] >> (8 * (iter - 1));
+            u8 inner = cpu->data_r[i-1] >> (8 * (iter - 1));
 
             if (!inner || inner <= 0xF) printf("0");
 
@@ -150,15 +150,15 @@ void __show__()
     printf("| ");
 
     id[0] = 'A';
-    for (generic_u8_t i = 4; i <= 6; i++) // addr regs
+    for (u8 i = 4; i <= 6; i++) // addr regs
     {
         id[1] = a++;
         printf("\033[01m\033[37m%s\033[0m: 0x", id);
 
-        generic_u8_t iter = 4;
+        u8 iter = 4;
         do
         {
-            generic_u8_t inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
+            u8 inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
 
             if (!inner || inner <= 0xF) printf("0");
 
@@ -170,14 +170,14 @@ void __show__()
         printf(" ");
     }
 
-    generic_u8_t iter = 4;
+    u8 iter = 4;
     printf("\033[01m\033[37mA7\033[0m: 0x");
 
-    generic_u32_t *curr = get_supervisor() ? &cpu->ssp : &cpu->usp;
+    u32 *curr = ((cpu->sr & SUPERVISOR) ? 1 : 0) ? &cpu->ssp : &cpu->usp;
 
     do
     {
-        generic_u8_t inner = *curr >> (8 * (iter - 1));
+        u8 inner = *curr >> (8 * (iter - 1));
 
         if (!inner || inner <= 0xF) printf("0");
 
@@ -194,7 +194,7 @@ void __show__()
     printf("\033[01m\033[37mUS\033[0m: 0x");
     do
     {
-        generic_u8_t inner = cpu->usp >> (8 * (iter - 1));
+        u8 inner = cpu->usp >> (8 * (iter - 1));
 
         if (!inner || inner <= 0xF) printf("0");
 
@@ -209,7 +209,7 @@ void __show__()
     printf("\033[01m\033[37mSS\033[0m: 0x");
     do
     {
-        generic_u8_t inner = cpu->ssp >> (8 * (iter - 1));
+        u8 inner = cpu->ssp >> (8 * (iter - 1));
 
         if (!inner || inner <= 0xF) printf("0");
 
@@ -222,7 +222,7 @@ void __show__()
     printf("\n\033[01m\033[37mPC\033[0m: 0x");
     do
     {
-        generic_u8_t inner = cpu->pc >> (8 * (iter - 1));
+        u8 inner = cpu->pc >> (8 * (iter - 1));
 
         if (!inner || inner <= 0xF) printf("0");
 
@@ -243,109 +243,9 @@ void __show__()
 
 
 
-// FLAGS GETTER & SETTER
-
-bit get_carry()
-{
-    return cpu->sr & CARRY;
-}
-
-void  set_carry(bit bit)
-{
-    if (bit)
-        cpu->sr |= CARRY;
-    else
-        cpu->sr &= ~CARRY;
-}
-
-
-bit get_overflow()
-{
-    return cpu->sr & OVERFLOW;
-}
-
-void  set_overflow(bit bit)
-{
-    if (bit)
-        cpu->sr |= OVERFLOW;
-    else
-        cpu->sr &= ~OVERFLOW;
-}
-
-bit get_zero()
-{
-    return cpu->sr & ZERO;
-}
-
-void  set_zero(bit bit)
-{
-    if (bit)
-        cpu->sr |= ZERO;
-    else
-        cpu->sr &= ~ZERO;
-}
-
-bit get_negative()
-{
-    return cpu->sr & NEGATIVE;
-}
-
-void  set_negative(bit bit)
-{
-    if (bit)
-        cpu->sr |= NEGATIVE;
-    else
-        cpu->sr &= ~NEGATIVE;
-}
-
-bit get_extended()
-{
-    return cpu->sr & EXTEND;
-}
-
-void  set_extended(bit bit)
-{
-    if (bit)
-        cpu->sr |= EXTEND;
-    else
-        cpu->sr &= ~EXTEND;
-}
-
-
-bit get_supervisor()
-{
-    unsigned int tmp = cpu->sr & SUPERVISOR;
-
-    return (tmp ? 1 : 0);
-}
-
-void  set_supervisor(bit bit)
-{
-    if (bit)
-        cpu->sr |= SUPERVISOR;
-    else
-        cpu->sr &= ~SUPERVISOR;
-}
-
-bit get_trace()
-{
-    unsigned int tmp = cpu->sr & TRACE;
-
-    return (tmp ? 1 : 0);
-}
-
-void  set_trace(bit bit)
-{
-    if (bit)
-        cpu->sr |= TRACE;
-    else
-        cpu->sr &= ~TRACE;
-}
-
-
 
 // DATA REGS GETTER & SETTER
-generic_u32_t read_datareg(generic_u32_t reg)
+u32 read_datareg(u32 reg)
 {
     if (reg < 8)
         return cpu->data_r[reg];
@@ -356,7 +256,7 @@ generic_u32_t read_datareg(generic_u32_t reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_datareg(generic_u32_t reg, generic_u32_t val, opsize *size)
+void  write_datareg(u32 reg, u32 val, opsize *size)
 {
     opsize static_size;
 
@@ -387,7 +287,7 @@ void  write_datareg(generic_u32_t reg, generic_u32_t val, opsize *size)
     }
 }
 
-generic_u32_t read_addrreg(generic_u32_t reg)
+u32 read_addrreg(u32 reg)
 {
     if (reg < 8)
     {
@@ -396,7 +296,7 @@ generic_u32_t read_addrreg(generic_u32_t reg)
 
         else if (reg == 7)
 
-            return get_supervisor() ? cpu->ssp : cpu->usp;
+            return ((cpu->sr & SUPERVISOR) ? 1 : 0) ? cpu->ssp : cpu->usp;
     }
 
     return (0);
@@ -405,7 +305,7 @@ generic_u32_t read_addrreg(generic_u32_t reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_addrreg(generic_u32_t reg, generic_u32_t val, opsize *size)
+void  write_addrreg(u32 reg, u32 val, opsize *size)
 {
     if (reg > 7) return;
 
@@ -438,7 +338,7 @@ void  write_addrreg(generic_u32_t reg, generic_u32_t val, opsize *size)
     }
     else if (reg == 7)
     {
-        if (get_supervisor())
+        if ((cpu->sr & SUPERVISOR) ? 1 : 0)
         {
             switch (static_size)
             {
@@ -481,9 +381,9 @@ void  write_addrreg(generic_u32_t reg, generic_u32_t val, opsize *size)
     }
 }
 
-void incr_addr_reg(generic_u32_t reg, opsize size)
+void incr_addr_reg(u32 reg, opsize size)
 {
-    generic_u32_t tmp = read_addrreg(reg);
+    u32 tmp = read_addrreg(reg);
 
     if (size == LONG)
         tmp += 4; //LONG
@@ -495,9 +395,9 @@ void incr_addr_reg(generic_u32_t reg, opsize size)
     write_addrreg(reg, tmp, NULL);
 }
 
-void decr_addr_reg(generic_u32_t reg, opsize size)
+void decr_addr_reg(u32 reg, opsize size)
 {
-    generic_u32_t tmp = read_addrreg(reg);
+    u32 tmp = read_addrreg(reg);
 
     if (size == LONG)
         tmp -= 4; //LONG
@@ -510,68 +410,44 @@ void decr_addr_reg(generic_u32_t reg, opsize size)
 }
 
 
-srflags get_sr() { return cpu->sr; }
-
-void set_sr(srflags bits) { cpu->sr = bits; }
-
-
-
-
-
 
 /* STACKS */
-generic_u16_t pop_word()
+u16 pop_word()
 {
-    generic_u32_t stack = read_addrreg(7);
-    generic_u16_t value = read_word(stack);
+    u32 stack = read_addrreg(7);
+    u16 value = read_word(stack);
     stack += WORD_SPAN;
     write_addrreg(7, stack, NULL);
 
     return (value);
 }
 
-generic_u32_t pop_long()
+u32 pop_long()
 {
-    generic_u32_t stack = read_addrreg(7);
-    generic_u32_t value = read_long(stack);
+    u32 stack = read_addrreg(7);
+    u32 value = read_long(stack);
     stack += LONG_SPAN;
     write_addrreg(7, stack, NULL);
 
     return (value);
 }
 
-void push_word(generic_u16_t word)
+void push_word(u16 word)
 {
-    generic_u32_t stack = read_addrreg(7);
+    u32 stack = read_addrreg(7);
     stack -= WORD_SPAN;
     write_addrreg(7, stack, NULL);
     write_word(stack, word);
 }
 
-void push_long(generic_u32_t longword)
+void push_long(u32 longword)
 {
-    generic_u32_t stack = read_addrreg(7);
+    u32 stack = read_addrreg(7);
     stack -= LONG_SPAN;
     write_addrreg(7, stack, NULL);
     write_long(stack, longword);
 }
 
-
-generic_u32_t get_stack_ptr()
-{
-    return get_supervisor() ? cpu->ssp : cpu->usp;
-}
-
-
-void set_usp(generic_u32_t ptr)
-{
-    cpu->usp = ptr;
-}
-
-generic_u32_t get_usp()
-{
-    return (cpu->usp);
-}
 
 
 /* CONDITION CODES */
@@ -583,33 +459,33 @@ bit eval_cc(CCm cc)
         case F:
             return 0;
         case HI:
-            return !get_zero() && !get_carry();
+            return !(cpu->sr & ZERO) && !(cpu->sr & CARRY);
         case LS:
-            return get_zero() || get_carry();
+            return (cpu->sr & ZERO) || (cpu->sr & CARRY);
         case CC:
-            return !get_carry();
+            return !(cpu->sr & CARRY);
         case CS:
-            return get_carry();
+            return (cpu->sr & CARRY);
         case NE:
-            return !get_zero();
+            return !(cpu->sr & ZERO);
         case EQ:
-            return get_zero();
+            return (cpu->sr & ZERO);
         case VC:
-            return !get_overflow();
+            return !(cpu->sr & OVERFLOW);
         case VS:
-            return get_overflow();
+            return (cpu->sr & OVERFLOW);
         case PL:
-            return !get_negative();
+            return !(cpu->sr & NEGATIVE);
         case MI:
-            return get_negative();
+            return (cpu->sr & NEGATIVE);
         case GE:
-            return get_negative() == get_overflow();
+            return (cpu->sr & NEGATIVE) == (cpu->sr & OVERFLOW);
         case LT:
-            return get_negative() != get_overflow();
+            return (cpu->sr & NEGATIVE) != (cpu->sr & OVERFLOW);
         case GT:
-            return !get_zero() && (get_negative() == get_overflow());
+            return !(cpu->sr & ZERO) && ((cpu->sr & NEGATIVE) == (cpu->sr & OVERFLOW));
         case LE:
-            return get_zero() || (get_negative() != get_overflow());
+            return (cpu->sr & ZERO) || ((cpu->sr & NEGATIVE) != (cpu->sr & OVERFLOW));
         default:
             return 0;
     }
@@ -618,10 +494,8 @@ bit eval_cc(CCm cc)
 
 
 /* PROGRAM COUNTER */
-void set_pc(generic_u32_t pc) { cpu->pc = pc; }
+void set_pc(u32 pc) { cpu->pc = pc; }
 
-void incr_pc(bit bits) { cpu->pc += bits; }
-
-generic_u32_t get_pc() { return (cpu->pc); }
+u32 get_pc() { return (cpu->pc); }
 
 

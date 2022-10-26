@@ -8,20 +8,21 @@
 #include <stdlib.h>
 
 
-m68k_ram* init_ram(generic_u32_t size);
+m68k_ram* init_ram(u32 size);
+m68k_ram* get_ram();
 void   erase();
 void   destroy_ram();
 
 
 /* MEMORY READ */
-generic_u8_t  read_byte(generic_u32_t pointer);
-generic_u16_t read_word(generic_u32_t pointer);
-generic_u32_t read_long(generic_u32_t pointer);
+u8  read_byte(u32 pointer);
+u16 read_word(u32 pointer);
+u32 read_long(u32 pointer);
 
 /* MEMORY WRITE */
-void write_byte(generic_u32_t pointer, generic_u8_t  value);
-void write_word(generic_u32_t pointer, generic_u16_t value);
-void write_long(generic_u32_t pointer, generic_u32_t value);
+void write_byte(u32 pointer, u8  value);
+void write_word(u32 pointer, u16 value);
+void write_long(u32 pointer, u32 value);
 
 
 

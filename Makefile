@@ -30,6 +30,7 @@ SOURCES       = $(EMULATOR_DIR)/emulator.c \
 		$(ASSEMBLER_DIR)/semantic.c \
 		$(ASSEMBLER_DIR)/strcmpci.c \
 		$(ASSEMBLER_DIR)/syntactic.c \
+		$(ASSEMBLER_DIR)/JSON.c \
 		$(EMULATOR_DIR)/cpu.c \
 		$(EMULATOR_DIR)/handler.c \
 		$(SOURCE_DIR)/main.c \
@@ -47,6 +48,7 @@ OBJECTS       = $(OBJECTS_DIR)/emulator.o \
 		$(OBJECTS_DIR)/main.o \
 		$(OBJECTS_DIR)/ram.o \
 		$(OBJECTS_DIR)/handler.o \
+		$(OBJECTS_DIR)/JSON.o \
 		$(OBJECTS_DIR)/utils.o
 
 TARGET        = $(BUILD_DIR)/stray68K
@@ -161,6 +163,15 @@ $(OBJECTS_DIR)/ram.o: $(EMULATOR_DIR)/ram.c $(EMULATOR_DIR)/ram.h \
 		$(EMULATOR_DIR)/cpu.h \
 		$(EMULATOR_DIR)/handler.h 
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/ram.o $(EMULATOR_DIR)/ram.c
+
+$(OBJECTS_DIR)/JSON.o: $(EMULATOR_DIR)/JSON.c $(EMULATOR_DIR)/JSON.h \
+		$(EMULATOR_DIR)/motorolatypes.h \
+		$(EMULATOR_DIR)/cpu.h \
+		$(EMULATOR_DIR)/handler.h \
+		$(EMULATOR_DIR)/enums.h \
+		$(EMULATOR_DIR)/utils.h \
+		$(EMULATOR_DIR)/ram.h
+	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/JSON.o $(EMULATOR_DIR)/JSON.c
 
 $(OBJECTS_DIR)/handler.o: $(EMULATOR_DIR)/handler.c $(EMULATOR_DIR)/handler.h \
 		$(EMULATOR_DIR)/motorolatypes.h \

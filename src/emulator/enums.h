@@ -25,7 +25,7 @@ typedef enum __operation_size_span__
     WORD_SPAN = 0x02,
     LONG_SPAN = 0x04
 
-} opsize_span;
+} sspan;
 
 
 
