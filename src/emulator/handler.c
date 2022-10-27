@@ -348,8 +348,8 @@ u32 SUBI(opcode code)
 
     s32 res, ssVal, sdVal;
 
-    SING_EXTENDED(ssVal, sVal, size);
-    SING_EXTENDED(sdVal, dVal, size);
+    SIGN_EXTENDED(ssVal, sVal, size);
+    SIGN_EXTENDED(sdVal, dVal, size);
 
     res = sdVal - ssVal;
 
@@ -382,8 +382,8 @@ u32 ADDI(opcode code)
 
     s32 res, ssVal, sdVal;
 
-    SING_EXTENDED(ssVal, sVal, size);
-    SING_EXTENDED(sdVal, dVal, size);
+    SIGN_EXTENDED(ssVal, sVal, size);
+    SIGN_EXTENDED(sdVal, dVal, size);
 
     res = sdVal + ssVal;
 
@@ -466,9 +466,9 @@ u32 CMPI(opcode code)
     u32 val;
     READ_EFFECTIVE_ADDRESS(val, dst, size, mode, NORMAL);
 
-    SING_EXTENDED(dst_val, val, size);
+    SIGN_EXTENDED(dst_val, val, size);
     u32 addr    = emulation->Machine.cpu->pc + WORD_SPAN;
-    SING_EXTENDED(ram_val, read_ram(&addr, &tmpsize), size);
+    SIGN_EXTENDED(ram_val, read_ram(&addr, &tmpsize), size);
 
     s32 value = dst_val - ram_val;
 
@@ -656,7 +656,7 @@ u32 NEGX(opcode code)
     READ_EFFECTIVE_ADDRESS(src_value, dst, size, mode, NORMAL);
 
     s32  signValue;
-    SING_EXTENDED(signValue, src_value, size);
+    SIGN_EXTENDED(signValue, src_value, size);
 
     s32 result = 0 - (signValue + ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0));
 
@@ -709,7 +709,7 @@ u32 NEG(opcode code)
     READ_EFFECTIVE_ADDRESS(src_value, dst, size, mode, NORMAL);
 
     s32  signValue;
-    SING_EXTENDED(signValue, src_value, size);
+    SIGN_EXTENDED(signValue, src_value, size);
 
     s32 result = 0 - signValue;
 
@@ -731,7 +731,7 @@ u32 NOT(opcode code)
     READ_EFFECTIVE_ADDRESS(src_value, dst, size, mode, NORMAL);
 
     s32  signValue;
-    SING_EXTENDED(signValue, src_value, size);
+    SIGN_EXTENDED(signValue, src_value, size);
 
     s32 result = ~signValue;
 
@@ -751,7 +751,7 @@ u32 EXT(opcode code)
     u32 value = read_datareg(regptr);
 
     s32 extval;
-    SING_EXTENDED(extval, value, size == WORD ? BYTE : WORD);
+    SIGN_EXTENDED(extval, value, size == WORD ? BYTE : WORD);
 
     write_datareg(regptr, (u32) extval, &size);
 
@@ -836,9 +836,9 @@ u32 ILLEGAL(opcode code)
 {
     UNUSED(code)
 
-    emulation->State = TRAP_STATE;
+    emulation->Machine.State = TRAP_STATE;
     sprintf(emulation->Machine.Exception.trap_cause,
-            "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+            "Raised trap exception: Code: %d, Mnemonic: %s",
             IllegalInstruction, trap_code_toString(IllegalInstruction));
 
     return (RETURN_ERR);
@@ -893,14 +893,14 @@ u32 TRAP(opcode code)
 
     if (vector == 0x000F)
     {
-        iotask(emulation->ExecArgs.descr);
+        iotask(emulation);
         return (RETURN_OK);
     }
     else
     {
-        emulation->State = TRAP_STATE;
+        emulation->Machine.State = TRAP_STATE;
         sprintf(emulation->Machine.Exception.trap_cause,
-                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                "Raised trap exception: Code: %d, Mnemonic: %s",
                 0x20 + vector, trap_code_toString(0x20 + vector));
     }
 
@@ -915,7 +915,7 @@ u32 LINK(opcode code)
     u32 reg = code & reg_mask;
     s16 val;
 
-    SING_EXTENDED(val, read_word(emulation->Machine.cpu->pc + WORD_SPAN), WORD);
+    SIGN_EXTENDED(val, read_word(emulation->Machine.cpu->pc + WORD_SPAN), WORD);
     u32 rVal = read_addrreg(reg);
 
     push_long(rVal);
@@ -948,9 +948,9 @@ u32 MOVEUSP(opcode code)
 {
     if (!((emulation->Machine.cpu->sr & SUPERVISOR) ? 1 : 0))
     {
-        emulation->State = TRAP_STATE;
+        emulation->Machine.State = TRAP_STATE;
         sprintf(emulation->Machine.Exception.trap_cause,
-                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                "Raised trap exception: Code: %d, Mnemonic: %s",
                 PrivilegeViolation, trap_code_toString(PrivilegeViolation));
 
         return (RETURN_ERR);
@@ -1012,9 +1012,9 @@ u32 RTE(opcode code)
     }
     else
     {
-        emulation->State = TRAP_STATE;
+        emulation->Machine.State = TRAP_STATE;
         sprintf(emulation->Machine.Exception.trap_cause,
-                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                "Raised trap exception: Code: %d, Mnemonic: %s",
                 PrivilegeViolation, trap_code_toString(PrivilegeViolation));
 
         return (RETURN_ERR);
@@ -1026,9 +1026,9 @@ u32 RTE(opcode code)
 
 u32 RTS(opcode code)
 {
-    if (emulation->Machine.ExecData.JSR_CALL_COUNTER == 0) //like return in C-like main func
+    if (emulation->Machine.RuntimeData.JSR_CALL_COUNTER == 0) //like return in C-like main func
     {
-        emulation->State = PANIC_STATE;
+        emulation->Machine.State = PANIC_STATE;
         sprintf(emulation->Machine.Exception.panic_cause, "RTS instruction invoked in main label, code: 0x%X", code);
 
         return (RETURN_ERR);
@@ -1036,7 +1036,7 @@ u32 RTS(opcode code)
 
     emulation->Machine.cpu->pc = (pop_long());
 
-    emulation->Machine.ExecData.JSR_CALL_COUNTER--;
+    emulation->Machine.RuntimeData.JSR_CALL_COUNTER--;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1048,9 +1048,9 @@ u32 TRAPV(opcode code)
 
     if ((emulation->Machine.cpu->sr & OVERFLOW))
     {
-        emulation->State = TRAP_STATE;
+        emulation->Machine.State = TRAP_STATE;
         sprintf(emulation->Machine.Exception.trap_cause,
-                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                "Raised trap exception: Code: %d, Mnemonic: %s",
                 TRAPVInstruction, trap_code_toString(TRAPVInstruction));
 
         return (RETURN_ERR);
@@ -1092,7 +1092,7 @@ u32 JSR(opcode code)
     }
     else
     {
-        emulation->State = PANIC_STATE;
+        emulation->Machine.State = PANIC_STATE;
         sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
@@ -1103,7 +1103,7 @@ u32 JSR(opcode code)
 
     emulation->Machine.cpu->pc = (jmp_addr);
 
-    emulation->Machine.ExecData.JSR_CALL_COUNTER++;
+    emulation->Machine.RuntimeData.JSR_CALL_COUNTER++;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1130,7 +1130,7 @@ u32 JMP(opcode code)
     }
     else
     {
-        emulation->State = PANIC_STATE;
+        emulation->Machine.State = PANIC_STATE;
         sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
@@ -1167,8 +1167,8 @@ u32 CHK(opcode code)
     u32 dVal  = read_datareg(data_reg);
 
     s32 signVALUE, signDVAL;
-    SING_EXTENDED(signVALUE, value, size);
-    SING_EXTENDED(signDVAL, dVal, size);
+    SIGN_EXTENDED(signVALUE, value, size);
+    SIGN_EXTENDED(signDVAL, dVal, size);
 
     if (signDVAL < 0 || signDVAL > signVALUE)
     {
@@ -1177,9 +1177,9 @@ u32 CHK(opcode code)
         if (signDVAL > signVALUE) SET_NEGATIVE(0)
 
         {
-            emulation->State = TRAP_STATE;
+            emulation->Machine.State = TRAP_STATE;
             sprintf(emulation->Machine.Exception.trap_cause,
-                    "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                    "Raised trap exception: Code: %d, Mnemonic: %s",
                     CHKInstruction, trap_code_toString(CHKInstruction));
 
             return (RETURN_ERR);
@@ -1203,7 +1203,7 @@ u32 LEA(opcode code)
     }
     else
     {
-        emulation->State = PANIC_STATE;
+        emulation->Machine.State = PANIC_STATE;
         sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
@@ -1229,7 +1229,7 @@ u32 DBcc(opcode code)
         u32 dval = read_datareg(dst);
 
         s32 new_dval;
-        SING_EXTENDED(new_dval, dval, size);
+        SIGN_EXTENDED(new_dval, dval, size);
         new_dval -= 1;
 
         write_datareg(dst, (u32) new_dval, &size);
@@ -1239,7 +1239,7 @@ u32 DBcc(opcode code)
             s32  disp;
             u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
             opsize        size   = WORD;
-            SING_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
+            SIGN_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
 
             u32 pc = emulation->Machine.cpu->pc;
             pc += WORD_SPAN;
@@ -1288,7 +1288,7 @@ u32 ADDQ(opcode code)
     {
         u32 reg_val     = read_addrreg(dst);
         u32 sign_regval;
-        SING_EXTENDED(sign_regval, reg_val, LONG);
+        SIGN_EXTENDED(sign_regval, reg_val, LONG);
         u32 result      = (u32)(sign_regval + value);
 
         write_addrreg(dst, result, NULL);
@@ -1299,7 +1299,7 @@ u32 ADDQ(opcode code)
     READ_EFFECTIVE_ADDRESS(reg_content, dst, size, mode, NORMAL);
 
     u32 sign_regval;
-    SING_EXTENDED(sign_regval, reg_content, LONG);
+    SIGN_EXTENDED(sign_regval, reg_content, LONG);
 
     u32 result = (u32)(sign_regval + value);
 
@@ -1324,7 +1324,7 @@ u32 SUBQ(opcode code)
     {
         u32 reg_val     = read_addrreg(dst);
         u32 sign_regval;
-        SING_EXTENDED(sign_regval, reg_val, LONG);
+        SIGN_EXTENDED(sign_regval, reg_val, LONG);
         u32 result      = (u32)(sign_regval - value);
 
         write_addrreg(dst, result, NULL);
@@ -1335,7 +1335,7 @@ u32 SUBQ(opcode code)
     READ_EFFECTIVE_ADDRESS(reg_content, dst, size, mode, NORMAL);
 
     u32 sign_regval;
-    SING_EXTENDED(sign_regval, reg_content, LONG);
+    SIGN_EXTENDED(sign_regval, reg_content, LONG);
 
     u32 result = (u32)(sign_regval - value);
 
@@ -1359,10 +1359,10 @@ u32 BRA(opcode code)
         u32 ram_ptr = pc + WORD_SPAN;
         opsize        dummy   = WORD;
 
-        SING_EXTENDED(disp, read_ram(&ram_ptr, &dummy), WORD);
+        SIGN_EXTENDED(disp, read_ram(&ram_ptr, &dummy), WORD);
     }
     else
-        SING_EXTENDED(disp, (u32) disp, WORD);
+        SIGN_EXTENDED(disp, (u32) disp, WORD);
 
     emulation->Machine.cpu->pc = (pc + disp);
 
@@ -1380,18 +1380,18 @@ u32 BSR(opcode code)
     {
         u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
         opsize        size   = WORD;
-        SING_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
+        SIGN_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
         push_long(pc + LONG_SPAN);
     }
     else
     {
-        SING_EXTENDED(disp, disp, WORD);
+        SIGN_EXTENDED(disp, disp, WORD);
         push_long(pc + WORD_SPAN);
     }
 
     emulation->Machine.cpu->pc = (pc + disp);
 
-    emulation->Machine.ExecData.JSR_CALL_COUNTER++;
+    emulation->Machine.RuntimeData.JSR_CALL_COUNTER++;
 
     return (RETURN_OK);
 }
@@ -1410,11 +1410,11 @@ u32 Bcc(opcode code)
         {
             u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
             opsize        size   = WORD;
-            SING_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
+            SIGN_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
         }
         else
         {
-            SING_EXTENDED(disp, disp, WORD);
+            SIGN_EXTENDED(disp, disp, WORD);
         }
 
         emulation->Machine.cpu->pc = (pc + disp);
@@ -1435,7 +1435,7 @@ u32 MOVEQ(opcode code)
 {
     u32 dst = (code & DST_MASK) >> 9;
     s32 val;
-    SING_EXTENDED(val, (code & 0b0000000011111111), LONG);
+    SIGN_EXTENDED(val, (code & 0b0000000011111111), LONG);
 
     write_datareg(dst, val, NULL);
 
@@ -1462,9 +1462,9 @@ u32 DIVU(opcode code)
 
     if (*sVal == 0)
     {
-        emulation->State = TRAP_STATE;
+        emulation->Machine.State = TRAP_STATE;
         sprintf(emulation->Machine.Exception.trap_cause,
-                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                "Raised trap exception: Code: %d, Mnemonic: %s",
                 DivideByZero, trap_code_toString(DivideByZero));
 
         return (RETURN_ERR);
@@ -1512,14 +1512,14 @@ u32 DIVS(opcode code)
 
     opsize size = WORD;
 
-    SING_EXTENDED(signed_dVal, *dVal, WORD);
-    SING_EXTENDED(signed_sVal, *sVal, WORD);
+    SIGN_EXTENDED(signed_dVal, *dVal, WORD);
+    SIGN_EXTENDED(signed_sVal, *sVal, WORD);
 
     if (signed_sVal == 0)
     {
-        emulation->State = TRAP_STATE;
+        emulation->Machine.State = TRAP_STATE;
         sprintf(emulation->Machine.Exception.trap_cause,
-                "Raised trap exception: \n\t\033[01m\033[37mcode\033[0m:\t  %d\n\t\033[01m\033[37mmnemonic\033[0m: %s",
+                "Raised trap exception: Code: %d, Mnemonic: %s",
                 DivideByZero, trap_code_toString(DivideByZero));
 
         return (RETURN_ERR);
@@ -1616,7 +1616,7 @@ u32 SUBA(opcode code)
     if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
 
     s32 signSRC;
-    SING_EXTENDED(signSRC, src_val, size);
+    SIGN_EXTENDED(signSRC, src_val, size);
 
     u32 result  = (u32)(dst_val - signSRC);
     write_addrreg(dst_reg, result, NULL);
@@ -1636,8 +1636,8 @@ u32 SUBX(opcode code)
     s32 signSRC, signDST, result;
     switch (drmode) {
         case DATAREG:
-            SING_EXTENDED(signDST, read_datareg(dst_reg), size);
-            SING_EXTENDED(signSRC, read_datareg(src_reg), size);
+            SIGN_EXTENDED(signDST, read_datareg(dst_reg), size);
+            SIGN_EXTENDED(signSRC, read_datareg(src_reg), size);
             result  = signDST - signSRC - ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
             SET_SRFLAGS(addx, size, (u32) signSRC, (u32) signDST, (u32) result);
             break;
@@ -1646,8 +1646,8 @@ u32 SUBX(opcode code)
             decr_addr_reg(dst_reg, size);
             decr_addr_reg(src_reg, size);
 
-            SING_EXTENDED(signDST, read_ram(&dst_reg, &size), size);
-            SING_EXTENDED(signSRC, read_ram(&src_reg, &size), size);
+            SIGN_EXTENDED(signDST, read_ram(&dst_reg, &size), size);
+            SIGN_EXTENDED(signSRC, read_ram(&src_reg, &size), size);
             result  = signDST - signSRC - ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
 
             WRITE_EFFECTIVE_ADDRESS(dst_reg, (u32) result, size, ADDRESSPreDecr);
@@ -1673,8 +1673,8 @@ u32 SUB(opcode code)
     opsize   *size      = (opsize *)        a[4];
     ea_direction *direction = (ea_direction *)  a[5];
 
-    SING_EXTENDED(signed_sVal, *sVal, *size);
-    SING_EXTENDED(signed_dVal, *dVal, *size);
+    SIGN_EXTENDED(signed_sVal, *sVal, *size);
+    SIGN_EXTENDED(signed_dVal, *dVal, *size);
 
     _val  = (*direction) ? signed_sVal - signed_dVal : signed_dVal - signed_sVal;
 
@@ -1721,7 +1721,7 @@ u32 CMPA(opcode code)
     {
         u32 ram_ptr = emulation->Machine.cpu->pc + WORD_SPAN;
         u32 imm_val = read_ram(&ram_ptr, &size);
-        SING_EXTENDED(signSRC, imm_val, size);
+        SIGN_EXTENDED(signSRC, imm_val, size);
 
         INCR_PC(size_to_span(size));
     }
@@ -1731,7 +1731,7 @@ u32 CMPA(opcode code)
 
         u32 src_val;
         READ_EFFECTIVE_ADDRESS(src_val, src_reg, size, mode, NORMAL);
-        SING_EXTENDED(signSRC, src_val, size);
+        SIGN_EXTENDED(signSRC, src_val, size);
 
         if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
     }
@@ -1762,8 +1762,8 @@ u32 CMPM(opcode code)
 
     s32 signDST, signSRC;
 
-    SING_EXTENDED(signDST, DST, size);
-    SING_EXTENDED(signSRC, SRC, size);
+    SIGN_EXTENDED(signDST, DST, size);
+    SIGN_EXTENDED(signSRC, SRC, size);
 
     incr_addr_reg(dst_addr_reg, size);
     incr_addr_reg(src_addr_reg, size);
@@ -1823,7 +1823,7 @@ u32 CMP(opcode code)
 
         u32 ram_ptr = emulation->Machine.cpu->pc + size_to_span(size);
         u32 imm_val = read_ram(&ram_ptr, &tmpsize);
-        SING_EXTENDED(signSRC, imm_val, tmpsize);
+        SIGN_EXTENDED(signSRC, imm_val, tmpsize);
 
         INCR_PC(size_to_span(size));
     }
@@ -1832,13 +1832,13 @@ u32 CMP(opcode code)
         mode = (code & 0b0000000000111000) >> 3;
         u32 src_val;
         READ_EFFECTIVE_ADDRESS(src_val, src_reg, size, mode, NORMAL);
-        SING_EXTENDED(signSRC, src_val, size);
+        SIGN_EXTENDED(signSRC, src_val, size);
 
         if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
     }
 
     s32 signDST;
-    SING_EXTENDED(signDST, read_datareg(dst_reg), size);
+    SIGN_EXTENDED(signDST, read_datareg(dst_reg), size);
 
     s32 result  = (signDST - signSRC);
 
@@ -1892,8 +1892,8 @@ u32 MULS(opcode code)
 
     opsize size = WORD;
 
-    SING_EXTENDED(signed_dVal, *dVal, WORD);
-    SING_EXTENDED(signed_sVal, *sVal, WORD);
+    SIGN_EXTENDED(signed_dVal, *dVal, WORD);
+    SIGN_EXTENDED(signed_sVal, *sVal, WORD);
 
     _val = signed_dVal * signed_sVal;
 
@@ -1943,7 +1943,7 @@ u32 EXG(opcode code)
             break;
         default:
         {
-            emulation->State = PANIC_STATE;
+            emulation->Machine.State = PANIC_STATE;
             sprintf(emulation->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
             return (RETURN_ERR);
@@ -2013,7 +2013,7 @@ u32 ADDA(opcode code)
     if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
 
     s32 signSRC;
-    SING_EXTENDED(signSRC, src_val, size);
+    SIGN_EXTENDED(signSRC, src_val, size);
 
     u32 result  = (u32)(dst_val + signSRC);
     write_addrreg(dst_reg, result, NULL);
@@ -2033,8 +2033,8 @@ u32 ADDX(opcode code)
     s32 signSRC, signDST, result;
     switch (drmode) {
         case DATAREG:
-            SING_EXTENDED(signDST, read_datareg(dst_reg), size);
-            SING_EXTENDED(signSRC, read_datareg(src_reg), size);
+            SIGN_EXTENDED(signDST, read_datareg(dst_reg), size);
+            SIGN_EXTENDED(signSRC, read_datareg(src_reg), size);
             result  = signDST + signSRC + ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
             SET_SRFLAGS(addx, size, (u32) signSRC, (u32) signDST, (u32) result);
             break;
@@ -2043,8 +2043,8 @@ u32 ADDX(opcode code)
             decr_addr_reg(dst_reg, size);
             decr_addr_reg(src_reg, size);
 
-            SING_EXTENDED(signDST, read_ram(&dst_reg, &size), size);
-            SING_EXTENDED(signSRC, read_ram(&src_reg, &size), size);
+            SIGN_EXTENDED(signDST, read_ram(&dst_reg, &size), size);
+            SIGN_EXTENDED(signSRC, read_ram(&src_reg, &size), size);
             result  = signDST + signSRC + ((emulation->Machine.cpu->sr & EXTEND) ? 1 : 0);
 
             WRITE_EFFECTIVE_ADDRESS(dst_reg, (u32) result, size, ADDRESSPreDecr);
@@ -2070,8 +2070,8 @@ u32 ADD(opcode code)
     opsize   *size      = (opsize *)        a[4];
     ea_direction *direction = (ea_direction *)  a[5];
 
-    SING_EXTENDED(signed_sVal, *sVal, *size);
-    SING_EXTENDED(signed_dVal, *dVal, *size);
+    SIGN_EXTENDED(signed_sVal, *sVal, *size);
+    SIGN_EXTENDED(signed_dVal, *dVal, *size);
 
     _val  = signed_dVal + signed_sVal;
 
@@ -2314,7 +2314,7 @@ u32 ALxx(u32 code)
         case BYTE2:
         /* cannot reach this case, i really hope :D */
         {
-            emulation->State = PANIC_STATE;
+            emulation->Machine.State = PANIC_STATE;
             sprintf(emulation->Machine.Exception.panic_cause, "ALxx invalid size 0x%X", BYTE);
 
             return (RETURN_ERR);
@@ -2430,7 +2430,7 @@ u32 ROxx(u32 code)
         case BYTE2:
         /* cannot reach this case, i really hope :D */
         {
-            emulation->State = PANIC_STATE;
+            emulation->Machine.State = PANIC_STATE;
             sprintf(emulation->Machine.Exception.panic_cause, "ROxx invalid size 0x%X", BYTE);
 
             return (RETURN_ERR);
@@ -2562,7 +2562,7 @@ m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemon
 
     if (!newopcode)
     {
-        emulation->State = PANIC_STATE;
+        emulation->Machine.State = PANIC_STATE;
         sprintf(emulation->Machine.Exception.panic_cause, "Internal error (generate opcode), aborting.");
 
         return (NULL);
@@ -2577,7 +2577,7 @@ m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemon
 
 }
 
-void init_codes()
+void init_codes(struct EmulationMachine *em)
 {
     if (!codemap)
     {
@@ -2585,8 +2585,8 @@ void init_codes()
 
         if (!codemap)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 0), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 0), aborting.");
             return;
         }
 
@@ -2597,8 +2597,8 @@ void init_codes()
         codemap[0].instances     = malloc(sizeof (*codemap[0].instances)  * GROUP_0x00_LEN);
         if (!codemap[0].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 1), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 1), aborting.");
             return;
         }
         codemap[0].instances[0]  = new_opcode_t(0b0000000000111100, 0b1111111111111111, "ORItoCCR",  ORItoCCR);
@@ -2630,8 +2630,8 @@ void init_codes()
         codemap[1].instances    = malloc(sizeof (*codemap[1].instances)  * GROUP_0x01_LEN);
         if (!codemap[1].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 2), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 2), aborting.");
             return;
         }
         codemap[1].instances[0] = new_opcode_t(0b0001000000000000, 0b1111000000000000, "MOVE", MOVE);
@@ -2643,8 +2643,8 @@ void init_codes()
         codemap[2].instances    = malloc(sizeof (*codemap[2].instances)  * GROUP_0x02_LEN);
         if (!codemap[2].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 3), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 3), aborting.");
             return;
         }
         codemap[2].instances[0] = new_opcode_t(0b0010000001000000, 0b1111000111000000, "MOVEA", MOVEA);
@@ -2657,8 +2657,8 @@ void init_codes()
         codemap[3].instances    = malloc(sizeof (*codemap[3].instances)  * GROUP_0x03_LEN);
         if (!codemap[3].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 4), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 4), aborting.");
             return;
         }
         codemap[3].instances[0] = new_opcode_t(0b0011000001000000, 0b1111000111000000, "MOVEA", MOVEA);
@@ -2671,8 +2671,8 @@ void init_codes()
         codemap[4].instances     = malloc(sizeof (*codemap[4].instances)  * GROUP_0x04_LEN);
         if (!codemap[4].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 5), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 5), aborting.");
             return;
         }
         codemap[4].instances[0]  = new_opcode_t(0b0100000011000000, 0b1111111111000000, "MOVEfromSR", MOVEfromSR);
@@ -2713,8 +2713,8 @@ void init_codes()
         codemap[5].instances    = malloc(sizeof (*codemap[5].instances)  * GROUP_0x05_LEN);
         if (!codemap[5].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 6), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 6), aborting.");
             return;
         }
         codemap[5].instances[0] = new_opcode_t(0b0101000011001000, 0b1111000011111000, "DBcc", DBcc);
@@ -2729,8 +2729,8 @@ void init_codes()
         codemap[6].instances    = malloc(sizeof (*codemap[6].instances)  * GROUP_0x06_LEN);
         if (!codemap[6].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 7), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 7), aborting.");
             return;
         }
         codemap[6].instances[0] = new_opcode_t(0b0110000000000000, 0b1111111100000000, "BRA", BRA);
@@ -2744,8 +2744,8 @@ void init_codes()
         codemap[7].instances    = malloc(sizeof (*codemap[7].instances)  * GROUP_0x07_LEN);
         if (!codemap[7].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 8), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 8), aborting.");
             return;
         }
         codemap[7].instances[0] = new_opcode_t(0b0111000000000000, 0b1111000100000000, "MOVEQ", MOVEQ);
@@ -2757,8 +2757,8 @@ void init_codes()
         codemap[8].instances    = malloc(sizeof (*codemap[8].instances)  * GROUP_0x08_LEN);
         if (!codemap[8].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 9), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 9), aborting.");
             return;
         }
         codemap[8].instances[0] = new_opcode_t(0b1000000011000000, 0b1111000111000000, "DIVU", DIVU);
@@ -2773,8 +2773,8 @@ void init_codes()
         codemap[9].instances    = malloc(sizeof (*codemap[9].instances)  * GROUP_0x09_LEN);
         if (!codemap[9].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 10), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 10), aborting.");
             return;
         }
         codemap[9].instances[0] = new_opcode_t(0b1001000011000000, 0b1111000011000000, "SUBA", SUBA);
@@ -2788,8 +2788,8 @@ void init_codes()
         codemap[10].instances    = malloc(sizeof (*codemap[10].instances) * GROUP_0x0B_LEN);
         if (!codemap[10].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 11), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 11), aborting.");
             return;
         }
         codemap[10].instances[0] = new_opcode_t(0b1011000011000000, 0b1111000011000000, "CMPA", CMPA);
@@ -2804,8 +2804,8 @@ void init_codes()
         codemap[11].instances    = malloc(sizeof (*codemap[11].instances) * GROUP_0x0C_LEN);
         if (!codemap[11].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 12), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 12), aborting.");
             return;
         }
         codemap[11].instances[0] = new_opcode_t(0b1100000011000000, 0b1111000111000000, "MULU", MULU);
@@ -2821,8 +2821,8 @@ void init_codes()
         codemap[12].instances    = malloc(sizeof (*codemap[12].instances) * GROUP_0x0D_LEN);
         if (!codemap[12].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 13), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 13), aborting.");
             return;
         }
         codemap[12].instances[0] = new_opcode_t(0b1101000011000000, 0b1111000011000000, "ADDA", ADDA);
@@ -2836,8 +2836,8 @@ void init_codes()
         codemap[13].instances     = malloc(sizeof (*codemap[13].instances) * GROUP_0x0E_LEN);
         if (!codemap[13].instances)
         {
-            emulation->State = PANIC_STATE;
-            sprintf(emulation->Machine.Exception.panic_cause, "Internal error (codemap stage 14), aborting.");
+            em->Machine.State = PANIC_STATE;
+            sprintf(em->Machine.Exception.panic_cause, "Internal error (codemap stage 14), aborting.");
             return;
         }
         codemap[13].instances[0]  = new_opcode_t(0b1110000011000000, 0b1111111111000000, "ASR",  ASR);
@@ -2890,6 +2890,7 @@ void destroy_codes()
         free(codemap);
     }
 
+    codemap = NULL;
 }
 
 
@@ -2924,25 +2925,28 @@ m68k_opcode* get_opcode_t(opcode code)
  * RUNNER
  *
  */
-void preset_handler(struct EmulationMachine *em) { emulation = em; }
+void preset_hander(struct EmulationMachine *em) { emulation = em; }
+
 
 u32 run_opcode(struct EmulationMachine *em)
 {
-    m68k_opcode *tmp = get_opcode_t(em->Machine.OpCode.code);
+    m68k_opcode *tmp = get_opcode_t(em->Machine.RuntimeData.operation_code);
 
     if (tmp == NULL)
     {
-        emulation->State = PANIC_STATE;
-        sprintf(emulation->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", em->Machine.OpCode.code);
+        em->Machine.State = PANIC_STATE;
+        sprintf(em->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", em->Machine.RuntimeData.operation_code);
         return (RETURN_ERR);
     }
 
-    em->Machine.OpCode.mnemonic = tmp->mnemonic;
+    em->Machine.RuntimeData.mnemonic = tmp->mnemonic;
 
     if (em->EmuType == EMULATE_SBS)
+    {
         machine_waiter(em);
+    }
 
-    u32 res = tmp->handler(em->Machine.OpCode.code);
+    u32 res = tmp->handler(em->Machine.RuntimeData.operation_code);
 
     if (res != RETURN_OK_PC_NO_INCR)
         INCR_PC(WORD_SPAN);

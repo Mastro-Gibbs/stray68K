@@ -16,7 +16,7 @@
               
 Stray motorola 68000 emulator, include assembler and emulator   
 
-About 25k, but what? :)
+About 26k, but what? :)
 
 ---
 
@@ -65,16 +65,18 @@ Just clone and invoke makefile
 
         You cannot combine '-d' and '-q' options.
         You cannot combine '-j' and '-t' options.
+        You cannot combine JSON encoding option 'dump' and 'concat'.
         You cannot use JSON encoding option (-j) alone.
         You cannot use JSON chrono encoding (-j chrono) in step-by-step mode.
 
         JSON encoding commands
-        [cpu]      -Mean cpu encoding.
-        [ram]      -Mean ram encoding.
-        [chrono]   -Mean chrono encoding (ns).
-        [code]     -Mean operation code encoding (base 10).
-        [mnemonic] -Mean mnemonic operation encoding.
-        [concat]   -Perform JSON concat, must pass at least two listed above commands.
+        [cpu]    -Mean cpu encoding.
+        [ram]    -Mean ram encoding.
+        [chrono] -Mean chrono encoding (ns).
+        [op]     -Mean op mnemonic and code encoding (base 10).
+        [io]     -Show io operation in JSON format.
+        [dump]   -Perform sys dump in JSON format.
+        [concat] -Perform JSON concat, must pass at least two listed above commands.
 
         STEP-BY-STEP MODE's options asked from stdin
         [s] -Asks for offsets and print current stack.
@@ -95,25 +97,29 @@ Just clone and invoke makefile
   ```
 
 
-- Invoke for help
+- Print help.
   ```bash
   $ ./stray68K 
   ```
-- To perform a ```compilation```
+- To perform a ```compilation```.
   ```bash
   $ ./stray68K -a -i <input_file_path>.X68 -o <output_file_path>.B68
   ```
-- To perform a ```execution```
+- To perform a quiet ```execution```.
   ```bash
   $ ./stray68K -e <output_file_path>.B68 -q
   ```
-- To perform a ```execution``` with JSON encoding output
+- To perform a quiet ```execution``` with cpu, ram and chrono dump in JSON format.
   ```bash
-  $ ./stray68K -e <output_file_path>.B68 -j cpu chrono concat -q
+  $ ./stray68K -e <output_file_path>.B68 -j cpu ram chrono concat -q
   ```
-- To perform a ```execution step by step```
+- To perform a descriptive ```execution step by step```.
   ```bash
   $ ./stray68K -s <output_file_path>.B68 -d
+  ```
+- To perform a descriptive ```execution step by step``` with system dump in JSON format.
+  ```bash
+  $ ./stray68K -s <output_file_path>.B68 -d -j dump
   ```
 
 ---

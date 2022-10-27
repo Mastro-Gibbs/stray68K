@@ -18,14 +18,12 @@ m68k_cpu* init_cpu(struct EmulationMachine *em)
 
         if (!cpu)
         {
-            em->State = PANIC_STATE;
+            em->Machine.State = PANIC_STATE;
             sprintf(em->Machine.Exception.panic_cause, "Cannot init cpu, aborting.");
             return (NULL);
         }
 
         reset_cpu();
-
-        init_codes();
     }
 
     return (cpu);
@@ -60,6 +58,8 @@ void destroy_cpu()
     if (cpu)
         free(cpu);
 
+    cpu = NULL;
+
     destroy_codes();
 }
 
@@ -70,12 +70,12 @@ u32 __exec__(struct EmulationMachine *em)
 
     if ((istruction_ptr % 2) != 0)
     {
-        em->State = PANIC_STATE;
+        em->Machine.State = PANIC_STATE;
         sprintf(em->Machine.Exception.panic_cause, "Segmentation fault while reading next istruction on odd address");
         return (RETURN_ERR);
     }
 
-    em->Machine.OpCode.code = read_word(istruction_ptr);;
+    em->Machine.RuntimeData.operation_code = read_word(istruction_ptr);;
 
     return run_opcode(em);
 }

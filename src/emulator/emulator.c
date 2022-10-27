@@ -17,14 +17,14 @@
 
 
 /* LOADER */
-bit _is_valid_file(char *filename)
+bit _is_valid_file(struct EmulationMachine *em)
 {
     FILE    *fp;
     char    *line = NULL;
     size_t  len   = 0;
     ssize_t read;
 
-    const char* ldot = strrchr(filename, '.');
+    const char* ldot = strrchr(em->ExecArgs.executable_path, '.');
     if (ldot != NULL)
     {
         size_t length = strlen("B68");
@@ -34,7 +34,7 @@ bit _is_valid_file(char *filename)
         }
     }
 
-    fp = fopen(filename, "r");
+    fp = fopen(em->ExecArgs.executable_path, "r");
 
     if (fp == NULL)
         EMULATOR_ERROR("File not found, be sure to pass correct path.")
@@ -48,7 +48,7 @@ bit _is_valid_file(char *filename)
     return 1;
 }
 
-u32 _extract_ORG(char *filename)
+u32 _extract_ORG(struct EmulationMachine *em)
 {
     FILE   *fp;
     char   *line = NULL;
@@ -59,7 +59,7 @@ u32 _extract_ORG(char *filename)
 
     char org[9];
 
-    fp = fopen(filename, "r");
+    fp = fopen(em->ExecArgs.executable_path, "r");
 
     read = getline(&line, &len, fp);
 
@@ -77,50 +77,57 @@ u32 _extract_ORG(char *filename)
     return value;
 }
 
-u8* _read_bytecode(struct EmulationMachine *em, char *filename)
+void load_bytecode(struct EmulationMachine *em)
 {
+    u32        size = 0;
+    regex_t    hex_rx;
+    const char *hex_regex = "[0-9a-fA-F!]+";
+
+    em->Machine.RuntimeData.org_pointer = _extract_ORG(em);
+    em->Machine.cpu->pc = em->Machine.RuntimeData.org_pointer;
+
     u8 *bytecode = NULL;
 
     FILE  *fp;
-    fp = fopen(filename, "r");
+    fp = fopen(em->ExecArgs.executable_path, "r");
 
-    if (regcomp(&em->Loader.hex_rx, em->Loader.hex_regex, REG_EXTENDED) == 1)
-        EMULATOR_ERROR("Could not compile regex %s", em->Loader.hex_regex)
+    if (regcomp(&hex_rx, hex_regex, REG_EXTENDED) == 1)
+        EMULATOR_ERROR("Could not compile regex %s", hex_regex)
 
     int  reti;
     char ch;
     while((ch = fgetc(fp)) != EOF)
     {
-        reti = regexec(&em->Loader.hex_rx, &ch, 0, NULL, 0);
+        reti = regexec(&hex_rx, &ch, 0, NULL, 0);
         if (!reti)
         {
-            em->Loader.size++;
+            size++;
         }
     }
 
-    em->Loader.size = ((em->Loader.size - ((em->Machine.ExecData.orgptr) ? 9 : 0)) / 2) + 1;
+    size = ((size - ((em->Machine.RuntimeData.org_pointer) ? 9 : 0)) / 2) + 1;
 
     fclose(fp);
 
-    bytecode = calloc(em->Loader.size, sizeof (* bytecode));
+    bytecode = calloc(size, sizeof (* bytecode));
 
-    fp = fopen(filename, "r");
+    fp = fopen(em->ExecArgs.executable_path, "r");
 
     char symbol[3];
     symbol[2] = '\0';
 
     u32 pos = 0,
-                  validator = ((em->Machine.ExecData.orgptr) ? 10 : 0);
+        validator = ((em->Machine.RuntimeData.org_pointer) ? 10 : 0);
 
     fseek(fp, validator, SEEK_SET);
 
-    u32 meta_pc = em->Machine.ExecData.orgptr;
+    u32 meta_pc = em->Machine.RuntimeData.org_pointer;
 
     while((ch = fgetc(fp)) != EOF)
     {
         if (ch == SIMHALT_SYMBOL)
         {
-            if (em->Machine.ExecData.simhalt == 0) em->Machine.ExecData.simhalt = meta_pc;
+            if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = meta_pc;
         }
         else if (ch != SEPARATOR)
         {
@@ -138,22 +145,10 @@ u8* _read_bytecode(struct EmulationMachine *em, char *filename)
     }
     fclose(fp);
 
-    return bytecode;
-}
-
-void __load_bytecode__(struct EmulationMachine *em)
-{
-    char *filename = em->ExecArgs.path;
-
-    em->Machine.ExecData.orgptr = _extract_ORG(filename);
-    em->Machine.cpu->pc = em->Machine.ExecData.orgptr;
-
-    u8 *bytecode = _read_bytecode(em, filename);
-
     if (bytecode)
     {
         u32 span = 0;
-        for (u32 iter = 0; iter < em->Loader.size; iter++)
+        for (u32 iter = 0; iter < size; iter++)
         {
             u8 c = bytecode[iter];
 
@@ -161,12 +156,12 @@ void __load_bytecode__(struct EmulationMachine *em)
             span += BYTE_SPAN;
         }
 
-        em->Machine.ExecData.lwb = em->Machine.cpu->pc + span;
+        em->Machine.RuntimeData.last_loaded_byte_index = em->Machine.cpu->pc + span;
 
         free(bytecode);
-        regfree(&em->Loader.hex_rx);
+        regfree(&hex_rx);
 
-        if (em->Machine.ExecData.simhalt == 0) em->Machine.ExecData.simhalt = em->Machine.ExecData.lwb;
+        if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = em->Machine.RuntimeData.last_loaded_byte_index;
 
     }
     else EMULATOR_ERROR("Error incomes while loading an invalid bytecode")
@@ -200,16 +195,18 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
             "\n"
             " You cannot combine '-d' and '-q' options.\n"
             " You cannot combine '-j' and '-t' options.\n"
+            " You cannot combine JSON encoding option 'dump' and 'concat'.\n"
             " You cannot use JSON encoding option (-j) alone.\n"
             " You cannot use JSON chrono encoding (-j chrono) in step-by-step mode.\n"
             "\n"
             "**JSON encoding commands**\n"
-            " [cpu]      -Mean cpu encoding.\n"
-            " [ram]      -Mean ram encoding.\n"
-            " [chrono]   -Mean chrono encoding (ns).\n"
-            " [code]     -Mean operation code encoding (base 10).\n"
-            " [mnemonic] -Mean mnemonic operation encoding.\n"
-            " [concat]   -Perform JSON concat, must pass at least two listed above commands.\n"
+            " [cpu]    -Mean cpu encoding.\n"
+            " [ram]    -Mean ram encoding.\n"
+            " [chrono] -Mean chrono encoding (ns).\n"
+            " [op]     -Mean op mnemonic and code encoding (base 10).\n"
+            " [io]     -Show io operation in JSON format.\n"
+            " [dump]   -Perform sys dump in JSON format.\n"
+            " [concat] -Perform JSON concat, must pass at least two listed above commands.\n"
             "\n"
             "**STEP-BY-STEP MODE's options asked from stdin**\n"
             " [s] -Asks for offsets and print current stack.\n"
@@ -222,37 +219,38 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
         EMULATOR_ERROR("Too few params")
     }
 
-    _is_valid_file(argv[2]);
+    em->ExecArgs.executable_path  = argv[2];
+    em->ExecArgs.descriptive_mode = FALSE;
+    em->ExecArgs.quiet_mode       = FALSE;
+    em->ExecArgs.chrono_mode      = FALSE;
 
-    em->ExecArgs.path   = argv[2];
-    em->ExecArgs.descr  = FALSE;
-    em->ExecArgs.quiet  = FALSE;
-    em->ExecArgs.timer  = FALSE;
-
-    em->ExecArgs.JSON.enable = FALSE;
+    em->ExecArgs.JSON.is_activated = FALSE;
     em->ExecArgs.JSON.cpu    = FALSE;
     em->ExecArgs.JSON.ram    = FALSE;
-    em->ExecArgs.JSON.chrono  = FALSE;
-    em->ExecArgs.JSON.mnem   = FALSE;
-    em->ExecArgs.JSON.ocode  = FALSE;
+    em->ExecArgs.JSON.chrono = FALSE;
+    em->ExecArgs.JSON.op     = FALSE;
+    em->ExecArgs.JSON.dump   = FALSE;
+    em->ExecArgs.JSON.io     = FALSE;
     em->ExecArgs.JSON.concat = FALSE;
+
+    _is_valid_file(em);
 
     for (s32 i = 3; i < argc; i++)
     {
         if (strlen(argv[i]) == 2)
         {
             if (argv[i][0] == '-' && argv[i][1] == 'd')
-                em->ExecArgs.descr = TRUE;
+                em->ExecArgs.descriptive_mode = TRUE;
 
             else if (argv[i][0] == '-' && argv[i][1] == 'q')
-                em->ExecArgs.quiet = TRUE;
+                em->ExecArgs.quiet_mode = TRUE;
 
             else if (argv[i][0] == '-' && argv[i][1] == 't')
-                em->ExecArgs.timer = TRUE;
+                em->ExecArgs.chrono_mode = TRUE;
 
             else if (argv[i][0] == '-' && argv[i][1] == 'j')
             {
-                em->ExecArgs.JSON.enable = TRUE;
+                em->ExecArgs.JSON.is_activated = TRUE;
 
                 u32 i_clone = i;
                 for (u16 j = i_clone+1; j < argc; j++)
@@ -263,10 +261,12 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
                         em->ExecArgs.JSON.ram = TRUE;
                     else if (strcmp(argv[j], "chrono") == 0)
                         em->ExecArgs.JSON.chrono = TRUE;
-                    else if (strcmp(argv[j], "mnemonic") == 0)
-                        em->ExecArgs.JSON.mnem = TRUE;
-                    else if (strcmp(argv[j], "code") == 0)
-                        em->ExecArgs.JSON.ocode = TRUE;
+                    else if (strcmp(argv[j], "op") == 0)
+                        em->ExecArgs.JSON.op = TRUE;
+                    else if (strcmp(argv[j], "dump") == 0)
+                        em->ExecArgs.JSON.dump = TRUE;
+                    else if (strcmp(argv[j], "io") == 0)
+                        em->ExecArgs.JSON.io = TRUE;
                     else if (strcmp(argv[j], "concat") == 0)
                         em->ExecArgs.JSON.concat = TRUE;
                     else if (argv[j][0] == '-')
@@ -282,37 +282,41 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
         else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
     }
 
-    if (em->EmuType == EMULATE_SBS && em->ExecArgs.quiet)
+    if (em->EmuType == EMULATE_SBS && em->ExecArgs.quiet_mode)
         EMULATOR_ERROR("Cannot use quiet option (-q) in step-by-step mode.")
 
-    if (em->EmuType == EMULATE_SBS && em->ExecArgs.timer)
+    if (em->EmuType == EMULATE_SBS && em->ExecArgs.chrono_mode)
         EMULATOR_ERROR("Cannot use timer option (-t) in step-by-step mode.")
 
     if (em->EmuType == EMULATE_SBS && em->ExecArgs.JSON.chrono)
         EMULATOR_ERROR("Cannot use JSON timer encoding (-j chrono) in step-by-step mode.")
 
-    if (em->EmuType == EMULATE_STD && em->ExecArgs.descr)
+    if (em->EmuType == EMULATE_STD && em->ExecArgs.descriptive_mode)
         EMULATOR_ERROR("Cannot use descriptive option (-d) in normal mode.")
 
-    if (em->ExecArgs.descr && em->ExecArgs.quiet)
+    if (em->ExecArgs.descriptive_mode && em->ExecArgs.quiet_mode)
         EMULATOR_ERROR("Cannot combine '-d' and '-q' options.")
 
-    if (em->ExecArgs.timer && em->ExecArgs.JSON.enable)
+    if (em->ExecArgs.chrono_mode && em->ExecArgs.JSON.is_activated)
         EMULATOR_ERROR("Cannot combine '-t' and JSON encoder '-j' options.")
 
-    if (em->ExecArgs.JSON.enable)
+    if (em->ExecArgs.JSON.dump && em->ExecArgs.JSON.concat)
+        EMULATOR_ERROR("Cannot combine JSON encoding option 'dump' and 'concat'.")
+
+    if (em->ExecArgs.JSON.is_activated)
     {
         u8 c_c = 0;
-        if (em->ExecArgs.JSON.cpu)   c_c++;
-        if (em->ExecArgs.JSON.ram)   c_c++;
-        if (em->ExecArgs.JSON.ocode) c_c++;
+        if (em->ExecArgs.JSON.cpu)    c_c++;
+        if (em->ExecArgs.JSON.ram)    c_c++;
+        if (em->ExecArgs.JSON.op)     c_c++;
         if (em->ExecArgs.JSON.chrono) c_c++;
-        if (em->ExecArgs.JSON.mnem)  c_c++;
+        if (em->ExecArgs.JSON.dump)   c_c++;
+        if (em->ExecArgs.JSON.io)     c_c++;
 
         if (em->ExecArgs.JSON.concat && c_c < 2)
             EMULATOR_ERROR("To use 'concat' JSON util, must pass at least two formatter params.")
 
-        if (em->ExecArgs.JSON.enable && c_c == 0)
+        if (em->ExecArgs.JSON.is_activated && c_c == 0)
             EMULATOR_ERROR("Cannot use JSON encoding option (-j) alone.")
     }
 }
@@ -321,26 +325,28 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 {
     struct EmulationMachine em;
 
-    em.Machine.ExecData.orgptr  = ORG_DEFAULT;
-    em.Machine.ExecData.simhalt = 0;
-    em.Machine.ExecData.lwb     = 0;
+    em.Machine.State = BEGIN_STATE;
 
-    em.Loader.size = 0;
-    em.Loader.hex_regex = "[0-9a-fA-F!]+";
-
-    em.State = BEGIN_STATE;
-    em.Machine.ExecData.sbs_debugger = FALSE;
+    em.Machine.RuntimeData.operation_code = 0;
+    em.Machine.RuntimeData.mnemonic = NULL;
+    em.Machine.RuntimeData.org_pointer  = ORG_DEFAULT;
+    em.Machine.RuntimeData.simhalt = 0;
+    em.Machine.RuntimeData.last_loaded_byte_index     = 0;
+    em.Machine.RuntimeData.RAM_SIZE = 0x00FFFFFF;
+    em.Machine.RuntimeData.STACK_BOTTOM_INDEX = 0x01000000;
+    em.Machine.RuntimeData.sbs_printer_enabler = FALSE;
 
     em.Machine.Chrono.dt = 0;
 
-    em.Machine.OpCode.code = 0;
-    em.Machine.OpCode.mnemonic = NULL;
+    em.Machine.IO.buffer  = NULL;
+    em.Machine.IO.Type    = IO_UNDEF;
+    em.Machine.IO.NewLine = NL_UNDEF;
 
     if (argv[1][1] == 'e')
         em.EmuType = EMULATE_STD;
     else
     {
-        em.Machine.ExecData.sbs_debugger = TRUE;
+        em.Machine.RuntimeData.sbs_printer_enabler = TRUE;
         em.EmuType = EMULATE_SBS;
     }
 
@@ -348,13 +354,39 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 
     em.Machine.cpu = init_cpu(&em);
 
-    if (em.State == PANIC_STATE)
-    { PANIC(em.Machine.Exception.panic_cause); exit(EXIT_FAILURE); }
+    if (em.Machine.State == PANIC_STATE)
+    {
+        PANIC(em.Machine.Exception.panic_cause);
 
-    em.Machine.ram = init_ram(&em, RAM_SIZE);
+        if (em.ExecArgs.JSON.is_activated)
+            emit_dump(&em);
 
-    if (em.State == PANIC_STATE)
-    { PANIC(em.Machine.Exception.panic_cause); exit(EXIT_FAILURE); }
+        exit(EXIT_FAILURE);
+    }
+
+    init_codes(&em);
+
+    if (em.Machine.State == PANIC_STATE)
+    {
+        PANIC(em.Machine.Exception.panic_cause);
+
+        if (em.ExecArgs.JSON.is_activated)
+            emit_dump(&em);
+
+        exit(EXIT_FAILURE);
+    }
+
+    em.Machine.ram = init_ram(&em);
+
+    if (em.Machine.State == PANIC_STATE)
+    {
+        PANIC(em.Machine.Exception.panic_cause);
+
+        if (em.ExecArgs.JSON.is_activated)
+            emit_dump(&em);
+
+        exit(EXIT_FAILURE);
+    }
 
     return em;
 }
@@ -364,16 +396,17 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 int emulate(int argc, char** argv)
 {
     struct EmulationMachine em = obtain_emulation_machine(argc, argv);
-    preset_handler(&em);
 
-    __load_bytecode__(&em);
+    preset_hander(&em);
 
-    printf_sstatus(&em);
+    load_bytecode(&em);
 
-    em.State = EXECUTION_STATE;
+    emit_sys_status(&em);
+
+    em.Machine.State = EXECUTION_STATE;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
-    while((em.Machine.cpu->pc != em.Machine.ExecData.simhalt || em.Machine.cpu->pc < em.Machine.ExecData.simhalt))
+    while((em.Machine.cpu->pc != em.Machine.RuntimeData.simhalt || em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt))
     {
         if (!em.Machine.cpu->exec(&em))
         {
@@ -382,20 +415,30 @@ int emulate(int argc, char** argv)
             em.Machine.Chrono.dt = (em.Machine.Chrono.t_end.tv_sec - em.Machine.Chrono.t_begin.tv_sec) * 1000000 +
                                    (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
 
-            switch (em.State) {
+            switch (em.Machine.State) {
                 case PANIC_STATE:
+                {
                     PANIC(em.Machine.Exception.panic_cause)
                     break;
+                }
                 case TRAP_STATE:
+                {
                     TRAPEXC(em.Machine.Exception.trap_cause)
                     break;
+                }
                 default:
                     break;
             }
 
-            em.State = FINAL_STATE;
+            if (em.ExecArgs.JSON.is_activated)
+                emit_dump(&em);
 
-            printf_sstatus(&em);
+            em.Machine.State = FINAL_STATE;
+
+            emit_sys_status(&em);
+
+            destroy_cpu();
+            destroy_ram();
 
             return (EXIT_FAILURE);
         }
@@ -405,11 +448,11 @@ int emulate(int argc, char** argv)
     em.Machine.Chrono.dt = (em.Machine.Chrono.t_end.tv_sec - em.Machine.Chrono.t_begin.tv_sec) * 1000000 +
                            (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
 
-    em.State = FINAL_STATE;
+    em.Machine.State = FINAL_STATE;
 
     machine_waiter(&em);
 
-    printf_sstatus(&em);
+    emit_sys_status(&em);
 
     destroy_cpu();
     destroy_ram();

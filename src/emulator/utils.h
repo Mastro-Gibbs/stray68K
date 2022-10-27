@@ -13,12 +13,10 @@
  * MACRO used to raise a critical trap code.
  *
  */
-#define TRAPEXC(cause)  do {                                                \
-                            printf("\n[\033[01m\033[35mTRAP\033[0m] ");     \
-                            printf("%s\n", cause);                          \
-                            fflush(stdout);                                 \
-                            destroy_cpu();                                  \
-                            destroy_ram();                                  \
+#define TRAPEXC(cause)  do {                                         \
+                            printf("[\033[01m\033[35mTRAP\033[0m] ");\
+                            printf("%s\n", cause);                   \
+                            fflush(stdout);                          \
                         } while (0);
 
 
@@ -30,8 +28,6 @@
                         printf("[\033[01m\033[91mPANIC\033[0m] "); \
                         printf("%s\n", cause);                     \
                         fflush(stdout);                            \
-                        destroy_cpu();                             \
-                        destroy_ram();                             \
                     } while (0);
 
 
@@ -54,14 +50,16 @@
  * This will call exit()
  *
  */
-#define EMULATOR_ERROR(fmt, ...) do {                                      \
-                            printf("[\033[01m\033[91mEMULATOR ERROR\033[0m] "); \
-                            printf (fmt, ##__VA_ARGS__);               \
-                            printf("\n");                              \
-                            fflush(stdout);                            \
-                            destroy_cpu();                             \
-                            destroy_ram();                             \
-                            exit(-1);                                  \
+#define EMULATOR_ERROR(fmt, ...) do {                                    \
+                            em->Machine.State = MERR_STATE;                      \
+                            printf("[\033[01m\033[91mEMULATOR ERROR\033[0m] ");            \
+                            sprintf(em->Machine.Exception.merr_cause, fmt, ##__VA_ARGS__); \
+                            printf ("%s\n", em->Machine.Exception.merr_cause);             \
+                            fflush(stdout);                              \
+                            if (em->ExecArgs.JSON.is_activated) emit_dump(em); \
+                            destroy_cpu();                               \
+                            destroy_ram();                               \
+                            exit(-1);                                    \
                         } while (0);
 
 
@@ -74,6 +72,8 @@
                         printf (fmt, ##__VA_ARGS__);                  \
                         fflush(stdout);                               \
                     } while (0);
+
+
 
 /*
  * MACRO used to prepend a tag to IO emulator loop.
@@ -189,7 +189,7 @@
 #define roxr  2521591
 
 
-#define SING_EXTENDED(dst, val, size) do{ \
+#define SIGN_EXTENDED(dst, val, size) do{ \
                                     dst = (int) val; \
                                     switch (size) \
                                     { \
@@ -228,8 +228,9 @@
                                                                         \
                                                                         default: \
                                                                         {\
-                                                                            PANIC("Addressing mode not handled! (read_EA)") \
-                                                                            break; \
+                                                                            emulation->Machine.State = PANIC_STATE; \
+                                                                            sprintf(emulation->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
+                                                                            return (RETURN_ERR); \
                                                                         }\
                                                                     } \
                                                                 else switch (mode) { \
@@ -282,7 +283,7 @@
                                                                     \
                                                                     default: \
                                                                     { \
-                                                                        emulation->State = PANIC_STATE; \
+                                                                        emulation->Machine.State = PANIC_STATE; \
                                                                         sprintf(emulation->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
                                                                         return (RETURN_ERR); \
                                                                     } \
@@ -315,7 +316,6 @@
                                                                             break; \
                                                                         case LONG: \
                                                                             write_long(ptr, val); \
-                                                                            break; \
                                                                         default: \
                                                                             break; \
                                                                     } \
@@ -351,7 +351,7 @@
                                                                 \
                                                                 default: \
                                                                 { \
-                                                                    emulation->State = PANIC_STATE; \
+                                                                    emulation->Machine.State = PANIC_STATE; \
                                                                     sprintf(emulation->Machine.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
                                                                     return (RETURN_ERR); \
                                                                 } \
@@ -497,6 +497,7 @@
                                     } while(0);
 
 
+
 // -------------------- BEGIN PROTS ------------------------ //
 
 u32 most_significant_byte(opsize size);
@@ -515,11 +516,14 @@ bit is_addr_to_data_op(ADDRMode *mode);
 
 /* TRAP */
 char* trap_code_toString(u32 trapcode);
-void  iotask(bit descr);
+void  iotask(struct EmulationMachine *em);
 
 
 /* EMULATION MACHINE */
 void machine_waiter(struct EmulationMachine *em);
-void printf_sstatus(struct EmulationMachine *em);
+void emit_sys_status(struct EmulationMachine *em);
+void emit_dump     (struct EmulationMachine *em);
+void emit_jio        (struct EmulationMachine *em);
+void emit_jconcat  (struct EmulationMachine *em);
 
 #endif // __UTILS_H__68000

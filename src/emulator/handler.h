@@ -8,10 +8,10 @@
 #include "ram.h"
 
 
-void init_codes();
+void init_codes(struct EmulationMachine *em);
 void destroy_codes();
 
-void preset_handler(struct EmulationMachine *em);
+void preset_hander(struct EmulationMachine *em);
 u32 run_opcode(struct EmulationMachine *em);
 
 

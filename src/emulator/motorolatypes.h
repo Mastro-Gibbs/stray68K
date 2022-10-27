@@ -12,8 +12,6 @@
 #define TRUE        1
 #define FALSE       0
 
-#define RAM_SIZE 0x00FFFFFF
-
 typedef unsigned short int opcode;
 
 
@@ -103,67 +101,64 @@ typedef struct __m68k__codemap__
 //EMULATOR MACHINE COMPLEX STRUCT
 struct EmulationMachine
 {
-    enum
-    {
-        EMULATE_STD = 0,
-        EMULATE_SBS = 1
-    } EmuType;
-
-    enum
-    {
-        BEGIN_STATE     = 0,
-        EXECUTION_STATE = 1,
-        FINAL_STATE     = 2,
-        PANIC_STATE     = 3,
-        WARNING_STATE   = 4,
-        TRAP_STATE      = 5
-    } State;
+    enum { EMULATE_STD = 0, EMULATE_SBS = 1 } EmuType;
 
     struct
     {
         struct
         {
-            bit enable;
+            bit is_activated;
+
             bit cpu;
             bit ram;
             bit chrono;
-            bit mnem;
-            bit ocode;
+            bit op;
+            bit io;
+
             bit concat;
+            bit dump;
         } JSON;
 
-        bit  descr;
-        bit  quiet;
-        bit  timer;
-        char *path;
+        bit  descriptive_mode;
+        bit  quiet_mode;
+        bit  chrono_mode;
+        char *executable_path;
     } ExecArgs;
-
-    struct
-    {
-        u32        size;
-        regex_t    hex_rx;
-        const char *hex_regex;
-    } Loader;
 
     struct
     {
         m68k_cpu *cpu;
         m68k_ram *ram;
 
-        struct
+        enum
         {
-            bit sbs_debugger;
-            u32 simhalt;
-            u32 orgptr;
-            u32 lwb;
-            u32 JSR_CALL_COUNTER;
-        } ExecData;
+            BEGIN_STATE     = 0,
+            EXECUTION_STATE = 1,
+            FINAL_STATE     = 2,
+            PANIC_STATE     = 3,
+            WARNING_STATE   = 4,
+            TRAP_STATE      = 5,
+            MERR_STATE      = 6,
+            IO_STATE        = 7
+        } State;
 
         struct
         {
+            u16  operation_code;
+            char *mnemonic;
+
+            bit sbs_printer_enabler;
+            u32 simhalt;
+            u32 org_pointer;
+            u32 last_loaded_byte_index;
+
+            u32 JSR_CALL_COUNTER;
+            u32 RAM_SIZE;
+            u32 STACK_BOTTOM_INDEX;
+
             struct termios oldt;
             struct termios newt;
-        } Expecter;
+        } RuntimeData;
 
         struct
         {
@@ -174,15 +169,19 @@ struct EmulationMachine
 
         struct
         {
-            u16  code;
-            char *mnemonic;
-        } OpCode;
+            char panic_cause[200];
+            char trap_cause [250];
+            char merr_cause [250];
+
+            enum { PANIC_EXC_TYPE = 0, TRAP_EXC_TYPE  = 1, MERR_EXC_TYPE  = 2 } Type;
+        } Exception;
 
         struct
         {
-            char panic_cause[150];
-            char trap_cause [250];
-        } Exception;
+            char *buffer;
+            enum { INPUT = 0,    OUTPUT = 1,  IO_UNDEF = 2 } Type;
+            enum { NL_FALSE = 0, NL_TRUE = 1, NL_UNDEF = 2 } NewLine;
+        } IO;
 
     } Machine;
 
