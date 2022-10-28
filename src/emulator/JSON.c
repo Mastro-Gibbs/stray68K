@@ -16,41 +16,26 @@ char* Jcpu()
     if (cpu != NULL)
     {
         char *res = NULL;
-        char tmp[16];
         char buf[410];
-
-        tmp[15] = '\0';
 
         sprintf(buf, "%s", "{\"CPU\":{");
 
         for (u16 i = 0; i < 8; i++)
         {
-            sprintf(tmp, "\"D%d\":\"%X\",", i, cpu->data_r[i]);
-            strncat(buf, tmp, 17);
+            sprintf(buf+strlen(buf), "\"D%d\":\"%X\",", i, cpu->data_r[i]);
         }
 
         for (u16 i = 0; i < 7; i++)
         {
-            sprintf(tmp, "\"A%d\":\"%X\",", i, cpu->addr_r[i]);
-            strncat(buf, tmp, 17);
+            sprintf(buf+strlen(buf), "\"A%d\":\"%X\",", i, cpu->addr_r[i]);
         }
 
-        sprintf(tmp, "\"A7\":\"%X\",", read_addrreg(7));
-        strncat(buf, tmp, 17);
-
-        sprintf(tmp, "\"US\":\"%X\",", cpu->usp);
-        strncat(buf, tmp, 17);
-
-        sprintf(tmp, "\"SS\":\"%X\",", cpu->ssp);
-        strncat(buf, tmp, 17);
-
-        sprintf(tmp, "\"PC\":\"%X\",", cpu->pc);
-        strncat(buf, tmp, 17);
-
-        sprintf(tmp, "\"SR\":\"%X\"", cpu->sr);
-        strncat(buf, tmp, 17);
-
-        strncat(buf, "}}\0", 3);
+        sprintf(buf+strlen(buf), "\"A7\":\"%X\",", read_addrreg(7));
+        sprintf(buf+strlen(buf), "\"US\":\"%X\",", cpu->usp);
+        sprintf(buf+strlen(buf), "\"SS\":\"%X\",", cpu->ssp);
+        sprintf(buf+strlen(buf), "\"PC\":\"%X\",", cpu->pc);
+        sprintf(buf+strlen(buf), "\"SR\":\"%X\"", cpu->sr);
+        strncat(buf+strlen(buf), "}}\0", 3);
 
         ssize_t size = strlen(buf) + 1;
         res = malloc(sizeof (* res) * size);
@@ -73,33 +58,25 @@ char* Jram(u32 from, u32 to, u32 sh)
     if (ram != NULL)
     {
         char *res = NULL;
-        char tmp[2];
-        char buf[(to - from) + 100];
 
-        tmp[1] = '\0';
+        const char *base = "{\"RAM\":{\"BEGIN\":\"%X\",\"END\":\"%X\",\"HALT\":\"%X\",\"DUMP\":\"";
+        const ssize_t base_size = strlen(base);
 
-        sprintf(buf, "{\"RAM\":{\"BEGIN\":\"%X\",\"END\":\"%X\",\"HALT\":\"%X\",\"DUMP\":\"", from, to, sh);
+        char buf[((to - from) + base_size + 10) * 2];
+
+        sprintf(buf, base, from, to, sh);
 
         for (u32 curr = from; curr <= to; curr++)
         {
             u8 byte = ram->ram[curr];
 
-            if (!byte || byte <= 0xF)
-            {
-                strncat(buf, "0\0", 2);
-                sprintf(tmp, "%X", byte);
-                strncat(buf, tmp, 2);
-            }
+            if (byte <= 0xF)
+                sprintf(buf+strlen(buf), "0%X", byte);
             else
-            {
-                char tmp2[3];
-                tmp2[2] = '\0';
-                sprintf(tmp2, "%X", byte);
-                strncat(buf, tmp2, 3);
-            }
+                sprintf(buf+strlen(buf), "%X", byte);
         }
 
-        strncat(buf, "\"}}\0", 4);
+        strncat(buf+strlen(buf), "\"}}\0", 4);
 
         ssize_t size = strlen(buf) + 1;
         res = malloc(sizeof (* res) * size);
@@ -112,50 +89,6 @@ char* Jram(u32 from, u32 to, u32 sh)
     }
 
     return (NULL);
-}
-
-
-char* Jstack(u32 from, u32 to)
-{
-    m68k_ram *stack = get_ram();
-
-    char *res = NULL;
-    char tmp[2];
-    char buf[(to - from) + 50];
-
-    tmp[1] = '\0';
-
-    sprintf(buf, "{\"%s\":\"", "STACK");
-
-    for (u32 curr = from; curr <= to; curr++)
-    {
-        u8 byte = stack->ram[curr];
-
-        if (!byte || byte <= 0xF)
-        {
-            strncat(buf, "0\0", 2);
-            sprintf(tmp, "%X", byte);
-            strncat(buf, tmp, 2);
-        }
-        else
-        {
-            char tmp2[3];
-            tmp2[2] = '\0';
-            sprintf(tmp2, "%X", byte);
-            strncat(buf, tmp2, 3);
-        }
-    }
-
-    strncat(buf, "\"}\0", 3);
-
-    ssize_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size-1);
-
-    res[size-1] = '\0';
-
-    return res;
 }
 
 

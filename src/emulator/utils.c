@@ -455,11 +455,7 @@ void emit_sys_status(struct EmulationMachine *em)
 
             if (em->ExecArgs.JSON.ram)
             {
-                u32 _start, _end, _ptr = em->Machine.cpu->pc;
-                _start = (_ptr & 0xFFFFFFF0) - 0x20;
-                _end   = (_ptr | 0x0000000F) + 0x31;
-
-                buf = Jram(_start, _end, em->Machine.RuntimeData.simhalt);
+                buf = Jram(em->Machine.RuntimeData.org_pointer, em->Machine.RuntimeData.last_loaded_byte_index, em->Machine.RuntimeData.simhalt);
                 printf("%s\n", buf);
                 free(buf);
             }
