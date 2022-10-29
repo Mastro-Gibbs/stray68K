@@ -222,24 +222,6 @@ typedef enum __bcd_type__
 
 
 /*
- * Codes used to invoke sys primitives through TRAP #15
- *
- *
- */
-typedef enum __custom_trap_behavior__
-{
-    PRINTINT     = 0,
-    PRINTINTLN   = 1,
-    UPRINTINT    = 2,
-    UPRINTINTLN  = 3,
-    SCANINT      = 4,
-    PRINTSTR     = 5,
-    PRINTSTRLN   = 6
-
-} CustomTrap;
-
-
-/*
  * Some frequently used masks
  *
  */

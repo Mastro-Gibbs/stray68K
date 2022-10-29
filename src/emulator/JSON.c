@@ -70,10 +70,45 @@ char* Jram(u32 from, u32 to, u32 sh)
         {
             u8 byte = ram->ram[curr];
 
-            if (byte <= 0xF)
-                sprintf(buf+strlen(buf), "0%X", byte);
-            else
-                sprintf(buf+strlen(buf), "%X", byte);
+            (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
+        }
+
+        strncat(buf+strlen(buf), "\"}}\0", 4);
+
+        ssize_t size = strlen(buf) + 1;
+        res = malloc(sizeof (* res) * size);
+
+        strncpy(res, buf, size-1);
+
+        res[size-1] = '\0';
+
+        return res;
+    }
+
+    return (NULL);
+}
+
+
+char* Jstack(u32 bottom, u32 top)
+{
+    m68k_ram *ram = get_ram();
+
+    if (ram != NULL)
+    {
+        char *res = NULL;
+
+        const char *base = "{\"STACK\":{\"BOTTOM\":\"%X\",\"TOP\":\"%X\",\"DUMP\":\"";
+        const ssize_t base_size = strlen(base);
+
+        char buf[((bottom - top) + base_size + 10) * 2];
+
+        sprintf(buf, base, bottom, top);
+
+        for (u32 curr = top; curr < bottom; curr++)
+        {
+            u8 byte = ram->ram[curr];
+
+            (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
         }
 
         strncat(buf+strlen(buf), "\"}}\0", 4);
@@ -168,16 +203,16 @@ char* Jexception(char* cause, u32 type)
     return res;
 }
 
-char* Jio(char* io, u32 type, u32 nl)
+char* Jio(char* io, u32 type)
 {
     char *res;
     ssize_t size = strlen(io) + 1;
     char buf[size + 60];
 
     if (type == INPUT)
-        sprintf(buf, "{\"IO\":{\"TYPE\":\"I\",\"VAL\":\"%s\",\"NL\":%s}}", io, "null");
+        sprintf(buf, "{\"IO\":{\"TYPE\":\"I\",\"VAL\":\"%s\"}}", io);
     else
-        sprintf(buf, "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\",\"NL\":%s}}", io, nl ? "true" : "false");
+        sprintf(buf, "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\"}}", io);
 
     res = malloc(sizeof (* res) * size);
 
@@ -226,6 +261,14 @@ char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
 
         src = Jram(_start, _end, _sh);
     }
+    else if (Jsrc == Jstack)
+    {
+        u32 _bottom, _top;
+        _bottom = va_arg(va_ptr, u32);
+        _top    = va_arg(va_ptr, u32);
+
+        src = Jstack(_bottom, _top);
+    }
     else if (Jsrc == Jchrono)
         src = Jchrono(va_arg(va_ptr, u64));
     else if (Jsrc == Jop)
@@ -246,9 +289,8 @@ char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
     {
         char *buff = va_arg(va_ptr, char *);
         u32   type = va_arg(va_ptr, u32);
-        u32   nl   = va_arg(va_ptr, u32);
 
-        src = Jio(buff, type, nl);
+        src = Jio(buff, type);
     }
 
     va_end(va_ptr);

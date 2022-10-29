@@ -8,7 +8,7 @@ char* Jcpu();
 
 char* Jram(u32 from, u32 to, u32 sh);
 
-char* Jstack(u32 from, u32 to);
+char* Jstack(u32 bottom, u32 top);
 
 char* Jchrono(u64 usec);
 
@@ -16,7 +16,7 @@ char* Jop(char *mnem, u32 code_promoted);
 
 char* Jexception(char* cause, u32 type);
 
-char* Jio(char* io, u32 type, u32 nl);
+char* Jio(char* io, u32 type);
 
 char* Jconcat(char *dst, char *src);
 

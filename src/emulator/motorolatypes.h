@@ -180,7 +180,6 @@ struct EmulationMachine
         {
             char *buffer;
             enum { INPUT = 0,    OUTPUT = 1,  IO_UNDEF = 2 } Type;
-            enum { NL_FALSE = 0, NL_TRUE = 1, NL_UNDEF = 2 } NewLine;
         } IO;
 
     } Machine;

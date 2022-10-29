@@ -328,19 +328,21 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
     em.Machine.State = BEGIN_STATE;
 
     em.Machine.RuntimeData.operation_code = 0;
-    em.Machine.RuntimeData.mnemonic = NULL;
-    em.Machine.RuntimeData.org_pointer  = ORG_DEFAULT;
-    em.Machine.RuntimeData.simhalt = 0;
-    em.Machine.RuntimeData.last_loaded_byte_index     = 0;
+    em.Machine.RuntimeData.mnemonic       = NULL;
+
+    em.Machine.RuntimeData.org_pointer = ORG_DEFAULT;
+    em.Machine.RuntimeData.simhalt     = 0;
+    em.Machine.RuntimeData.last_loaded_byte_index = 0;
+    em.Machine.RuntimeData.sbs_printer_enabler    = FALSE;
+
     em.Machine.RuntimeData.RAM_SIZE = 0x00FFFFFF;
     em.Machine.RuntimeData.STACK_BOTTOM_INDEX = 0x01000000;
-    em.Machine.RuntimeData.sbs_printer_enabler = FALSE;
+    em.Machine.RuntimeData.JSR_CALL_COUNTER   = 0;
 
     em.Machine.Chrono.dt = 0;
 
     em.Machine.IO.buffer  = NULL;
     em.Machine.IO.Type    = IO_UNDEF;
-    em.Machine.IO.NewLine = NL_UNDEF;
 
     if (argv[1][1] == 'e')
         em.EmuType = EMULATE_STD;
@@ -408,7 +410,7 @@ int emulate(int argc, char** argv)
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
     while((em.Machine.cpu->pc != em.Machine.RuntimeData.simhalt || em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt))
     {
-        if (!em.Machine.cpu->exec(&em))
+        if (em.Machine.cpu->exec(&em) == RETURN_ERR)
         {
             clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_end);
 
@@ -429,11 +431,6 @@ int emulate(int argc, char** argv)
                 default:
                     break;
             }
-
-            if (em.ExecArgs.JSON.is_activated)
-                emit_dump(&em);
-
-            em.Machine.State = FINAL_STATE;
 
             emit_sys_status(&em);
 

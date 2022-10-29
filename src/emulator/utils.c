@@ -135,205 +135,256 @@ void _io_dumps(struct EmulationMachine *em)
 
     em->Machine.IO.buffer  = NULL;
     em->Machine.IO.Type    = IO_UNDEF;
-    em->Machine.IO.NewLine = NL_UNDEF;
 }
+
+
+#include <string.h>
+#define EVAL_ESCAPE_SEQUENCE(iostr, cchar, rptr)    do{ \
+                                                        cchar = read_byte(rptr++); \
+                                                        if (  /* ANSI ESCAPE SEQUENCE */ \
+                                                            cchar == '0' && \
+                                                            read_byte(rptr) == '3' && \
+                                                            read_byte(rptr + 1) == '3' \
+                                                        ) { \
+                                                            sprintf(iostr+strlen(iostr), "%c", '\033'); \
+                                                            rptr += 2; \
+                                                        } \
+                                                        else  /* CLASSIC ESCAPE SEQUENCE */ \
+                                                        { \
+                                                            switch (cchar) { \
+                                                                case '\\': \
+                                                                    sprintf(iostr+strlen(iostr), "%c", '\\'); \
+                                                                    break; \
+                                                                case 'n':  \
+                                                                    sprintf(iostr+strlen(iostr), "%c", '\n'); \
+                                                                    break; \
+                                                                case 't': \
+                                                                    sprintf(iostr+strlen(iostr), "%c", '\t'); \
+                                                                    break; \
+                                                                case 'r': \
+                                                                    sprintf(iostr+strlen(iostr), "%c", '\r'); \
+                                                                    break; \
+                                                                default: \
+                                                                    sprintf(iostr+strlen(iostr), "%c", cchar); \
+                                                                    break; \
+                                                            } \
+                                                        } \
+                                                    } while(0);
+
+#define EVAL_PLACE_OLDER(iostr, cchar, rptr)    do { \
+                                                    opsize size; \
+                                                    cchar = read_byte(rptr++); \
+                                                    \
+                                                    switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
+                                                        case 'b':    \
+                                                        case 'B':    \
+                                                            size = BYTE; \
+                                                            break;   \
+                                                        case 'w':    \
+                                                        case 'W':    \
+                                                            size = WORD; \
+                                                            break;   \
+                                                        case 'l':    \
+                                                        case 'L':    \
+                                                            size = LONG; \
+                                                            break;   \
+                                                        default:     \
+                                                            size = LONG; \
+                                                            break;   \
+                                                    }                \
+                                                    \
+                                                    char ccchar = read_byte(rptr); \
+                                                    if (ccchar == 'x' || ccchar == 'X' || \
+                                                        ccchar == 'a' || ccchar == 'A' || \
+                                                        ccchar == 'd' || ccchar == 'D') \
+                                                    { \
+                                                        cchar = ccchar; \
+                                                        rptr++; \
+                                                    } \
+                                                    \
+                                                    switch (cchar) \
+                                                    { \
+                                                        case 'x': \
+                                                        { \
+                                                            cchar = read_byte(rptr++);          \
+                                                            u32 index  = cchar - 0x30;          \
+                                                            u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            u32 length = snprintf(NULL, 0, "%x", value); \
+                                                            iostr = realloc(iostr, strlen(iostr) + length + 1); \
+                                                            snprintf(iostr+strlen(iostr), length + 1, "%x", value); \
+                                                            break; \
+                                                        } \
+                                                        case 'X': \
+                                                        { \
+                                                            cchar = read_byte(rptr++);          \
+                                                            u32 index  = cchar - 0x30;          \
+                                                            u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            u32 length = snprintf(NULL, 0, "%X", value); \
+                                                            iostr = realloc(iostr, strlen(iostr) + length + 1); \
+                                                            snprintf(iostr+strlen(iostr), length + 1, "%X", value); \
+                                                            break; \
+                                                        } \
+                                                        case 'b':  /*aka BYTE sign extend*/ \
+                                                        case 'B':  \
+                                                        case 'w':  /*aka WORD sign extend*/ \
+                                                        case 'W':  \
+                                                        case 'l':  /*aka LONG sign extend*/ \
+                                                        case 'L':  \
+                                                        { \
+                                                            cchar = read_byte(rptr++);          \
+                                                            u32 index  = cchar - 0x30;          \
+                                                            u32 value  = read_datareg(index);   \
+                                                            s32 sval;                           \
+                                                            SIGN_EXTENDED(sval, value, size);   \
+                                                            u32 length = snprintf(NULL, 0, "%d", sval); \
+                                                            iostr = realloc(iostr, strlen(iostr) + length + 1); \
+                                                            snprintf(iostr+strlen(iostr), length + 1, "%d", sval); \
+                                                            break; \
+                                                        } \
+                                                        case 'a':  \
+                                                        case 'A':  \
+                                                        { \
+                                                            cchar = read_byte(rptr++);        \
+                                                            u32 index  = cchar - 0x30;        \
+                                                            u32 value  = read_addrreg(index) & mask_by_opsize(size);   \
+                                                            u32 length = snprintf(NULL, 0, "%X", value); \
+                                                            iostr = realloc(iostr, strlen(iostr) + length + 1); \
+                                                            snprintf(iostr+strlen(iostr), length + 1, "%X", value); \
+                                                            break; \
+                                                        } \
+                                                        case 'd':  \
+                                                        case 'D':  \
+                                                        { \
+                                                            cchar = read_byte(rptr++);        \
+                                                            u32 index  = cchar - 0x30;        \
+                                                            u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            u32 length = snprintf(NULL, 0, "%u", value); \
+                                                            iostr = realloc(iostr, strlen(iostr) + length + 1); \
+                                                            snprintf(iostr+strlen(iostr), length + 1, "%u", value); \
+                                                            break; \
+                                                        } \
+                                                        default:   \
+                                                            break; \
+                                                    } \
+                                                } while(0);
+
+#define EVAL_PRINT_SEQUENCE(iostr, cchar, rptr)   do { \
+                                                        if (cchar == '\\') \
+                                                            EVAL_ESCAPE_SEQUENCE(iostr, cchar, rptr) \
+                                                        else if (cchar == '%') \
+                                                            EVAL_PLACE_OLDER(iostr, cchar, rptr) \
+                                                        else \
+                                                            sprintf(iostr+strlen(iostr), "%c", cchar); \
+                                                    } while(0);
+
+#define EVAL_SCAN_SEQUENCE(value, rptr)  do { \
+                                            char c; \
+                                            while ((c = read_byte(rptr++)) == '%' && (c & 0xFF) != 0x00) \
+                                            { \
+                                                opsize size; \
+                                                char cchar = read_byte(rptr++); \
+                                                \
+                                                switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
+                                                    case 'b':    \
+                                                    case 'B':    \
+                                                        size = BYTE; \
+                                                        break;   \
+                                                    case 'w':    \
+                                                    case 'W':    \
+                                                        size = WORD; \
+                                                        break;   \
+                                                    case 'l':    \
+                                                    case 'L':    \
+                                                        size = LONG; \
+                                                        break;   \
+                                                    default:     \
+                                                        size = LONG; \
+                                                        break;   \
+                                                } \
+                                                char ccchar = read_byte(rptr); \
+                                                if (ccchar == 'a' || ccchar == 'A' || \
+                                                    ccchar == 'd' || ccchar == 'D') \
+                                                { \
+                                                    cchar = ccchar; \
+                                                    rptr++; \
+                                                } \
+                                                \
+                                                char rtype = cchar; \
+                                                \
+                                                cchar = read_byte(rptr++);     \
+                                                u32 index  = cchar - 0x30;     \
+                                                scanf(" %u", &value);          \
+                                                value &= mask_by_opsize(size); \
+                                                \
+                                                switch (rtype) \
+                                                { \
+                                                    case 'a':  \
+                                                    case 'A':  \
+                                                    { \
+                                                        write_addrreg(index, value, &size);   \
+                                                        break; \
+                                                    } \
+                                                    case 'd':  \
+                                                    case 'D':  \
+                                                    { \
+                                                        write_datareg(index, value, &size);   \
+                                                        break; \
+                                                    } \
+                                                    default:   \
+                                                        break; \
+                                                } \
+                                            } \
+                                        } while(0);
 
 void iotask(struct EmulationMachine *em)
 {
-    em->Machine.State = IO_STATE;
-
-    u32 d0_val = read_datareg(0) & 0x000000FF;
-    u32 d1_val = read_datareg(1);
-    u32 d2_val = read_datareg(2) & 0x000000FF;
-
-    s32    value;
-    opsize size;
-
-    switch (d2_val) {
-        case 0x01:
-            size = BYTE;
-            break;
-        case 0x02:
-            size = WORD;
-            break;
-        default:
-            size = LONG;
-    }
-
-    switch (d0_val)
-    {
-        case PRINTINT:
-        {
-            SIGN_EXTENDED(value, d1_val, size);
-
-            u32 length = snprintf(NULL, 0, "%d", value);
-
-            char* str = malloc(length + 1);
-            snprintf(str, length + 1, "%d", value);
-
-            em->Machine.IO.buffer  = str;
-            em->Machine.IO.Type    = OUTPUT;
-            em->Machine.IO.NewLine = NL_FALSE;
-
-            _io_dumps(em);
-
-            IO_TASK(em->ExecArgs.descriptive_mode, "%d", value);
-
-            free(str);
-            break;
-        }
-
-        case PRINTINTLN:
-        {
-            SIGN_EXTENDED(value, d1_val, size);
-
-            u32 length = snprintf(NULL, 0, "%d", value);
-
-            char* str = malloc(length + 1);
-            snprintf(str, length + 1, "%d", value);
-
-            em->Machine.IO.buffer  = str;
-            em->Machine.IO.Type    = OUTPUT;
-            em->Machine.IO.NewLine = NL_TRUE;
-
-            _io_dumps(em);
-
-            IO_TASK(em->ExecArgs.descriptive_mode, "%d\n", value);
-            free(str);
-            break;
-        }
-
-        case UPRINTINT:
-        {
-            u32 length = snprintf(NULL, 0, "%d", d1_val);
-
-            char* str = malloc(length + 1);
-            snprintf(str, length + 1, "%d", d1_val);
-
-            em->Machine.IO.buffer  = str;
-            em->Machine.IO.Type    = OUTPUT;
-            em->Machine.IO.NewLine = NL_FALSE;
-
-            _io_dumps(em);
-
-            IO_TASK(em->ExecArgs.descriptive_mode, "%d", d1_val);
-            free(str);
-            break;
-        }
-
-        case UPRINTINTLN:
-        {
-            u32 length = snprintf(NULL, 0, "%d", d1_val);
-
-            char* str = malloc(length + 1);
-            snprintf(str, length + 1, "%d", d1_val);
-
-            em->Machine.IO.buffer  = str;
-            em->Machine.IO.Type    = OUTPUT;
-            em->Machine.IO.NewLine = NL_TRUE;
-
-            _io_dumps(em);
-
-            IO_TASK(em->ExecArgs.descriptive_mode, "%d\n", d1_val);
-            free(str);
-            break;
-        }
-
-        case SCANINT:
-        {
-            u32 ip;
-            scanf(" %u", &ip);
-            write_datareg(1, ip, NULL);
-
-            u32 length = snprintf(NULL, 0, "%d", ip);
-
-            char* str = malloc(length + 1);
-            snprintf(str, length + 1, "%d", ip);
-
-            em->Machine.IO.buffer  = str;
-            em->Machine.IO.Type    = INPUT;
-            em->Machine.IO.NewLine = NL_FALSE;
-
-            _io_dumps(em);
-            free(str);
-            break;
-        }
-
 #include <string.h>
-        case PRINTSTR:
+
+    if (em->Machine.IO.Type == OUTPUT)
+    {
+        u32 ramptr = read_addrreg(0);
+
+        char c;
+        char *str;
+
+        str = malloc(2 * sizeof (s8));
+        str[0] = '\0';
+
+        do
         {
-            u32 ramptr = read_addrreg(0);
-            u32 pos = 0;
+            c = read_byte(ramptr++);
 
-            char c;
-            char *str;
+            EVAL_PRINT_SEQUENCE(str, c, ramptr)
 
-            str = calloc(1, sizeof (s8));
-            str[pos] = '\0';
+            str = realloc(str, strlen(str)+2);
 
-            do
-            {
-                c = read_byte(ramptr++);
+        } while ((c & 0xFF) != 0b00000000);
 
-                str = realloc(str, pos+2);
+        em->Machine.IO.buffer  = str;
 
-                str[pos++] = c;
-                str[pos]   = '\0';
+        _io_dumps(em);
 
-            } while ((c & 0xFF) != 0b00000000);
-
-            em->Machine.IO.buffer  = str;
-            em->Machine.IO.Type    = OUTPUT;
-            em->Machine.IO.NewLine = NL_FALSE;
-
-            _io_dumps(em);
-
-            IO_TASK_TAG(em->ExecArgs.descriptive_mode)
-            printf("%s", str);
-            free(str);
-            break;
-        }
-
-        case PRINTSTRLN:
-        {
-            em->Machine.IO.NewLine = NL_TRUE;
-
-            u32 ramptr = read_addrreg(0);
-            u32 pos = 0;
-
-            char c;
-            char *str;
-
-            str = calloc(1, sizeof (s8));
-            str[pos] = '\0';
-
-            do
-            {
-                c = read_byte(ramptr++);
-
-                str = realloc(str, pos+2);
-                str[pos++] = c;
-                str[pos]   = '\0';
-
-            } while ((c & 0xFF) != 0b00000000);
-
-            em->Machine.IO.buffer  = str;
-            em->Machine.IO.Type    = OUTPUT;
-            em->Machine.IO.NewLine = NL_TRUE;
-
-            _io_dumps(em);
-
-            IO_TASK_TAG(em->ExecArgs.descriptive_mode)
-            printf("%s\n", str);
-            free(str);
-            break;
-        }
-
-        default:
-            break;
+        IO_TASK(em->ExecArgs.descriptive_mode, "%s", str)
+        free(str);
     }
+    else if (em->Machine.IO.Type == INPUT)
+    {
+        u32 ramptr = read_addrreg(0);
+        u32 ival;
+        EVAL_SCAN_SEQUENCE(ival, ramptr)
 
-    em->Machine.State = EXECUTION_STATE;
+        /*
+        u32 length = snprintf(NULL, 0, "%d", ival);
+
+        char* str = malloc(length + 1);
+        snprintf(str, length + 1, "%d", ival);
+
+        em->Machine.IO.buffer  = str;
+
+        _io_dumps(em);
+        free(str);
+        */
+    }
 }
 
 
@@ -432,7 +483,12 @@ void emit_sys_status(struct EmulationMachine *em)
 
     if (em->ExecArgs.JSON.is_activated)
     {
-        if (em->EmuType == EMULATE_STD && em->ExecArgs.quiet_mode && em->Machine.State != FINAL_STATE) goto maybe_sbs_print;
+        if (
+            em->Machine.State != TRAP_STATE  &&
+            em->Machine.State != PANIC_STATE &&
+            em->Machine.State != MERR_STATE  &&
+            (em->ExecArgs.quiet_mode && em->Machine.State != FINAL_STATE)
+           ) goto maybe_sbs_print;
 
         char *buf = NULL;
 
@@ -556,11 +612,15 @@ void emit_dump(struct EmulationMachine *em)
     {
         buf = Jcpu();
         buf = Jconcat2(buf, Jram,    em->Machine.RuntimeData.org_pointer, em->Machine.RuntimeData.last_loaded_byte_index, em->Machine.RuntimeData.simhalt);
+
+        if (em->Machine.cpu->ssp != em->Machine.RuntimeData.STACK_BOTTOM_INDEX)
+            buf = Jconcat2(buf, Jstack, em->Machine.RuntimeData.STACK_BOTTOM_INDEX, em->Machine.cpu->ssp);
+
         buf = Jconcat2(buf, Jop,     em->Machine.RuntimeData.mnemonic, em->Machine.RuntimeData.operation_code);
         buf = Jconcat2(buf, Jchrono, em->Machine.Chrono.dt);
 
-        if (em->Machine.IO.buffer != NULL && em->Machine.IO.Type != IO_UNDEF && em->Machine.IO.NewLine != NL_UNDEF)
-            buf = Jconcat2(buf, Jio, em->Machine.IO.buffer, em->Machine.IO.Type, em->Machine.IO.NewLine);
+        if (em->Machine.IO.buffer != NULL && em->Machine.IO.Type != IO_UNDEF)
+            buf = Jconcat2(buf, Jio, em->Machine.IO.buffer, em->Machine.IO.Type);
 
         if (em->Machine.State == TRAP_STATE)
             buf = Jconcat2(buf, Jexception, em->Machine.Exception.trap_cause, TRAP_EXC_TYPE);
@@ -580,7 +640,7 @@ void emit_jio(struct EmulationMachine *em)
     {
         char *buf = NULL;
 
-        buf = Jio(em->Machine.IO.buffer, em->Machine.IO.Type, em->Machine.IO.NewLine);
+        buf = Jio(em->Machine.IO.buffer, em->Machine.IO.Type);
 
         printf("%s\n", buf);
         free(buf);

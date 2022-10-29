@@ -891,9 +891,18 @@ u32 TRAP(opcode code)
 {
     u16 vector = (u16)(code & 0x0000000F);
 
-    if (vector == 0x000F)
+    if (vector == 0x0F)
+        emulation->Machine.IO.Type = OUTPUT;
+    else if (vector == 0x0E)
+        emulation->Machine.IO.Type = INPUT;
+    else
+        emulation->Machine.IO.Type = IO_UNDEF;
+
+    if (emulation->Machine.IO.Type != IO_UNDEF)
     {
+        emulation->Machine.State = IO_STATE;
         iotask(emulation);
+        emulation->Machine.State = EXECUTION_STATE;
         return (RETURN_OK);
     }
     else
@@ -1026,7 +1035,7 @@ u32 RTE(opcode code)
 
 u32 RTS(opcode code)
 {
-    if (emulation->Machine.RuntimeData.JSR_CALL_COUNTER == 0) //like return in C-like main func
+    if (emulation->Machine.RuntimeData.JSR_CALL_COUNTER == 0)
     {
         emulation->Machine.State = PANIC_STATE;
         sprintf(emulation->Machine.Exception.panic_cause, "RTS instruction invoked in main label, code: 0x%X", code);
@@ -1135,7 +1144,6 @@ u32 JMP(opcode code)
 
         return (RETURN_ERR);
     }
-
 
     emulation->Machine.cpu->pc = (jmp_addr);
 

@@ -248,21 +248,63 @@
                                                                         break; \
                                                                     \
                                                                     case ADDRESS: \
-                                                                        ptr = read_addrreg(addr); \
-                                                                        dst = read_ram(&ptr, &size); \
+                                                                        if (addr == 7) { \
+                                                                            switch (size) { \
+                                                                                case BYTE: \
+                                                                                case WORD: \
+                                                                                    dst = pop_word(); \
+                                                                                    break; \
+                                                                                case LONG: \
+                                                                                    dst = pop_long(); \
+                                                                                default: \
+                                                                                    break; \
+                                                                            } \
+                                                                        } \
+                                                                        else { \
+                                                                            ptr = read_addrreg(addr); \
+                                                                            dst = read_ram(&ptr, &size); \
+                                                                        } \
                                                                         break; \
                                                                     \
                                                                     case ADDRESSPostIncr: \
-                                                                        ptr = read_addrreg(addr); \
-                                                                        dst = read_ram(&ptr, &size); \
+                                                                        if (addr == 7) { \
+                                                                            switch (size) { \
+                                                                                case BYTE: \
+                                                                                case WORD: \
+                                                                                    dst = pop_word(); \
+                                                                                    break; \
+                                                                                case LONG: \
+                                                                                    dst = pop_long(); \
+                                                                                default: \
+                                                                                    break; \
+                                                                            } \
+                                                                        } \
+                                                                        else { \
+                                                                            ptr = read_addrreg(addr); \
+                                                                            dst = read_ram(&ptr, &size); \
+                                                                        } \
+                                                                        break; \
                                                                         /* incr_addr_reg(*addr, *size); */ \
                                                                         /*/ incr must be done after memory read! */ \
-                                                                        break; \
                                                                     \
                                                                     case ADDRESSPreDecr: \
                                                                         decr_addr_reg(addr, size); \
-                                                                        ptr = read_addrreg(addr); \
-                                                                        dst = read_ram(&ptr, &size); \
+                                                                        if (addr == 7) { \
+                                                                            switch (size) { \
+                                                                                case BYTE: \
+                                                                                case WORD: \
+                                                                                    dst = pop_word(); \
+                                                                                    break; \
+                                                                                case LONG: \
+                                                                                    dst = pop_long(); \
+                                                                                default: \
+                                                                                    break; \
+                                                                            } \
+                                                                        } \
+                                                                        else { \
+                                                                            ptr = read_addrreg(addr); \
+                                                                            dst = read_ram(&ptr, &size); \
+                                                                        } \
                                                                         break; \
                                                                     \
                                                                     case ADDRESSDisp: \
@@ -273,7 +315,6 @@
                                                                         u32 disp = read_ram(&ramptr, &tmpsize); \
                                                                         \
                                                                         ptr = read_addrreg(addr) + disp; \
-                                                                        \
                                                                         dst = read_ram(&ptr, &size); \
                                                                         \
                                                                         set_pc(get_pc() + size_to_span(tmpsize)); \
@@ -306,20 +347,32 @@
                                                                 case ADDRESSPostIncr: \
                                                                 case ADDRESSPreDecr: \
                                                                     ptr = read_addrreg(addr); \
-                                                                    \
-                                                                    switch (size) { \
-                                                                        case BYTE: \
-                                                                            write_byte(ptr, val); \
-                                                                            break; \
-                                                                        case WORD: \
-                                                                            write_word(ptr, val); \
-                                                                            break; \
-                                                                        case LONG: \
-                                                                            write_long(ptr, val); \
-                                                                        default: \
-                                                                            break; \
+                                                                    if (addr == 7) {\
+                                                                        switch (size) { \
+                                                                            case BYTE: \
+                                                                            case WORD: \
+                                                                                push_word(val); \
+                                                                                break; \
+                                                                            case LONG: \
+                                                                                push_long(val); \
+                                                                            default: \
+                                                                                break; \
+                                                                        } \
                                                                     } \
-                                                                    \
+                                                                    else { \
+                                                                        switch (size) { \
+                                                                            case BYTE: \
+                                                                                write_byte(ptr, val); \
+                                                                                break; \
+                                                                            case WORD: \
+                                                                                write_word(ptr, val); \
+                                                                                break; \
+                                                                            case LONG: \
+                                                                                write_long(ptr, val); \
+                                                                            default: \
+                                                                                break; \
+                                                                        } \
+                                                                    } \
                                                                     break; \
                                                                     \
                                                                 case ADDRESSDisp: \
@@ -520,10 +573,10 @@ void  iotask(struct EmulationMachine *em);
 
 
 /* EMULATION MACHINE */
-void machine_waiter(struct EmulationMachine *em);
+void machine_waiter (struct EmulationMachine *em);
 void emit_sys_status(struct EmulationMachine *em);
-void emit_dump     (struct EmulationMachine *em);
-void emit_jio        (struct EmulationMachine *em);
-void emit_jconcat  (struct EmulationMachine *em);
+void emit_dump      (struct EmulationMachine *em);
+void emit_jio       (struct EmulationMachine *em);
+void emit_jconcat   (struct EmulationMachine *em);
 
 #endif // __UTILS_H__68000
