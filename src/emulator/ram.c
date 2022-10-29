@@ -49,7 +49,7 @@ m68k_ram* get_ram()
     return (ram);
 }
 
-void erase()
+void erase_ram()
 {
     if (ram)
     {

@@ -1,7 +1,7 @@
 #include "utils.h"
 
 u32 most_significant_byte(opsize size)
-{    
+{
     switch (size)
     {
         case BYTE:

@@ -168,6 +168,52 @@ u32 ROxx(u32 code);
 
 
 
+/*
+ * DEFINING MNEMONIC HASHING VALUES, COMPUTED WITH 'generic_u32_t hash (const char* word)' func
+ *
+ */
+#define ori   78534
+#define andi  2013554
+#define eori  2134113
+#define move_op 2372561
+#define moveq 73549472
+#define divu  2098692
+#define divs  2098690
+#define or    2531
+#define eor   68840
+#define mulu  2378033
+#define muls  2378031
+#define and   64951
+#define subi  2556457
+#define subq  2556465
+#define sub   82464
+#define subx  2556472
+#define addi  2003944
+#define addq  2003952
+#define add   64641
+#define addx  2003959
+#define cmpi  2072547
+#define cmpm  2072551
+#define cmp   66854
+#define clr   66825
+#define cmpa  2072539
+#define negx  2392296
+#define neg   77168
+#define not   77491
+#define ext   69121
+#define swap  2558355
+#define tst   83381
+#define asl   65114
+#define asr   65120
+#define lsl   75685
+#define lsr   75691
+#define rol   81327
+#define ror   81333
+#define roxl  2521585
+#define roxr  2521591
+
+
+
 
 
 #endif // __HANDLER_H__68000

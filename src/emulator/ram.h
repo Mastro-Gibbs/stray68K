@@ -10,7 +10,7 @@
 
 m68k_ram* init_ram(struct EmulationMachine *em);
 m68k_ram* get_ram();
-void   erase();
+void   erase_ram();
 void   destroy_ram();
 
 

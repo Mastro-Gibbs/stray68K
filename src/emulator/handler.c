@@ -92,7 +92,7 @@ struct __m68k__codemap__ *codemap   = NULL;
                                                             case ori:  \
                                                             case andi:  \
                                                             case eori:  \
-                                                            case move:  \
+                                                            case move_op:  \
                                                             case moveq:  \
                                                             case divu:  \
                                                             case divs:  \
@@ -539,7 +539,7 @@ u32 MOVE(opcode code)
 
         WRITE_EFFECTIVE_ADDRESS(dst_reg, rVal, tmpsize, dst_mode);
 
-        SET_SRFLAGS(move, size, 0, 0, rVal);
+        SET_SRFLAGS(move_op, size, 0, 0, rVal);
 
         INCR_PC(size_to_span(tmpsize));
     }
@@ -557,7 +557,7 @@ u32 MOVE(opcode code)
 
         if (dst_mode == ADDRESSPostIncr) incr_addr_reg(dst_reg, size);
 
-        SET_SRFLAGS(move, size, 0, 0, rVal);
+        SET_SRFLAGS(move_op, size, 0, 0, rVal);
     }
 
     return (RETURN_OK);
