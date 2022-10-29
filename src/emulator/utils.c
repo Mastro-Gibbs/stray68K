@@ -208,6 +208,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                         { \
                                                             cchar = read_byte(rptr++);          \
                                                             u32 index  = cchar - 0x30;          \
+                                                            if (index > 7) break; \
                                                             u32 value  = read_datareg(index) & mask_by_opsize(size);   \
                                                             u32 length = snprintf(NULL, 0, "%x", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
@@ -218,6 +219,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                         { \
                                                             cchar = read_byte(rptr++);          \
                                                             u32 index  = cchar - 0x30;          \
+                                                            if (index > 7) break; \
                                                             u32 value  = read_datareg(index) & mask_by_opsize(size);   \
                                                             u32 length = snprintf(NULL, 0, "%X", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
@@ -233,6 +235,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                         { \
                                                             cchar = read_byte(rptr++);          \
                                                             u32 index  = cchar - 0x30;          \
+                                                            if (index > 7) break; \
                                                             u32 value  = read_datareg(index);   \
                                                             s32 sval;                           \
                                                             SIGN_EXTENDED(sval, value, size);   \
@@ -246,6 +249,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                         { \
                                                             cchar = read_byte(rptr++);        \
                                                             u32 index  = cchar - 0x30;        \
+                                                            if (index > 7) break; \
                                                             u32 value  = read_addrreg(index) & mask_by_opsize(size);   \
                                                             u32 length = snprintf(NULL, 0, "%X", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
@@ -257,6 +261,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                         { \
                                                             cchar = read_byte(rptr++);        \
                                                             u32 index  = cchar - 0x30;        \
+                                                            if (index > 7) break; \
                                                             u32 value  = read_datareg(index) & mask_by_opsize(size);   \
                                                             u32 length = snprintf(NULL, 0, "%u", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
@@ -268,122 +273,137 @@ void _io_dumps(struct EmulationMachine *em)
                                                     } \
                                                 } while(0);
 
-#define EVAL_PRINT_SEQUENCE(iostr, cchar, rptr)   do { \
-                                                        if (cchar == '\\') \
-                                                            EVAL_ESCAPE_SEQUENCE(iostr, cchar, rptr) \
-                                                        else if (cchar == '%') \
-                                                            EVAL_PLACE_OLDER(iostr, cchar, rptr) \
-                                                        else \
-                                                            sprintf(iostr+strlen(iostr), "%c", cchar); \
-                                                    } while(0);
+#define EVAL_PRINT_SEQUENCE(iostr)  do { \
+                                        u32 rptr; \
+                                        s8  cchar; \
+                                        \
+                                        rptr = read_addrreg(0);\
+                                        \
+                                        iostr = malloc(2 * sizeof (s8)); \
+                                        iostr[0] = '\0'; \
+                                        \
+                                        do { \
+                                            cchar = read_byte(rptr++); \
+                                            \
+                                            if (cchar == '\\') \
+                                                EVAL_ESCAPE_SEQUENCE(iostr, cchar, rptr) \
+                                            else if (cchar == '%') \
+                                                EVAL_PLACE_OLDER(iostr, cchar, rptr) \
+                                            else \
+                                                sprintf(iostr+strlen(iostr), "%c", cchar); \
+                                            \
+                                            str = realloc(str, strlen(str)+2); \
+                                            \
+                                        } while ((cchar & 0xFF) != 0b00000000); \
+                                    } while(0);
 
-#define EVAL_SCAN_SEQUENCE(value, rptr)  do { \
-                                            char c; \
-                                            while ((c = read_byte(rptr++)) == '%' && (c & 0xFF) != 0x00) \
-                                            { \
-                                                opsize size; \
-                                                char cchar = read_byte(rptr++); \
-                                                \
-                                                switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
-                                                    case 'b':    \
-                                                    case 'B':    \
-                                                        size = BYTE; \
-                                                        break;   \
-                                                    case 'w':    \
-                                                    case 'W':    \
-                                                        size = WORD; \
-                                                        break;   \
-                                                    case 'l':    \
-                                                    case 'L':    \
-                                                        size = LONG; \
-                                                        break;   \
-                                                    default:     \
-                                                        size = LONG; \
-                                                        break;   \
-                                                } \
-                                                char ccchar = read_byte(rptr); \
-                                                if (ccchar == 'a' || ccchar == 'A' || \
-                                                    ccchar == 'd' || ccchar == 'D') \
-                                                { \
-                                                    cchar = ccchar; \
-                                                    rptr++; \
-                                                } \
-                                                \
-                                                char rtype = cchar; \
-                                                \
-                                                cchar = read_byte(rptr++);     \
-                                                u32 index  = cchar - 0x30;     \
-                                                scanf(" %u", &value);          \
-                                                value &= mask_by_opsize(size); \
-                                                \
-                                                switch (rtype) \
-                                                { \
-                                                    case 'a':  \
-                                                    case 'A':  \
-                                                    { \
-                                                        write_addrreg(index, value, &size);   \
-                                                        break; \
-                                                    } \
-                                                    case 'd':  \
-                                                    case 'D':  \
-                                                    { \
-                                                        write_datareg(index, value, &size);   \
-                                                        break; \
-                                                    } \
-                                                    default:   \
-                                                        break; \
-                                                } \
+#define EVAL_SCAN_SEQUENCE(iostr)   do { \
+                                        u32 rptr, index, value, length; \
+                                        char c; \
+                                        \
+                                        rptr = read_addrreg(0); \
+                                        \
+                                        iostr = malloc(2 * sizeof (s8)); \
+                                        iostr[0] = '{'; iostr[1] = '\0'; \
+                                        \
+                                        while ((c = read_byte(rptr++)) == '%' && (c & 0xFF) != 0x00) \
+                                        { \
+                                            opsize size; \
+                                            char cchar = read_byte(rptr++); \
+                                            \
+                                            switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
+                                                case 'b':    \
+                                                case 'B':    \
+                                                    size = BYTE; \
+                                                    break;   \
+                                                case 'w':    \
+                                                case 'W':    \
+                                                    size = WORD; \
+                                                    break;   \
+                                                case 'l':    \
+                                                case 'L':    \
+                                                    size = LONG; \
+                                                    break;   \
+                                                default:     \
+                                                    size = LONG; \
+                                                    break;   \
                                             } \
-                                        } while(0);
+                                            char ccchar = read_byte(rptr); \
+                                            if (ccchar == 'a' || ccchar == 'A' || \
+                                                ccchar == 'd' || ccchar == 'D') \
+                                            { \
+                                                cchar = ccchar; \
+                                                rptr++; \
+                                            } \
+                                            \
+                                            char rtype = cchar; \
+                                            \
+                                            cchar = read_byte(rptr++);     \
+                                            index = cchar - 0x30;          \
+                                            if (index > 7) continue;       \
+                                            scanf(" %u", &value);          \
+                                            value &= mask_by_opsize(size); \
+                                            \
+                                            switch (rtype) \
+                                            { \
+                                                case 'a':  \
+                                                case 'A':  \
+                                                { \
+                                                    write_addrreg(index, value, &size);   \
+                                                    break; \
+                                                } \
+                                                case 'd':  \
+                                                case 'D':  \
+                                                { \
+                                                    write_datareg(index, value, &size);   \
+                                                    break; \
+                                                } \
+                                                default:   \
+                                                    break; \
+                                            } \
+                                            length = snprintf(NULL, 0, "%d", value); \
+                                            if (strlen(iostr) == 1) { \
+                                                iostr  = realloc(iostr, strlen(iostr) + length + 8); \
+                                                sprintf(iostr+strlen(iostr), "\"%c%d\":\"%d\"", rtype, index, value); \
+                                            } else { \
+                                                iostr  = realloc(iostr, strlen(iostr) + length + 9); \
+                                                sprintf(iostr+strlen(iostr), ",\"%c%d\":\"%d\"", rtype, index, value); \
+                                            } \
+                                        } \
+                                        u32 pos = strlen(iostr);       \
+                                        iostr = realloc(str, pos + 2); \
+                                        iostr[pos] = '}'; iostr[pos+1] = '\0'; \
+                                    } while(0);
 
 void iotask(struct EmulationMachine *em)
 {
-#include <string.h>
+    char *str = NULL;
 
     if (em->Machine.IO.Type == OUTPUT)
     {
-        u32 ramptr = read_addrreg(0);
+        EVAL_PRINT_SEQUENCE(str)
 
-        char c;
-        char *str;
-
-        str = malloc(2 * sizeof (s8));
-        str[0] = '\0';
-
-        do
+        if (str != NULL)
         {
-            c = read_byte(ramptr++);
+            em->Machine.IO.buffer  = str;
 
-            EVAL_PRINT_SEQUENCE(str, c, ramptr)
+            _io_dumps(em);
 
-            str = realloc(str, strlen(str)+2);
-
-        } while ((c & 0xFF) != 0b00000000);
-
-        em->Machine.IO.buffer  = str;
-
-        _io_dumps(em);
-
-        IO_TASK(em->ExecArgs.descriptive_mode, "%s", str)
-        free(str);
+            IO_TASK(em->ExecArgs.descriptive_mode, "%s", str)
+            free(str);
+        }
     }
     else if (em->Machine.IO.Type == INPUT)
     {
-        u32 ramptr = read_addrreg(0);
-        u32 ival;
-        EVAL_SCAN_SEQUENCE(ival, ramptr)
+        EVAL_SCAN_SEQUENCE(str)
 
-        /*
-        u32 length = snprintf(NULL, 0, "%d", ival);
+        if (str != NULL)
+        {
+            em->Machine.IO.buffer  = str;
 
-        char* str = malloc(length + 1);
-        snprintf(str, length + 1, "%d", ival);
-
-        em->Machine.IO.buffer  = str;
-
-        _io_dumps(em);
-        free(str);
-        */
+            _io_dumps(em);
+            free(str);
+        }
     }
 }
 

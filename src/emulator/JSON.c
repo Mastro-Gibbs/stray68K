@@ -203,16 +203,56 @@ char* Jexception(char* cause, u32 type)
     return res;
 }
 
+
+#define SANIFICATE_ESCAPE_SEQUENCE(iostr, str)  do { \
+                                                    u32 length, i, j; \
+                                                    length = strlen(str); \
+                                                    i = 0; \
+                                                    j = 0; \
+                                                    for (; i < length; i++, j++) { \
+                                                        char c = str[i]; \
+                                                        \
+                                                        switch (c) { \
+                                                            case '\033': \
+                                                                iostr = realloc(iostr, strlen(iostr) + 5); \
+                                                                iostr[j++] = '\\'; iostr[j++] = '0'; \
+                                                                iostr[j++] = '3';  iostr[j]   = '3'; \
+                                                                break; \
+                                                            case '\n': \
+                                                                iostr = realloc(iostr, strlen(iostr) + 3); \
+                                                                iostr[j++] = '\\'; iostr[j] = 'n'; \
+                                                                break; \
+                                                            case '\t': \
+                                                                iostr = realloc(iostr, strlen(iostr) + 3); \
+                                                                iostr[j++] = '\\'; iostr[j] = 't'; \
+                                                                break; \
+                                                            case '\r': \
+                                                                iostr = realloc(iostr, strlen(iostr) + 3); \
+                                                                iostr[j++] = '\\'; iostr[j] = 'r'; \
+                                                                break; \
+                                                            default: \
+                                                                iostr[j] = c; \
+                                                                break; \
+                                                        } \
+                                                    } \
+                                                    iostr[j] = '\0'; \
+                                                } while(0);
+
 char* Jio(char* io, u32 type)
 {
     char *res;
     ssize_t size = strlen(io) + 1;
-    char buf[size + 60];
+    char buf[(size + 30) * 2];
 
     if (type == INPUT)
-        sprintf(buf, "{\"IO\":{\"TYPE\":\"I\",\"VAL\":\"%s\"}}", io);
+        sprintf(buf, "{\"IO\":{\"TYPE\":\"I\",\"VAL\":%s}}", io);
     else
-        sprintf(buf, "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\"}}", io);
+    {
+        char *str = malloc(sizeof(s8) * strlen(io) + 1);
+        SANIFICATE_ESCAPE_SEQUENCE(str, io);
+        sprintf(buf, "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\"}}", str);
+        free(str);
+    }
 
     res = malloc(sizeof (* res) * size);
 

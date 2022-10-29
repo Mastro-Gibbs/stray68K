@@ -67,11 +67,11 @@
  * MACRO used to prepend a tag to IO emulator.
  *
  */
-#define IO_TASK(descr, fmt, ...) do {                                 \
-                        IO_TASK_TAG(descr)                            \
-                        printf (fmt, ##__VA_ARGS__);                  \
-                        fflush(stdout);                               \
-                    } while (0);
+#define IO_TASK(descr, fmt, ...) do {                            \
+                                    IO_TASK_TAG(descr)           \
+                                    printf (fmt, ##__VA_ARGS__); \
+                                    fflush(stdout);              \
+                                } while (0);
 
 
 
@@ -80,11 +80,11 @@
  * It's different from the previous macro because this one allows to print sequences of chars (strings).
  *
  */
-#define IO_TASK_TAG(descr) do {                                       \
-                        if (descr)                                    \
-                            printf("[\033[01m\033[95mIO\033[0m] "); \
-                        fflush(stdout);                               \
-                    } while (0);
+#define IO_TASK_TAG(descr)  do {                                            \
+                                if (descr)                                  \
+                                    printf("[\033[01m\033[95mIO\033[0m] "); \
+                                fflush(stdout);                             \
+                            } while (0);
 
 
 /*
