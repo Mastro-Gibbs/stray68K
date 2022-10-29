@@ -2,7 +2,10 @@
 ;	
 ;	This file include other sources for testing specific OPs
 ;	 
-;Author: Stefano Fattore	
+; Author: Stefano Fattore
+;
+; assemble: ./stray68K -a -i scripts/generic.X68 -o scripts/generic.B68 
+; run:      ./stray68K -s scripts/generic.B68 -d -j dump	
 
 	ORG       $1000	
 
