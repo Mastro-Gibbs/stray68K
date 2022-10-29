@@ -103,23 +103,23 @@ Just clone and invoke makefile
   ```
 - To perform a ```compilation```.
   ```bash
-  $ ./stray68K -a -i scripts/generic.X68 -o scripts/generic.B68
+  $ ./stray68K -a -i examples/scripts/generic.X68 -o examples/scripts/generic.B68
   ```
 - To perform a quiet ```execution```.
   ```bash
-  $ ./stray68K -e scripts/io.B68 -q
+  $ ./stray68K -e examples/scripts/io.B68 -q
   ```
 - To perform a quiet ```execution``` with cpu, ram and chrono dumps in JSON format.
   ```bash
-  $ ./stray68K -e scripts/io.B68 -j cpu ram chrono concat -q
+  $ ./stray68K -e examples/scripts/io.B68 -j cpu ram chrono concat -q
   ```
 - To perform a descriptive ```execution step by step```.
   ```bash
-  $ ./stray68K -s scripts/generic.B68 -d
+  $ ./stray68K -s examples/scripts/generic.B68 -d
   ```
 - To perform a descriptive ```execution step by step``` with system dump in JSON format.
   ```bash
-  $ ./stray68K -s scripts/generic.B68 -d -j dump
+  $ ./stray68K -s examples/scripts/generic.B68 -d -j dump
   ```
 
 ---
