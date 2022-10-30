@@ -416,9 +416,9 @@ void machine_waiter(struct EmulationMachine *em)
         fputs(
             "\n---------------- Execution Options ----------------\n"
             "[\033[01m\033[37ms\033[0m] \033[01m\033[37mstack\033[0m | "
+            "[\033[01m\033[37mr\033[0m] \033[01m\033[37mram\033[0m | "
             "[\033[01m\033[37mn\033[0m] \033[01m\033[37mnext\033[0m | "
-            "[\033[01m\033[37mk\033[0m] \033[01m\033[37mskip\033[0m | "
-            "[\033[01m\033[37mt\033[0m] \033[01m\033[37mfull skip\033[0m\n",
+            "[\033[01m\033[37mt\033[0m] \033[01m\033[37mterminate\033[0m\n",
         stdout);
 
         fflush(stdout);
@@ -431,7 +431,7 @@ void machine_waiter(struct EmulationMachine *em)
         {
             tcgetattr(STDIN_FILENO, &em->Machine.RuntimeData.oldt);
             em->Machine.RuntimeData.newt = em->Machine.RuntimeData.oldt;
-            em->Machine.RuntimeData.newt.c_lflag &= ~(ICANON);
+            em->Machine.RuntimeData.newt.c_lflag &= (~ECHO) & (~ICANON);
             tcsetattr(STDIN_FILENO, TCSANOW, &em->Machine.RuntimeData.newt);
 
             opt = getchar();
@@ -445,21 +445,42 @@ void machine_waiter(struct EmulationMachine *em)
 
                     SBS_DEBUGGER("Insert stack top address: ");
                     scanf("%X", &_top);
-                    SBS_DEBUGGER("Insert stack bottom address: ");
-                    scanf("%X", &_bottom);
 
-                    if (_bottom >= em->Machine.RuntimeData.STACK_BOTTOM_INDEX || (((_bottom & 0x0000000F) + 1) % 4) != 0)
+                    if (_top >= em->Machine.RuntimeData.STACK_BOTTOM_INDEX)
                     {
-                        SBS_DEBUGGER("Invalid bottom index");
+                        SBS_DEBUGGER("Invalid top index\n");
                     }
                     else
                     {
+                        while (((_top & 0x0000000F) % 4) != 0) _top -= 1;
                         em->Machine.ram->stack(_top, _bottom);
                     }
 
                     break;
                 }
+                case 'r': //ram
+                {
+                    u32 _from = 0, _to = 0;
 
+                    SBS_DEBUGGER("Insert start address: ");
+                    scanf("%X", &_from);
+                    SBS_DEBUGGER("Insert end address: ");
+                    scanf("%X", &_to);
+
+                    _from = (_from & 0xFFFFFFF0);
+                    _to   = (_to   & 0xFFFFFFF0);
+
+                    if (_from >= _to)
+                    {
+                        SBS_DEBUGGER("Invalid bottom index");
+                    }
+                    else
+                    {
+                        em->Machine.ram->show(_from, _to, em->Machine.cpu->pc, "\033[93m");
+                    }
+
+                break;
+                }
                 case 'n': //goto next istr, print cpu & ram
                 {
                     emit_sys_status(em);
@@ -467,21 +488,8 @@ void machine_waiter(struct EmulationMachine *em)
                     loop = FALSE;
                     break;
                 }
-
-                case 'k': //skip
-                {
-                    system("clear");
-                    SBS_DEBUGGER("Skip selected, the execution proceeds.\n");
-
-                    loop = FALSE;
-                    break;
-                }
-
                 case 't': //terminate
                 {
-                    system("clear");
-                    SBS_DEBUGGER("Full skip selected, the execution proceeds to the end.\n");
-
                     loop = FALSE;
 
                     em->Machine.RuntimeData.sbs_printer_enabler = FALSE;
@@ -553,7 +561,7 @@ void emit_sys_status(struct EmulationMachine *em)
     }
 
 maybe_sbs_print:
-    if (!em->ExecArgs.quiet_mode)
+    if (!em->ExecArgs.quiet_mode && em->Machine.RuntimeData.sbs_printer_enabler)
     {
         u32 _start = em->Machine.RuntimeData.org_pointer;
         u32 _end   = (em->Machine.RuntimeData.last_loaded_byte_index | 0x0000000F) + 0x11;
@@ -615,6 +623,8 @@ maybe_sbs_print:
                (f64) em->Machine.Chrono.dt / (f64) 1000,
                (f64) em->Machine.Chrono.dt / (f64) 1000000);
     }
+
+    fflush(stdout);
 }
 
 void emit_dump(struct EmulationMachine *em)

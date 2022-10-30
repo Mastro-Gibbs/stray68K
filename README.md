@@ -79,10 +79,10 @@ Just clone and invoke makefile
         [concat] -Perform JSON concat, must pass at least two listed above commands.
 
         STEP-BY-STEP MODE's options asked from stdin
-        [s] -Asks for offsets and print current stack.
+        [s] -Asks for top address and print current stack.
+        [r] -Asks for ram offsets and print selected ram chunck.
         [n] -Execute next istruction.
-        [k] -Skip current step.
-        [t] -Full skip steps. The execution proceeds to the end.
+        [t] -Terminate the program. The execution proceeds to the end.
         
         Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)
         

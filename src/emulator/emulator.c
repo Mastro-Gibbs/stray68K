@@ -209,10 +209,10 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
             " [concat] -Perform JSON concat, must pass at least two listed above commands.\n"
             "\n"
             "**STEP-BY-STEP MODE's options asked from stdin**\n"
-            " [s] -Asks for offsets and print current stack.\n"
+            " [s] -Asks for top address and print current stack.\n"
+            " [r] -Asks for ram offsets and print selected ram chunck.\n"
             " [n] -Execute next istruction.\n"
-            " [k] -Skip current step.\n"
-            " [t] -Full skip steps. The execution proceeds to the end.\n"
+            " [t] -Terminate the program. The execution proceeds to the end.\n"
             "\n\n",
         stdout);
 
