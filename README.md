@@ -80,7 +80,7 @@ Just clone and invoke makefile
 
         STEP-BY-STEP MODE's options asked from stdin
         [s] -Asks for top address and print current stack.
-        [r] -Asks for ram offsets and print selected ram chunck.
+        [r] -Asks for ram offsets and print selected ram chunk.
         [n] -Execute next istruction.
         [t] -Terminate the program. The execution proceeds to the end.
         
