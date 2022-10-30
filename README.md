@@ -33,7 +33,7 @@ This emulator tries to be as faithful as possible to the Motorola 68000 processo
   Depending on the number #xx used, the trap operation will jump to any of the 16 possible callbacks from the memory area \$80 to $BC.
   But in the **stray68K** implementation there is no vector of routines stored in that offset. Simply, the system will go into a state known as **TRAP_STATE**, from which it cannot resume, which will terminate the executed program by associating the corresponding code and mnemonic of the routine that the OS should have executed. This situation is not true for numbers #14 and #15 which correspond to C routines for scanf and printf respectively.   
   <br>
-- **Operating mode**
+- **Operating mode**  
   Given the assumption that the TRAP vector does not correspond to routine addresses stored somewhere, the machine is in **supervisor mode** all the time.
 
 #### Input/Output
