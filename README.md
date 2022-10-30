@@ -21,7 +21,7 @@ The emulator is based on a **pseudo-state machine** and a series of functions th
 Possible states:
   - **BEGIN_STATE**: initial state.
   - **EXECUTION_STATE**: state in which the machine executes the instructions.
-  - **FINAL_STATE**: accepting final status.
+  - **FINAL_STATE**: accepting final state.
   - **PANIC_STATE**: state in which an unresolvable condition occurred, such as internal errors, it's a no-accepting final state.
   - **TRAP_STATE**: the state in which a TRAP exception is raised, see below, it's a no-accepting final state.
   - **MERR_STATE**: state in which an internal error occurred during the assembly of the machine, it's a no-accepting final state.
