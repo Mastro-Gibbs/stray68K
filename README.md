@@ -31,7 +31,7 @@ Possible states:
 This emulator tries to be as faithful as possible to the Motorola 68000 processor. But some things have been implemented differently:
 - **TRAPS**  
   Depending on the number #xx used, the trap operation will jump to any of the 16 possible callbacks from the memory area \$80 to $BC.
-  But in the **stray68K** implementation there is no vector of routines stored in that offset. Simply, the system will go into a state known as **TRAP_STATE**, from which it cannot resume, which will terminate the executed program by associating the corresponding code and mnemonic of the routine that the OS should have executed. This situation is not true for numbers #14 and #15 which correspond to C routines for scanf and printf respectively.   
+  But in the **stray68K** implementation there is no vector of routines stored in that offset. Simply, the system will go into a state known as **TRAP_STATE**, from which it cannot resume, which will terminate the executed program by associating the corresponding code and mnemonic of the routine that the OS should have executed. This situation is not true for numbers #14 and #15 which correspond to C routines for scanf and printf respectively. See below.    
   <br>
 - **Operating mode**  
   Given the assumption that the TRAP vector does not correspond to routine addresses stored somewhere, the machine is in **supervisor mode** all the time.
@@ -40,7 +40,7 @@ This emulator tries to be as faithful as possible to the Motorola 68000 processo
 - **How to**  
   By invoking **TRAP #14** or **TRAP #15** you can invoke a **scanf** or **printf**, respectively.
   * **TRAP #14**  
-    First you will need a formatter string like in scanf. Commonly we will use a string that **must** be loaded into **A0** via the **LEA** operation. Based on the formatter escapes the scans will be performed, any characters extraneous to the characters recognized as escapes will be ignored.
+    First you will need a formatter string like in scanf. Commonly we will use a string that **must** be loaded into **A0** via the **LEA** operation. Based on the formatted string with placeholders the scans will be performed, any characters extraneous to the characters recognized as placeholder will be ignored.
     Below are a number of escapes and placeholders.
   * **TRAP #15**  
     Unlike the scan (TRAP #14), here, the presence of placeholders and escapes is not mandatory. It will be possible to print a classic string by loading its address in **A0** with the **LEA** operation and invoking **TRAP # 15**. **If placeholders and escapes** are evaluated in the string, a **dynamic formatting** of the string will be performed before printing.
