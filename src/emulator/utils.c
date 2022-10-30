@@ -141,7 +141,7 @@ void _io_dumps(struct EmulationMachine *em)
 #include <string.h>
 #define EVAL_ESCAPE_SEQUENCE(iostr, cchar, rptr)    do{ \
                                                         cchar = read_byte(rptr++); \
-                                                        if (  /* ANSI ESCAPE SEQUENCE */ \
+                                                        if (  /* ANSI ESCAPE SEQUENCE '\033'*/ \
                                                             cchar == '0' && \
                                                             read_byte(rptr) == '3' && \
                                                             read_byte(rptr + 1) == '3' \
@@ -154,6 +154,12 @@ void _io_dumps(struct EmulationMachine *em)
                                                             switch (cchar) { \
                                                                 case '\\': \
                                                                     sprintf(iostr+strlen(iostr), "%c", '\\'); \
+                                                                    if (read_byte(rptr) == '%') /*Escape for placeholder*/\
+                                                                    { \
+                                                                        iostr = realloc(iostr, strlen(iostr)+2); \
+                                                                        sprintf(iostr+strlen(iostr), "%c", '%'); \
+                                                                        rptr++; \
+                                                                    }\
                                                                     break; \
                                                                 case 'n':  \
                                                                     sprintf(iostr+strlen(iostr), "%c", '\n'); \
@@ -189,8 +195,19 @@ void _io_dumps(struct EmulationMachine *em)
                                                             size = LONG; \
                                                             break;   \
                                                         default:     \
-                                                            size = LONG; \
-                                                            break;   \
+                                                        { /*Needs a forward reading to clear placeholder escape chars*/ \
+                                                            char fw = read_byte(rptr); \
+                                                            if (fw != 'x' && fw != 'X' && \
+                                                                fw != 'a' && fw != 'A' && \
+                                                                fw != 'd' && fw != 'D') \
+                                                            { \
+                                                                rptr++; \
+                                                                fw = read_byte(rptr); \
+                                                                if ((fw - 0x30) < 10) rptr++; \
+                                                            } else if ((fw - 0x30) < 10) rptr++; \
+                                                            \
+                                                            continue;   \
+                                                        } \
                                                     }                \
                                                     \
                                                     char ccchar = read_byte(rptr); \
@@ -303,11 +320,15 @@ void _io_dumps(struct EmulationMachine *em)
                                         \
                                         rptr = read_addrreg(0); \
                                         \
-                                        iostr = malloc(2 * sizeof (s8)); \
-                                        iostr[0] = '{'; iostr[1] = '\0'; \
-                                        \
-                                        while ((c = read_byte(rptr++)) == '%' && (c & 0xFF) != 0x00) \
+                                        while ((c = read_byte(rptr++)) == '%' || (c & 0xFF) != 0x00) \
                                         { \
+                                            if (iostr == NULL) {\
+                                                iostr = malloc(2 * sizeof (s8)); \
+                                                iostr[0] = '{'; iostr[1] = '\0'; \
+                                            } \
+                                            \
+                                            if (c != '%') continue; \
+                                            \
                                             opsize size; \
                                             char cchar = read_byte(rptr++); \
                                             \
@@ -325,8 +346,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                     size = LONG; \
                                                     break;   \
                                                 default:     \
-                                                    size = LONG; \
-                                                    break;   \
+                                                    continue;   \
                                             } \
                                             char ccchar = read_byte(rptr); \
                                             if (ccchar == 'a' || ccchar == 'A' || \
@@ -335,6 +355,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                 cchar = ccchar; \
                                                 rptr++; \
                                             } \
+                                            else continue; \
                                             \
                                             char rtype = cchar; \
                                             \
@@ -370,9 +391,11 @@ void _io_dumps(struct EmulationMachine *em)
                                                 sprintf(iostr+strlen(iostr), ",\"%c%d\":\"%d\"", rtype, index, value); \
                                             } \
                                         } \
-                                        u32 pos = strlen(iostr);       \
-                                        iostr = realloc(str, pos + 2); \
-                                        iostr[pos] = '}'; iostr[pos+1] = '\0'; \
+                                        if (iostr != NULL) { \
+                                            u32 pos = strlen(iostr);       \
+                                            iostr = realloc(str, pos + 2); \
+                                            iostr[pos] = '}'; iostr[pos+1] = '\0'; \
+                                        } \
                                     } while(0);
 
 void iotask(struct EmulationMachine *em)

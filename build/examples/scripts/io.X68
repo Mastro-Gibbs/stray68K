@@ -28,7 +28,15 @@ PASS_PARAM_VIA_STACK:
 	TRAP	#14  ; aka scan
 
 	; print formatted str
-	LEA		print,A0
+	LEA		Sprint,A0
+	TRAP	#15
+
+	; print formatted str
+	LEA		Uprint,A0
+	TRAP	#15
+
+	; print formatted str
+	LEA		Xprint,A0
 	TRAP	#15
 
 	; set RTS address from D7 into (SP)
@@ -43,7 +51,16 @@ EXIT:
 
 	; HALT
 
+; simple str for printer
 welcome		DC.B	'Insert two integers\n',0
-scan:		DC.B	'%LD2%LD3',0
-print:      DC.B    'Values:\nFrom SP -> %LD1\nFirst int entered -> %LD2\nSecond int entered -> %LD3\n',0
-byebye:		DC.B	'\nBye bye from \033[91mstray68K\033[0m\n',0
+
+; ftm for scannner
+scan:		DC.B	'c',0
+
+; ftm for printer
+Sprint:     DC.B    '\nSigned values:\n-From SP -> %L1\n-First int entered -> %L2\n-Second int entered -> %L3\n',0
+Uprint:     DC.B    '\nUnsigned values:\n-From SP -> %LD1\n-First int entered -> %LD2\n-Second int entered -> %LD3\n',0
+Xprint:     DC.B    '\nHex values:\n-From SP -> 0x%LX1\n-First int entered -> 0x%LX2\n-Second int entered -> 0x%LX3\n',0
+
+; ansi escape ftm str for printer
+byebye:		DC.B	'\n\033[92m\033[1mBye bye\033[0m \033[1mfrom\033[0m \033[91m\033[5m\033[1mstray68K\033[0m\n',0
