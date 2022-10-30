@@ -18,7 +18,7 @@ Stray motorola 68000 emulator, include assembler and emulator.
 
 #### Emulation Machine
 The emulator is based on a **pseudo-state machine** and a series of functions that emulate the behavior of the operations performed by the Motorola 68000 processor.
-List of possible states
+Possible states:
   - **BEGIN_STATE**: initial state.
   - **EXECUTION_STATE**: state in which the machine executes the instructions.
   - **FINAL_STATE**: accepting final status.
