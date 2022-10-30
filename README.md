@@ -37,12 +37,12 @@ This emulator tries to be as faithful as possible to the Motorola 68000 processo
   Given the assumption that the TRAP vector does not correspond to routine addresses stored somewhere, the machine is in **supervisor mode** all the time.
 
 #### Input/Output
-- **How to**
+- **How to**  
   By invoking **TRAP #14** or **TRAP #15** you can invoke a **scanf** or **printf**, respectively.
-  * **TRAP #14**
+  * **TRAP #14**  
     First you will need a formatter string like in scanf. Commonly we will use a string that **must** be loaded into **A0** via the **LEA** operation. Based on the formatter escapes the scans will be performed, any characters extraneous to the characters recognized as escapes will be ignored.
     Below are a number of escapes and placeholders.
-  * **TRAP #15**
+  * **TRAP #15**  
     Unlike the scan (TRAP #14), here, the presence of placeholders and escapes is not mandatory. It will be possible to print a classic string by loading its address in **A0** with the **LEA** operation and invoking **TRAP # 15**. **If placeholders and escapes** are evaluated in the string, a **dynamic formatting** of the string will be performed before printing.
 
 - **Supported placeholders and escapes list**
