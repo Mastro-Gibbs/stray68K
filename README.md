@@ -54,7 +54,7 @@ This emulator tries to be as faithful as possible to the Motorola 68000 processo
         **B-W-L** | **b-w-l** symbolize the value size to be printed, BYTE, WORD, LONG. **Mandatory**.  
         **A-D-X** | **a-d-x** symbolize registers, A-a for base 16 address registers, D-d for base 10 data registers, X-x for base 16 data registers. Omitting these formatters will print the signed value in the **Dx** data register. **Not mandatory**.  
         **Numbers 0 to 7** represent the register index. **Mandatory**.  
-        For some clarification see 'example/scripts/io.X68' file.  
+        For some clarification see 'build/examples/scripts/io.X68' file.  
   
       By concatenating these symbols it is possible to have all the **I/O combinations** on the registers.
 
