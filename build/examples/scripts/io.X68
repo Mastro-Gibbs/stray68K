@@ -55,7 +55,7 @@ EXIT:
 welcome		DC.B	'Insert two integers\n',0
 
 ; ftm for scannner
-scan:		DC.B	'c',0
+scan:		DC.B	'%LD2%LD3',0
 
 ; ftm for printer
 Sprint:     DC.B    '\nSigned values:\n-From SP -> %L1\n-First int entered -> %L2\n-Second int entered -> %L3\n',0
