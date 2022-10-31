@@ -5,10 +5,12 @@
 ####### Compiler, tools and options
 
 CC            = gcc
-CFLAGS        = -pipe -g -Wall -Wextra -fPIC
+CFLAGS        = -pipe -g -Wall -Wextra -fPIC -O3
 DEL_FILE      = rm -f
 MKDIR         = mkdir -p
 DEL_DIR       = rmdir
+ROOT_DIR      := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
 
 LEX           = flex
 YACC          = bison
@@ -17,9 +19,9 @@ YACC          = bison
 
 OBJECTS_DIR   = objects
 BUILD_DIR     = build
-ASSEMBLER_DIR = ../stray68K/src/assembler
-EMULATOR_DIR  = ../stray68K/src/emulator
-SOURCE_DIR    = ../stray68K/src
+ASSEMBLER_DIR = $(ROOT_DIR)/src/assembler
+EMULATOR_DIR  = $(ROOT_DIR)/src/emulator
+SOURCE_DIR    = $(ROOT_DIR)/src
 
 ####### Files
 

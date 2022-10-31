@@ -137,7 +137,7 @@ char* Jchrono(u64 usec)
     ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
 
-    strncpy(res, buf, size-1);
+    strncpy(res, buf, size);
 
     res[size-1] = '\0';
 
@@ -156,7 +156,7 @@ char* Jop(char *mnem, u32 code_promoted)
     ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
 
-    strncpy(res, buf, size-1);
+    strncpy(res, buf, size);
 
     res[size-1] = '\0';
 
@@ -196,7 +196,7 @@ char* Jexception(char* cause, u32 type)
     size_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
 
-    strncpy(res, buf, size-1);
+    strncpy(res, buf, size);
 
     res[size-1] = '\0';
 
@@ -261,7 +261,7 @@ char* Jio(char* io, u32 type)
     size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
 
-    strncpy(res, buf, size-1);
+    strncpy(res, buf, size);
 
     res[size-1] = '\0';
 

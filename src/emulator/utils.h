@@ -211,8 +211,9 @@
                                                                                     break; \
                                                                                 case LONG: \
                                                                                     dst = pop_long(); \
-                                                                                default: \
                                                                                     break; \
+                                                                                default: \
+                                                                                    return (RETURN_ERR); \
                                                                             } \
                                                                         } \
                                                                         else { \
@@ -230,8 +231,9 @@
                                                                                     break; \
                                                                                 case LONG: \
                                                                                     dst = pop_long(); \
-                                                                                default: \
                                                                                     break; \
+                                                                                default: \
+                                                                                    return (RETURN_ERR); \
                                                                             } \
                                                                         } \
                                                                         else { \
@@ -252,8 +254,9 @@
                                                                                     break; \
                                                                                 case LONG: \
                                                                                     dst = pop_long(); \
-                                                                                default: \
                                                                                     break; \
+                                                                                default: \
+                                                                                    return (RETURN_ERR); \
                                                                             } \
                                                                         } \
                                                                         else { \
@@ -310,8 +313,9 @@
                                                                                 break; \
                                                                             case LONG: \
                                                                                 push_long(val); \
-                                                                            default: \
                                                                                 break; \
+                                                                            default: \
+                                                                                return (RETURN_ERR); \
                                                                         } \
                                                                     } \
                                                                     else { \
@@ -324,8 +328,9 @@
                                                                                 break; \
                                                                             case LONG: \
                                                                                 write_long(ptr, val); \
-                                                                            default: \
                                                                                 break; \
+                                                                            default: \
+                                                                                return (RETURN_ERR); \
                                                                         } \
                                                                     } \
                                                                     break; \
@@ -350,7 +355,7 @@
                                                                             write_long(ptr, val); \
                                                                             break; \
                                                                         default: \
-                                                                            break; \
+                                                                            return (RETURN_ERR); \
                                                                     } \
                                                                     set_pc(get_pc() + size_to_span(tmpsize)); \
                                                                     \

@@ -83,7 +83,7 @@ typedef struct __m68k__opcode__
     opcode mask;
     char*  mnemonic;
 
-    u32 (*handler) (const opcode code);
+    u32 (*handler) ();
 
 } m68k_opcode;
 

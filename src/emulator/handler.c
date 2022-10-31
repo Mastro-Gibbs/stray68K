@@ -209,8 +209,9 @@ struct __m68k__codemap__ *codemap   = NULL;
  */
 
 // GROUP 0x00
-u32 ORItoCCR(opcode code)
+u32 ORItoCCR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
@@ -225,8 +226,9 @@ u32 ORItoCCR(opcode code)
 }
 
 
-u32 ORItoSR(opcode code)
+u32 ORItoSR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
@@ -241,8 +243,9 @@ u32 ORItoSR(opcode code)
 }
 
 
-u32 ORI(opcode code)
+u32 ORI()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -264,8 +267,9 @@ u32 ORI(opcode code)
 }
 
 
-u32 ANDItoCCR(opcode code)
+u32 ANDItoCCR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
@@ -280,8 +284,9 @@ u32 ANDItoCCR(opcode code)
 }
 
 
-u32 ANDItoSR(opcode code)
+u32 ANDItoSR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
@@ -296,8 +301,9 @@ u32 ANDItoSR(opcode code)
 }
 
 
-u32 ANDI(opcode code)
+u32 ANDI()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -329,8 +335,9 @@ u32 ANDI(opcode code)
 }
 
 
-u32 SUBI(opcode code)
+u32 SUBI()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     opsize size = (code & SIZE_MASK) >> 6;
     opsize tmps = size;
 
@@ -363,8 +370,9 @@ u32 SUBI(opcode code)
 }
 
 
-u32 ADDI(opcode code)
+u32 ADDI()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     opsize size = (code & SIZE_MASK) >> 6;
     opsize tmps = size;
 
@@ -397,8 +405,9 @@ u32 ADDI(opcode code)
 }
 
 
-u32 EORItoCCR(opcode code)
+u32 EORItoCCR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
@@ -413,8 +422,9 @@ u32 EORItoCCR(opcode code)
 }
 
 
-u32 EORItoSR(opcode code)
+u32 EORItoSR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulation->Machine.cpu->pc + WORD_SPAN);
@@ -429,8 +439,9 @@ u32 EORItoSR(opcode code)
 }
 
 
-u32 EORI(opcode code)
+u32 EORI()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -452,8 +463,9 @@ u32 EORI(opcode code)
 }
 
 
-u32 CMPI(opcode code)
+u32 CMPI()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -480,34 +492,39 @@ u32 CMPI(opcode code)
 }
 
 
-u32 MOVEP(opcode code)
+u32 MOVEP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
 
 
-u32 BTST(opcode code)
+u32 BTST()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     return Bxxx(code);
 }
 
 
-u32 BCHG(opcode code)
+u32 BCHG()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     return Bxxx(code);
 }
 
 
-u32 BCLR(opcode code)
+u32 BCLR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     return Bxxx(code);
 }
 
 
-u32 BSET(opcode code)
+u32 BSET()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     return Bxxx(code);
 }
 
@@ -515,8 +532,9 @@ u32 BSET(opcode code)
 
 
 // GROUP 0x01
-u32 MOVE(opcode code)
+u32 MOVE()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst_reg,  src_reg;
     u32 dst_mode, src_mode;
     u32 rVal;
@@ -567,8 +585,9 @@ u32 MOVE(opcode code)
 
 
 // GROUP 0x02-0x03
-u32 MOVEA(opcode code)
+u32 MOVEA()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     /* hack:
          call 'move' with dst_mode as 001 aka ADDRReg.
          for sure this code will go into the 'move' proc's if-true-branch
@@ -581,8 +600,9 @@ u32 MOVEA(opcode code)
 
 
 // group 0X04
-u32 MOVEfromSR(opcode code)
+u32 MOVEfromSR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
 
@@ -598,8 +618,9 @@ u32 MOVEfromSR(opcode code)
 }
 
 
-u32 MOVEtoCCR(opcode code)
+u32 MOVEtoCCR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
 
@@ -622,8 +643,9 @@ u32 MOVEtoCCR(opcode code)
 }
 
 
-u32 MOVEtoSR(opcode code)
+u32 MOVEtoSR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
 
@@ -646,8 +668,9 @@ u32 MOVEtoSR(opcode code)
 }
 
 
-u32 NEGX(opcode code)
+u32 NEGX()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -668,8 +691,9 @@ u32 NEGX(opcode code)
 }
 
 
-u32 CLR(opcode code)
+u32 CLR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 reg  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -699,8 +723,9 @@ u32 CLR(opcode code)
 }
 
 
-u32 NEG(opcode code)
+u32 NEG()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -721,8 +746,9 @@ u32 NEG(opcode code)
 }
 
 
-u32 NOT(opcode code)
+u32 NOT()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -743,8 +769,9 @@ u32 NOT(opcode code)
 }
 
 
-u32 EXT(opcode code)
+u32 EXT()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32  regptr = (code & 0x0007);
     opsize size = (code & 0x0040) == 0 ? WORD : LONG;
 
@@ -761,8 +788,9 @@ u32 EXT(opcode code)
 }
 
 
-u32 NBCD(opcode code)
+u32 NBCD()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     s32 lo_val, hi_val;
     bit carry;
 
@@ -799,8 +827,9 @@ u32 NBCD(opcode code)
 }
 
 
-u32 SWAP(opcode code)
+u32 SWAP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
 
     u32 val = read_datareg(code & reg_mask);
@@ -813,8 +842,9 @@ u32 SWAP(opcode code)
 }
 
 
-u32 PEA(opcode code)
+u32 PEA()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     ADDRMode mode = (code & 0b0000000000111000) >> 3;
 
     if (mode == ADDRESS || mode == ADDRESSDisp)
@@ -832,8 +862,9 @@ u32 PEA(opcode code)
 }
 
 
-u32 ILLEGAL(opcode code)
+u32 ILLEGAL()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     emulation->Machine.State = TRAP_STATE;
@@ -845,16 +876,18 @@ u32 ILLEGAL(opcode code)
 }
 
 
-u32 TAS(opcode code)
+u32 TAS()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
 
 
-u32 TST(opcode code)
+u32 TST()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
     bitmask size_mask = 0b0000000011000000;
@@ -887,8 +920,9 @@ u32 TST(opcode code)
 }
 
 
-u32 TRAP(opcode code)
+u32 TRAP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u16 vector = (u16)(code & 0x0000000F);
 
     if (vector == 0x0F)
@@ -917,8 +951,9 @@ u32 TRAP(opcode code)
 }
 
 
-u32 LINK(opcode code)
+u32 LINK()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
 
     u32 reg = code & reg_mask;
@@ -941,8 +976,9 @@ u32 LINK(opcode code)
 }
 
 
-u32 UNLK(opcode code)
+u32 UNLK()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
     u32 reg = code & reg_mask;
 
@@ -953,8 +989,9 @@ u32 UNLK(opcode code)
 }
 
 
-u32 MOVEUSP(opcode code)
+u32 MOVEUSP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     if (!((emulation->Machine.cpu->sr & SUPERVISOR) ? 1 : 0))
     {
         emulation->Machine.State = TRAP_STATE;
@@ -983,32 +1020,36 @@ u32 MOVEUSP(opcode code)
 }
 
 
-u32 RESET(opcode code)
+u32 RESET()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
 
 
-u32 NOP(opcode code)
+u32 NOP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     return (RETURN_OK);
 }
 
 
-u32 STOP(opcode code)
+u32 STOP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     WARNING("Unmenaged operation, code: %X", code)
 
     return (RETURN_OK);
 }
 
 
-u32 RTE(opcode code)
+u32 RTE()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     if ((emulation->Machine.cpu->sr & SUPERVISOR) ? 1 : 0)
@@ -1033,8 +1074,9 @@ u32 RTE(opcode code)
 }
 
 
-u32 RTS(opcode code)
+u32 RTS()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     if (emulation->Machine.RuntimeData.JSR_CALL_COUNTER == 0)
     {
         emulation->Machine.State = PANIC_STATE;
@@ -1051,8 +1093,9 @@ u32 RTS(opcode code)
 }
 
 
-u32 TRAPV(opcode code)
+u32 TRAPV()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     if ((emulation->Machine.cpu->sr & OVERFLOW))
@@ -1069,8 +1112,9 @@ u32 TRAPV(opcode code)
 }
 
 
-u32 RTR(opcode code)
+u32 RTR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     UNUSED(code)
 
     srflags ccr   = pop_word();
@@ -1085,8 +1129,9 @@ u32 RTR(opcode code)
 }
 
 
-u32 JSR(opcode code)
+u32 JSR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     ADDRMode mode = (code & ADDRMODE_MASK);
     u32  addr_reg = (code & SRC_MASK);
 
@@ -1118,8 +1163,9 @@ u32 JSR(opcode code)
 }
 
 
-u32 JMP(opcode code)
+u32 JMP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     ADDRMode mode = (code & ADDRMODE_MASK);
     u32  addr_reg = (code & SRC_MASK);
 
@@ -1151,8 +1197,9 @@ u32 JMP(opcode code)
 }
 
 
-u32 MOVEM(opcode code)
+u32 MOVEM()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     // wtf is this?? maybe later
 
     WARNING("Unmenaged operation, code: %X", code)
@@ -1161,8 +1208,9 @@ u32 MOVEM(opcode code)
 }
 
 
-u32 CHK(opcode code)
+u32 CHK()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     WARNING("Operation maybe include bugs")
 
     u32 addr_reg = (code & SRC_MASK);
@@ -1198,8 +1246,9 @@ u32 CHK(opcode code)
 }
 
 
-u32 LEA(opcode code)
+u32 LEA()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u8 mode     = (code & ADDRMODE_MASK);
     u8 addr_reg = (code & DST_MASK) >> 9;
 
@@ -1226,8 +1275,9 @@ u32 LEA(opcode code)
 
 
 // GROUP 0x05
-u32 DBcc(opcode code)
+u32 DBcc()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     opsize size = WORD;
     CCm condition = (code & 0x0F00) >> 8;
 
@@ -1261,8 +1311,9 @@ u32 DBcc(opcode code)
 }
 
 
-u32 Scc(opcode code)
+u32 Scc()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst = (code & SRC_MASK);
     opsize   size = BYTE;
     ADDRMode mode = (code & 0b0000000000111000) >> 3;
@@ -1282,8 +1333,9 @@ u32 Scc(opcode code)
 }
 
 
-u32 ADDQ(opcode code)
+u32 ADDQ()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 value = (code & DST_MASK) >> 9;
 
     if (value == 0) value = 8;
@@ -1318,8 +1370,9 @@ u32 ADDQ(opcode code)
 }
 
 
-u32 SUBQ(opcode code)
+u32 SUBQ()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 value = (code & DST_MASK) >> 9;
 
     if (value == 0) value = 8;
@@ -1357,8 +1410,9 @@ u32 SUBQ(opcode code)
 
 
 // GROUP 0x06
-u32 BRA(opcode code)
+u32 BRA()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 pc   = emulation->Machine.cpu->pc;
     s32  disp = (code & 0x00FF);
 
@@ -1378,8 +1432,9 @@ u32 BRA(opcode code)
 }
 
 
-u32 BSR(opcode code)
+u32 BSR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 pc = emulation->Machine.cpu->pc;
 
     u32 disp = code & 0x00FF;
@@ -1405,8 +1460,9 @@ u32 BSR(opcode code)
 }
 
 
-u32 Bcc(opcode code)
+u32 Bcc()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     CCm condition = (code & 0x0F00) >> 8;
 
     if (eval_cc(condition))
@@ -1416,8 +1472,8 @@ u32 Bcc(opcode code)
 
         if (disp == 0)
         {
-            u32 ramptr = emulation->Machine.cpu->pc + WORD_SPAN;
-            opsize        size   = WORD;
+            u32 ramptr = pc + WORD_SPAN;
+            opsize size = WORD;
             SIGN_EXTENDED(disp, read_ram(&ramptr, &size), WORD);
         }
         else
@@ -1439,8 +1495,9 @@ u32 Bcc(opcode code)
 
 
 // GROUP 0x07
-u32 MOVEQ(opcode code)
+u32 MOVEQ()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst = (code & DST_MASK) >> 9;
     s32 val;
     SIGN_EXTENDED(val, (code & 0b0000000011111111), LONG);
@@ -1456,8 +1513,9 @@ u32 MOVEQ(opcode code)
 
 
 // GROUP 0x08
-u32 DIVU(opcode code)
+u32 DIVU()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 _val;
 
     void **a;
@@ -1506,8 +1564,9 @@ u32 DIVU(opcode code)
 }
 
 
-u32 DIVS(opcode code)
+u32 DIVS()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     s32 _val, signed_sVal, signed_dVal;
 
     void **a;
@@ -1558,14 +1617,15 @@ u32 DIVS(opcode code)
 }
 
 
-u32 SBCD(opcode code)
+u32 SBCD()
 {
-    return xBCD(code, SUBTRACTION);
+    return xBCD(SUBTRACTION);
 }
 
 
-u32 OR(opcode code)
+u32 OR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 _val;
 
     void **a;
@@ -1604,8 +1664,9 @@ u32 OR(opcode code)
 
 
 // GROUP 0x09
-u32 SUBA(opcode code)
+u32 SUBA()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst_reg = (code & DST_MASK) >> 9;
     u32 src_reg = (code & SRC_MASK);
     ADDRMode mode = (code & 0b0000000000111000) >> 3;
@@ -1634,8 +1695,9 @@ u32 SUBA(opcode code)
 }
 
 
-u32 SUBX(opcode code)
+u32 SUBX()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
     opsize         size   = (code & SIZE_MASK) >> 6;
@@ -1667,8 +1729,9 @@ u32 SUBX(opcode code)
 }
 
 
-u32 SUB(opcode code)
+u32 SUB()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     s32 _val, signed_sVal, signed_dVal;
 
     void **a;
@@ -1710,8 +1773,9 @@ u32 SUB(opcode code)
 
 
 // GROUP 0x0B
-u32 CMPA(opcode code)
+u32 CMPA()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst_reg = (code & DST_MASK) >> 9;
     u32 src_reg = (code & SRC_MASK);
 
@@ -1754,8 +1818,9 @@ u32 CMPA(opcode code)
 }
 
 
-u32 CMPM(opcode code)
+u32 CMPM()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 dst_addr_reg = (code & DST_MASK) >> 9;
     u32 src_addr_reg = (code & SRC_MASK);
     opsize      size = (code & SIZE_MASK) >> 6;
@@ -1783,8 +1848,9 @@ u32 CMPM(opcode code)
 }
 
 
-u32 EOR(opcode code)
+u32 EOR()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 _val;
 
     void **a;
@@ -1812,8 +1878,9 @@ u32 EOR(opcode code)
 }
 
 
-u32 CMP(opcode code)
+u32 CMP()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
 
@@ -1859,8 +1926,9 @@ u32 CMP(opcode code)
 
 
 // GROUP 0x0C
-u32 MULU(opcode code)
+u32 MULU()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 _val;
 
     void **a;
@@ -1886,8 +1954,9 @@ u32 MULU(opcode code)
 }
 
 
-u32 MULS(opcode code)
+u32 MULS()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     s32 _val, signed_sVal, signed_dVal;;
 
     void **a;
@@ -1916,14 +1985,15 @@ u32 MULS(opcode code)
 }
 
 
-u32 ABCD(opcode code)
+u32 ABCD()
 {
-    return xBCD(code, ADDICTION);
+    return xBCD(ADDICTION);
 }
 
 
-u32 EXG(opcode code)
+u32 EXG()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 rX = (code & 0x0007);
     u32 rY = (code & 0x0E00) >> 9;
     bit mode         = (bit)((code & 0x00F8) >> 3);
@@ -1962,8 +2032,9 @@ u32 EXG(opcode code)
 }
 
 
-u32 AND(opcode code)
+u32 AND()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32 _val;
 
     void **a;
@@ -2002,8 +2073,9 @@ u32 AND(opcode code)
 
 
 // GROUP 0x0D
-u32 ADDA(opcode code)
+u32 ADDA()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
     ADDRMode   mode    = (code & 0b0000000000111000) >> 3;
@@ -2031,8 +2103,9 @@ u32 ADDA(opcode code)
 }
 
 
-u32 ADDX(opcode code)
+u32 ADDX()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
     opsize         size    = (code & SIZE_MASK) >> 6;
@@ -2064,8 +2137,9 @@ u32 ADDX(opcode code)
 }
 
 
-u32 ADD(opcode code)
+u32 ADD()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     s32  _val, signed_sVal, signed_dVal;
 
     void **a;
@@ -2107,58 +2181,59 @@ u32 ADD(opcode code)
 
 
 // GROUP 0x0E
-u32 ASR(opcode code)
+u32 ASR()
 {
-    return ALxx(code);
+    return ALxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
-u32 ASL(opcode code)
+u32 ASL()
 {
-    return ALxx(code);
+    return ALxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
-u32 LSR(opcode code)
+u32 LSR()
 {
-    return ALxx(code);
+    return ALxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
-u32 LSL(opcode code)
+u32 LSL()
 {
-    return ALxx(code);
+    return ALxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
-u32 ROXR(opcode code)
+u32 ROXR()
 {
-    return ROxx(code);
+    return ROxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
-u32 ROXL(opcode code)
+u32 ROXL()
 {
-    return ROxx(code);
+    return ROxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
-u32 ROR(opcode code)
+u32 ROR()
 {
-    return ROxx(code);
+    return ROxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
-u32 ROL(opcode code)
+u32 ROL()
 {
-    return ROxx(code);
+    return ROxx(emulation->Machine.RuntimeData.operation_code);
 }
 
 
 
 //Bxxx
-u32 Bxxx(opcode code)
+u32 Bxxx()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code; 
     bit mode = (code & 0x0100) == 0x0000; // if true mean IMMEDIATE, read extension word
 
     u32 dst = (code & 0x0007);
@@ -2225,8 +2300,10 @@ u32 Bxxx(opcode code)
 
 
 //abcd-sbcd
-u32 xBCD(opcode code, BCD_type type)
+u32 xBCD(BCD_type type)
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code;
+
     u32 srcval, dstval, result;
 
     u32 srcptr = (code & 0x0007);
@@ -2310,8 +2387,10 @@ u32 perform_BCD(BCD_type type, u32 src, u32 dest)
 
 
 //A-Lxx
-u32 ALxx(u32 code)
+u32 ALxx()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code;
+
     Rot al_dir  = (code & 0x0100) >> 8;
     opsize size = (code & 0x00C0) >> 6;
 
@@ -2426,8 +2505,10 @@ u32 ALxx(u32 code)
 }
 
 //Roxx
-u32 ROxx(u32 code)
+u32 ROxx()
 {
+    opcode code = emulation->Machine.RuntimeData.operation_code;
+
     Rot rot_dir = (code & 0x0100) >> 8;
     opsize size = (code & 0x00C0) >> 6;
 
@@ -2564,7 +2645,7 @@ u32 ROxx(u32 code)
 
 
 
-m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemonic, u32 (*handler)(const opcode))
+m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemonic, u32 (*handler)())
 {
     m68k_opcode *newopcode = malloc(sizeof (*newopcode));
 
@@ -2906,23 +2987,20 @@ void destroy_codes()
  * FINDER
  *
  */
-m68k_opcode* get_opcode_t(opcode code)
+m68k_opcode* get_opcode_t()
 {
-    u8 code_group_id = (u8)((code & 0xF000) >> 12);
+    u8 code_group_id = (u8)((emulation->Machine.RuntimeData.operation_code & 0xF000) >> 12);
 
     if (code_group_id < 0x0F && code_group_id != 0x0A)
     {
-        m68k_codemap *tmp = NULL;
+        m68k_codemap *tmp = (code_group_id > 0x09) ? &codemap[code_group_id - 0x01] : &codemap[code_group_id];
 
-        if (code_group_id > 0x09)
-            tmp = &codemap[code_group_id - 0x01];
-        else
-            tmp = &codemap[code_group_id];
-
-        if (tmp->key == code_group_id)
-            for (unsigned char iter = 0; iter < tmp->size; iter++)
-                if ((code & tmp->instances[iter]->mask) == tmp->instances[iter]->code)
-                    return tmp->instances[iter];
+        for (unsigned char iter = 0; iter < tmp->size; iter++)
+            if ((emulation->Machine.RuntimeData.operation_code & tmp->instances[iter]->mask) == tmp->instances[iter]->code)
+            {
+                emulation->Machine.RuntimeData.mnemonic = tmp->instances[iter]->mnemonic;
+                return tmp->instances[iter];
+            }
     }
 
     return NULL;
@@ -2936,25 +3014,20 @@ m68k_opcode* get_opcode_t(opcode code)
 void preset_hander(struct EmulationMachine *em) { emulation = em; }
 
 
-u32 run_opcode(struct EmulationMachine *em)
+u32 run_opcode()
 {
-    m68k_opcode *tmp = get_opcode_t(em->Machine.RuntimeData.operation_code);
+    m68k_opcode *tmp = get_opcode_t();
 
     if (tmp == NULL)
     {
-        em->Machine.State = PANIC_STATE;
-        sprintf(em->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", em->Machine.RuntimeData.operation_code);
+        emulation->Machine.State = PANIC_STATE;
+        sprintf(emulation->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", emulation->Machine.RuntimeData.operation_code);
         return (RETURN_ERR);
     }
 
-    em->Machine.RuntimeData.mnemonic = tmp->mnemonic;
+    machine_waiter(emulation);
 
-    if (em->EmuType == EMULATE_SBS)
-    {
-        machine_waiter(em);
-    }
-
-    u32 res = tmp->handler(em->Machine.RuntimeData.operation_code);
+    u32 res = tmp->handler();
 
     if (res != RETURN_OK_PC_NO_INCR)
         INCR_PC(WORD_SPAN);

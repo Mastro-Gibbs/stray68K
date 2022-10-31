@@ -66,4 +66,4 @@ addval:		DC.B	5
 output:		DS.W	1
 
 ; str with placeholder (D7)
-str:		DC.B	'From memory with displacement: %LX7\n',0
+str:		DC.B	'From memory with displacement: \033[91m%LX7\033[0m\n',0

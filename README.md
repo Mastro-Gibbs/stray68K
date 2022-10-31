@@ -54,7 +54,7 @@ This emulator tries to be as faithful as possible to the Motorola 68000 processo
         **B-W-L** | **b-w-l** symbolize the value size to be printed, BYTE, WORD, LONG. **Mandatory**.  
         **A-D-X** | **a-d-x** symbolize registers, A-a for base 16 address registers, D-d for base 10 data registers, X-x for base 16 data registers. Omitting these formatters will print the signed value in the **Dx** data register. **Not mandatory**.  
         **Numbers 0 to 7** represent the register index. **Mandatory**.  
-        For some clarification see 'build/examples/scripts/io.X68' file.  
+        For some clarification see 'examples/IO/io.X68' file.  
   
       By concatenating these symbols it is possible to have all the **I/O combinations** on the registers.
 
@@ -145,23 +145,23 @@ Just clone and invoke makefile
   ```
 - To perform a ```compilation```.
   ```bash
-  $ ./stray68K -a -i examples/scripts/generic.X68 -o examples/scripts/generic.B68
+  $ ./stray68K -a -i ../examples/GenericTester/generic.X68 -o ../examples/GenericTester/generic.B68
   ```
 - To perform a quiet ```execution```.
   ```bash
-  $ ./stray68K -e examples/scripts/io.B68 -q
+  $ ./stray68K -e ../examples/IO/io.B68 -q
   ```
 - To perform a quiet ```execution``` with cpu, ram and chrono dumps in JSON format.
   ```bash
-  $ ./stray68K -e examples/scripts/io.B68 -j cpu ram chrono concat -q
+  $ ./stray68K -e ../examples/IO/io.B68 -j cpu ram chrono concat -q
   ```
 - To perform a descriptive ```execution step by step```.
   ```bash
-  $ ./stray68K -s examples/scripts/generic.B68 -d
+  $ ./stray68K -s ../examples/GenericTester/generic.B68 -d
   ```
 - To perform a descriptive ```execution step by step``` with system dump in JSON format.
   ```bash
-  $ ./stray68K -s examples/scripts/generic.B68 -d -j dump
+  $ ./stray68K -s ../examples/GenericTester/generic.B68 -d -j dump
   ```
 
 ---

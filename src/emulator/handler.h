@@ -12,7 +12,7 @@ void init_codes(struct EmulationMachine *em);
 void destroy_codes();
 
 void preset_hander(struct EmulationMachine *em);
-u32 run_opcode(struct EmulationMachine *em);
+u32  run_opcode();
 
 
 
@@ -23,142 +23,142 @@ u32 run_opcode(struct EmulationMachine *em);
  *
  */
 // GROUP 0x00
-u32 ORItoCCR(opcode code);  //ok
-u32 ORItoSR(opcode code);   //ok
-u32 ORI(opcode code);       //ok
-u32 ANDItoCCR(opcode code); //ok
-u32 ANDItoSR(opcode code);  //ok
-u32 ANDI(opcode code);      //ok
-u32 SUBI(opcode code);      //ok
-u32 ADDI(opcode code);      //ok
-u32 EORItoCCR(opcode code); //ok
-u32 EORItoSR(opcode code);  //ok
-u32 EORI(opcode code);      //ok
-u32 CMPI(opcode code);      //ok
-u32 MOVEP(opcode code);     // maybe next -warn
-u32 BTST(opcode code);      //ok
-u32 BCHG(opcode code);      //ok
-u32 BCLR(opcode code);      //ok
-u32 BSET(opcode code);      //ok
+u32 ORItoCCR();  //ok
+u32 ORItoSR();   //ok
+u32 ORI();       //ok
+u32 ANDItoCCR(); //ok
+u32 ANDItoSR();  //ok
+u32 ANDI();      //ok
+u32 SUBI();      //ok
+u32 ADDI();      //ok
+u32 EORItoCCR(); //ok
+u32 EORItoSR();  //ok
+u32 EORI();      //ok
+u32 CMPI();      //ok
+u32 MOVEP();     // maybe next -warn
+u32 BTST();      //ok
+u32 BCHG();      //ok
+u32 BCLR();      //ok
+u32 BSET();      //ok
 
 
 // GROUP 0x01
-u32 MOVE(opcode code);   //ok
+u32 MOVE();   //ok
 
 
 // GROUP 0x02-0x03
-u32 MOVEA(opcode code);  //ok
+u32 MOVEA();  //ok
 
 
 // group 0X04
-u32 MOVEfromSR(opcode code); //ok
-u32 MOVEtoCCR(opcode code);  //ok
-u32 MOVEtoSR(opcode code);   //ok
-u32 NEGX(opcode code);       //ok
-u32 CLR(opcode code);        //ok
-u32 NEG(opcode code);        //ok
-u32 NOT(opcode code);        //ok
-u32 EXT(opcode code);        //ok
-u32 NBCD(opcode code);       //ok
-u32 SWAP(opcode code);       //ok
-u32 PEA(opcode code);        //ok
-u32 ILLEGAL(opcode code);    //ok
-u32 TAS(opcode code);        // ?? -warn
-u32 TST(opcode code);        //ok
-u32 TRAP(opcode code);       //ok
-u32 LINK(opcode code);       //ok
-u32 UNLK(opcode code);       //ok
-u32 MOVEUSP(opcode code);    //ok
-u32 RESET(opcode code);      // ?? -warn
-u32 NOP(opcode code);        //ok
-u32 STOP(opcode code);       // ?? -warn
-u32 RTE(opcode code);        //ok
-u32 RTS(opcode code);        //ok
-u32 TRAPV(opcode code);      //ok
-u32 RTR(opcode code);        //ok
-u32 JSR(opcode code);        //ok
-u32 JMP(opcode code);        //ok
-u32 MOVEM(opcode code);      // wtf -warn
-u32 CHK(opcode code);        // ok -warn
-u32 LEA(opcode code);        //ok
+u32 MOVEfromSR(); //ok
+u32 MOVEtoCCR();  //ok
+u32 MOVEtoSR();   //ok
+u32 NEGX();       //ok
+u32 CLR();        //ok
+u32 NEG();        //ok
+u32 NOT();        //ok
+u32 EXT();        //ok
+u32 NBCD();       //ok
+u32 SWAP();       //ok
+u32 PEA();        //ok
+u32 ILLEGAL();    //ok
+u32 TAS();        // ?? -warn
+u32 TST();        //ok
+u32 TRAP();       //ok
+u32 LINK();       //ok
+u32 UNLK();       //ok
+u32 MOVEUSP();    //ok
+u32 RESET();      // ?? -warn
+u32 NOP();        //ok
+u32 STOP();       // ?? -warn
+u32 RTE();        //ok
+u32 RTS();        //ok
+u32 TRAPV();      //ok
+u32 RTR();        //ok
+u32 JSR();        //ok
+u32 JMP();        //ok
+u32 MOVEM();      // wtf -warn
+u32 CHK();        // ok -warn
+u32 LEA();        //ok
 
 
 // GROUP 0x05
-u32 DBcc(opcode code);      //ok
-u32 Scc(opcode code);       //ok
-u32 ADDQ(opcode code);      //ok
-u32 SUBQ(opcode code);      //ok
+u32 DBcc();      //ok
+u32 Scc();       //ok
+u32 ADDQ();      //ok
+u32 SUBQ();      //ok
 
 
 // GROUP 0x06
-u32 BRA(opcode code);      //ok
-u32 BSR(opcode code);      //ok
-u32 Bcc(opcode code);      //ok
+u32 BRA();      //ok
+u32 BSR();      //ok
+u32 Bcc();      //ok
 
 
 // GROUP 0x07
-u32 MOVEQ(opcode code);     //ok
+u32 MOVEQ();     //ok
 
 
 // GROUP 0x08
-u32 DIVU(opcode code);   //ok
-u32 DIVS(opcode code);   //ok
-u32 SBCD(opcode code);   //ok
-u32 OR(opcode code);     //ok
+u32 DIVU();   //ok
+u32 DIVS();   //ok
+u32 SBCD();   //ok
+u32 OR();     //ok
 
 
 // GROUP 0x09
-u32 SUBA(opcode code);  //ok
-u32 SUBX(opcode code);  //ok
-u32 SUB(opcode code);   //ok
+u32 SUBA();  //ok
+u32 SUBX();  //ok
+u32 SUB();   //ok
 
 
 // GROUP 0x0B
-u32 CMPA(opcode code);  //ok
-u32 CMPM(opcode code);  //ok
-u32 EOR(opcode code);   //ok
-u32 CMP(opcode code);   //ok
+u32 CMPA();  //ok
+u32 CMPM();  //ok
+u32 EOR();   //ok
+u32 CMP();   //ok
 
 
 // GROUP 0x0C
-u32 MULU(opcode code);  //ok
-u32 MULS(opcode code);  //ok
-u32 ABCD(opcode code);  //ok
-u32 EXG(opcode code);   //ok
-u32 AND(opcode code);   //ok
+u32 MULU();  //ok
+u32 MULS();  //ok
+u32 ABCD();  //ok
+u32 EXG();   //ok
+u32 AND();   //ok
 
 
 // GROUP 0x0D
-u32 ADDA(opcode code);  //ok
-u32 ADDX(opcode code);  //ok
-u32 ADD(opcode code);   //ok
+u32 ADDA();  //ok
+u32 ADDX();  //ok
+u32 ADD();   //ok
 
 
 // GROUP 0x0E
-u32 ASR(opcode code);   //ok
-u32 ASL(opcode code);   //ok
-u32 LSR(opcode code);   //ok
-u32 LSL(opcode code);   //ok
-u32 ROXR(opcode code);  //ok
-u32 ROXL(opcode code);  //ok
-u32 ROR(opcode code);   //ok
-u32 ROL(opcode code);   //ok
+u32 ASR();   //ok
+u32 ASL();   //ok
+u32 LSR();   //ok
+u32 LSL();   //ok
+u32 ROXR();  //ok
+u32 ROXL();  //ok
+u32 ROR();   //ok
+u32 ROL();   //ok
 
 
 //Bxxx
-u32 Bxxx(opcode code);
+u32 Bxxx();
 
 
 //abcd-sbcd
-u32 xBCD(opcode code, BCD_type type);
+u32 xBCD(BCD_type type);
 u32 perform_BCD(BCD_type type, u32 src, u32 dest);
 
 
 //A-Lxx
-u32 ALxx(u32 code);
+u32 ALxx();
 
 //Roxx
-u32 ROxx(u32 code);
+u32 ROxx();
 
 /*
  * END DUMBS PROTOS

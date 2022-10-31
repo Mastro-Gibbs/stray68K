@@ -48,12 +48,18 @@ bit _is_valid_file(struct EmulationMachine *em)
     return 1;
 }
 
-u32 _extract_ORG(struct EmulationMachine *em)
+FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
 {
     FILE   *fp;
     char   *line = NULL;
     char   *end  = NULL;
-    size_t  len   = 0, read = 0;
+    size_t  len   = 0;
+
+    regex_t    regex;
+    const char *regex_str = "o[0-9a-fA-F]{8}\n";
+
+    if (regcomp(&regex, regex_str, REG_EXTENDED) == 1)
+        EMULATOR_ERROR("Could not compile regex %s", regex_str)
 
     u32 value = ORG_DEFAULT;
 
@@ -61,110 +67,83 @@ u32 _extract_ORG(struct EmulationMachine *em)
 
     fp = fopen(em->ExecArgs.executable_path, "r");
 
-    read = getline(&line, &len, fp);
-
-    if (line[0] == ORG_SYMBOL)
+    if (getline(&line, &len, fp) != 0)
     {
-        if (read != 10)
-            EMULATOR_ERROR("Error incomes while loading an invalid bytecode, line: 1. (Invalid ORG)")
+        if (!regexec(&regex, line, 0, NULL, 0))
+        {
+            strncpy(org, line+1, 8);
+            value = (u32) strtol(org, &end, 16);
+        }
+        else
+        {
+            fseek(fp, 0, SEEK_SET);
+        }
 
-        strncpy(org, line+1, 8);
-        value = (u32) strtol(org, &end, 16);
+        em->Machine.RuntimeData.org_pointer = value;
+        em->Machine.cpu->pc                 = value;
+
+        regfree(&regex);
+
+        return fp;
     }
-
-    fclose(fp);
-
-    return value;
+    else EMULATOR_ERROR("Error incomes while loading invalid bytecode")
 }
 
 void load_bytecode(struct EmulationMachine *em)
 {
-    u32        size = 0;
-    regex_t    hex_rx;
-    const char *hex_regex = "[0-9a-fA-F!]+";
-
-    em->Machine.RuntimeData.org_pointer = _extract_ORG(em);
-    em->Machine.cpu->pc = em->Machine.RuntimeData.org_pointer;
-
-    u8 *bytecode = NULL;
-
     FILE  *fp;
-    fp = fopen(em->ExecArgs.executable_path, "r");
 
-    if (regcomp(&hex_rx, hex_regex, REG_EXTENDED) == 1)
-        EMULATOR_ERROR("Could not compile regex %s", hex_regex)
+    regex_t    regex;
+    const char *regex_str = "[0-9a-fA-F!\n]+";
 
-    int  reti;
-    char ch;
-    while((ch = fgetc(fp)) != EOF)
+    s32 reti;
+    s8  ch;
+    u32 span = 0;
+
+    if (regcomp(&regex, regex_str, REG_EXTENDED) == 1)
     {
-        reti = regexec(&hex_rx, &ch, 0, NULL, 0);
-        if (!reti)
-        {
-            size++;
-        }
+        regfree(&regex);
+        EMULATOR_ERROR("Could not compile regex %s", regex_str)
     }
 
-    size = ((size - ((em->Machine.RuntimeData.org_pointer) ? 9 : 0)) / 2) + 1;
-
-    fclose(fp);
-
-    bytecode = calloc(size, sizeof (* bytecode));
-
-    fp = fopen(em->ExecArgs.executable_path, "r");
+    fp = open_file_and_extract_ORG(em);
 
     char symbol[3];
     symbol[2] = '\0';
 
-    u32 pos = 0,
-        validator = ((em->Machine.RuntimeData.org_pointer) ? 10 : 0);
-
-    fseek(fp, validator, SEEK_SET);
-
-    u32 meta_pc = em->Machine.RuntimeData.org_pointer;
-
     while((ch = fgetc(fp)) != EOF)
     {
-        if (ch == SIMHALT_SYMBOL)
+        reti = regexec(&regex, &ch, 0, NULL, 0);
+        if (!reti)
         {
-            if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = meta_pc;
+            if (ch == SIMHALT_SYMBOL)
+            {
+                if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = em->Machine.cpu->pc + span;
+            }
+            else if (ch != SEPARATOR)
+            {
+                symbol[0] = ch;
+                symbol[1] = fgetc(fp);
+
+                char *end = NULL;
+
+                u8 val = strtol(symbol, &end, 16);
+
+                write_byte(em->Machine.cpu->pc + span, val);
+                span += BYTE_SPAN;
+            }
         }
-        else if (ch != SEPARATOR)
-        {
-            symbol[0] = ch;
-            symbol[1] = fgetc(fp);
-
-            char *end = NULL;
-
-            u8 val = strtol(symbol, &end, 16);
-
-            bytecode[pos++] = (u8) val;
-
-            meta_pc += BYTE_SPAN;
-        }
+        else EMULATOR_ERROR("Error incomes while loading invalid bytecode")
     }
+
     fclose(fp);
 
-    if (bytecode)
-    {
-        u32 span = 0;
-        for (u32 iter = 0; iter < size; iter++)
-        {
-            u8 c = bytecode[iter];
+    em->Machine.RuntimeData.last_loaded_byte_index = em->Machine.cpu->pc + span;
 
-            write_byte(em->Machine.cpu->pc + span, c);
-            span += BYTE_SPAN;
-        }
+    regfree(&regex);
 
-        em->Machine.RuntimeData.last_loaded_byte_index = em->Machine.cpu->pc + span;
+    if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = em->Machine.RuntimeData.last_loaded_byte_index;
 
-        free(bytecode);
-        regfree(&hex_rx);
-
-        if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = em->Machine.RuntimeData.last_loaded_byte_index;
-
-    }
-    else EMULATOR_ERROR("Error incomes while loading an invalid bytecode")
 }
 
 
@@ -408,7 +387,7 @@ int emulate(int argc, char** argv)
     em.Machine.State = EXECUTION_STATE;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
-    while((em.Machine.cpu->pc != em.Machine.RuntimeData.simhalt || em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt))
+    while(em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt)
     {
         if (em.Machine.cpu->exec(&em) == RETURN_ERR)
         {

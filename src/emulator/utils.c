@@ -362,7 +362,11 @@ void _io_dumps(struct EmulationMachine *em)
                                             cchar = read_byte(rptr++);     \
                                             index = cchar - 0x30;          \
                                             if (index > 7) continue;       \
-                                            scanf(" %u", &value);          \
+                                            \
+                                            s32 sf_r;                      \
+                                            sf_r = scanf(" %u", &value);   \
+                                            if (sf_r == 0 || sf_r == EOF)  continue; \
+                                            \
                                             value &= mask_by_opsize(size); \
                                             \
                                             switch (rtype) \
@@ -467,9 +471,15 @@ void machine_waiter(struct EmulationMachine *em)
                     u32 _top = 0, _bottom = em->Machine.RuntimeData.STACK_BOTTOM_INDEX - 1;
 
                     SBS_DEBUGGER("Insert stack top address: ");
-                    scanf("%X", &_top);
 
-                    if (_top >= em->Machine.RuntimeData.STACK_BOTTOM_INDEX)
+                    s32 sf_r;
+                    sf_r = scanf(" %u", &_top);
+
+                    if (sf_r == 0 || sf_r == EOF)
+                    {
+                        SBS_DEBUGGER("Invalid top index\n");
+                    }
+                    else if (_top >= em->Machine.RuntimeData.STACK_BOTTOM_INDEX)
                     {
                         SBS_DEBUGGER("Invalid top index\n");
                     }
@@ -484,11 +494,26 @@ void machine_waiter(struct EmulationMachine *em)
                 case 'r': //ram
                 {
                     u32 _from = 0, _to = 0;
+                    s32 sf_r;
 
                     SBS_DEBUGGER("Insert start address: ");
-                    scanf("%X", &_from);
+                    sf_r = scanf("%X", &_from);
+
+                    if (sf_r == 0 || sf_r == EOF)
+                    {
+                        SBS_DEBUGGER("Invalid start index\n");
+                        break;
+                    }
+
                     SBS_DEBUGGER("Insert end address: ");
-                    scanf("%X", &_to);
+
+                    sf_r = scanf("%X", &_to);
+
+                    if (sf_r == 0 || sf_r == EOF)
+                    {
+                        SBS_DEBUGGER("Invalid end index\n");
+                        break;
+                    }
 
                     _from = (_from & 0xFFFFFFF0);
                     _to   = (_to   & 0xFFFFFFF0);
@@ -530,7 +555,13 @@ void machine_waiter(struct EmulationMachine *em)
 #include "JSON.h"
 void emit_sys_status(struct EmulationMachine *em)
 {
-    if (em->EmuType == EMULATE_SBS && em->Machine.RuntimeData.sbs_printer_enabler) system("clear");
+    if (em->EmuType == EMULATE_SBS && em->Machine.RuntimeData.sbs_printer_enabler)
+    {
+        if (system("clear") == -1)
+        {
+            return;
+        }
+    }
 
     if (em->ExecArgs.JSON.is_activated)
     {
