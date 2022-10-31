@@ -1,10 +1,12 @@
 ;
 ; Do a loop from 0 to 0xFFFF.
 ; Get chrono.
-; Wuold you compare it with python? :)
+; Would you compare it with python? run 'time python3 speed.py' :)
 ;   
 ; Author: Stefano Fattore aka MastroGibbs
 ;
+; assemble: ./stray68K -a -i ../examples/SpeedTest/speed.X68 -o ../examples/SpeedTest/speed.B68 
+; run:      ./stray68K -e ../examples/SpeedTest/speed.B68 -q -t
 
     ORG     $1000
 

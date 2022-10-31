@@ -2,8 +2,8 @@
 ;
 ; Author: Stefano Fattore aka MastroGibbs 
 ;
-; assemble: ./stray68K -a -i examples/scripts/io.X68 -o examples/scripts/io.B68 
-; run:      ./stray68K -e examples/scripts/io.B68 -q
+; assemble: ./stray68K -a -i ../examples/IO/io.X68 -o ../examples/IO/io.B68 
+; run:      ./stray68K -e ../examples/IO/io.B68 -q
 
     ORG $1000
 

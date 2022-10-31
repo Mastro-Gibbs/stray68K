@@ -4,8 +4,8 @@
 ;	 
 ; Author: Stefano Fattore
 ;
-; assemble: ./stray68K -a -i examples/scripts/generic.X68 -o examples/scripts/generic.B68 
-; run:      ./stray68K -s examples/scripts/generic.B68 -d -j dump	
+; assemble: ./stray68K -a -i ../examples/GenericTester/generic.X68 -o ../examples/GenericTester/generic.B68 
+; run:      ./stray68K -s ../examples/GenericTester/generic.B68 -d -j dump	
 
 	ORG       $1000	
 
