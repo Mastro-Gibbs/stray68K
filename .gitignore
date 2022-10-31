@@ -1,7 +1,7 @@
 *.pro
 *.pro.user
 objects/
-build/stray68K
+build/
 assembler/lexical.c
 assembler/lexical.h
 assembler/syntactic.c
