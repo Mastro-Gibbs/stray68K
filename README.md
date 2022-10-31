@@ -163,6 +163,15 @@ Just clone and invoke makefile
   ```bash
   $ ./stray68K -s ../examples/GenericTester/generic.B68 -d -j dump
   ```
+- To perform a chrono test ```execution```.
+  ```bash
+  $ ./stray68K -s ../examples/SpeedTest/speed.B68 -d -t
+  ```  
+  Compare it with python3 **:smile:**  
+  run: 
+  ```bash
+  $ time python3 ../examples/SpeedTest/speed.py
+  ```
 
 ---
 
