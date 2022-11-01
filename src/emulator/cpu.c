@@ -5,7 +5,7 @@
 
 
 u32 __exec__(struct EmulationMachine *em);
-void __show__();
+void __show__(void);
 
 
 m68k_cpu *cpu = NULL;
@@ -29,9 +29,9 @@ m68k_cpu* init_cpu(struct EmulationMachine *em)
     return (cpu);
 }
 
-m68k_cpu* get_cpu() { return (cpu); }
+m68k_cpu* get_cpu(void) { return (cpu); }
 
-void reset_cpu()
+void reset_cpu(void)
 {
     if (cpu)
     {
@@ -53,14 +53,12 @@ void reset_cpu()
 }
 
 
-void destroy_cpu()
+void destroy_cpu(void)
 {
     if (cpu)
         free(cpu);
 
     cpu = NULL;
-
-    destroy_codes();
 }
 
 
@@ -77,11 +75,11 @@ u32 __exec__(struct EmulationMachine *em)
 
     em->Machine.RuntimeData.operation_code = read_word(istruction_ptr);;
 
-    return run_opcode(em);
+    return run_opcode();
 }
 
 
-void __show__()
+void __show__(void)
 {
     char d = 0x30, a = 0x30;
     char id[3];
@@ -421,7 +419,7 @@ void decr_addr_reg(u32 reg, opsize size)
 
 
 /* STACKS */
-u16 pop_word()
+u16 pop_word(void)
 {
     u32 stack = read_addrreg(7);
     u16 value = read_word(stack);
@@ -431,7 +429,7 @@ u16 pop_word()
     return (value);
 }
 
-u32 pop_long()
+u32 pop_long(void)
 {
     u32 stack = read_addrreg(7);
     u32 value = read_long(stack);
@@ -505,6 +503,6 @@ bit eval_cc(CCm cc)
 /* PROGRAM COUNTER */
 void set_pc(u32 pc) { cpu->pc = pc; }
 
-u32 get_pc() { return (cpu->pc); }
+u32 get_pc(void) { return (cpu->pc); }
 
 

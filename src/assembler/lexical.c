@@ -1,6 +1,6 @@
-#line 2 "../stray68K/src/assembler/lexical.c"
+#line 2 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.c"
 
-#line 4 "../stray68K/src/assembler/lexical.c"
+#line 4 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1094,7 +1094,7 @@ static const flex_int16_t yy_chk[1360] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "../stray68K/src/assembler/lexical.l"
+#line 1 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 /*
  * Copyright (C) 2022 Clownacy
  *
@@ -1113,7 +1113,7 @@ static const flex_int16_t yy_chk[1360] =
 */
 #define YY_NO_UNISTD_H 1
 #define YY_NO_INPUT 1
-#line 26 "../stray68K/src/assembler/lexical.l"
+#line 26 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 
 #include <stdlib.h>
 #include <string.h>
@@ -1122,10 +1122,10 @@ static const flex_int16_t yy_chk[1360] =
 
 void m68kasm_error(void *scanner, Statement *statement, const char *message);
 
-#line 1126 "../stray68K/src/assembler/lexical.c"
+#line 1126 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.c"
 /* Regular expression. */
 
-#line 1129 "../stray68K/src/assembler/lexical.c"
+#line 1129 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.c"
 
 #define INITIAL 0
 #define OPERANDS 1
@@ -1399,12 +1399,12 @@ YY_DECL
 		}
 
 	{
-#line 46 "../stray68K/src/assembler/lexical.l"
+#line 46 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 
 
-#line 49 "../stray68K/src/assembler/lexical.l"
+#line 49 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
  /* Ignore whitespace */
-#line 1408 "../stray68K/src/assembler/lexical.c"
+#line 1408 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1459,945 +1459,945 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 50 "../stray68K/src/assembler/lexical.l"
+#line 50 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 ;
 	YY_BREAK
 /* Terminate at comment or newline. When terminating, revert to initial state. */
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(OPERANDS):
 case YY_STATE_EOF(PATH):
-#line 53 "../stray68K/src/assembler/lexical.l"
+#line 53 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 54 "../stray68K/src/assembler/lexical.l"
+#line 54 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(INITIAL); yyterminate();
 	YY_BREAK
 /* Directives. */
 case 3:
 YY_RULE_SETUP
-#line 57 "../stray68K/src/assembler/lexical.l"
+#line 57 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ORI;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 58 "../stray68K/src/assembler/lexical.l"
+#line 58 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ANDI;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 59 "../stray68K/src/assembler/lexical.l"
+#line 59 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SUBI;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 60 "../stray68K/src/assembler/lexical.l"
+#line 60 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ADDI;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 61 "../stray68K/src/assembler/lexical.l"
+#line 61 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_EORI;
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 62 "../stray68K/src/assembler/lexical.l"
+#line 62 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_CMPI;
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 63 "../stray68K/src/assembler/lexical.l"
+#line 63 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BTST;
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 64 "../stray68K/src/assembler/lexical.l"
+#line 64 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BCHG;
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 65 "../stray68K/src/assembler/lexical.l"
+#line 65 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BCLR;
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 66 "../stray68K/src/assembler/lexical.l"
+#line 66 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BSET;
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 67 "../stray68K/src/assembler/lexical.l"
+#line 67 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MOVEP;
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 68 "../stray68K/src/assembler/lexical.l"
+#line 68 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MOVEA;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 69 "../stray68K/src/assembler/lexical.l"
+#line 69 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MOVE;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 70 "../stray68K/src/assembler/lexical.l"
+#line 70 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_NEGX;
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 71 "../stray68K/src/assembler/lexical.l"
+#line 71 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_CLR;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 72 "../stray68K/src/assembler/lexical.l"
+#line 72 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_NEG;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 73 "../stray68K/src/assembler/lexical.l"
+#line 73 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_NOT;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 74 "../stray68K/src/assembler/lexical.l"
+#line 74 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_EXT;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 75 "../stray68K/src/assembler/lexical.l"
+#line 75 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_NBCD;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 76 "../stray68K/src/assembler/lexical.l"
+#line 76 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SWAP;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 77 "../stray68K/src/assembler/lexical.l"
+#line 77 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_PEA;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 78 "../stray68K/src/assembler/lexical.l"
+#line 78 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ILLEGAL;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 79 "../stray68K/src/assembler/lexical.l"
+#line 79 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_TAS;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 80 "../stray68K/src/assembler/lexical.l"
+#line 80 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_TST;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 81 "../stray68K/src/assembler/lexical.l"
+#line 81 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_TRAP;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 82 "../stray68K/src/assembler/lexical.l"
+#line 82 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_LINK;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 83 "../stray68K/src/assembler/lexical.l"
+#line 83 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_UNLK;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 84 "../stray68K/src/assembler/lexical.l"
+#line 84 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_RESET;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 85 "../stray68K/src/assembler/lexical.l"
+#line 85 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_NOP;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 86 "../stray68K/src/assembler/lexical.l"
+#line 86 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_STOP;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 87 "../stray68K/src/assembler/lexical.l"
+#line 87 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_RTE;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 88 "../stray68K/src/assembler/lexical.l"
+#line 88 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_RTS;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 89 "../stray68K/src/assembler/lexical.l"
+#line 89 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_TRAPV;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 90 "../stray68K/src/assembler/lexical.l"
+#line 90 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_RTR;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 91 "../stray68K/src/assembler/lexical.l"
+#line 91 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_JSR;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 92 "../stray68K/src/assembler/lexical.l"
+#line 92 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_JMP;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 93 "../stray68K/src/assembler/lexical.l"
+#line 93 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MOVEM;
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 94 "../stray68K/src/assembler/lexical.l"
+#line 94 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_LEA;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 95 "../stray68K/src/assembler/lexical.l"
+#line 95 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_CHK;
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 96 "../stray68K/src/assembler/lexical.l"
+#line 96 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ADDQ;
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 97 "../stray68K/src/assembler/lexical.l"
+#line 97 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SUBQ;
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 98 "../stray68K/src/assembler/lexical.l"
+#line 98 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ST;
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 99 "../stray68K/src/assembler/lexical.l"
+#line 99 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SF;
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 100 "../stray68K/src/assembler/lexical.l"
+#line 100 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SHI;
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 101 "../stray68K/src/assembler/lexical.l"
+#line 101 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SLS;
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 102 "../stray68K/src/assembler/lexical.l"
+#line 102 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SCC;
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 103 "../stray68K/src/assembler/lexical.l"
+#line 103 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SCS;
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 104 "../stray68K/src/assembler/lexical.l"
+#line 104 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SNE;
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 105 "../stray68K/src/assembler/lexical.l"
+#line 105 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SEQ;
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 106 "../stray68K/src/assembler/lexical.l"
+#line 106 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SVC;
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 107 "../stray68K/src/assembler/lexical.l"
+#line 107 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SVS;
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 108 "../stray68K/src/assembler/lexical.l"
+#line 108 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SPL;
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 109 "../stray68K/src/assembler/lexical.l"
+#line 109 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SMI;
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 110 "../stray68K/src/assembler/lexical.l"
+#line 110 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SGE;
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 111 "../stray68K/src/assembler/lexical.l"
+#line 111 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SLT;
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 112 "../stray68K/src/assembler/lexical.l"
+#line 112 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SGT;
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 113 "../stray68K/src/assembler/lexical.l"
+#line 113 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SLE;
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 114 "../stray68K/src/assembler/lexical.l"
+#line 114 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SCC;
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 115 "../stray68K/src/assembler/lexical.l"
+#line 115 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SCS;
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 116 "../stray68K/src/assembler/lexical.l"
+#line 116 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBT;
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 117 "../stray68K/src/assembler/lexical.l"
+#line 117 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBF;
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 118 "../stray68K/src/assembler/lexical.l"
+#line 118 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBHI;
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 119 "../stray68K/src/assembler/lexical.l"
+#line 119 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBLS;
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 120 "../stray68K/src/assembler/lexical.l"
+#line 120 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBCC;
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 121 "../stray68K/src/assembler/lexical.l"
+#line 121 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBCS;
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 122 "../stray68K/src/assembler/lexical.l"
+#line 122 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBNE;
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 123 "../stray68K/src/assembler/lexical.l"
+#line 123 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBEQ;
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 124 "../stray68K/src/assembler/lexical.l"
+#line 124 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBVC;
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 125 "../stray68K/src/assembler/lexical.l"
+#line 125 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBVS;
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 126 "../stray68K/src/assembler/lexical.l"
+#line 126 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBPL;
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 127 "../stray68K/src/assembler/lexical.l"
+#line 127 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBMI;
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 128 "../stray68K/src/assembler/lexical.l"
+#line 128 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBGE;
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 129 "../stray68K/src/assembler/lexical.l"
+#line 129 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBLT;
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 130 "../stray68K/src/assembler/lexical.l"
+#line 130 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBGT;
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 131 "../stray68K/src/assembler/lexical.l"
+#line 131 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBLE;
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 132 "../stray68K/src/assembler/lexical.l"
+#line 132 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBCC;
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 133 "../stray68K/src/assembler/lexical.l"
+#line 133 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBCS;
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 134 "../stray68K/src/assembler/lexical.l"
+#line 134 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DBF;
 	YY_BREAK
 case 81:
 YY_RULE_SETUP
-#line 135 "../stray68K/src/assembler/lexical.l"
+#line 135 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BRA;
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 136 "../stray68K/src/assembler/lexical.l"
+#line 136 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BSR;
 	YY_BREAK
 case 83:
 YY_RULE_SETUP
-#line 137 "../stray68K/src/assembler/lexical.l"
+#line 137 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BHI;
 	YY_BREAK
 case 84:
 YY_RULE_SETUP
-#line 138 "../stray68K/src/assembler/lexical.l"
+#line 138 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BLS;
 	YY_BREAK
 case 85:
 YY_RULE_SETUP
-#line 139 "../stray68K/src/assembler/lexical.l"
+#line 139 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BCC;
 	YY_BREAK
 case 86:
 YY_RULE_SETUP
-#line 140 "../stray68K/src/assembler/lexical.l"
+#line 140 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BCS;
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 141 "../stray68K/src/assembler/lexical.l"
+#line 141 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BNE;
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 142 "../stray68K/src/assembler/lexical.l"
+#line 142 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BEQ;
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 143 "../stray68K/src/assembler/lexical.l"
+#line 143 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BVC;
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 144 "../stray68K/src/assembler/lexical.l"
+#line 144 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BVS;
 	YY_BREAK
 case 91:
 YY_RULE_SETUP
-#line 145 "../stray68K/src/assembler/lexical.l"
+#line 145 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BPL;
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 146 "../stray68K/src/assembler/lexical.l"
+#line 146 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BMI;
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 147 "../stray68K/src/assembler/lexical.l"
+#line 147 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BGE;
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 148 "../stray68K/src/assembler/lexical.l"
+#line 148 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BLT;
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 149 "../stray68K/src/assembler/lexical.l"
+#line 149 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BGT;
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
-#line 150 "../stray68K/src/assembler/lexical.l"
+#line 150 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BLE;
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 151 "../stray68K/src/assembler/lexical.l"
+#line 151 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BCC;
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 152 "../stray68K/src/assembler/lexical.l"
+#line 152 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_BCS;
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 153 "../stray68K/src/assembler/lexical.l"
+#line 153 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MOVEQ;
 	YY_BREAK
 case 100:
 YY_RULE_SETUP
-#line 154 "../stray68K/src/assembler/lexical.l"
+#line 154 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DIVU;
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 155 "../stray68K/src/assembler/lexical.l"
+#line 155 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DIVS;
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 156 "../stray68K/src/assembler/lexical.l"
+#line 156 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SBCD;
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 157 "../stray68K/src/assembler/lexical.l"
+#line 157 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_OR;
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 158 "../stray68K/src/assembler/lexical.l"
+#line 158 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SUB;
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 159 "../stray68K/src/assembler/lexical.l"
+#line 159 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SUBX;
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 160 "../stray68K/src/assembler/lexical.l"
+#line 160 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SUBA;
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 161 "../stray68K/src/assembler/lexical.l"
+#line 161 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_EOR;
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 162 "../stray68K/src/assembler/lexical.l"
+#line 162 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_CMPM;
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 163 "../stray68K/src/assembler/lexical.l"
+#line 163 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_CMP;
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 164 "../stray68K/src/assembler/lexical.l"
+#line 164 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_CMPA;
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 165 "../stray68K/src/assembler/lexical.l"
+#line 165 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MULU;
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 166 "../stray68K/src/assembler/lexical.l"
+#line 166 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MULS;
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 167 "../stray68K/src/assembler/lexical.l"
+#line 167 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ABCD;
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 168 "../stray68K/src/assembler/lexical.l"
+#line 168 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_EXG;
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 169 "../stray68K/src/assembler/lexical.l"
+#line 169 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_AND;
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 170 "../stray68K/src/assembler/lexical.l"
+#line 170 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ADD;
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 171 "../stray68K/src/assembler/lexical.l"
+#line 171 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ADDX;
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 172 "../stray68K/src/assembler/lexical.l"
+#line 172 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ADDA;
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 173 "../stray68K/src/assembler/lexical.l"
+#line 173 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ASL;
 	YY_BREAK
 case 120:
 YY_RULE_SETUP
-#line 174 "../stray68K/src/assembler/lexical.l"
+#line 174 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ASR;
 	YY_BREAK
 case 121:
 YY_RULE_SETUP
-#line 175 "../stray68K/src/assembler/lexical.l"
+#line 175 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_LSL;
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 176 "../stray68K/src/assembler/lexical.l"
+#line 176 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_LSR;
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 177 "../stray68K/src/assembler/lexical.l"
+#line 177 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ROXL;
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 178 "../stray68K/src/assembler/lexical.l"
+#line 178 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ROXR;
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 179 "../stray68K/src/assembler/lexical.l"
+#line 179 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ROL;
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 180 "../stray68K/src/assembler/lexical.l"
+#line 180 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ROR;
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 181 "../stray68K/src/assembler/lexical.l"
+#line 181 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ORG;
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 182 "../stray68K/src/assembler/lexical.l"
+#line 182 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DC;
 	YY_BREAK
 case 129:
 YY_RULE_SETUP
-#line 183 "../stray68K/src/assembler/lexical.l"
+#line 183 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DS;
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 184 "../stray68K/src/assembler/lexical.l"
+#line 184 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_DCB;
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 185 "../stray68K/src/assembler/lexical.l"
+#line 185 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_REPT;
 	YY_BREAK
 case 132:
 YY_RULE_SETUP
-#line 186 "../stray68K/src/assembler/lexical.l"
+#line 186 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ENDR;
 	YY_BREAK
 case 133:
 YY_RULE_SETUP
-#line 187 "../stray68K/src/assembler/lexical.l"
+#line 187 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MACRO;
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 188 "../stray68K/src/assembler/lexical.l"
+#line 188 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_MACROS;
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 189 "../stray68K/src/assembler/lexical.l"
+#line 189 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ENDM;
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 190 "../stray68K/src/assembler/lexical.l"
+#line 190 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(PATH); return TOKEN_DIRECTIVE_INCLUDE;
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 191 "../stray68K/src/assembler/lexical.l"
+#line 191 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(PATH); return TOKEN_DIRECTIVE_INCBIN;
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 192 "../stray68K/src/assembler/lexical.l"
+#line 192 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(PATH); return TOKEN_DIRECTIVE_INCBIN;
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 193 "../stray68K/src/assembler/lexical.l"
+#line 193 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_EQU;
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 194 "../stray68K/src/assembler/lexical.l"
+#line 194 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_SET;
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 195 "../stray68K/src/assembler/lexical.l"
+#line 195 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_IF;
 	YY_BREAK
 case 142:
 YY_RULE_SETUP
-#line 196 "../stray68K/src/assembler/lexical.l"
+#line 196 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ELSEIF;
 	YY_BREAK
 case 143:
 YY_RULE_SETUP
-#line 197 "../stray68K/src/assembler/lexical.l"
+#line 197 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ELSE;
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
-#line 198 "../stray68K/src/assembler/lexical.l"
+#line 198 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ENDC;
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 199 "../stray68K/src/assembler/lexical.l"
+#line 199 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ENDC;
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
-#line 200 "../stray68K/src/assembler/lexical.l"
+#line 200 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_WHILE;
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 201 "../stray68K/src/assembler/lexical.l"
+#line 201 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_ENDW;
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 202 "../stray68K/src/assembler/lexical.l"
+#line 202 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_EVEN;
 	YY_BREAK
 case 149:
 YY_RULE_SETUP
-#line 203 "../stray68K/src/assembler/lexical.l"
+#line 203 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_CNOP;
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
-#line 204 "../stray68K/src/assembler/lexical.l"
+#line 204 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_INFORM;
 	YY_BREAK
 case 151:
 YY_RULE_SETUP
-#line 205 "../stray68K/src/assembler/lexical.l"
+#line 205 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_END;
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-#line 206 "../stray68K/src/assembler/lexical.l"
+#line 206 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_RS;
 	YY_BREAK
 case 153:
 YY_RULE_SETUP
-#line 207 "../stray68K/src/assembler/lexical.l"
+#line 207 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_RSSET;
 	YY_BREAK
 case 154:
 YY_RULE_SETUP
-#line 208 "../stray68K/src/assembler/lexical.l"
+#line 208 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 BEGIN(OPERANDS); return TOKEN_DIRECTIVE_RSRESET;
 	YY_BREAK
 /* Sizes. */
 case 155:
 YY_RULE_SETUP
-#line 211 "../stray68K/src/assembler/lexical.l"
+#line 211 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_SIZE_BYTE;
 	YY_BREAK
 case 156:
 YY_RULE_SETUP
-#line 212 "../stray68K/src/assembler/lexical.l"
+#line 212 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_SIZE_SHORT;
 	YY_BREAK
 case 157:
 YY_RULE_SETUP
-#line 213 "../stray68K/src/assembler/lexical.l"
+#line 213 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_SIZE_WORD;
 	YY_BREAK
 case 158:
 YY_RULE_SETUP
-#line 214 "../stray68K/src/assembler/lexical.l"
+#line 214 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_SIZE_LONGWORD;
 	YY_BREAK
 /* Misc. symbols. */
 case 159:
 YY_RULE_SETUP
-#line 217 "../stray68K/src/assembler/lexical.l"
+#line 217 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
-#line 218 "../stray68K/src/assembler/lexical.l"
+#line 218 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 161:
 YY_RULE_SETUP
-#line 219 "../stray68K/src/assembler/lexical.l"
+#line 219 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
-#line 220 "../stray68K/src/assembler/lexical.l"
+#line 220 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 163:
 YY_RULE_SETUP
-#line 221 "../stray68K/src/assembler/lexical.l"
+#line 221 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 164:
 YY_RULE_SETUP
-#line 222 "../stray68K/src/assembler/lexical.l"
+#line 222 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 165:
 YY_RULE_SETUP
-#line 223 "../stray68K/src/assembler/lexical.l"
+#line 223 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 166:
 YY_RULE_SETUP
-#line 224 "../stray68K/src/assembler/lexical.l"
+#line 224 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 167:
 YY_RULE_SETUP
-#line 225 "../stray68K/src/assembler/lexical.l"
+#line 225 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 168:
 YY_RULE_SETUP
-#line 226 "../stray68K/src/assembler/lexical.l"
+#line 226 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 169:
 YY_RULE_SETUP
-#line 227 "../stray68K/src/assembler/lexical.l"
+#line 227 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 /* Operators. */
 case 170:
 YY_RULE_SETUP
-#line 230 "../stray68K/src/assembler/lexical.l"
+#line 230 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_LOGICAL_AND;
 	YY_BREAK
 case 171:
 YY_RULE_SETUP
-#line 231 "../stray68K/src/assembler/lexical.l"
+#line 231 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_LOGICAL_OR;
 	YY_BREAK
 case 172:
 YY_RULE_SETUP
-#line 232 "../stray68K/src/assembler/lexical.l"
+#line 232 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_EQUALITY;   /* An assembler extension, for programmers that are familiar with C. */
 	YY_BREAK
 case 173:
 YY_RULE_SETUP
-#line 233 "../stray68K/src/assembler/lexical.l"
+#line 233 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_INEQUALITY; /* An assembler extension, for programmers that are familiar with C. */
 	YY_BREAK
 case 174:
 YY_RULE_SETUP
-#line 234 "../stray68K/src/assembler/lexical.l"
+#line 234 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_INEQUALITY;
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
-#line 235 "../stray68K/src/assembler/lexical.l"
+#line 235 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_INEQUALITY;
 	YY_BREAK
 case 176:
 YY_RULE_SETUP
-#line 236 "../stray68K/src/assembler/lexical.l"
+#line 236 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_LESS_OR_EQUAL;
 	YY_BREAK
 case 177:
 YY_RULE_SETUP
-#line 237 "../stray68K/src/assembler/lexical.l"
+#line 237 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_MORE_OR_EQUAL;
 	YY_BREAK
 case 178:
 YY_RULE_SETUP
-#line 238 "../stray68K/src/assembler/lexical.l"
+#line 238 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_LEFT_SHIFT;
 	YY_BREAK
 case 179:
 YY_RULE_SETUP
-#line 239 "../stray68K/src/assembler/lexical.l"
+#line 239 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_RIGHT_SHIFT;
 	YY_BREAK
 /* Operands. */
 case 180:
 YY_RULE_SETUP
-#line 242 "../stray68K/src/assembler/lexical.l"
+#line 242 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_STATUS_REGISTER;
 	YY_BREAK
 case 181:
 YY_RULE_SETUP
-#line 243 "../stray68K/src/assembler/lexical.l"
+#line 243 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_CONDITION_CODE_REGISTER;
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 244 "../stray68K/src/assembler/lexical.l"
+#line 244 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 yylval->unsigned_long = 7; return TOKEN_ADDRESS_REGISTER;
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 245 "../stray68K/src/assembler/lexical.l"
+#line 245 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_USER_STACK_POINTER_REGISTER;
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 246 "../stray68K/src/assembler/lexical.l"
+#line 246 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_PROGRAM_COUNTER;
 	YY_BREAK
 /* Functions. */
 case 185:
 YY_RULE_SETUP
-#line 249 "../stray68K/src/assembler/lexical.l"
+#line 249 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return TOKEN_STRLEN;
 	YY_BREAK
 /* Data register. */
 case 186:
 YY_RULE_SETUP
-#line 252 "../stray68K/src/assembler/lexical.l"
+#line 252 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext + 1, &string_end, 10);
@@ -2420,7 +2420,7 @@ YY_RULE_SETUP
 /* Address register. */
 case 187:
 YY_RULE_SETUP
-#line 272 "../stray68K/src/assembler/lexical.l"
+#line 272 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext + 1, &string_end, 10);
@@ -2443,7 +2443,7 @@ YY_RULE_SETUP
 /* Decimal number. */
 case 188:
 YY_RULE_SETUP
-#line 292 "../stray68K/src/assembler/lexical.l"
+#line 292 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext, &string_end, 10);
@@ -2460,7 +2460,7 @@ YY_RULE_SETUP
 /* Hexadecimal number (68k). */
 case 189:
 YY_RULE_SETUP
-#line 306 "../stray68K/src/assembler/lexical.l"
+#line 306 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext + 1, &string_end, 16);
@@ -2477,7 +2477,7 @@ YY_RULE_SETUP
 /* Binary number (68k). */
 case 190:
 YY_RULE_SETUP
-#line 320 "../stray68K/src/assembler/lexical.l"
+#line 320 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext + 1, &string_end, 2);
@@ -2494,7 +2494,7 @@ YY_RULE_SETUP
 /* Hexadecimal number (Z80). */
 case 191:
 YY_RULE_SETUP
-#line 334 "../stray68K/src/assembler/lexical.l"
+#line 334 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext, &string_end, 16);
@@ -2511,7 +2511,7 @@ YY_RULE_SETUP
 /* Binary number (Z80). */
 case 192:
 YY_RULE_SETUP
-#line 348 "../stray68K/src/assembler/lexical.l"
+#line 348 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext, &string_end, 2);
@@ -2528,7 +2528,7 @@ YY_RULE_SETUP
 /* Hexadecimal number (C). */
 case 193:
 YY_RULE_SETUP
-#line 362 "../stray68K/src/assembler/lexical.l"
+#line 362 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext + 2, &string_end, 16);
@@ -2545,7 +2545,7 @@ YY_RULE_SETUP
 /* Binary number (GNU C). */
 case 194:
 YY_RULE_SETUP
-#line 376 "../stray68K/src/assembler/lexical.l"
+#line 376 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	char *string_end;
 	yylval->unsigned_long = strtoul(yytext + 2, &string_end, 2);
@@ -2562,11 +2562,11 @@ YY_RULE_SETUP
 /* String. */
 case 195:
 /* rule 195 can match eol */
-#line 391 "../stray68K/src/assembler/lexical.l"
+#line 391 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 case 196:
 /* rule 196 can match eol */
 YY_RULE_SETUP
-#line 391 "../stray68K/src/assembler/lexical.l"
+#line 391 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	const size_t length = strlen(yytext) - 2;
 	yylval->string = malloc(length + 1);
@@ -2587,7 +2587,7 @@ YY_RULE_SETUP
 case 197:
 /* rule 197 can match eol */
 YY_RULE_SETUP
-#line 408 "../stray68K/src/assembler/lexical.l"
+#line 408 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	const size_t length = strlen(yytext);
 
@@ -2610,7 +2610,7 @@ YY_RULE_SETUP
 /* Identifier. */
 case 198:
 YY_RULE_SETUP
-#line 428 "../stray68K/src/assembler/lexical.l"
+#line 428 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	const size_t length = strlen(yytext);
 	yylval->string = malloc(length + 1);
@@ -2629,7 +2629,7 @@ YY_RULE_SETUP
 /* Local label. */
 case 199:
 YY_RULE_SETUP
-#line 444 "../stray68K/src/assembler/lexical.l"
+#line 444 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 {
 	const size_t length = strlen(yytext);
 	yylval->string = malloc(length + 1);
@@ -2648,15 +2648,15 @@ YY_RULE_SETUP
 /* Make Bison signal a syntax error for unrecognised symbols */
 case 200:
 YY_RULE_SETUP
-#line 460 "../stray68K/src/assembler/lexical.l"
+#line 460 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 return yytext[0];
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
-#line 462 "../stray68K/src/assembler/lexical.l"
+#line 462 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 ECHO;
 	YY_BREAK
-#line 2660 "../stray68K/src/assembler/lexical.c"
+#line 2660 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -3798,6 +3798,6 @@ void yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 462 "../stray68K/src/assembler/lexical.l"
+#line 462 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 
 

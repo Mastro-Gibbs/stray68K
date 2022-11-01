@@ -4,7 +4,7 @@
 #include "motorolatypes.h"
 
 
-char* Jcpu();
+char* Jcpu(void);
 
 char* Jram(u32 from, u32 to, u32 sh);
 

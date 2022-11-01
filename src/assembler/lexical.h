@@ -2,9 +2,9 @@
 #define m68kasm_HEADER_H 1
 #define m68kasm_IN_HEADER 1
 
-#line 6 "../stray68K/src/assembler/lexical.h"
+#line 6 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.h"
 
-#line 8 "../stray68K/src/assembler/lexical.h"
+#line 8 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -714,9 +714,9 @@ extern int yylex \
 #undef yyTABLES_NAME
 #endif
 
-#line 462 "../stray68K/src/assembler/lexical.l"
+#line 462 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.l"
 
 
-#line 721 "../stray68K/src/assembler/lexical.h"
+#line 721 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/lexical.h"
 #undef m68kasm_IN_HEADER
 #endif /* m68kasm_HEADER_H */

@@ -523,8 +523,8 @@ u32 read_ram(u32 *addr, opsize *size);
 
 /* MISC */
 sspan size_to_span(opsize size);
-bit is_ram_op(ADDRMode *mode);
-bit is_addr_to_data_op(ADDRMode *mode);
+bit   is_ram_op(ADDRMode *mode);
+bit   is_addr_to_data_op(ADDRMode *mode);
 
 
 /* TRAP */

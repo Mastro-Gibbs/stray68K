@@ -9,7 +9,7 @@
 #include "ram.h"
 
 
-char* Jcpu()
+char* Jcpu(void)
 {
     m68k_cpu *cpu = get_cpu();
 

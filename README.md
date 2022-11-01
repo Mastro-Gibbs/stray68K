@@ -53,8 +53,10 @@ This emulator tries to be as faithful as possible to the Motorola 68000 processo
       * %[**b**-**w**-**l**][**a**-**d**-**x**][**0**-**1**-**2**-**3**-**4**-**5**-**6**-**7**]  
         **B-W-L** | **b-w-l** symbolize the value size to be printed, BYTE, WORD, LONG. **Mandatory**.  
         **A-D-X** | **a-d-x** symbolize registers, A-a for base 16 address registers, D-d for base 10 data registers, X-x for base 16 data registers. Omitting these formatters will print the signed value in the **Dx** data register. **Not mandatory**.  
-        **Numbers 0 to 7** represent the register index. **Mandatory**.  
+        **Numbers 0 to 7** represent the register target index. **Mandatory**.  
         For some clarification see 'examples/IO/io.X68' file.  
+      * %[**T**|**t**][**0**-**1**-**2**-**3**-**4**-**5**-**6**-**7**]  
+        **T** | **t** symbolize time scanning, **Mandatory**. **0** to **7** represent the register target index, **Mandatory**. This placeholder will only be evaluated in TRAP #14 (scan) mode.  
   
       By concatenating these symbols it is possible to have all the **I/O combinations** on the registers.
 

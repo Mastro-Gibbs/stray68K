@@ -161,54 +161,20 @@ static void AssembleLine(SemanticState *state, const char *source_line);
 
 int can_write_simhalt = 1;
 
-static char hexToChar(unsigned char c)
-{
-	switch (c)
-	{
-	case 0x0F:
-		return 'F';
-	case 0x0E:
-		return 'E';
-	case 0x0D:
-		return 'D';
-	case 0x0C:
-		return 'C';
-	case 0x0B:
-		return 'B';
-	case 0x0A:
-		return 'A';
-	case 0x09:
-		return '9';
-	case 0x08:
-		return '8';
-	case 0x07:
-		return '7';
-	case 0x06:
-		return '6';
-	case 0x05:
-		return '5';
-	case 0x04:
-		return '4';
-	case 0x03:
-		return '3';
-	case 0x02:
-		return '2';
-	case 0x01:
-		return '1';
-	case 0x00:
-		return '0';
-	default:
-		return '0';
-	}
-} 
-
 
 void write_simhalt(SemanticState *state)
 {
+    int i;
     if (can_write_simhalt)
     {
-        fprintf(state->output_file, "%c", '!');
-        fprintf(state->output_file, "%c", '\n');
+        for(i = 0; i < 2; i++)
+            fputc(0xAC, state->output_file);
+
+        for(i = 0; i < 4; i++)
+            fputc(0xFF, state->output_file);
+
+        for(i = 0; i < 2; i++)
+            fputc(0xAC, state->output_file);
 
         can_write_simhalt = 0;
     }
@@ -3710,16 +3676,10 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 	/* Output the machine code for the opcode. */
 
-
-	/*
-		MASTROGIBBS, binary search sucks compared to me, i'm O(1)
-
-	*/
-
-	fprintf(state->output_file, "%c", hexToChar((machine_code & 0x0000F000) >> 12));
-	fprintf(state->output_file, "%c", hexToChar((machine_code & 0x00000F00) >> 8));
-	fprintf(state->output_file, "%c", hexToChar((machine_code & 0x000000F0) >> 4));
-	fprintf(state->output_file, "%c", hexToChar(machine_code & 0x0000000F));
+    for (i = 2; i-- > 0;)
+    {
+        fputc((machine_code >> (8 * i)) & 0xFF, state->output_file);
+    }
 
 	/* Output the data for the operands. */
 	for (i = 0; i < CC_COUNT_OF(operands_to_output); ++i)
@@ -3868,11 +3828,8 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 					state->program_counter += bytes_to_write;
 
-					while (bytes_to_write-- > 0)
-					{
-						fprintf(state->output_file, "%c", hexToChar(value >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
-						fprintf(state->output_file, "%c", hexToChar(value >> (8 * bytes_to_write) & 0x000000000000000F));
-					}
+                    while (bytes_to_write-- > 0)
+                        fputc((value >> (8 * bytes_to_write)) & 0xFF, state->output_file);
 
 					break;
 				}
@@ -3883,19 +3840,14 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 					state->program_counter += 2;
 
-					for (bytes_to_write = 2; bytes_to_write-- > 0; )
-					{
-						fprintf(state->output_file, "%c", hexToChar(operand->main_register >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
-						fprintf(state->output_file, "%c", hexToChar(operand->main_register >> (8 * bytes_to_write) & 0x000000000000000F));
-					}
+                    for (bytes_to_write = 2; bytes_to_write-- > 0; )
+                        fputc((operand->main_register >> (8 * bytes_to_write)) & 0xFF, state->output_file);
 					
 					break;
 				}
 			}
 		}
 	}
-
-	fprintf(state->output_file, "%c", '\n');
 }
 
 static void OutputDcValue(SemanticState *state, const Size size, unsigned long value)
@@ -3933,13 +3885,8 @@ static void OutputDcValue(SemanticState *state, const Size size, unsigned long v
 
 	state->program_counter += bytes_to_write;
 
-	while (bytes_to_write-- > 0)
-	{
-		fprintf(state->output_file, "%c", hexToChar(value >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
-		fprintf(state->output_file, "%c", hexToChar(value >> (8 * bytes_to_write) & 0x000000000000000F));
-	}
-
-	fprintf(state->output_file, "%c", '\n');
+    while (bytes_to_write-- != 0)
+        fputc((value >> (bytes_to_write * 8)) & 0xFF, state->output_file);
 }
 
 
@@ -3964,16 +3911,11 @@ static void ProcessOrg(SemanticState *state, StatementOrg *org)
 
             orgv = (unsigned int) (org->value.shared.unsigned_long & 0x00000000FFFFFFFF);
 
-            fprintf(state->output_file, "%c", 'o');
+            fputc('o', state->output_file);
 
             bytes_to_write = 4;
-            while (bytes_to_write-- > 0)
-            {
-                fprintf(state->output_file, "%c", hexToChar(orgv >> ((8 * bytes_to_write) + 4) & 0x000000000000000F));
-                fprintf(state->output_file, "%c", hexToChar(orgv >> (8 * bytes_to_write) & 0x000000000000000F));
-            }
-
-            fprintf(state->output_file, "%c", '\n');
+            while (bytes_to_write-- != 0)
+                fputc((orgv >> (bytes_to_write * 8)) & 0xFF, state->output_file);
         }
     }
 }

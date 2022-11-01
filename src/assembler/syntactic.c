@@ -314,7 +314,7 @@ typedef enum yysymbol_kind_t yysymbol_kind_t;
 
 
 /* Unqualified %code blocks.  */
-#line 410 "../stray68K/src/assembler/syntactic.y"
+#line 410 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
 
 
 #include <stddef.h>
@@ -332,7 +332,7 @@ static void DestroyOperand(Operand *operand);
 static void DestroyStatementInstruction(StatementInstruction *instruction);
 
 
-#line 336 "../stray68K/src/assembler/syntactic.c"
+#line 336 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
 
 #ifdef short
 # undef short
@@ -1609,93 +1609,93 @@ yydestruct (const char *yymsg,
   switch (yykind)
     {
     case YYSYMBOL_TOKEN_IDENTIFIER: /* TOKEN_IDENTIFIER  */
-#line 619 "../stray68K/src/assembler/syntactic.y"
+#line 619 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { free(((*yyvaluep).string)); }
-#line 1615 "../stray68K/src/assembler/syntactic.c"
+#line 1615 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_TOKEN_LOCAL_IDENTIFIER: /* TOKEN_LOCAL_IDENTIFIER  */
-#line 619 "../stray68K/src/assembler/syntactic.y"
+#line 619 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { free(((*yyvaluep).string)); }
-#line 1621 "../stray68K/src/assembler/syntactic.c"
+#line 1621 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_TOKEN_STRING: /* TOKEN_STRING  */
-#line 619 "../stray68K/src/assembler/syntactic.y"
+#line 619 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { free(((*yyvaluep).string)); }
-#line 1627 "../stray68K/src/assembler/syntactic.c"
+#line 1627 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression_list: /* expression_list  */
-#line 621 "../stray68K/src/assembler/syntactic.y"
+#line 621 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpressionList(((*yyvaluep).list_metadata).head); }
-#line 1633 "../stray68K/src/assembler/syntactic.c"
+#line 1633 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_identifier_list: /* identifier_list  */
-#line 622 "../stray68K/src/assembler/syntactic.y"
+#line 622 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyIdentifierList(((*yyvaluep).list_metadata).head); }
-#line 1639 "../stray68K/src/assembler/syntactic.c"
+#line 1639 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_operand: /* operand  */
-#line 620 "../stray68K/src/assembler/syntactic.y"
+#line 620 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyOperand(&((*yyvaluep).operand)); }
-#line 1645 "../stray68K/src/assembler/syntactic.c"
+#line 1645 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression: /* expression  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1651 "../stray68K/src/assembler/syntactic.c"
+#line 1651 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression1: /* expression1  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1657 "../stray68K/src/assembler/syntactic.c"
+#line 1657 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression2: /* expression2  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1663 "../stray68K/src/assembler/syntactic.c"
+#line 1663 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression3: /* expression3  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1669 "../stray68K/src/assembler/syntactic.c"
+#line 1669 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression4: /* expression4  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1675 "../stray68K/src/assembler/syntactic.c"
+#line 1675 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression5: /* expression5  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1681 "../stray68K/src/assembler/syntactic.c"
+#line 1681 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression6: /* expression6  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1687 "../stray68K/src/assembler/syntactic.c"
+#line 1687 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression7: /* expression7  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1693 "../stray68K/src/assembler/syntactic.c"
+#line 1693 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
     case YYSYMBOL_expression8: /* expression8  */
-#line 623 "../stray68K/src/assembler/syntactic.y"
+#line 623 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
             { DestroyExpression(&((*yyvaluep).expression)); }
-#line 1699 "../stray68K/src/assembler/syntactic.c"
+#line 1699 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
         break;
 
       default:
@@ -1972,73 +1972,73 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* statement: %empty  */
-#line 631 "../stray68K/src/assembler/syntactic.y"
+#line 631 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_EMPTY;
 	}
-#line 1980 "../stray68K/src/assembler/syntactic.c"
+#line 1980 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 3: /* statement: instruction  */
-#line 635 "../stray68K/src/assembler/syntactic.y"
+#line 635 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_INSTRUCTION;
 		statement->shared.instruction = (yyvsp[0].instruction);
 	}
-#line 1989 "../stray68K/src/assembler/syntactic.c"
+#line 1989 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 4: /* statement: TOKEN_DIRECTIVE_ORG expression  */
-#line 640 "../stray68K/src/assembler/syntactic.y"
+#line 640 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ORG;
 		statement->shared.org.value = (yyvsp[0].expression);
 	}
-#line 1998 "../stray68K/src/assembler/syntactic.c"
+#line 1998 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 5: /* statement: TOKEN_DIRECTIVE_DC size expression_list  */
-#line 645 "../stray68K/src/assembler/syntactic.y"
+#line 645 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_DC;
 		statement->shared.dc.size = (yyvsp[-1].size);
 		statement->shared.dc.values = (yyvsp[0].list_metadata).head;
 	}
-#line 2008 "../stray68K/src/assembler/syntactic.c"
+#line 2008 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 6: /* statement: TOKEN_DIRECTIVE_DS size expression  */
-#line 651 "../stray68K/src/assembler/syntactic.y"
+#line 651 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
     {
         statement->type = STATEMENT_TYPE_DS;
         statement->shared.ds.size = (yyvsp[-1].size);
         statement->shared.ds.value = (yyvsp[0].expression);
     }
-#line 2018 "../stray68K/src/assembler/syntactic.c"
+#line 2018 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 7: /* statement: TOKEN_DIRECTIVE_DCB size expression ',' expression  */
-#line 657 "../stray68K/src/assembler/syntactic.y"
+#line 657 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_DCB;
 		statement->shared.dcb.size = (yyvsp[-3].size);
 		statement->shared.dcb.repetitions = (yyvsp[-2].expression);
 		statement->shared.dcb.value = (yyvsp[0].expression);
 	}
-#line 2029 "../stray68K/src/assembler/syntactic.c"
+#line 2029 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 8: /* statement: TOKEN_DIRECTIVE_INCLUDE TOKEN_STRING  */
-#line 664 "../stray68K/src/assembler/syntactic.y"
+#line 664 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_INCLUDE;
 		statement->shared.include.path = (yyvsp[0].string);
 	}
-#line 2038 "../stray68K/src/assembler/syntactic.c"
+#line 2038 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 9: /* statement: TOKEN_DIRECTIVE_INCBIN TOKEN_STRING  */
-#line 669 "../stray68K/src/assembler/syntactic.y"
+#line 669 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_INCBIN;
 		statement->shared.incbin.path = (yyvsp[0].string);
@@ -2046,22 +2046,22 @@ yyreduce:
 		statement->shared.incbin.start.shared.unsigned_long = 0;
 		statement->shared.incbin.has_length = cc_false;
 	}
-#line 2050 "../stray68K/src/assembler/syntactic.c"
+#line 2050 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 10: /* statement: TOKEN_DIRECTIVE_INCBIN TOKEN_STRING ',' expression  */
-#line 677 "../stray68K/src/assembler/syntactic.y"
+#line 677 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_INCBIN;
 		statement->shared.incbin.path = (yyvsp[-2].string);
 		statement->shared.incbin.start = (yyvsp[0].expression);
 		statement->shared.incbin.has_length = cc_false;
 	}
-#line 2061 "../stray68K/src/assembler/syntactic.c"
+#line 2061 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 11: /* statement: TOKEN_DIRECTIVE_INCBIN TOKEN_STRING ',' expression ',' expression  */
-#line 684 "../stray68K/src/assembler/syntactic.y"
+#line 684 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_INCBIN;
 		statement->shared.incbin.path = (yyvsp[-4].string);
@@ -2069,176 +2069,176 @@ yyreduce:
 		statement->shared.incbin.has_length = cc_true;
 		statement->shared.incbin.length = (yyvsp[0].expression);
 	}
-#line 2073 "../stray68K/src/assembler/syntactic.c"
+#line 2073 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 12: /* statement: TOKEN_DIRECTIVE_REPT expression  */
-#line 692 "../stray68K/src/assembler/syntactic.y"
+#line 692 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_REPT;
 		statement->shared.rept.repetitions = (yyvsp[0].expression);
 	}
-#line 2082 "../stray68K/src/assembler/syntactic.c"
+#line 2082 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 13: /* statement: TOKEN_DIRECTIVE_ENDR  */
-#line 697 "../stray68K/src/assembler/syntactic.y"
+#line 697 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ENDR;
 	}
-#line 2090 "../stray68K/src/assembler/syntactic.c"
+#line 2090 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 14: /* statement: TOKEN_DIRECTIVE_MACRO  */
-#line 701 "../stray68K/src/assembler/syntactic.y"
+#line 701 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_MACRO;
 		statement->shared.macro.parameter_names = NULL;
 	}
-#line 2099 "../stray68K/src/assembler/syntactic.c"
+#line 2099 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 15: /* statement: TOKEN_DIRECTIVE_MACRO identifier_list  */
-#line 706 "../stray68K/src/assembler/syntactic.y"
+#line 706 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_MACRO;
 		statement->shared.macro.parameter_names = (yyvsp[0].list_metadata).head;
 	}
-#line 2108 "../stray68K/src/assembler/syntactic.c"
+#line 2108 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 16: /* statement: TOKEN_DIRECTIVE_MACROS  */
-#line 711 "../stray68K/src/assembler/syntactic.y"
+#line 711 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_MACROS;
 		statement->shared.macro.parameter_names = NULL;
 	}
-#line 2117 "../stray68K/src/assembler/syntactic.c"
+#line 2117 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 17: /* statement: TOKEN_DIRECTIVE_MACROS identifier_list  */
-#line 716 "../stray68K/src/assembler/syntactic.y"
+#line 716 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_MACROS;
 		statement->shared.macro.parameter_names = (yyvsp[0].list_metadata).head;
 	}
-#line 2126 "../stray68K/src/assembler/syntactic.c"
+#line 2126 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 18: /* statement: TOKEN_DIRECTIVE_ENDM  */
-#line 721 "../stray68K/src/assembler/syntactic.y"
+#line 721 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ENDM;
 	}
-#line 2134 "../stray68K/src/assembler/syntactic.c"
+#line 2134 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 19: /* statement: TOKEN_DIRECTIVE_EQU expression  */
-#line 725 "../stray68K/src/assembler/syntactic.y"
+#line 725 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_EQU;
 		statement->shared.expression = (yyvsp[0].expression);
 	}
-#line 2143 "../stray68K/src/assembler/syntactic.c"
+#line 2143 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 20: /* statement: TOKEN_DIRECTIVE_SET expression  */
-#line 730 "../stray68K/src/assembler/syntactic.y"
+#line 730 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_SET;
 		statement->shared.expression = (yyvsp[0].expression);
 	}
-#line 2152 "../stray68K/src/assembler/syntactic.c"
+#line 2152 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 21: /* statement: '=' expression  */
-#line 735 "../stray68K/src/assembler/syntactic.y"
+#line 735 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_SET;
 		statement->shared.expression = (yyvsp[0].expression);
 	}
-#line 2161 "../stray68K/src/assembler/syntactic.c"
+#line 2161 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 22: /* statement: TOKEN_DIRECTIVE_IF expression  */
-#line 740 "../stray68K/src/assembler/syntactic.y"
+#line 740 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_IF;
 		statement->shared.expression = (yyvsp[0].expression);
 	}
-#line 2170 "../stray68K/src/assembler/syntactic.c"
+#line 2170 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 23: /* statement: TOKEN_DIRECTIVE_ELSEIF expression  */
-#line 745 "../stray68K/src/assembler/syntactic.y"
+#line 745 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ELSEIF;
 		statement->shared.expression = (yyvsp[0].expression);
 	}
-#line 2179 "../stray68K/src/assembler/syntactic.c"
+#line 2179 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 24: /* statement: TOKEN_DIRECTIVE_ELSEIF  */
-#line 750 "../stray68K/src/assembler/syntactic.y"
+#line 750 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ELSE;
 	}
-#line 2187 "../stray68K/src/assembler/syntactic.c"
+#line 2187 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 25: /* statement: TOKEN_DIRECTIVE_ELSE  */
-#line 754 "../stray68K/src/assembler/syntactic.y"
+#line 754 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ELSE;
 	}
-#line 2195 "../stray68K/src/assembler/syntactic.c"
+#line 2195 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 26: /* statement: TOKEN_DIRECTIVE_ENDC  */
-#line 758 "../stray68K/src/assembler/syntactic.y"
+#line 758 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ENDC;
 	}
-#line 2203 "../stray68K/src/assembler/syntactic.c"
+#line 2203 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 27: /* statement: TOKEN_DIRECTIVE_WHILE expression  */
-#line 762 "../stray68K/src/assembler/syntactic.y"
+#line 762 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_WHILE;
 		statement->shared.expression = (yyvsp[0].expression);
 	}
-#line 2212 "../stray68K/src/assembler/syntactic.c"
+#line 2212 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 28: /* statement: TOKEN_DIRECTIVE_ENDW  */
-#line 767 "../stray68K/src/assembler/syntactic.y"
+#line 767 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_ENDW;
 	}
-#line 2220 "../stray68K/src/assembler/syntactic.c"
+#line 2220 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 29: /* statement: TOKEN_DIRECTIVE_EVEN  */
-#line 771 "../stray68K/src/assembler/syntactic.y"
+#line 771 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_EVEN;
 	}
-#line 2228 "../stray68K/src/assembler/syntactic.c"
+#line 2228 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 30: /* statement: TOKEN_DIRECTIVE_CNOP expression ',' expression  */
-#line 775 "../stray68K/src/assembler/syntactic.y"
+#line 775 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_CNOP;
 		statement->shared.cnop.offset = (yyvsp[-2].expression);
 		statement->shared.cnop.size_boundary = (yyvsp[0].expression);
 	}
-#line 2238 "../stray68K/src/assembler/syntactic.c"
+#line 2238 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 31: /* statement: TOKEN_DIRECTIVE_INFORM expression ',' TOKEN_STRING  */
-#line 781 "../stray68K/src/assembler/syntactic.y"
+#line 781 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(void)(yyvsp[-2].expression);
 
@@ -2246,11 +2246,11 @@ yyreduce:
 		statement->type = STATEMENT_TYPE_INFORM;
 		statement->shared.inform.message = (yyvsp[0].string);
 	}
-#line 2250 "../stray68K/src/assembler/syntactic.c"
+#line 2250 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 32: /* statement: TOKEN_DIRECTIVE_INFORM expression ',' TOKEN_STRING ',' expression_list  */
-#line 789 "../stray68K/src/assembler/syntactic.y"
+#line 789 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(void)(yyvsp[-4].expression);
 		(void)(yyvsp[0].list_metadata);
@@ -2259,46 +2259,46 @@ yyreduce:
 		statement->type = STATEMENT_TYPE_INFORM;
 		statement->shared.inform.message = (yyvsp[-2].string);
 	}
-#line 2263 "../stray68K/src/assembler/syntactic.c"
+#line 2263 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 33: /* statement: TOKEN_DIRECTIVE_END  */
-#line 798 "../stray68K/src/assembler/syntactic.y"
+#line 798 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_END;
 	}
-#line 2271 "../stray68K/src/assembler/syntactic.c"
+#line 2271 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 34: /* statement: TOKEN_DIRECTIVE_RS size expression  */
-#line 802 "../stray68K/src/assembler/syntactic.y"
+#line 802 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_RS;
 		statement->shared.rs.size = (yyvsp[-1].size);
 		statement->shared.rs.length = (yyvsp[0].expression);
 	}
-#line 2281 "../stray68K/src/assembler/syntactic.c"
+#line 2281 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 35: /* statement: TOKEN_DIRECTIVE_RSSET expression  */
-#line 808 "../stray68K/src/assembler/syntactic.y"
+#line 808 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_RSSET;
 		statement->shared.expression = (yyvsp[0].expression);
 	}
-#line 2290 "../stray68K/src/assembler/syntactic.c"
+#line 2290 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 36: /* statement: TOKEN_DIRECTIVE_RSRESET  */
-#line 813 "../stray68K/src/assembler/syntactic.y"
+#line 813 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		statement->type = STATEMENT_TYPE_RSRESET;
 	}
-#line 2298 "../stray68K/src/assembler/syntactic.c"
+#line 2298 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 37: /* expression_list: expression  */
-#line 820 "../stray68K/src/assembler/syntactic.y"
+#line 820 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		ExpressionListNode *node = malloc(sizeof(ExpressionListNode));
 
@@ -2315,11 +2315,11 @@ yyreduce:
 
 		(yyval.list_metadata).head = (yyval.list_metadata).tail = node;
 	}
-#line 2319 "../stray68K/src/assembler/syntactic.c"
+#line 2319 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 38: /* expression_list: expression_list ',' expression  */
-#line 837 "../stray68K/src/assembler/syntactic.y"
+#line 837 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		ExpressionListNode *node = malloc(sizeof(ExpressionListNode));
 
@@ -2344,11 +2344,11 @@ yyreduce:
 			(yyval.list_metadata).tail = node;
 		}
 	}
-#line 2348 "../stray68K/src/assembler/syntactic.c"
+#line 2348 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 39: /* identifier_list: TOKEN_IDENTIFIER  */
-#line 865 "../stray68K/src/assembler/syntactic.y"
+#line 865 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		IdentifierListNode *node = malloc(sizeof(IdentifierListNode));
 
@@ -2365,11 +2365,11 @@ yyreduce:
 
 		(yyval.list_metadata).head = (yyval.list_metadata).tail = node;
 	}
-#line 2369 "../stray68K/src/assembler/syntactic.c"
+#line 2369 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 40: /* identifier_list: identifier_list ',' TOKEN_IDENTIFIER  */
-#line 882 "../stray68K/src/assembler/syntactic.y"
+#line 882 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		IdentifierListNode *node = malloc(sizeof(IdentifierListNode));
 
@@ -2394,1120 +2394,1120 @@ yyreduce:
 			(yyval.list_metadata).tail = node;
 		}
 	}
-#line 2398 "../stray68K/src/assembler/syntactic.c"
+#line 2398 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 41: /* instruction: full_opcode  */
-#line 910 "../stray68K/src/assembler/syntactic.y"
+#line 910 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.instruction).opcode = (yyvsp[0].opcode);
 		(yyval.instruction).operands[0].type = 0;
 		(yyval.instruction).operands[1].type = 0;
 	}
-#line 2408 "../stray68K/src/assembler/syntactic.c"
+#line 2408 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 42: /* instruction: full_opcode operand  */
-#line 916 "../stray68K/src/assembler/syntactic.y"
+#line 916 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.instruction).opcode = (yyvsp[-1].opcode);
 		(yyval.instruction).operands[0] = (yyvsp[0].operand);
 		(yyval.instruction).operands[1].type = 0;
 	}
-#line 2418 "../stray68K/src/assembler/syntactic.c"
+#line 2418 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 43: /* instruction: full_opcode operand ',' operand  */
-#line 922 "../stray68K/src/assembler/syntactic.y"
+#line 922 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.instruction).opcode = (yyvsp[-3].opcode);
 		(yyval.instruction).operands[0] = (yyvsp[-2].operand);
 		(yyval.instruction).operands[1] = (yyvsp[0].operand);
 	}
-#line 2428 "../stray68K/src/assembler/syntactic.c"
+#line 2428 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 44: /* full_opcode: opcode  */
-#line 931 "../stray68K/src/assembler/syntactic.y"
+#line 931 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode) = (yyvsp[0].opcode);
 		(yyval.opcode).size = SIZE_UNDEFINED;
 	}
-#line 2437 "../stray68K/src/assembler/syntactic.c"
+#line 2437 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 45: /* full_opcode: opcode '.'  */
-#line 936 "../stray68K/src/assembler/syntactic.y"
+#line 936 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode) = (yyvsp[-1].opcode);
 		(yyval.opcode).size = SIZE_UNDEFINED;
 		m68kasm_warning(scanner, statement, "Opcode has a dot but no size; either remove the dot or add an explicit size.");
 	}
-#line 2447 "../stray68K/src/assembler/syntactic.c"
+#line 2447 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 46: /* full_opcode: opcode size  */
-#line 942 "../stray68K/src/assembler/syntactic.y"
+#line 942 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode) = (yyvsp[-1].opcode);
 		(yyval.opcode).size = (yyvsp[0].size);
 	}
-#line 2456 "../stray68K/src/assembler/syntactic.c"
+#line 2456 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 47: /* opcode: TOKEN_DIRECTIVE_ORI  */
-#line 950 "../stray68K/src/assembler/syntactic.y"
+#line 950 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ORI;
 	}
-#line 2464 "../stray68K/src/assembler/syntactic.c"
+#line 2464 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 48: /* opcode: TOKEN_DIRECTIVE_ANDI  */
-#line 954 "../stray68K/src/assembler/syntactic.y"
+#line 954 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ANDI;
 	}
-#line 2472 "../stray68K/src/assembler/syntactic.c"
+#line 2472 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 49: /* opcode: TOKEN_DIRECTIVE_SUBI  */
-#line 958 "../stray68K/src/assembler/syntactic.y"
+#line 958 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_SUBI;
 	}
-#line 2480 "../stray68K/src/assembler/syntactic.c"
+#line 2480 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 50: /* opcode: TOKEN_DIRECTIVE_ADDI  */
-#line 962 "../stray68K/src/assembler/syntactic.y"
+#line 962 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ADDI;
 	}
-#line 2488 "../stray68K/src/assembler/syntactic.c"
+#line 2488 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 51: /* opcode: TOKEN_DIRECTIVE_EORI  */
-#line 966 "../stray68K/src/assembler/syntactic.y"
+#line 966 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_EORI;
 	}
-#line 2496 "../stray68K/src/assembler/syntactic.c"
+#line 2496 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 52: /* opcode: TOKEN_DIRECTIVE_CMPI  */
-#line 970 "../stray68K/src/assembler/syntactic.y"
+#line 970 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_CMPI;
 	}
-#line 2504 "../stray68K/src/assembler/syntactic.c"
+#line 2504 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 53: /* opcode: TOKEN_DIRECTIVE_BTST  */
-#line 974 "../stray68K/src/assembler/syntactic.y"
+#line 974 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_BTST_STATIC;
 	}
-#line 2512 "../stray68K/src/assembler/syntactic.c"
+#line 2512 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 54: /* opcode: TOKEN_DIRECTIVE_BCHG  */
-#line 978 "../stray68K/src/assembler/syntactic.y"
+#line 978 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_BCHG_STATIC;
 	}
-#line 2520 "../stray68K/src/assembler/syntactic.c"
+#line 2520 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 55: /* opcode: TOKEN_DIRECTIVE_BCLR  */
-#line 982 "../stray68K/src/assembler/syntactic.y"
+#line 982 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_BCLR_STATIC;
 	}
-#line 2528 "../stray68K/src/assembler/syntactic.c"
+#line 2528 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 56: /* opcode: TOKEN_DIRECTIVE_BSET  */
-#line 986 "../stray68K/src/assembler/syntactic.y"
+#line 986 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_BSET_STATIC;
 	}
-#line 2536 "../stray68K/src/assembler/syntactic.c"
+#line 2536 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 57: /* opcode: TOKEN_DIRECTIVE_MOVEP  */
-#line 990 "../stray68K/src/assembler/syntactic.y"
+#line 990 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_MOVEP_TO_REG;
 	}
-#line 2544 "../stray68K/src/assembler/syntactic.c"
+#line 2544 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 58: /* opcode: TOKEN_DIRECTIVE_MOVEA  */
-#line 994 "../stray68K/src/assembler/syntactic.y"
+#line 994 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_MOVEA;
 	}
-#line 2552 "../stray68K/src/assembler/syntactic.c"
+#line 2552 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 59: /* opcode: TOKEN_DIRECTIVE_MOVE  */
-#line 998 "../stray68K/src/assembler/syntactic.y"
+#line 998 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_MOVE;
 	}
-#line 2560 "../stray68K/src/assembler/syntactic.c"
+#line 2560 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 60: /* opcode: TOKEN_DIRECTIVE_NEGX  */
-#line 1002 "../stray68K/src/assembler/syntactic.y"
+#line 1002 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_NEGX;
 	}
-#line 2568 "../stray68K/src/assembler/syntactic.c"
+#line 2568 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 61: /* opcode: TOKEN_DIRECTIVE_CLR  */
-#line 1006 "../stray68K/src/assembler/syntactic.y"
+#line 1006 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_CLR;
 	}
-#line 2576 "../stray68K/src/assembler/syntactic.c"
+#line 2576 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 62: /* opcode: TOKEN_DIRECTIVE_NEG  */
-#line 1010 "../stray68K/src/assembler/syntactic.y"
+#line 1010 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_NEG;
 	}
-#line 2584 "../stray68K/src/assembler/syntactic.c"
+#line 2584 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 63: /* opcode: TOKEN_DIRECTIVE_NOT  */
-#line 1014 "../stray68K/src/assembler/syntactic.y"
+#line 1014 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_NOT;
 	}
-#line 2592 "../stray68K/src/assembler/syntactic.c"
+#line 2592 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 64: /* opcode: TOKEN_DIRECTIVE_EXT  */
-#line 1018 "../stray68K/src/assembler/syntactic.y"
+#line 1018 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_EXT;
 	}
-#line 2600 "../stray68K/src/assembler/syntactic.c"
+#line 2600 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 65: /* opcode: TOKEN_DIRECTIVE_NBCD  */
-#line 1022 "../stray68K/src/assembler/syntactic.y"
+#line 1022 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_NBCD;
 	}
-#line 2608 "../stray68K/src/assembler/syntactic.c"
+#line 2608 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 66: /* opcode: TOKEN_DIRECTIVE_SWAP  */
-#line 1026 "../stray68K/src/assembler/syntactic.y"
+#line 1026 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_SWAP;
 	}
-#line 2616 "../stray68K/src/assembler/syntactic.c"
+#line 2616 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 67: /* opcode: TOKEN_DIRECTIVE_PEA  */
-#line 1030 "../stray68K/src/assembler/syntactic.y"
+#line 1030 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_PEA;
 	}
-#line 2624 "../stray68K/src/assembler/syntactic.c"
+#line 2624 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 68: /* opcode: TOKEN_DIRECTIVE_ILLEGAL  */
-#line 1034 "../stray68K/src/assembler/syntactic.y"
+#line 1034 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ILLEGAL;
 	}
-#line 2632 "../stray68K/src/assembler/syntactic.c"
+#line 2632 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 69: /* opcode: TOKEN_DIRECTIVE_TAS  */
-#line 1038 "../stray68K/src/assembler/syntactic.y"
+#line 1038 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_TAS;
 	}
-#line 2640 "../stray68K/src/assembler/syntactic.c"
+#line 2640 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 70: /* opcode: TOKEN_DIRECTIVE_TST  */
-#line 1042 "../stray68K/src/assembler/syntactic.y"
+#line 1042 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_TST;
 	}
-#line 2648 "../stray68K/src/assembler/syntactic.c"
+#line 2648 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 71: /* opcode: TOKEN_DIRECTIVE_TRAP  */
-#line 1046 "../stray68K/src/assembler/syntactic.y"
+#line 1046 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_TRAP;
 	}
-#line 2656 "../stray68K/src/assembler/syntactic.c"
+#line 2656 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 72: /* opcode: TOKEN_DIRECTIVE_LINK  */
-#line 1050 "../stray68K/src/assembler/syntactic.y"
+#line 1050 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_LINK;
 	}
-#line 2664 "../stray68K/src/assembler/syntactic.c"
+#line 2664 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 73: /* opcode: TOKEN_DIRECTIVE_UNLK  */
-#line 1054 "../stray68K/src/assembler/syntactic.y"
+#line 1054 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_UNLK;
 	}
-#line 2672 "../stray68K/src/assembler/syntactic.c"
+#line 2672 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 74: /* opcode: TOKEN_DIRECTIVE_RESET  */
-#line 1058 "../stray68K/src/assembler/syntactic.y"
+#line 1058 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_RESET;
 	}
-#line 2680 "../stray68K/src/assembler/syntactic.c"
+#line 2680 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 75: /* opcode: TOKEN_DIRECTIVE_NOP  */
-#line 1062 "../stray68K/src/assembler/syntactic.y"
+#line 1062 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_NOP;
 	}
-#line 2688 "../stray68K/src/assembler/syntactic.c"
+#line 2688 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 76: /* opcode: TOKEN_DIRECTIVE_STOP  */
-#line 1066 "../stray68K/src/assembler/syntactic.y"
+#line 1066 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_STOP;
 	}
-#line 2696 "../stray68K/src/assembler/syntactic.c"
+#line 2696 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 77: /* opcode: TOKEN_DIRECTIVE_RTE  */
-#line 1070 "../stray68K/src/assembler/syntactic.y"
+#line 1070 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_RTE;
 	}
-#line 2704 "../stray68K/src/assembler/syntactic.c"
+#line 2704 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 78: /* opcode: TOKEN_DIRECTIVE_RTS  */
-#line 1074 "../stray68K/src/assembler/syntactic.y"
+#line 1074 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_RTS;
 	}
-#line 2712 "../stray68K/src/assembler/syntactic.c"
+#line 2712 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 79: /* opcode: TOKEN_DIRECTIVE_TRAPV  */
-#line 1078 "../stray68K/src/assembler/syntactic.y"
+#line 1078 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_TRAPV;
 	}
-#line 2720 "../stray68K/src/assembler/syntactic.c"
+#line 2720 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 80: /* opcode: TOKEN_DIRECTIVE_RTR  */
-#line 1082 "../stray68K/src/assembler/syntactic.y"
+#line 1082 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_RTR;
 	}
-#line 2728 "../stray68K/src/assembler/syntactic.c"
+#line 2728 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 81: /* opcode: TOKEN_DIRECTIVE_JSR  */
-#line 1086 "../stray68K/src/assembler/syntactic.y"
+#line 1086 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_JSR;
 	}
-#line 2736 "../stray68K/src/assembler/syntactic.c"
+#line 2736 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 82: /* opcode: TOKEN_DIRECTIVE_JMP  */
-#line 1090 "../stray68K/src/assembler/syntactic.y"
+#line 1090 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_JMP;
 	}
-#line 2744 "../stray68K/src/assembler/syntactic.c"
+#line 2744 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 83: /* opcode: TOKEN_DIRECTIVE_MOVEM  */
-#line 1094 "../stray68K/src/assembler/syntactic.y"
+#line 1094 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_MOVEM_TO_REGS;
 	}
-#line 2752 "../stray68K/src/assembler/syntactic.c"
+#line 2752 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 84: /* opcode: TOKEN_DIRECTIVE_LEA  */
-#line 1098 "../stray68K/src/assembler/syntactic.y"
+#line 1098 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_LEA;
 	}
-#line 2760 "../stray68K/src/assembler/syntactic.c"
+#line 2760 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 85: /* opcode: TOKEN_DIRECTIVE_CHK  */
-#line 1102 "../stray68K/src/assembler/syntactic.y"
+#line 1102 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_CHK;
 	}
-#line 2768 "../stray68K/src/assembler/syntactic.c"
+#line 2768 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 86: /* opcode: TOKEN_DIRECTIVE_ADDQ  */
-#line 1106 "../stray68K/src/assembler/syntactic.y"
+#line 1106 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ADDQ;
 	}
-#line 2776 "../stray68K/src/assembler/syntactic.c"
+#line 2776 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 87: /* opcode: TOKEN_DIRECTIVE_SUBQ  */
-#line 1110 "../stray68K/src/assembler/syntactic.y"
+#line 1110 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_SUBQ;
 	}
-#line 2784 "../stray68K/src/assembler/syntactic.c"
+#line 2784 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 88: /* opcode: TOKEN_DIRECTIVE_ST  */
-#line 1114 "../stray68K/src/assembler/syntactic.y"
+#line 1114 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_TRUE;
 	}
-#line 2793 "../stray68K/src/assembler/syntactic.c"
+#line 2793 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 89: /* opcode: TOKEN_DIRECTIVE_SF  */
-#line 1119 "../stray68K/src/assembler/syntactic.y"
+#line 1119 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_FALSE;
 	}
-#line 2802 "../stray68K/src/assembler/syntactic.c"
+#line 2802 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 90: /* opcode: TOKEN_DIRECTIVE_SHI  */
-#line 1124 "../stray68K/src/assembler/syntactic.y"
+#line 1124 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_HIGHER;
 	}
-#line 2811 "../stray68K/src/assembler/syntactic.c"
+#line 2811 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 91: /* opcode: TOKEN_DIRECTIVE_SLS  */
-#line 1129 "../stray68K/src/assembler/syntactic.y"
+#line 1129 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_LOWER_OR_SAME;
 	}
-#line 2820 "../stray68K/src/assembler/syntactic.c"
+#line 2820 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 92: /* opcode: TOKEN_DIRECTIVE_SCC  */
-#line 1134 "../stray68K/src/assembler/syntactic.y"
+#line 1134 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_CARRY_CLEAR;
 	}
-#line 2829 "../stray68K/src/assembler/syntactic.c"
+#line 2829 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 93: /* opcode: TOKEN_DIRECTIVE_SCS  */
-#line 1139 "../stray68K/src/assembler/syntactic.y"
+#line 1139 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_CARRY_SET;
 	}
-#line 2838 "../stray68K/src/assembler/syntactic.c"
+#line 2838 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 94: /* opcode: TOKEN_DIRECTIVE_SNE  */
-#line 1144 "../stray68K/src/assembler/syntactic.y"
+#line 1144 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_NOT_EQUAL;
 	}
-#line 2847 "../stray68K/src/assembler/syntactic.c"
+#line 2847 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 95: /* opcode: TOKEN_DIRECTIVE_SEQ  */
-#line 1149 "../stray68K/src/assembler/syntactic.y"
+#line 1149 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_EQUAL;
 	}
-#line 2856 "../stray68K/src/assembler/syntactic.c"
+#line 2856 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 96: /* opcode: TOKEN_DIRECTIVE_SVC  */
-#line 1154 "../stray68K/src/assembler/syntactic.y"
+#line 1154 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_OVERFLOW_CLEAR;
 	}
-#line 2865 "../stray68K/src/assembler/syntactic.c"
+#line 2865 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 97: /* opcode: TOKEN_DIRECTIVE_SVS  */
-#line 1159 "../stray68K/src/assembler/syntactic.y"
+#line 1159 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_OVERFLOW_SET;
 	}
-#line 2874 "../stray68K/src/assembler/syntactic.c"
+#line 2874 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 98: /* opcode: TOKEN_DIRECTIVE_SPL  */
-#line 1164 "../stray68K/src/assembler/syntactic.y"
+#line 1164 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_PLUS;
 	}
-#line 2883 "../stray68K/src/assembler/syntactic.c"
+#line 2883 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 99: /* opcode: TOKEN_DIRECTIVE_SMI  */
-#line 1169 "../stray68K/src/assembler/syntactic.y"
+#line 1169 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_MINUS;
 	}
-#line 2892 "../stray68K/src/assembler/syntactic.c"
+#line 2892 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 100: /* opcode: TOKEN_DIRECTIVE_SGE  */
-#line 1174 "../stray68K/src/assembler/syntactic.y"
+#line 1174 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_GREATER_OR_EQUAL;
 	}
-#line 2901 "../stray68K/src/assembler/syntactic.c"
+#line 2901 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 101: /* opcode: TOKEN_DIRECTIVE_SLT  */
-#line 1179 "../stray68K/src/assembler/syntactic.y"
+#line 1179 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_LESS_THAN;
 	}
-#line 2910 "../stray68K/src/assembler/syntactic.c"
+#line 2910 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 102: /* opcode: TOKEN_DIRECTIVE_SGT  */
-#line 1184 "../stray68K/src/assembler/syntactic.y"
+#line 1184 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_GREATER_THAN;
 	}
-#line 2919 "../stray68K/src/assembler/syntactic.c"
+#line 2919 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 103: /* opcode: TOKEN_DIRECTIVE_SLE  */
-#line 1189 "../stray68K/src/assembler/syntactic.y"
+#line 1189 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Scc;
 		(yyval.opcode).condition = CONDITION_LESS_OR_EQUAL;
 	}
-#line 2928 "../stray68K/src/assembler/syntactic.c"
+#line 2928 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 104: /* opcode: TOKEN_DIRECTIVE_DBT  */
-#line 1194 "../stray68K/src/assembler/syntactic.y"
+#line 1194 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_TRUE;
 	}
-#line 2937 "../stray68K/src/assembler/syntactic.c"
+#line 2937 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 105: /* opcode: TOKEN_DIRECTIVE_DBF  */
-#line 1199 "../stray68K/src/assembler/syntactic.y"
+#line 1199 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_FALSE;
 	}
-#line 2946 "../stray68K/src/assembler/syntactic.c"
+#line 2946 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 106: /* opcode: TOKEN_DIRECTIVE_DBHI  */
-#line 1204 "../stray68K/src/assembler/syntactic.y"
+#line 1204 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_HIGHER;
 	}
-#line 2955 "../stray68K/src/assembler/syntactic.c"
+#line 2955 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 107: /* opcode: TOKEN_DIRECTIVE_DBLS  */
-#line 1209 "../stray68K/src/assembler/syntactic.y"
+#line 1209 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_LOWER_OR_SAME;
 	}
-#line 2964 "../stray68K/src/assembler/syntactic.c"
+#line 2964 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 108: /* opcode: TOKEN_DIRECTIVE_DBCC  */
-#line 1214 "../stray68K/src/assembler/syntactic.y"
+#line 1214 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_CARRY_CLEAR;
 	}
-#line 2973 "../stray68K/src/assembler/syntactic.c"
+#line 2973 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 109: /* opcode: TOKEN_DIRECTIVE_DBCS  */
-#line 1219 "../stray68K/src/assembler/syntactic.y"
+#line 1219 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_CARRY_SET;
 	}
-#line 2982 "../stray68K/src/assembler/syntactic.c"
+#line 2982 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 110: /* opcode: TOKEN_DIRECTIVE_DBNE  */
-#line 1224 "../stray68K/src/assembler/syntactic.y"
+#line 1224 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_NOT_EQUAL;
 	}
-#line 2991 "../stray68K/src/assembler/syntactic.c"
+#line 2991 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 111: /* opcode: TOKEN_DIRECTIVE_DBEQ  */
-#line 1229 "../stray68K/src/assembler/syntactic.y"
+#line 1229 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_EQUAL;
 	}
-#line 3000 "../stray68K/src/assembler/syntactic.c"
+#line 3000 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 112: /* opcode: TOKEN_DIRECTIVE_DBVC  */
-#line 1234 "../stray68K/src/assembler/syntactic.y"
+#line 1234 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_OVERFLOW_CLEAR;
 	}
-#line 3009 "../stray68K/src/assembler/syntactic.c"
+#line 3009 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 113: /* opcode: TOKEN_DIRECTIVE_DBVS  */
-#line 1239 "../stray68K/src/assembler/syntactic.y"
+#line 1239 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_OVERFLOW_SET;
 	}
-#line 3018 "../stray68K/src/assembler/syntactic.c"
+#line 3018 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 114: /* opcode: TOKEN_DIRECTIVE_DBPL  */
-#line 1244 "../stray68K/src/assembler/syntactic.y"
+#line 1244 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_PLUS;
 	}
-#line 3027 "../stray68K/src/assembler/syntactic.c"
+#line 3027 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 115: /* opcode: TOKEN_DIRECTIVE_DBMI  */
-#line 1249 "../stray68K/src/assembler/syntactic.y"
+#line 1249 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_MINUS;
 	}
-#line 3036 "../stray68K/src/assembler/syntactic.c"
+#line 3036 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 116: /* opcode: TOKEN_DIRECTIVE_DBGE  */
-#line 1254 "../stray68K/src/assembler/syntactic.y"
+#line 1254 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_GREATER_OR_EQUAL;
 	}
-#line 3045 "../stray68K/src/assembler/syntactic.c"
+#line 3045 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 117: /* opcode: TOKEN_DIRECTIVE_DBLT  */
-#line 1259 "../stray68K/src/assembler/syntactic.y"
+#line 1259 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_LESS_THAN;
 	}
-#line 3054 "../stray68K/src/assembler/syntactic.c"
+#line 3054 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 118: /* opcode: TOKEN_DIRECTIVE_DBGT  */
-#line 1264 "../stray68K/src/assembler/syntactic.y"
+#line 1264 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_GREATER_THAN;
 	}
-#line 3063 "../stray68K/src/assembler/syntactic.c"
+#line 3063 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 119: /* opcode: TOKEN_DIRECTIVE_DBLE  */
-#line 1269 "../stray68K/src/assembler/syntactic.y"
+#line 1269 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DBcc;
 		(yyval.opcode).condition = CONDITION_LESS_OR_EQUAL;
 	}
-#line 3072 "../stray68K/src/assembler/syntactic.c"
+#line 3072 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 120: /* opcode: TOKEN_DIRECTIVE_BRA  */
-#line 1274 "../stray68K/src/assembler/syntactic.y"
+#line 1274 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_BRA;
 	}
-#line 3080 "../stray68K/src/assembler/syntactic.c"
+#line 3080 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 121: /* opcode: TOKEN_DIRECTIVE_BSR  */
-#line 1278 "../stray68K/src/assembler/syntactic.y"
+#line 1278 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_BSR;
 	}
-#line 3088 "../stray68K/src/assembler/syntactic.c"
+#line 3088 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 122: /* opcode: TOKEN_DIRECTIVE_BHI  */
-#line 1282 "../stray68K/src/assembler/syntactic.y"
+#line 1282 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_HIGHER;
 	}
-#line 3097 "../stray68K/src/assembler/syntactic.c"
+#line 3097 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 123: /* opcode: TOKEN_DIRECTIVE_BLS  */
-#line 1287 "../stray68K/src/assembler/syntactic.y"
+#line 1287 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_LOWER_OR_SAME;
 	}
-#line 3106 "../stray68K/src/assembler/syntactic.c"
+#line 3106 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 124: /* opcode: TOKEN_DIRECTIVE_BCC  */
-#line 1292 "../stray68K/src/assembler/syntactic.y"
+#line 1292 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_CARRY_CLEAR;
 	}
-#line 3115 "../stray68K/src/assembler/syntactic.c"
+#line 3115 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 125: /* opcode: TOKEN_DIRECTIVE_BCS  */
-#line 1297 "../stray68K/src/assembler/syntactic.y"
+#line 1297 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_CARRY_SET;
 	}
-#line 3124 "../stray68K/src/assembler/syntactic.c"
+#line 3124 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 126: /* opcode: TOKEN_DIRECTIVE_BNE  */
-#line 1302 "../stray68K/src/assembler/syntactic.y"
+#line 1302 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_NOT_EQUAL;
 	}
-#line 3133 "../stray68K/src/assembler/syntactic.c"
+#line 3133 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 127: /* opcode: TOKEN_DIRECTIVE_BEQ  */
-#line 1307 "../stray68K/src/assembler/syntactic.y"
+#line 1307 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_EQUAL;
 	}
-#line 3142 "../stray68K/src/assembler/syntactic.c"
+#line 3142 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 128: /* opcode: TOKEN_DIRECTIVE_BVC  */
-#line 1312 "../stray68K/src/assembler/syntactic.y"
+#line 1312 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_OVERFLOW_CLEAR;
 	}
-#line 3151 "../stray68K/src/assembler/syntactic.c"
+#line 3151 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 129: /* opcode: TOKEN_DIRECTIVE_BVS  */
-#line 1317 "../stray68K/src/assembler/syntactic.y"
+#line 1317 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_OVERFLOW_SET;
 	}
-#line 3160 "../stray68K/src/assembler/syntactic.c"
+#line 3160 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 130: /* opcode: TOKEN_DIRECTIVE_BPL  */
-#line 1322 "../stray68K/src/assembler/syntactic.y"
+#line 1322 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_PLUS;
 	}
-#line 3169 "../stray68K/src/assembler/syntactic.c"
+#line 3169 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 131: /* opcode: TOKEN_DIRECTIVE_BMI  */
-#line 1327 "../stray68K/src/assembler/syntactic.y"
+#line 1327 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_MINUS;
 	}
-#line 3178 "../stray68K/src/assembler/syntactic.c"
+#line 3178 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 132: /* opcode: TOKEN_DIRECTIVE_BGE  */
-#line 1332 "../stray68K/src/assembler/syntactic.y"
+#line 1332 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_GREATER_OR_EQUAL;
 	}
-#line 3187 "../stray68K/src/assembler/syntactic.c"
+#line 3187 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 133: /* opcode: TOKEN_DIRECTIVE_BLT  */
-#line 1337 "../stray68K/src/assembler/syntactic.y"
+#line 1337 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_LESS_THAN;
 	}
-#line 3196 "../stray68K/src/assembler/syntactic.c"
+#line 3196 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 134: /* opcode: TOKEN_DIRECTIVE_BGT  */
-#line 1342 "../stray68K/src/assembler/syntactic.y"
+#line 1342 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_GREATER_THAN;
 	}
-#line 3205 "../stray68K/src/assembler/syntactic.c"
+#line 3205 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 135: /* opcode: TOKEN_DIRECTIVE_BLE  */
-#line 1347 "../stray68K/src/assembler/syntactic.y"
+#line 1347 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_Bcc;
 		(yyval.opcode).condition = CONDITION_LESS_OR_EQUAL;
 	}
-#line 3214 "../stray68K/src/assembler/syntactic.c"
+#line 3214 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 136: /* opcode: TOKEN_DIRECTIVE_MOVEQ  */
-#line 1352 "../stray68K/src/assembler/syntactic.y"
+#line 1352 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_MOVEQ;
 	}
-#line 3222 "../stray68K/src/assembler/syntactic.c"
+#line 3222 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 137: /* opcode: TOKEN_DIRECTIVE_DIVU  */
-#line 1356 "../stray68K/src/assembler/syntactic.y"
+#line 1356 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DIVU;
 	}
-#line 3230 "../stray68K/src/assembler/syntactic.c"
+#line 3230 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 138: /* opcode: TOKEN_DIRECTIVE_DIVS  */
-#line 1360 "../stray68K/src/assembler/syntactic.y"
+#line 1360 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_DIVS;
 	}
-#line 3238 "../stray68K/src/assembler/syntactic.c"
+#line 3238 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 139: /* opcode: TOKEN_DIRECTIVE_SBCD  */
-#line 1364 "../stray68K/src/assembler/syntactic.y"
+#line 1364 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_SBCD_DATA_REGS;
 	}
-#line 3246 "../stray68K/src/assembler/syntactic.c"
+#line 3246 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 140: /* opcode: TOKEN_DIRECTIVE_OR  */
-#line 1368 "../stray68K/src/assembler/syntactic.y"
+#line 1368 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_OR_TO_REG;
 	}
-#line 3254 "../stray68K/src/assembler/syntactic.c"
+#line 3254 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 141: /* opcode: TOKEN_DIRECTIVE_SUB  */
-#line 1372 "../stray68K/src/assembler/syntactic.y"
+#line 1372 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_SUB_TO_REG;
 	}
-#line 3262 "../stray68K/src/assembler/syntactic.c"
+#line 3262 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 142: /* opcode: TOKEN_DIRECTIVE_SUBX  */
-#line 1376 "../stray68K/src/assembler/syntactic.y"
+#line 1376 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_SUBX_DATA_REGS;
 	}
-#line 3270 "../stray68K/src/assembler/syntactic.c"
+#line 3270 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 143: /* opcode: TOKEN_DIRECTIVE_SUBA  */
-#line 1380 "../stray68K/src/assembler/syntactic.y"
+#line 1380 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_SUBA;
 	}
-#line 3278 "../stray68K/src/assembler/syntactic.c"
+#line 3278 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 144: /* opcode: TOKEN_DIRECTIVE_EOR  */
-#line 1384 "../stray68K/src/assembler/syntactic.y"
+#line 1384 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_EOR;
 	}
-#line 3286 "../stray68K/src/assembler/syntactic.c"
+#line 3286 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 145: /* opcode: TOKEN_DIRECTIVE_CMPM  */
-#line 1388 "../stray68K/src/assembler/syntactic.y"
+#line 1388 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_CMPM;
 	}
-#line 3294 "../stray68K/src/assembler/syntactic.c"
+#line 3294 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 146: /* opcode: TOKEN_DIRECTIVE_CMP  */
-#line 1392 "../stray68K/src/assembler/syntactic.y"
+#line 1392 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_CMP;
 	}
-#line 3302 "../stray68K/src/assembler/syntactic.c"
+#line 3302 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 147: /* opcode: TOKEN_DIRECTIVE_CMPA  */
-#line 1396 "../stray68K/src/assembler/syntactic.y"
+#line 1396 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_CMPA;
 	}
-#line 3310 "../stray68K/src/assembler/syntactic.c"
+#line 3310 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 148: /* opcode: TOKEN_DIRECTIVE_MULU  */
-#line 1400 "../stray68K/src/assembler/syntactic.y"
+#line 1400 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_MULU;
 	}
-#line 3318 "../stray68K/src/assembler/syntactic.c"
+#line 3318 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 149: /* opcode: TOKEN_DIRECTIVE_MULS  */
-#line 1404 "../stray68K/src/assembler/syntactic.y"
+#line 1404 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_MULS;
 	}
-#line 3326 "../stray68K/src/assembler/syntactic.c"
+#line 3326 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 150: /* opcode: TOKEN_DIRECTIVE_ABCD  */
-#line 1408 "../stray68K/src/assembler/syntactic.y"
+#line 1408 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ABCD_DATA_REGS;
 	}
-#line 3334 "../stray68K/src/assembler/syntactic.c"
+#line 3334 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 151: /* opcode: TOKEN_DIRECTIVE_EXG  */
-#line 1412 "../stray68K/src/assembler/syntactic.y"
+#line 1412 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_EXG;
 	}
-#line 3342 "../stray68K/src/assembler/syntactic.c"
+#line 3342 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 152: /* opcode: TOKEN_DIRECTIVE_AND  */
-#line 1416 "../stray68K/src/assembler/syntactic.y"
+#line 1416 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_AND_TO_REG;
 	}
-#line 3350 "../stray68K/src/assembler/syntactic.c"
+#line 3350 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 153: /* opcode: TOKEN_DIRECTIVE_ADD  */
-#line 1420 "../stray68K/src/assembler/syntactic.y"
+#line 1420 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ADD_TO_REG;
 	}
-#line 3358 "../stray68K/src/assembler/syntactic.c"
+#line 3358 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 154: /* opcode: TOKEN_DIRECTIVE_ADDX  */
-#line 1424 "../stray68K/src/assembler/syntactic.y"
+#line 1424 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ADDX_DATA_REGS;
 	}
-#line 3366 "../stray68K/src/assembler/syntactic.c"
+#line 3366 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 155: /* opcode: TOKEN_DIRECTIVE_ADDA  */
-#line 1428 "../stray68K/src/assembler/syntactic.y"
+#line 1428 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ADDA;
 	}
-#line 3374 "../stray68K/src/assembler/syntactic.c"
+#line 3374 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 156: /* opcode: TOKEN_DIRECTIVE_ASL  */
-#line 1432 "../stray68K/src/assembler/syntactic.y"
+#line 1432 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ASL_STATIC;
 	}
-#line 3382 "../stray68K/src/assembler/syntactic.c"
+#line 3382 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 157: /* opcode: TOKEN_DIRECTIVE_ASR  */
-#line 1436 "../stray68K/src/assembler/syntactic.y"
+#line 1436 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ASR_STATIC;
 	}
-#line 3390 "../stray68K/src/assembler/syntactic.c"
+#line 3390 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 158: /* opcode: TOKEN_DIRECTIVE_LSL  */
-#line 1440 "../stray68K/src/assembler/syntactic.y"
+#line 1440 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_LSL_STATIC;
 	}
-#line 3398 "../stray68K/src/assembler/syntactic.c"
+#line 3398 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 159: /* opcode: TOKEN_DIRECTIVE_LSR  */
-#line 1444 "../stray68K/src/assembler/syntactic.y"
+#line 1444 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_LSR_STATIC;
 	}
-#line 3406 "../stray68K/src/assembler/syntactic.c"
+#line 3406 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 160: /* opcode: TOKEN_DIRECTIVE_ROXL  */
-#line 1448 "../stray68K/src/assembler/syntactic.y"
+#line 1448 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ROXL_STATIC;
 	}
-#line 3414 "../stray68K/src/assembler/syntactic.c"
+#line 3414 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 161: /* opcode: TOKEN_DIRECTIVE_ROXR  */
-#line 1452 "../stray68K/src/assembler/syntactic.y"
+#line 1452 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ROXR_STATIC;
 	}
-#line 3422 "../stray68K/src/assembler/syntactic.c"
+#line 3422 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 162: /* opcode: TOKEN_DIRECTIVE_ROL  */
-#line 1456 "../stray68K/src/assembler/syntactic.y"
+#line 1456 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ROL_STATIC;
 	}
-#line 3430 "../stray68K/src/assembler/syntactic.c"
+#line 3430 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 163: /* opcode: TOKEN_DIRECTIVE_ROR  */
-#line 1460 "../stray68K/src/assembler/syntactic.y"
+#line 1460 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.opcode).type = OPCODE_ROR_STATIC;
 	}
-#line 3438 "../stray68K/src/assembler/syntactic.c"
+#line 3438 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 164: /* size: TOKEN_SIZE_BYTE  */
-#line 1467 "../stray68K/src/assembler/syntactic.y"
+#line 1467 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.size) = SIZE_BYTE;
 	}
-#line 3446 "../stray68K/src/assembler/syntactic.c"
+#line 3446 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 165: /* size: TOKEN_SIZE_SHORT  */
-#line 1471 "../stray68K/src/assembler/syntactic.y"
+#line 1471 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.size) = SIZE_SHORT;
 	}
-#line 3454 "../stray68K/src/assembler/syntactic.c"
+#line 3454 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 166: /* size: TOKEN_SIZE_WORD  */
-#line 1475 "../stray68K/src/assembler/syntactic.y"
+#line 1475 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.size) = SIZE_WORD;
 	}
-#line 3462 "../stray68K/src/assembler/syntactic.c"
+#line 3462 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 167: /* size: TOKEN_SIZE_LONGWORD  */
-#line 1479 "../stray68K/src/assembler/syntactic.y"
+#line 1479 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.size) = SIZE_LONGWORD;
 	}
-#line 3470 "../stray68K/src/assembler/syntactic.c"
+#line 3470 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 168: /* operand: '(' TOKEN_ADDRESS_REGISTER ')'  */
-#line 1487 "../stray68K/src/assembler/syntactic.y"
+#line 1487 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT;
 		(yyval.operand).main_register = (yyvsp[-1].unsigned_long);
 	}
-#line 3479 "../stray68K/src/assembler/syntactic.c"
+#line 3479 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 169: /* operand: '(' TOKEN_ADDRESS_REGISTER ')' '+'  */
-#line 1492 "../stray68K/src/assembler/syntactic.y"
+#line 1492 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT_POSTINCREMENT;
 		(yyval.operand).main_register = (yyvsp[-2].unsigned_long);
 	}
-#line 3488 "../stray68K/src/assembler/syntactic.c"
+#line 3488 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 170: /* operand: '-' '(' TOKEN_ADDRESS_REGISTER ')'  */
-#line 1497 "../stray68K/src/assembler/syntactic.y"
+#line 1497 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT_PREDECREMENT;
 		(yyval.operand).main_register = (yyvsp[-1].unsigned_long);
 	}
-#line 3497 "../stray68K/src/assembler/syntactic.c"
+#line 3497 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 171: /* operand: expression '(' TOKEN_ADDRESS_REGISTER ')'  */
-#line 1502 "../stray68K/src/assembler/syntactic.y"
+#line 1502 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT;
 		(yyval.operand).literal = (yyvsp[-3].expression);
 		(yyval.operand).main_register = (yyvsp[-1].unsigned_long);
 	}
-#line 3507 "../stray68K/src/assembler/syntactic.c"
+#line 3507 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 172: /* operand: '(' TOKEN_ADDRESS_REGISTER ',' data_or_address_register size ')'  */
-#line 1508 "../stray68K/src/assembler/syntactic.y"
+#line 1508 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		(yyval.operand).literal.type = EXPRESSION_NUMBER;
@@ -3517,11 +3517,11 @@ yyreduce:
 		(yyval.operand).size = (yyvsp[-1].size);
 		(yyval.operand).index_register_is_address_register = (yyvsp[-2].unsigned_long) / 8 != 0;
 	}
-#line 3521 "../stray68K/src/assembler/syntactic.c"
+#line 3521 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 173: /* operand: expression '(' TOKEN_ADDRESS_REGISTER ',' data_or_address_register size ')'  */
-#line 1518 "../stray68K/src/assembler/syntactic.y"
+#line 1518 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		(yyval.operand).literal = (yyvsp[-6].expression);
@@ -3530,11 +3530,11 @@ yyreduce:
 		(yyval.operand).size = (yyvsp[-1].size);
 		(yyval.operand).index_register_is_address_register = (yyvsp[-2].unsigned_long) / 8 !=0;
 	}
-#line 3534 "../stray68K/src/assembler/syntactic.c"
+#line 3534 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 174: /* operand: '(' TOKEN_ADDRESS_REGISTER ',' data_or_address_register ')'  */
-#line 1527 "../stray68K/src/assembler/syntactic.y"
+#line 1527 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		m68kasm_warning(scanner, statement, "Index register lacks a size specifier (assuming word-size for now, but you should really add an explicit size).");
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
@@ -3545,11 +3545,11 @@ yyreduce:
 		(yyval.operand).size = SIZE_WORD;
 		(yyval.operand).index_register_is_address_register = (yyvsp[-1].unsigned_long) / 8 != 0;
 	}
-#line 3549 "../stray68K/src/assembler/syntactic.c"
+#line 3549 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 175: /* operand: expression '(' TOKEN_ADDRESS_REGISTER ',' data_or_address_register ')'  */
-#line 1538 "../stray68K/src/assembler/syntactic.y"
+#line 1538 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		m68kasm_warning(scanner, statement, "Index register lacks a size specifier (assuming word-size for now, but you should really add an explicit size).");
 		(yyval.operand).type = OPERAND_ADDRESS_REGISTER_INDIRECT_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
@@ -3559,20 +3559,20 @@ yyreduce:
 		(yyval.operand).size = SIZE_WORD;
 		(yyval.operand).index_register_is_address_register = (yyvsp[-1].unsigned_long) / 8 !=0;
 	}
-#line 3563 "../stray68K/src/assembler/syntactic.c"
+#line 3563 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 176: /* operand: expression '(' TOKEN_PROGRAM_COUNTER ')'  */
-#line 1548 "../stray68K/src/assembler/syntactic.y"
+#line 1548 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_PROGRAM_COUNTER_WITH_DISPLACEMENT;
 		(yyval.operand).literal = (yyvsp[-3].expression);
 	}
-#line 3572 "../stray68K/src/assembler/syntactic.c"
+#line 3572 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 177: /* operand: '(' TOKEN_PROGRAM_COUNTER ',' data_or_address_register size ')'  */
-#line 1553 "../stray68K/src/assembler/syntactic.y"
+#line 1553 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_PROGRAM_COUNTER_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		(yyval.operand).literal.type = EXPRESSION_NUMBER;
@@ -3581,11 +3581,11 @@ yyreduce:
 		(yyval.operand).size = (yyvsp[-1].size);
 		(yyval.operand).index_register_is_address_register = (yyvsp[-2].unsigned_long) / 8 != 0;
 	}
-#line 3585 "../stray68K/src/assembler/syntactic.c"
+#line 3585 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 178: /* operand: expression '(' TOKEN_PROGRAM_COUNTER ',' data_or_address_register size ')'  */
-#line 1562 "../stray68K/src/assembler/syntactic.y"
+#line 1562 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_PROGRAM_COUNTER_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
 		(yyval.operand).literal = (yyvsp[-6].expression);
@@ -3593,11 +3593,11 @@ yyreduce:
 		(yyval.operand).size = (yyvsp[-1].size);
 		(yyval.operand).index_register_is_address_register = (yyvsp[-2].unsigned_long) / 8 != 0;
 	}
-#line 3597 "../stray68K/src/assembler/syntactic.c"
+#line 3597 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 179: /* operand: '(' TOKEN_PROGRAM_COUNTER ',' data_or_address_register ')'  */
-#line 1570 "../stray68K/src/assembler/syntactic.y"
+#line 1570 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		m68kasm_warning(scanner, statement, "Index register lacks a size specifier (assuming word-size for now, but you should really add an explicit size).");
 		(yyval.operand).type = OPERAND_PROGRAM_COUNTER_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
@@ -3607,11 +3607,11 @@ yyreduce:
 		(yyval.operand).size = SIZE_WORD;
 		(yyval.operand).index_register_is_address_register = (yyvsp[-1].unsigned_long) / 8 != 0;
 	}
-#line 3611 "../stray68K/src/assembler/syntactic.c"
+#line 3611 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 180: /* operand: expression '(' TOKEN_PROGRAM_COUNTER ',' data_or_address_register ')'  */
-#line 1580 "../stray68K/src/assembler/syntactic.y"
+#line 1580 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		m68kasm_warning(scanner, statement, "Index register lacks a size specifier (assuming word-size for now, but you should really add an explicit size).");
 		(yyval.operand).type = OPERAND_PROGRAM_COUNTER_WITH_DISPLACEMENT_AND_INDEX_REGISTER;
@@ -3620,64 +3620,64 @@ yyreduce:
 		(yyval.operand).size = SIZE_WORD;
 		(yyval.operand).index_register_is_address_register = (yyvsp[-1].unsigned_long) / 8 != 0;
 	}
-#line 3624 "../stray68K/src/assembler/syntactic.c"
+#line 3624 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 181: /* operand: '#' expression  */
-#line 1590 "../stray68K/src/assembler/syntactic.y"
+#line 1590 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_LITERAL;
 		(yyval.operand).literal = (yyvsp[0].expression);
 	}
-#line 3633 "../stray68K/src/assembler/syntactic.c"
+#line 3633 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 182: /* operand: TOKEN_STATUS_REGISTER  */
-#line 1606 "../stray68K/src/assembler/syntactic.y"
+#line 1606 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_STATUS_REGISTER;
 	}
-#line 3641 "../stray68K/src/assembler/syntactic.c"
+#line 3641 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 183: /* operand: TOKEN_CONDITION_CODE_REGISTER  */
-#line 1610 "../stray68K/src/assembler/syntactic.y"
+#line 1610 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_CONDITION_CODE_REGISTER;
 	}
-#line 3649 "../stray68K/src/assembler/syntactic.c"
+#line 3649 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 184: /* operand: TOKEN_USER_STACK_POINTER_REGISTER  */
-#line 1614 "../stray68K/src/assembler/syntactic.y"
+#line 1614 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_USER_STACK_POINTER_REGISTER;
 	}
-#line 3657 "../stray68K/src/assembler/syntactic.c"
+#line 3657 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 185: /* operand: expression  */
-#line 1619 "../stray68K/src/assembler/syntactic.y"
+#line 1619 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS;
 		(yyval.operand).literal = (yyvsp[0].expression);
 		(yyval.operand).size = SIZE_UNDEFINED;
 	}
-#line 3667 "../stray68K/src/assembler/syntactic.c"
+#line 3667 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 186: /* operand: '(' expression ')' size  */
-#line 1625 "../stray68K/src/assembler/syntactic.y"
+#line 1625 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.operand).type = OPERAND_ADDRESS_ABSOLUTE;
 		(yyval.operand).literal = (yyvsp[-2].expression);
 		(yyval.operand).size = (yyvsp[0].size);
 	}
-#line 3677 "../stray68K/src/assembler/syntactic.c"
+#line 3677 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 187: /* operand: register_list  */
-#line 1632 "../stray68K/src/assembler/syntactic.y"
+#line 1632 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		/* Neat trick to check if only one bit is set (yes, I know that it evaluates to true for 0, but that doesn't matter here). */
 		if (((yyvsp[0].unsigned_long) & ((yyvsp[0].unsigned_long) - 1)) == 0)
@@ -3705,35 +3705,35 @@ yyreduce:
 			(yyval.operand).main_register = (yyvsp[0].unsigned_long); /* Such a hack... */
 		}
 	}
-#line 3709 "../stray68K/src/assembler/syntactic.c"
+#line 3709 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 188: /* register_list: register_span  */
-#line 1663 "../stray68K/src/assembler/syntactic.y"
+#line 1663 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.unsigned_long) = (yyvsp[0].unsigned_long);
 	}
-#line 3717 "../stray68K/src/assembler/syntactic.c"
+#line 3717 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 189: /* register_list: register_span '/' register_list  */
-#line 1667 "../stray68K/src/assembler/syntactic.y"
+#line 1667 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.unsigned_long) = (yyvsp[-2].unsigned_long) | (yyvsp[0].unsigned_long);
 	}
-#line 3725 "../stray68K/src/assembler/syntactic.c"
+#line 3725 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 190: /* register_span: data_or_address_register  */
-#line 1674 "../stray68K/src/assembler/syntactic.y"
+#line 1674 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.unsigned_long) = 1 << (yyvsp[0].unsigned_long);
 	}
-#line 3733 "../stray68K/src/assembler/syntactic.c"
+#line 3733 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 191: /* register_span: data_or_address_register '-' data_or_address_register  */
-#line 1678 "../stray68K/src/assembler/syntactic.y"
+#line 1678 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		unsigned long start;
 		unsigned long end;
@@ -3755,333 +3755,333 @@ yyreduce:
 		for (i = start; i <= end; ++i)
 			(yyval.unsigned_long) |= 1 << i;
 	}
-#line 3759 "../stray68K/src/assembler/syntactic.c"
+#line 3759 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 192: /* data_or_address_register: TOKEN_DATA_REGISTER  */
-#line 1703 "../stray68K/src/assembler/syntactic.y"
+#line 1703 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.unsigned_long) = 0 + (yyvsp[0].unsigned_long);
 	}
-#line 3767 "../stray68K/src/assembler/syntactic.c"
+#line 3767 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 193: /* data_or_address_register: TOKEN_ADDRESS_REGISTER  */
-#line 1707 "../stray68K/src/assembler/syntactic.y"
+#line 1707 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.unsigned_long) = 8 + (yyvsp[0].unsigned_long);
 	}
-#line 3775 "../stray68K/src/assembler/syntactic.c"
+#line 3775 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 194: /* expression: expression1  */
-#line 1720 "../stray68K/src/assembler/syntactic.y"
+#line 1720 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 3783 "../stray68K/src/assembler/syntactic.c"
+#line 3783 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 195: /* expression: expression TOKEN_LOGICAL_AND expression1  */
-#line 1725 "../stray68K/src/assembler/syntactic.y"
+#line 1725 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_LOGICAL_AND, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3792 "../stray68K/src/assembler/syntactic.c"
+#line 3792 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 196: /* expression: expression TOKEN_LOGICAL_OR expression1  */
-#line 1731 "../stray68K/src/assembler/syntactic.y"
+#line 1731 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_LOGICAL_OR, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3801 "../stray68K/src/assembler/syntactic.c"
+#line 3801 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 197: /* expression1: expression2  */
-#line 1739 "../stray68K/src/assembler/syntactic.y"
+#line 1739 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 3809 "../stray68K/src/assembler/syntactic.c"
+#line 3809 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 198: /* expression1: expression1 '=' expression2  */
-#line 1743 "../stray68K/src/assembler/syntactic.y"
+#line 1743 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_EQUALITY, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3818 "../stray68K/src/assembler/syntactic.c"
+#line 3818 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 199: /* expression1: expression1 TOKEN_EQUALITY expression2  */
-#line 1748 "../stray68K/src/assembler/syntactic.y"
+#line 1748 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_EQUALITY, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3827 "../stray68K/src/assembler/syntactic.c"
+#line 3827 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 200: /* expression1: expression1 TOKEN_INEQUALITY expression2  */
-#line 1753 "../stray68K/src/assembler/syntactic.y"
+#line 1753 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_INEQUALITY, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3836 "../stray68K/src/assembler/syntactic.c"
+#line 3836 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 201: /* expression2: expression3  */
-#line 1761 "../stray68K/src/assembler/syntactic.y"
+#line 1761 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 3844 "../stray68K/src/assembler/syntactic.c"
+#line 3844 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 202: /* expression2: expression2 '<' expression3  */
-#line 1765 "../stray68K/src/assembler/syntactic.y"
+#line 1765 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_LESS_THAN, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3853 "../stray68K/src/assembler/syntactic.c"
+#line 3853 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 203: /* expression2: expression2 TOKEN_LESS_OR_EQUAL expression3  */
-#line 1770 "../stray68K/src/assembler/syntactic.y"
+#line 1770 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_LESS_OR_EQUAL, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3862 "../stray68K/src/assembler/syntactic.c"
+#line 3862 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 204: /* expression2: expression2 '>' expression3  */
-#line 1775 "../stray68K/src/assembler/syntactic.y"
+#line 1775 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_MORE_THAN, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3871 "../stray68K/src/assembler/syntactic.c"
+#line 3871 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 205: /* expression2: expression2 TOKEN_MORE_OR_EQUAL expression3  */
-#line 1780 "../stray68K/src/assembler/syntactic.y"
+#line 1780 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_MORE_OR_EQUAL, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3880 "../stray68K/src/assembler/syntactic.c"
+#line 3880 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 206: /* expression3: expression4  */
-#line 1788 "../stray68K/src/assembler/syntactic.y"
+#line 1788 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 3888 "../stray68K/src/assembler/syntactic.c"
+#line 3888 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 207: /* expression3: expression3 '+' expression4  */
-#line 1792 "../stray68K/src/assembler/syntactic.y"
+#line 1792 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_ADD, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3897 "../stray68K/src/assembler/syntactic.c"
+#line 3897 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 208: /* expression3: expression3 '-' expression4  */
-#line 1797 "../stray68K/src/assembler/syntactic.y"
+#line 1797 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_SUBTRACT, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3906 "../stray68K/src/assembler/syntactic.c"
+#line 3906 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 209: /* expression4: expression5  */
-#line 1805 "../stray68K/src/assembler/syntactic.y"
+#line 1805 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 3914 "../stray68K/src/assembler/syntactic.c"
+#line 3914 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 210: /* expression4: expression4 '*' expression5  */
-#line 1809 "../stray68K/src/assembler/syntactic.y"
+#line 1809 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_MULTIPLY, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3923 "../stray68K/src/assembler/syntactic.c"
+#line 3923 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 211: /* expression4: expression4 '/' expression5  */
-#line 1814 "../stray68K/src/assembler/syntactic.y"
+#line 1814 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_DIVIDE, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3932 "../stray68K/src/assembler/syntactic.c"
+#line 3932 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 212: /* expression4: expression4 '%' expression5  */
-#line 1819 "../stray68K/src/assembler/syntactic.y"
+#line 1819 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_MODULO, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3941 "../stray68K/src/assembler/syntactic.c"
+#line 3941 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 213: /* expression5: expression6  */
-#line 1827 "../stray68K/src/assembler/syntactic.y"
+#line 1827 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 3949 "../stray68K/src/assembler/syntactic.c"
+#line 3949 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 214: /* expression5: expression5 '&' expression6  */
-#line 1831 "../stray68K/src/assembler/syntactic.y"
+#line 1831 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_BITWISE_AND, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3958 "../stray68K/src/assembler/syntactic.c"
+#line 3958 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 215: /* expression5: expression5 '!' expression6  */
-#line 1836 "../stray68K/src/assembler/syntactic.y"
+#line 1836 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_BITWISE_OR, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3967 "../stray68K/src/assembler/syntactic.c"
+#line 3967 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 216: /* expression5: expression5 '|' expression6  */
-#line 1841 "../stray68K/src/assembler/syntactic.y"
+#line 1841 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_BITWISE_OR, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3976 "../stray68K/src/assembler/syntactic.c"
+#line 3976 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 217: /* expression5: expression5 '^' expression6  */
-#line 1846 "../stray68K/src/assembler/syntactic.y"
+#line 1846 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_BITWISE_XOR, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 3985 "../stray68K/src/assembler/syntactic.c"
+#line 3985 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 218: /* expression6: expression7  */
-#line 1854 "../stray68K/src/assembler/syntactic.y"
+#line 1854 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 3993 "../stray68K/src/assembler/syntactic.c"
+#line 3993 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 219: /* expression6: expression6 TOKEN_LEFT_SHIFT expression7  */
-#line 1858 "../stray68K/src/assembler/syntactic.y"
+#line 1858 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_LEFT_SHIFT, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 4002 "../stray68K/src/assembler/syntactic.c"
+#line 4002 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 220: /* expression6: expression6 TOKEN_RIGHT_SHIFT expression7  */
-#line 1863 "../stray68K/src/assembler/syntactic.y"
+#line 1863 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_RIGHT_SHIFT, &(yyvsp[-2].expression), &(yyvsp[0].expression)))
 			YYNOMEM;
 	}
-#line 4011 "../stray68K/src/assembler/syntactic.c"
+#line 4011 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 221: /* expression7: expression8  */
-#line 1871 "../stray68K/src/assembler/syntactic.y"
+#line 1871 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 4019 "../stray68K/src/assembler/syntactic.c"
+#line 4019 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 222: /* expression7: '+' expression7  */
-#line 1875 "../stray68K/src/assembler/syntactic.y"
+#line 1875 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[0].expression);
 	}
-#line 4027 "../stray68K/src/assembler/syntactic.c"
+#line 4027 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 223: /* expression7: '-' expression7  */
-#line 1879 "../stray68K/src/assembler/syntactic.y"
+#line 1879 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_NEGATE, &(yyvsp[0].expression), NULL))
 			YYNOMEM;
 	}
-#line 4036 "../stray68K/src/assembler/syntactic.c"
+#line 4036 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 224: /* expression7: '~' expression7  */
-#line 1884 "../stray68K/src/assembler/syntactic.y"
+#line 1884 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_BITWISE_NOT, &(yyvsp[0].expression), NULL))
 			YYNOMEM;
 	}
-#line 4045 "../stray68K/src/assembler/syntactic.c"
+#line 4045 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 225: /* expression7: '!' expression7  */
-#line 1890 "../stray68K/src/assembler/syntactic.y"
+#line 1890 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		if (!DoExpression(&(yyval.expression), EXPRESSION_LOGICAL_NOT, &(yyvsp[0].expression), NULL))
 			YYNOMEM;
 	}
-#line 4054 "../stray68K/src/assembler/syntactic.c"
+#line 4054 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 226: /* expression8: TOKEN_NUMBER  */
-#line 1898 "../stray68K/src/assembler/syntactic.y"
+#line 1898 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression).type = EXPRESSION_NUMBER;
 		(yyval.expression).shared.unsigned_long = (yyvsp[0].unsigned_long);
 	}
-#line 4063 "../stray68K/src/assembler/syntactic.c"
+#line 4063 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 227: /* expression8: TOKEN_IDENTIFIER  */
-#line 1903 "../stray68K/src/assembler/syntactic.y"
+#line 1903 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression).type = EXPRESSION_IDENTIFIER;
 		(yyval.expression).shared.string = (yyvsp[0].string);
 	}
-#line 4072 "../stray68K/src/assembler/syntactic.c"
+#line 4072 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 228: /* expression8: TOKEN_LOCAL_IDENTIFIER  */
-#line 1908 "../stray68K/src/assembler/syntactic.y"
+#line 1908 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression).type = EXPRESSION_IDENTIFIER;
 		(yyval.expression).shared.string = (yyvsp[0].string);
 	}
-#line 4081 "../stray68K/src/assembler/syntactic.c"
+#line 4081 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 229: /* expression8: TOKEN_IDENTIFIER TOKEN_LOCAL_IDENTIFIER  */
-#line 1913 "../stray68K/src/assembler/syntactic.y"
+#line 1913 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		const size_t identifier_length = strlen((yyvsp[-1].string));
 		const size_t local_identifier_length = strlen((yyvsp[0].string) + 1);
@@ -4104,53 +4104,53 @@ yyreduce:
 			free((yyvsp[0].string));
 		}
 	}
-#line 4108 "../stray68K/src/assembler/syntactic.c"
+#line 4108 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 230: /* expression8: TOKEN_STRING  */
-#line 1936 "../stray68K/src/assembler/syntactic.y"
+#line 1936 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression).type = EXPRESSION_STRING;
 		(yyval.expression).shared.string = (yyvsp[0].string);
 	}
-#line 4117 "../stray68K/src/assembler/syntactic.c"
+#line 4117 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 231: /* expression8: '*'  */
-#line 1941 "../stray68K/src/assembler/syntactic.y"
+#line 1941 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression).type = EXPRESSION_PROGRAM_COUNTER_OF_STATEMENT;
 	}
-#line 4125 "../stray68K/src/assembler/syntactic.c"
+#line 4125 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 232: /* expression8: '@'  */
-#line 1945 "../stray68K/src/assembler/syntactic.y"
+#line 1945 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression).type = EXPRESSION_PROGRAM_COUNTER_OF_EXPRESSION;
 	}
-#line 4133 "../stray68K/src/assembler/syntactic.c"
+#line 4133 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 233: /* expression8: '(' expression ')'  */
-#line 1949 "../stray68K/src/assembler/syntactic.y"
+#line 1949 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression) = (yyvsp[-1].expression);
 	}
-#line 4141 "../stray68K/src/assembler/syntactic.c"
+#line 4141 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
   case 234: /* expression8: TOKEN_STRLEN '(' TOKEN_STRING ')'  */
-#line 1953 "../stray68K/src/assembler/syntactic.y"
+#line 1953 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
         {
 		(yyval.expression).type = EXPRESSION_STRLEN;
 		(yyval.expression).shared.string = (yyvsp[-1].string);
 	}
-#line 4150 "../stray68K/src/assembler/syntactic.c"
+#line 4150 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
     break;
 
 
-#line 4154 "../stray68K/src/assembler/syntactic.c"
+#line 4154 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.c"
 
       default: break;
     }
@@ -4374,7 +4374,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1959 "../stray68K/src/assembler/syntactic.y"
+#line 1959 "/home/mastro/Developing/C/STRAY68K/stray68K/src/assembler/syntactic.y"
 
 
 static cc_bool DoExpression(Expression *expression, ExpressionType type, Expression *left_expression, Expression *right_expression)

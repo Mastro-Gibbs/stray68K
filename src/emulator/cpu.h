@@ -17,9 +17,9 @@
 #include <stdlib.h>
 
 m68k_cpu* init_cpu(struct EmulationMachine *em);
-m68k_cpu* get_cpu();
-void      reset_cpu();
-void      destroy_cpu();
+m68k_cpu* get_cpu(void);
+void      reset_cpu(void);
+void      destroy_cpu(void);
 
 
 /* REGS */
@@ -34,8 +34,8 @@ void decr_addr_reg(u32 reg, opsize size);
 
 
 /* STACKS */
-u16 pop_word();
-u32 pop_long();
+u16 pop_word(void);
+u32 pop_long(void);
 
 void push_word(u16 word);
 void push_long(u32 longword);
@@ -47,6 +47,6 @@ bit eval_cc(CCm cc);
 
 /* PROGRAM COUNTER */
 void set_pc(u32 pc);
-u32 get_pc();
+u32 get_pc(void);
 
 #endif // __CPU_H__68000

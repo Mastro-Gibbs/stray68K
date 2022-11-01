@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include <sys/time.h>
+
 u32 most_significant_byte(opsize size)
 {
     switch (size)
@@ -322,77 +324,93 @@ void _io_dumps(struct EmulationMachine *em)
                                         \
                                         while ((c = read_byte(rptr++)) == '%' || (c & 0xFF) != 0x00) \
                                         { \
-                                            if (iostr == NULL) {\
-                                                iostr = malloc(2 * sizeof (s8)); \
-                                                iostr[0] = '{'; iostr[1] = '\0'; \
-                                            } \
-                                            \
-                                            if (c != '%') continue; \
-                                            \
-                                            opsize size; \
-                                            char cchar = read_byte(rptr++); \
-                                            \
-                                            switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
-                                                case 'b':    \
-                                                case 'B':    \
-                                                    size = BYTE; \
-                                                    break;   \
-                                                case 'w':    \
-                                                case 'W':    \
-                                                    size = WORD; \
-                                                    break;   \
-                                                case 'l':    \
-                                                case 'L':    \
-                                                    size = LONG; \
-                                                    break;   \
-                                                default:     \
-                                                    continue;   \
-                                            } \
-                                            char ccchar = read_byte(rptr); \
-                                            if (ccchar == 'a' || ccchar == 'A' || \
-                                                ccchar == 'd' || ccchar == 'D') \
-                                            { \
-                                                cchar = ccchar; \
-                                                rptr++; \
-                                            } \
-                                            else continue; \
-                                            \
-                                            char rtype = cchar; \
-                                            \
-                                            cchar = read_byte(rptr++);     \
-                                            index = cchar - 0x30;          \
-                                            if (index > 7) continue;       \
-                                            \
-                                            s32 sf_r;                      \
-                                            sf_r = scanf(" %u", &value);   \
-                                            if (sf_r == 0 || sf_r == EOF)  continue; \
-                                            \
-                                            value &= mask_by_opsize(size); \
-                                            \
-                                            switch (rtype) \
-                                            { \
-                                                case 'a':  \
-                                                case 'A':  \
-                                                { \
-                                                    write_addrreg(index, value, &size);   \
-                                                    break; \
+                                            if (read_byte(rptr) == 't' || read_byte(rptr) == 'T') {  \
+                                                index = read_byte(rptr+1); \
+                                                if (index == 0x00) return; \
+                                                index = index - 0x30;      \
+                                                if (index > 7) continue;   \
+                                                struct timeval tv;         \
+                                                gettimeofday(&tv,NULL);    \
+                                                u32 time = (u32) ((tv.tv_sec * (unsigned long)1000000 + tv.tv_usec) & 0x00000000FFFFFFFF); \
+                                                write_datareg(index, time, NULL); \
+                                                rptr += 2; \
+                                            }\
+                                            else { \
+                                                if (iostr == NULL) {\
+                                                    iostr = malloc(2 * sizeof (s8)); \
+                                                    iostr[0] = '{'; iostr[1] = '\0'; \
                                                 } \
-                                                case 'd':  \
-                                                case 'D':  \
-                                                { \
-                                                    write_datareg(index, value, &size);   \
-                                                    break; \
+                                                \
+                                                if (c != '%') continue; \
+                                                \
+                                                opsize size; \
+                                                char cchar = read_byte(rptr++); \
+                                                if (cchar == 0x00) { free(iostr); iostr = NULL; break; }  \
+                                                \
+                                                switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
+                                                    case 'b':    \
+                                                    case 'B':    \
+                                                        size = BYTE; \
+                                                        break;   \
+                                                    case 'w':    \
+                                                    case 'W':    \
+                                                        size = WORD; \
+                                                        break;   \
+                                                    case 'l':    \
+                                                    case 'L':    \
+                                                        size = LONG; \
+                                                        break;   \
+                                                    default:     \
+                                                        continue;   \
                                                 } \
-                                                default:   \
-                                                    break; \
-                                            } \
-                                            length = snprintf(NULL, 0, "%d", value); \
-                                            if (strlen(iostr) == 1) { \
-                                                iostr  = realloc(iostr, strlen(iostr) + length + 8); \
-                                                sprintf(iostr+strlen(iostr), "\"%c%d\":\"%d\"", rtype, index, value); \
-                                            } else { \
-                                                iostr  = realloc(iostr, strlen(iostr) + length + 9); \
-                                                sprintf(iostr+strlen(iostr), ",\"%c%d\":\"%d\"", rtype, index, value); \
+                                                char ccchar = read_byte(rptr); \
+                                                if (cchar == 0x00) { free(iostr); iostr = NULL; break; }  \
+                                                if (ccchar == 'a' || ccchar == 'A' || \
+                                                    ccchar == 'd' || ccchar == 'D') \
+                                                { \
+                                                    cchar = ccchar; \
+                                                    rptr++; \
+                                                } \
+                                                else continue; \
+                                                \
+                                                char rtype = cchar; \
+                                                \
+                                                cchar = read_byte(rptr++);     \
+                                                if (cchar == 0x00) { free(iostr); iostr = NULL; break; }  \
+                                                index = cchar - 0x30;          \
+                                                if (index > 7) continue;       \
+                                                \
+                                                s32 sf_r;                      \
+                                                sf_r = scanf(" %u", &value);   \
+                                                if (sf_r == 0 || sf_r == EOF)  continue; \
+                                                \
+                                                value &= mask_by_opsize(size); \
+                                                \
+                                                switch (rtype) \
+                                                { \
+                                                    case 'a':  \
+                                                    case 'A':  \
+                                                    { \
+                                                        write_addrreg(index, value, &size);   \
+                                                        break; \
+                                                    } \
+                                                    case 'd':  \
+                                                    case 'D':  \
+                                                    { \
+                                                        write_datareg(index, value, &size);   \
+                                                        break; \
+                                                    } \
+                                                    default:   \
+                                                        break; \
+                                                } \
+                                                length = snprintf(NULL, 0, "%d", value); \
+                                                if (strlen(iostr) == 1) { \
+                                                    iostr  = realloc(iostr, strlen(iostr) + length + 8); \
+                                                    sprintf(iostr+strlen(iostr), "\"%c%d\":\"%d\"", rtype, index, value); \
+                                                } else { \
+                                                    iostr  = realloc(iostr, strlen(iostr) + length + 9); \
+                                                    sprintf(iostr+strlen(iostr), ",\"%c%d\":\"%d\"", rtype, index, value); \
+                                                } \
                                             } \
                                         } \
                                         if (iostr != NULL) { \

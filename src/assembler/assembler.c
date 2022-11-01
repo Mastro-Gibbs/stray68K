@@ -178,7 +178,7 @@ int assemble(int argc, char **argv)
                     FILE *output_file_tmp;
 
                     input_file = fopen(input_file_path, "r");
-                    output_file_tmp = fopen(output_file_tmp_path, "w");
+                    output_file_tmp = fopen(output_file_tmp_path, "wb");
 
                     if (output_file_tmp == NULL)
                     {
@@ -221,8 +221,8 @@ int assemble(int argc, char **argv)
                         {
                             fclose(output_file_tmp);
 
-                            output_file_tmp = fopen(output_file_tmp_path, "r");
-                            output_file     = fopen(output_file_path, "w");
+                            output_file_tmp = fopen(output_file_tmp_path, "rb");
+                            output_file     = fopen(output_file_path, "wb");
 
                             if (output_file == NULL || output_file_tmp == NULL)
                             {
@@ -231,7 +231,7 @@ int assemble(int argc, char **argv)
                             else
                             {
                                 char ch;
-                                while((ch = fgetc(output_file_tmp)) != EOF)
+                                while(fread(&ch, 1, 1, output_file_tmp) != 0)
                                       fputc(ch, output_file);
 
                                 fclose(output_file);

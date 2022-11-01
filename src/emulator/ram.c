@@ -44,12 +44,12 @@ m68k_ram* init_ram(struct EmulationMachine *em)
     return (ram);
 }
 
-m68k_ram* get_ram()
+m68k_ram* get_ram(void)
 {
     return (ram);
 }
 
-void erase_ram()
+void erase_ram(void)
 {
     if (ram)
     {
@@ -62,7 +62,7 @@ void erase_ram()
     ram = NULL;
 }
 
-void destroy_ram()
+void destroy_ram(void)
 {
     if (ram)
     {

@@ -10,19 +10,27 @@
 #include "ram.h"
 #include "JSON.h"
 
-#define SEPARATOR      '\n'
-#define SIMHALT_SYMBOL '!'
-#define ORG_SYMBOL     'o'
+#define SIMHALT_SYMBOL  0xAC
+#define ORG_SYMBOL      'o'
 #define ORG_DEFAULT     0x00000000
+
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
+
+bit halt_compare(u8 *s1)
+{
+    u8 halt[8] = {0xAC, 0xAC, 0xFF, 0xFF, 0xFF, 0xFF, 0xAC, 0xAC};
+
+    for (u16 i = 0; i < 8; i++)
+        if (s1[i] != halt[i]) return FALSE;
+
+    return TRUE;
+}
 
 
 /* LOADER */
 bit _is_valid_file(struct EmulationMachine *em)
 {
     FILE    *fp;
-    char    *line = NULL;
-    size_t  len   = 0;
-    ssize_t read;
 
     const char* ldot = strrchr(em->ExecArgs.executable_path, '.');
     if (ldot != NULL)
@@ -39,110 +47,86 @@ bit _is_valid_file(struct EmulationMachine *em)
     if (fp == NULL)
         EMULATOR_ERROR("File not found, be sure to pass correct path.")
 
-    read = getline(&line, &len, fp);
-    if (read == -1)
-        EMULATOR_ERROR("Empty file!")
+    fseek(fp, 0L, SEEK_END);
+    if (ftell(fp) == 0L)
+        EMULATOR_ERROR("Empty bin file.")
 
     fclose(fp);
 
     return 1;
 }
 
+
+
 FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
 {
-    FILE   *fp;
-    char   *line = NULL;
-    char   *end  = NULL;
-    size_t  len   = 0;
+    FILE *fp;
 
-    regex_t    regex;
-    const char *regex_str = "o[0-9a-fA-F]{8}\n";
-
-    if (regcomp(&regex, regex_str, REG_EXTENDED) == 1)
-        EMULATOR_ERROR("Could not compile regex %s", regex_str)
-
+    s8  is_org = 0;
+    u8  org[4];
     u32 value = ORG_DEFAULT;
 
-    char org[9];
+    fp = fopen(em->ExecArgs.executable_path, "rb");
 
-    fp = fopen(em->ExecArgs.executable_path, "r");
+    if (fread(&is_org, 1, 1, fp) == 0)
+        EMULATOR_ERROR("Error incomes while loading invalid binary");
 
-    if (getline(&line, &len, fp) != 0)
+    if (is_org == ORG_SYMBOL)
     {
-        if (!regexec(&regex, line, 0, NULL, 0))
-        {
-            strncpy(org, line+1, 8);
-            value = (u32) strtol(org, &end, 16);
-        }
-        else
-        {
-            fseek(fp, 0, SEEK_SET);
-        }
+        if (fread(org, ARRAY_SIZE(org), sizeof (*org), fp) == 0)
+            EMULATOR_ERROR("Error incomes while loading binary");
 
-        em->Machine.RuntimeData.org_pointer = value;
-        em->Machine.cpu->pc                 = value;
-
-        regfree(&regex);
-
-        return fp;
+        value = (org[0] << 24) | (org[1] << 16) | (org[2] << 8) | org[3];
     }
-    else EMULATOR_ERROR("Error incomes while loading invalid bytecode")
+    else
+        fseek(fp, 0, SEEK_SET);
+
+    em->Machine.RuntimeData.org_pointer = value;
+    em->Machine.cpu->pc                 = value;
+
+    return fp;
 }
 
 void load_bytecode(struct EmulationMachine *em)
 {
     FILE  *fp;
 
-    regex_t    regex;
-    const char *regex_str = "[0-9a-fA-F!\n]+";
-
-    s32 reti;
-    s8  ch;
+    u8  byte;
     u32 span = 0;
-
-    if (regcomp(&regex, regex_str, REG_EXTENDED) == 1)
-    {
-        regfree(&regex);
-        EMULATOR_ERROR("Could not compile regex %s", regex_str)
-    }
 
     fp = open_file_and_extract_ORG(em);
 
-    char symbol[3];
-    symbol[2] = '\0';
-
-    while((ch = fgetc(fp)) != EOF)
+    while (fread(&byte, 1, 1, fp) != 0)
     {
-        reti = regexec(&regex, &ch, 0, NULL, 0);
-        if (!reti)
+        if (byte == SIMHALT_SYMBOL)
         {
-            if (ch == SIMHALT_SYMBOL)
+            u8 sh[8] = {byte, 0, 0, 0, 0, 0, 0, 0};
+
+            u16 i   = 1;
+            u32 len = 1;
+
+            for (; i < 8 && len != 0; i++)
+                len = fread(&sh[i], 1, 1, fp);
+
+            if (halt_compare(sh) && em->Machine.RuntimeData.simhalt == 0)
             {
-                if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = em->Machine.cpu->pc + span;
+                em->Machine.RuntimeData.simhalt = em->Machine.cpu->pc + span;
+                continue;
             }
-            else if (ch != SEPARATOR)
-            {
-                symbol[0] = ch;
-                symbol[1] = fgetc(fp);
-
-                char *end = NULL;
-
-                u8 val = strtol(symbol, &end, 16);
-
-                write_byte(em->Machine.cpu->pc + span, val);
-                span += BYTE_SPAN;
-            }
+            else fseek(fp, ftell(fp) - ((!len) ? (i-2) : (i-1)),  SEEK_SET);
         }
-        else EMULATOR_ERROR("Error incomes while loading invalid bytecode")
+
+        write_byte(em->Machine.cpu->pc + span, byte);
+        span += BYTE_SPAN;
     }
+
 
     fclose(fp);
 
     em->Machine.RuntimeData.last_loaded_byte_index = em->Machine.cpu->pc + span;
 
-    regfree(&regex);
-
-    if (em->Machine.RuntimeData.simhalt == 0) em->Machine.RuntimeData.simhalt = em->Machine.RuntimeData.last_loaded_byte_index;
+    if (em->Machine.RuntimeData.simhalt == 0)
+        em->Machine.RuntimeData.simhalt = em->Machine.RuntimeData.last_loaded_byte_index;
 
 }
 
@@ -300,6 +284,55 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
     }
 }
 
+
+void __init(struct EmulationMachine *this)
+{
+    this->Machine.cpu = init_cpu(this);
+
+    if (this->Machine.State == PANIC_STATE)
+    {
+        PANIC(this->Machine.Exception.panic_cause);
+
+        if (this->ExecArgs.JSON.is_activated)
+            emit_dump(this);
+
+        exit(EXIT_FAILURE);
+    }
+
+    init_opcodes(this);
+
+    if (this->Machine.State == PANIC_STATE)
+    {
+        PANIC(this->Machine.Exception.panic_cause);
+
+        if (this->ExecArgs.JSON.is_activated)
+            emit_dump(this);
+
+        exit(EXIT_FAILURE);
+    }
+
+    this->Machine.ram = init_ram(this);
+
+    if (this->Machine.State == PANIC_STATE)
+    {
+        PANIC(this->Machine.Exception.panic_cause);
+
+        if (this->ExecArgs.JSON.is_activated)
+            emit_dump(this);
+
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+void __turnoff()
+{
+    destroy_cpu();
+    destroy_ram();
+    destroy_codes();
+}
+
+
 struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 {
     struct EmulationMachine em;
@@ -333,41 +366,8 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 
     parse_args(&em, argc, argv);
 
-    em.Machine.cpu = init_cpu(&em);
-
-    if (em.Machine.State == PANIC_STATE)
-    {
-        PANIC(em.Machine.Exception.panic_cause);
-
-        if (em.ExecArgs.JSON.is_activated)
-            emit_dump(&em);
-
-        exit(EXIT_FAILURE);
-    }
-
-    init_codes(&em);
-
-    if (em.Machine.State == PANIC_STATE)
-    {
-        PANIC(em.Machine.Exception.panic_cause);
-
-        if (em.ExecArgs.JSON.is_activated)
-            emit_dump(&em);
-
-        exit(EXIT_FAILURE);
-    }
-
-    em.Machine.ram = init_ram(&em);
-
-    if (em.Machine.State == PANIC_STATE)
-    {
-        PANIC(em.Machine.Exception.panic_cause);
-
-        if (em.ExecArgs.JSON.is_activated)
-            emit_dump(&em);
-
-        exit(EXIT_FAILURE);
-    }
+    em.Machine.init    = __init;
+    em.Machine.turnoff = __turnoff;
 
     return em;
 }
@@ -377,12 +377,13 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 int emulate(int argc, char** argv)
 {
     struct EmulationMachine em = obtain_emulation_machine(argc, argv);
+    em.Machine.init(&em);
 
     preset_hander(&em);
 
     load_bytecode(&em);
 
-    emit_sys_status(&em);
+    emit_sys_status(&em); // for no-quiet mode
 
     em.Machine.State = EXECUTION_STATE;
 
@@ -413,8 +414,7 @@ int emulate(int argc, char** argv)
 
             emit_sys_status(&em);
 
-            destroy_cpu();
-            destroy_ram();
+            em.Machine.turnoff();
 
             return (EXIT_FAILURE);
         }
@@ -426,12 +426,11 @@ int emulate(int argc, char** argv)
 
     em.Machine.State = FINAL_STATE;
 
-    machine_waiter(&em);
+    machine_waiter(&em);  // for sbs mode
 
-    emit_sys_status(&em);
+    emit_sys_status(&em); // for no-quiet mode
 
-    destroy_cpu();
-    destroy_ram();
+    em.Machine.turnoff();
 
     return (EXIT_SUCCESS);
 }

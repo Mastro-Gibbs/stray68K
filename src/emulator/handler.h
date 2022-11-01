@@ -8,11 +8,11 @@
 #include "ram.h"
 
 
-void init_codes(struct EmulationMachine *em);
-void destroy_codes();
+void init_opcodes(struct EmulationMachine *em);
+void destroy_codes(void);
 
 void preset_hander(struct EmulationMachine *em);
-u32  run_opcode();
+u32  run_opcode(void);
 
 
 
@@ -23,130 +23,130 @@ u32  run_opcode();
  *
  */
 // GROUP 0x00
-u32 ORItoCCR();  //ok
-u32 ORItoSR();   //ok
-u32 ORI();       //ok
-u32 ANDItoCCR(); //ok
-u32 ANDItoSR();  //ok
-u32 ANDI();      //ok
-u32 SUBI();      //ok
-u32 ADDI();      //ok
-u32 EORItoCCR(); //ok
-u32 EORItoSR();  //ok
-u32 EORI();      //ok
-u32 CMPI();      //ok
-u32 MOVEP();     // maybe next -warn
-u32 BTST();      //ok
-u32 BCHG();      //ok
-u32 BCLR();      //ok
-u32 BSET();      //ok
+u32 ORItoCCR(void);  //ok
+u32 ORItoSR(void);   //ok
+u32 ORI(void);       //ok
+u32 ANDItoCCR(void); //ok
+u32 ANDItoSR(void);  //ok
+u32 ANDI(void);      //ok
+u32 SUBI(void);      //ok
+u32 ADDI(void);      //ok
+u32 EORItoCCR(void); //ok
+u32 EORItoSR(void);  //ok
+u32 EORI(void);      //ok
+u32 CMPI(void);      //ok
+u32 MOVEP(void);     // maybe next -warn
+u32 BTST(void);      //ok
+u32 BCHG(void);      //ok
+u32 BCLR(void);      //ok
+u32 BSET(void);      //ok
 
 
 // GROUP 0x01
-u32 MOVE();   //ok
+u32 MOVE(void);   //ok
 
 
 // GROUP 0x02-0x03
-u32 MOVEA();  //ok
+u32 MOVEA(void);  //ok
 
 
 // group 0X04
-u32 MOVEfromSR(); //ok
-u32 MOVEtoCCR();  //ok
-u32 MOVEtoSR();   //ok
-u32 NEGX();       //ok
-u32 CLR();        //ok
-u32 NEG();        //ok
-u32 NOT();        //ok
-u32 EXT();        //ok
-u32 NBCD();       //ok
-u32 SWAP();       //ok
-u32 PEA();        //ok
-u32 ILLEGAL();    //ok
-u32 TAS();        // ?? -warn
-u32 TST();        //ok
-u32 TRAP();       //ok
-u32 LINK();       //ok
-u32 UNLK();       //ok
-u32 MOVEUSP();    //ok
-u32 RESET();      // ?? -warn
-u32 NOP();        //ok
-u32 STOP();       // ?? -warn
-u32 RTE();        //ok
-u32 RTS();        //ok
-u32 TRAPV();      //ok
-u32 RTR();        //ok
-u32 JSR();        //ok
-u32 JMP();        //ok
-u32 MOVEM();      // wtf -warn
-u32 CHK();        // ok -warn
-u32 LEA();        //ok
+u32 MOVEfromSR(void); //ok
+u32 MOVEtoCCR(void);  //ok
+u32 MOVEtoSR(void);   //ok
+u32 NEGX(void);       //ok
+u32 CLR(void);        //ok
+u32 NEG(void);        //ok
+u32 NOT(void);        //ok
+u32 EXT(void);        //ok
+u32 NBCD(void);       //ok
+u32 SWAP(void);       //ok
+u32 PEA(void);        //ok
+u32 ILLEGAL(void);    //ok
+u32 TAS(void);        // ?? -warn
+u32 TST(void);        //ok
+u32 TRAP(void);       //ok
+u32 LINK(void);       //ok
+u32 UNLK(void);       //ok
+u32 MOVEUSP(void);    //ok
+u32 RESET(void);      // ?? -warn
+u32 NOP(void);        //ok
+u32 STOP(void);       // ?? -warn
+u32 RTE(void);        //ok
+u32 RTS(void);        //ok
+u32 TRAPV(void);      //ok
+u32 RTR(void);        //ok
+u32 JSR(void);        //ok
+u32 JMP(void);        //ok
+u32 MOVEM(void);      // wtf -warn
+u32 CHK(void);        // ok -warn
+u32 LEA(void);        //ok
 
 
 // GROUP 0x05
-u32 DBcc();      //ok
-u32 Scc();       //ok
-u32 ADDQ();      //ok
-u32 SUBQ();      //ok
+u32 DBcc(void);      //ok
+u32 Scc(void);       //ok
+u32 ADDQ(void);      //ok
+u32 SUBQ(void);      //ok
 
 
 // GROUP 0x06
-u32 BRA();      //ok
-u32 BSR();      //ok
-u32 Bcc();      //ok
+u32 BRA(void);      //ok
+u32 BSR(void);      //ok
+u32 Bcc(void);      //ok
 
 
 // GROUP 0x07
-u32 MOVEQ();     //ok
+u32 MOVEQ(void);     //ok
 
 
 // GROUP 0x08
-u32 DIVU();   //ok
-u32 DIVS();   //ok
-u32 SBCD();   //ok
-u32 OR();     //ok
+u32 DIVU(void);   //ok
+u32 DIVS(void);   //ok
+u32 SBCD(void);   //ok
+u32 OR(void);     //ok
 
 
 // GROUP 0x09
-u32 SUBA();  //ok
-u32 SUBX();  //ok
-u32 SUB();   //ok
+u32 SUBA(void);  //ok
+u32 SUBX(void);  //ok
+u32 SUB(void);   //ok
 
 
 // GROUP 0x0B
-u32 CMPA();  //ok
-u32 CMPM();  //ok
-u32 EOR();   //ok
-u32 CMP();   //ok
+u32 CMPA(void);  //ok
+u32 CMPM(void);  //ok
+u32 EOR(void);   //ok
+u32 CMP(void);   //ok
 
 
 // GROUP 0x0C
-u32 MULU();  //ok
-u32 MULS();  //ok
-u32 ABCD();  //ok
-u32 EXG();   //ok
-u32 AND();   //ok
+u32 MULU(void);  //ok
+u32 MULS(void);  //ok
+u32 ABCD(void);  //ok
+u32 EXG(void);   //ok
+u32 AND(void);   //ok
 
 
 // GROUP 0x0D
-u32 ADDA();  //ok
-u32 ADDX();  //ok
-u32 ADD();   //ok
+u32 ADDA(void);  //ok
+u32 ADDX(void);  //ok
+u32 ADD(void);   //ok
 
 
 // GROUP 0x0E
-u32 ASR();   //ok
-u32 ASL();   //ok
-u32 LSR();   //ok
-u32 LSL();   //ok
-u32 ROXR();  //ok
-u32 ROXL();  //ok
-u32 ROR();   //ok
-u32 ROL();   //ok
+u32 ASR(void);   //ok
+u32 ASL(void);   //ok
+u32 LSR(void);   //ok
+u32 LSL(void);   //ok
+u32 ROXR(void);  //ok
+u32 ROXL(void);  //ok
+u32 ROR(void);   //ok
+u32 ROL(void);   //ok
 
 
 //Bxxx
-u32 Bxxx();
+u32 Bxxx(void);
 
 
 //abcd-sbcd
@@ -155,10 +155,10 @@ u32 perform_BCD(BCD_type type, u32 src, u32 dest);
 
 
 //A-Lxx
-u32 ALxx();
+u32 ALxx(void);
 
 //Roxx
-u32 ROxx();
+u32 ROxx(void);
 
 /*
  * END DUMBS PROTOS

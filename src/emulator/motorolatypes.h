@@ -59,7 +59,7 @@ typedef struct __m68k__cpu__
 
     u32 (*exec) (struct EmulationMachine *em); // runner
 
-    void (*show)();
+    void (*show)(void);
 
 } m68k_cpu;
 
@@ -83,7 +83,7 @@ typedef struct __m68k__opcode__
     opcode mask;
     char*  mnemonic;
 
-    u32 (*handler) ();
+    u32 (*handler) (void);
 
 } m68k_opcode;
 
@@ -181,6 +181,9 @@ struct EmulationMachine
             char *buffer;
             enum { INPUT = 0,    OUTPUT = 1,  IO_UNDEF = 2 } Type;
         } IO;
+
+        void (*init)    (struct EmulationMachine *this);
+        void (*turnoff) ();
 
     } Machine;
 
