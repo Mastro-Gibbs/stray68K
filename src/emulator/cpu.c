@@ -252,7 +252,7 @@ void __show__(void)
 
 
 // DATA REGS GETTER & SETTER
-u32 read_datareg(u32 reg)
+u32 read_datareg(const u32 reg)
 {
     if (reg < 8)
         return cpu->data_r[reg];
@@ -263,7 +263,7 @@ u32 read_datareg(u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_datareg(u32 reg, u32 val, opsize *size)
+void  write_datareg(const u32 reg, const u32 val, opsize* const size)
 {
     opsize static_size;
 
@@ -294,7 +294,7 @@ void  write_datareg(u32 reg, u32 val, opsize *size)
     }
 }
 
-u32 read_addrreg(u32 reg)
+u32 read_addrreg(const u32 reg)
 {
     if (reg < 8)
     {
@@ -312,7 +312,7 @@ u32 read_addrreg(u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_addrreg(u32 reg, u32 val, opsize *size)
+void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
 {
     if (reg > 7) return;
 
@@ -388,7 +388,7 @@ void  write_addrreg(u32 reg, u32 val, opsize *size)
     }
 }
 
-void incr_addr_reg(u32 reg, opsize size)
+void incr_addr_reg(const u32 reg, const opsize size)
 {
     u32 tmp = read_addrreg(reg);
 
@@ -402,7 +402,7 @@ void incr_addr_reg(u32 reg, opsize size)
     write_addrreg(reg, tmp, NULL);
 }
 
-void decr_addr_reg(u32 reg, opsize size)
+void decr_addr_reg(const u32 reg, const opsize size)
 {
     u32 tmp = read_addrreg(reg);
 
@@ -439,7 +439,7 @@ u32 pop_long(void)
     return (value);
 }
 
-void push_word(u16 word)
+void push_word(const u16 word)
 {
     u32 stack = read_addrreg(7);
     stack -= WORD_SPAN;
@@ -447,7 +447,7 @@ void push_word(u16 word)
     write_word(stack, word);
 }
 
-void push_long(u32 longword)
+void push_long(const u32 longword)
 {
     u32 stack = read_addrreg(7);
     stack -= LONG_SPAN;
@@ -458,7 +458,7 @@ void push_long(u32 longword)
 
 
 /* CONDITION CODES */
-bit eval_cc(CCm cc)
+bit eval_cc(const CCm cc)
 {
     switch (cc) {
         case T:
@@ -501,7 +501,7 @@ bit eval_cc(CCm cc)
 
 
 /* PROGRAM COUNTER */
-void set_pc(u32 pc) { cpu->pc = pc; }
+void set_pc(const u32 pc) { cpu->pc = pc; }
 
 u32 get_pc(void) { return (cpu->pc); }
 

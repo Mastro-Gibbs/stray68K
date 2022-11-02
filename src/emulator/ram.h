@@ -15,14 +15,14 @@ void      destroy_ram(void);
 
 
 /* MEMORY READ */
-u8  read_byte(u32 pointer);
-u16 read_word(u32 pointer);
-u32 read_long(u32 pointer);
+u8  read_byte(const u32 pointer);
+u16 read_word(const u32 pointer);
+u32 read_long(const u32 pointer);
 
 /* MEMORY WRITE */
-void write_byte(u32 pointer, u8  value);
-void write_word(u32 pointer, u16 value);
-void write_long(u32 pointer, u32 value);
+void write_byte(const u32 pointer, const u8  value);
+void write_word(const u32 pointer, const u16 value);
+void write_long(const u32 pointer, const u32 value);
 
 
 

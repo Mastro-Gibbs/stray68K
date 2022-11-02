@@ -96,21 +96,21 @@ void check_addr(u32 pointer, u32 iospan)
 
 
 /* MEMORY READ */
-u8 read_byte(u32 pointer)
+u8 read_byte(const u32 pointer)
 {
     check_addr(pointer, BYTE_SPAN);
 
     return ram->ram[pointer];
 }
 
-u16 read_word(u32 pointer)
+u16 read_word(const u32 pointer)
 {
     check_addr(pointer, WORD_SPAN);
 
     return (u16)((ram->ram[pointer] << 8) + ram->ram[pointer + 1]);
 }
 
-u32 read_long(u32 pointer)
+u32 read_long(const u32 pointer)
 {
     check_addr(pointer, LONG_SPAN);
 
@@ -120,14 +120,14 @@ u32 read_long(u32 pointer)
 
 
 /* MEMORY WRITE */
-void write_byte(u32 pointer, u8 value)
+void write_byte(const u32 pointer, const u8 value)
 {
     check_addr(pointer, BYTE_SPAN);
 
     ram->ram[pointer] = value;
 }
 
-void write_word(u32 pointer, u16 value)
+void write_word(const u32 pointer, const u16 value)
 {
     check_addr(pointer, WORD_SPAN);
 
@@ -135,7 +135,7 @@ void write_word(u32 pointer, u16 value)
     ram->ram[pointer + 1] = (u8)(value & 0xFF);
 }
 
-void write_long(u32 pointer, u32 value)
+void write_long(const u32 pointer, const u32 value)
 {
     check_addr(pointer, LONG_SPAN);
 

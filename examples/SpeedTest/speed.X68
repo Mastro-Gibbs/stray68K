@@ -1,7 +1,6 @@
 ;
 ; Do a loop from 0 to 0xFFFF.
 ; Get chrono.
-; Would you compare it with python? run 'time python3 speed.py' :)
 ;   
 ; Author: Stefano Fattore aka MastroGibbs
 ;

@@ -69,6 +69,7 @@ generators: $(ASSEMBLER_DIR)/lexical.c $(ASSEMBLER_DIR)/lexical.h $(ASSEMBLER_DI
 
 all: generators $(BUILD_DIR)/stray68K
 
+
 clean:
 	-$(DEL_FILE) $(OBJECTS)
 	-$(DEL_FILE) $(TARGET)
@@ -78,6 +79,7 @@ cleanassembler:
 
 cleanall: clean cleanassembler
 
+rebuild: cleanall all
 
 ####### Create dirs
 

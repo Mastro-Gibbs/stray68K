@@ -2,7 +2,7 @@
 
 #include <sys/time.h>
 
-u32 most_significant_byte(opsize size)
+u32 most_significant_byte(const opsize size)
 {
     switch (size)
     {
@@ -21,7 +21,7 @@ u32 most_significant_byte(opsize size)
 }
 
 
-u32 mask_by_opsize(opsize size)
+u32 mask_by_opsize(const opsize size)
 {
     switch (size)
     {
@@ -65,7 +65,7 @@ u32 read_ram(u32 *addr, opsize *size)
 
 
 /* MISC */
-sspan size_to_span(opsize size)
+sspan size_to_span(const opsize size)
 {
     switch (size) {
         case BYTE:
@@ -77,7 +77,7 @@ sspan size_to_span(opsize size)
     }
 }
 
-bit is_ram_op(ADDRMode *mode)
+bit is_ram_op(ADDRMode* const mode)
 {
     switch (*mode)
     {
@@ -92,7 +92,7 @@ bit is_ram_op(ADDRMode *mode)
 }
 
 
-bit is_addr_to_data_op(ADDRMode *mode)
+bit is_addr_to_data_op(ADDRMode* const mode)
 {
     switch (*mode)
     {
@@ -106,7 +106,7 @@ bit is_addr_to_data_op(ADDRMode *mode)
 
 
 /* TRAP */
-char* trap_code_toString(u32 trapcode)
+char* trap_code_toString(const u32 trapcode)
 {
     switch (trapcode) {
         case BusError:
@@ -226,10 +226,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'x': \
                                                         { \
                                                             cchar = read_byte(rptr++);          \
-                                                            u32 index  = cchar - 0x30;          \
+                                                            const u32 index  = cchar - 0x30;          \
                                                             if (index > 7) break; \
-                                                            u32 value  = read_datareg(index) & mask_by_opsize(size);   \
-                                                            u32 length = snprintf(NULL, 0, "%x", value); \
+                                                            const u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            const u32 length = snprintf(NULL, 0, "%x", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%x", value); \
                                                             break; \
@@ -237,10 +237,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'X': \
                                                         { \
                                                             cchar = read_byte(rptr++);          \
-                                                            u32 index  = cchar - 0x30;          \
+                                                            const u32 index  = cchar - 0x30;          \
                                                             if (index > 7) break; \
-                                                            u32 value  = read_datareg(index) & mask_by_opsize(size);   \
-                                                            u32 length = snprintf(NULL, 0, "%X", value); \
+                                                            const u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            const u32 length = snprintf(NULL, 0, "%X", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%X", value); \
                                                             break; \
@@ -253,12 +253,12 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'L':  \
                                                         { \
                                                             cchar = read_byte(rptr++);          \
-                                                            u32 index  = cchar - 0x30;          \
+                                                            const u32 index  = cchar - 0x30;          \
                                                             if (index > 7) break; \
-                                                            u32 value  = read_datareg(index);   \
+                                                            const u32 value  = read_datareg(index);   \
                                                             s32 sval;                           \
                                                             SIGN_EXTENDED(sval, value, size);   \
-                                                            u32 length = snprintf(NULL, 0, "%d", sval); \
+                                                            const u32 length = snprintf(NULL, 0, "%d", sval); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%d", sval); \
                                                             break; \
@@ -267,10 +267,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'A':  \
                                                         { \
                                                             cchar = read_byte(rptr++);        \
-                                                            u32 index  = cchar - 0x30;        \
+                                                            const u32 index  = cchar - 0x30;        \
                                                             if (index > 7) break; \
-                                                            u32 value  = read_addrreg(index) & mask_by_opsize(size);   \
-                                                            u32 length = snprintf(NULL, 0, "%X", value); \
+                                                            const u32 value  = read_addrreg(index) & mask_by_opsize(size);   \
+                                                            const u32 length = snprintf(NULL, 0, "%X", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%X", value); \
                                                             break; \
@@ -279,10 +279,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'D':  \
                                                         { \
                                                             cchar = read_byte(rptr++);        \
-                                                            u32 index  = cchar - 0x30;        \
+                                                            const u32 index  = cchar - 0x30;        \
                                                             if (index > 7) break; \
-                                                            u32 value  = read_datareg(index) & mask_by_opsize(size);   \
-                                                            u32 length = snprintf(NULL, 0, "%u", value); \
+                                                            const u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            const u32 length = snprintf(NULL, 0, "%u", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%u", value); \
                                                             break; \
