@@ -96,11 +96,11 @@ struct __m68k__codemap__ *codemap   = NULL;
                                                             case moveq:  \
                                                             case divu:  \
                                                             case divs:  \
-                                                            case or:  \
+                                                            case _or:  \
                                                             case eor:  \
                                                             case mulu:  \
                                                             case muls:  \
-                                                            case and:  \
+                                                            case _and:  \
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
                                                                 SET_OVERFLOW(0);  \
@@ -128,7 +128,7 @@ struct __m68k__codemap__ *codemap   = NULL;
                                                                 break;  \
                                                             case cmpi:  \
                                                             case cmpm:  \
-                                                            case cmp:  \
+                                                            case _cmp:  \
                                                             case cmpa:  \
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
@@ -149,9 +149,9 @@ struct __m68k__codemap__ *codemap   = NULL;
                                                                 SET_CARRY((res & mask) != 0);  \
                                                                 SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 break;  \
-                                                            case not:  \
+                                                            case _not:  \
                                                             case ext:  \
-                                                            case swap:  \
+                                                            case _swap:  \
                                                             case tst:  \
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
@@ -758,7 +758,7 @@ u32 NOT(void)
 
     WRITE_EFFECTIVE_ADDRESS(dst, (u32) result, size, mode);
 
-    SET_SRFLAGS(not, size, src_value, 0, (u32) result);
+    SET_SRFLAGS(_not, size, src_value, 0, (u32) result);
 
     return (RETURN_OK);
 }
@@ -831,7 +831,7 @@ u32 SWAP(void)
     val = (val >> 16) | ((val & 0x0000FFFF) << 16);
 
     write_datareg(code & reg_mask, val, NULL);
-    SET_SRFLAGS(swap, LONG, 0, 0, val);
+    SET_SRFLAGS(_swap, LONG, 0, 0, val);
 
     return (RETURN_OK);
 }
@@ -1646,7 +1646,7 @@ u32 OR(void)
         if (*mode == ADDRESSPostIncr) incr_addr_reg(*dst, *size);
     }
 
-    SET_SRFLAGS(or, *size, 0, 0, _val);
+    SET_SRFLAGS(_or, *size, 0, 0, _val);
 
     SHOULD_INCR_PC(*size, *mode); // for IMMEDIATE mode
 
@@ -1863,7 +1863,7 @@ u32 EOR(void)
 
     if (*mode == ADDRESSPostIncr) incr_addr_reg(*dst, *size);
 
-    SET_SRFLAGS(or, *size, 0, 0, _val);
+    SET_SRFLAGS(_or, *size, 0, 0, _val);
 
     SHOULD_INCR_PC(*size, *mode); // for IMMEDIATE mode
 
@@ -1912,7 +1912,7 @@ u32 CMP(void)
 
     s32 result  = (signDST - signSRC);
 
-    SET_SRFLAGS(cmp, size, (u32) signSRC, (u32) signDST, (u32) result);
+    SET_SRFLAGS(_cmp, size, (u32) signSRC, (u32) signDST, (u32) result);
 
     return (RETURN_OK);
 }
@@ -2055,7 +2055,7 @@ u32 AND(void)
         if (*mode == ADDRESSPostIncr) incr_addr_reg(*dst, *size);
     }
 
-    SET_SRFLAGS(or, *size, 0, 0, _val);
+    SET_SRFLAGS(_or, *size, 0, 0, _val);
 
     SHOULD_INCR_PC(*size, *mode); // for IMMEDIATE mode
 

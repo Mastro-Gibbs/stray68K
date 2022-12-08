@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/theme">
+        <file>theme/DarkTheme.json</file>
+        <file>theme/LightTheme.json</file>
+    </qresource>
+</RCC>

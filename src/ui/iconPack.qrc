@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>img/run.png</file>
+        <file>img/close.png</file>
+        <file>img/newfile.png</file>
+        <file>img/open.png</file>
+        <file>img/folder.png</file>
+        <file>img/save.png</file>
+        <file>img/zoomin.png</file>
+        <file>img/zoomout.png</file>
+        <file>img/fileicon.png</file>
+        <file>img/red_x.png</file>
+        <file>img/project.png</file>
+        <file>img/newproj.png</file>
+        <file>img/settings.png</file>
+        <file>img/method.png</file>
+        <file>img/shebang.png</file>
+        <file>img/nativeKeyword.png</file>
+        <file>img/param.png</file>
+        <file>img/splash.jpg</file>
+        <file>img/file.png</file>
+    </qresource>
+</RCC>

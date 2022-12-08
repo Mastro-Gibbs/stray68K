@@ -182,7 +182,7 @@ struct EmulationMachine
             enum { INPUT = 0,    OUTPUT = 1,  IO_UNDEF = 2 } Type;
         } IO;
 
-        void (*init)    (struct EmulationMachine *this);
+        void (*init)    (struct EmulationMachine *_this);
         void (*turnoff) ();
 
     } Machine;

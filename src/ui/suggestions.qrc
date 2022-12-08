@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/keywords">
+        <file>keywords/keywords</file>
+        <file>keywords/regs</file>
+        <file>keywords/directives</file>
+    </qresource>
+</RCC>
