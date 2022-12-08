@@ -3020,7 +3020,7 @@ u32 run_opcode()
         return (RETURN_ERR);
     }
 
-    machine_waiter(emulation);
+    emit_dump(emulation);
 
     const u32 res = tmp->handler();
 

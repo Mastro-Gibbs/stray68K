@@ -23,6 +23,12 @@
 #define RECENT_FILES_PATH    "recent_files"
 #define RECENT_PROJECTS_PATH "recent_projects"
 
+
+extern "C" {
+    const char* machine_status ();
+}
+
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class AxolotlApp; }
 QT_END_NAMESPACE

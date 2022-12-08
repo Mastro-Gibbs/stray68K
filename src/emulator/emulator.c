@@ -383,9 +383,9 @@ int emulate(int argc, char** argv)
 
     load_bytecode(&em);
 
-    emit_sys_status(&em); // for no-quiet mode
-
     em.Machine.State = EXECUTION_STATE;
+
+    emit_dump(&em);
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
     while(em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt)
@@ -412,8 +412,6 @@ int emulate(int argc, char** argv)
                     break;
             }
 
-            emit_sys_status(&em);
-
             em.Machine.turnoff();
 
             return (EXIT_FAILURE);
@@ -426,9 +424,7 @@ int emulate(int argc, char** argv)
 
     em.Machine.State = FINAL_STATE;
 
-    machine_waiter(&em);  // for sbs mode
-
-    emit_sys_status(&em); // for no-quiet mode
+    emit_dump(&em);
 
     em.Machine.turnoff();
 
