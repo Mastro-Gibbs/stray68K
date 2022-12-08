@@ -14,6 +14,10 @@ public:
 
     void makeIt(QVector<QString>);
 
+    void addBinFile(QString);
+
+    void removeBinFile(QString);
+
     void addSourceFile(QString);
 
     void removeSourceFile(QString);
@@ -30,6 +34,10 @@ public:
 
     QVector<QString> sourcesToQStringVector();
 
+    QJsonArray binary();
+
+    QVector<QString> binaryToQStringVector();
+
     void setProFile(QString newProFile);
 
 private:
@@ -38,6 +46,7 @@ private:
     QFile proFile;
 
     void write(QByteArray);
+    QJsonObject read();
 };
 
 #endif // PROMANAGER_H

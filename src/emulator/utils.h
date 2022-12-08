@@ -534,7 +534,7 @@ void  iotask(struct EmulationMachine *em);
 
 /* EMULATION MACHINE */
 void machine_waiter (struct EmulationMachine *em);
-const char* emit_dump      (struct EmulationMachine *em);
+void emit_dump      (struct EmulationMachine *em);
 const char* machine_status ();
 void emit_jio       (struct EmulationMachine *em);
 void emit_jconcat   (struct EmulationMachine *em);

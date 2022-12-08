@@ -75,7 +75,7 @@
               </widget>
              </item>
              <item row="3" column="2">
-              <widget class="QLineEdit" name="sRLineEdit_2">
+              <widget class="QLineEdit" name="d6le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -88,7 +88,7 @@
               </widget>
              </item>
              <item row="0" column="4">
-              <widget class="QLineEdit" name="uSPLineEdit_3">
+              <widget class="QLineEdit" name="d1le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -115,7 +115,7 @@
               </widget>
              </item>
              <item row="2" column="2">
-              <widget class="QLineEdit" name="pCLineEdit_2">
+              <widget class="QLineEdit" name="d4le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -128,7 +128,7 @@
               </widget>
              </item>
              <item row="1" column="4">
-              <widget class="QLineEdit" name="sSPLineEdit_3">
+              <widget class="QLineEdit" name="d3le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -141,7 +141,7 @@
               </widget>
              </item>
              <item row="0" column="2">
-              <widget class="QLineEdit" name="uSPLineEdit_2">
+              <widget class="QLineEdit" name="d0le">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -166,7 +166,7 @@
               </widget>
              </item>
              <item row="1" column="2">
-              <widget class="QLineEdit" name="sSPLineEdit_2">
+              <widget class="QLineEdit" name="d2le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -200,7 +200,7 @@
               </widget>
              </item>
              <item row="3" column="4">
-              <widget class="QLineEdit" name="sRLineEdit_3">
+              <widget class="QLineEdit" name="d7le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -213,7 +213,7 @@
               </widget>
              </item>
              <item row="2" column="4">
-              <widget class="QLineEdit" name="pCLineEdit_3">
+              <widget class="QLineEdit" name="d5le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -237,16 +237,16 @@
            <item row="1" column="0">
             <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="pushButton_4">
                <property name="text">
-                <string>Terminate</string>
+                <string>Next</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton_4">
+              <widget class="QPushButton" name="pushButton">
                <property name="text">
-                <string>Next</string>
+                <string>Terminate</string>
                </property>
               </widget>
              </item>
@@ -274,12 +274,18 @@
                <property name="text">
                 <string>USP</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
               </widget>
              </item>
              <item row="2" column="0">
               <widget class="QLabel" name="pCLabel">
                <property name="text">
                 <string>PC</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
@@ -288,10 +294,13 @@
                <property name="text">
                 <string>SSP</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLineEdit" name="sRLineEdit">
+              <widget class="QLineEdit" name="srle">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -310,7 +319,7 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="pCLineEdit">
+              <widget class="QLineEdit" name="pcle">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -323,7 +332,7 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="uSPLineEdit">
+              <widget class="QLineEdit" name="usple">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -336,7 +345,7 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="sSPLineEdit">
+              <widget class="QLineEdit" name="ssple">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -352,6 +361,9 @@
               <widget class="QLabel" name="sRLabel">
                <property name="text">
                 <string>SR</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                </property>
               </widget>
              </item>
@@ -386,6 +398,9 @@
                <property name="text">
                 <string>A7</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               </property>
               </widget>
              </item>
              <item row="0" column="2">
@@ -403,7 +418,7 @@
               </widget>
              </item>
              <item row="1" column="3">
-              <widget class="QLineEdit" name="sSPLineEdit_5">
+              <widget class="QLineEdit" name="a3le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -416,7 +431,7 @@
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="uSPLineEdit_4">
+              <widget class="QLineEdit" name="a0le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -443,7 +458,7 @@
               </widget>
              </item>
              <item row="2" column="3">
-              <widget class="QLineEdit" name="pCLineEdit_5">
+              <widget class="QLineEdit" name="a5le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -456,7 +471,7 @@
               </widget>
              </item>
              <item row="0" column="3">
-              <widget class="QLineEdit" name="uSPLineEdit_5">
+              <widget class="QLineEdit" name="a1le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -469,7 +484,7 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="pCLineEdit_4">
+              <widget class="QLineEdit" name="a4le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -482,7 +497,7 @@
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QLineEdit" name="sRLineEdit_4">
+              <widget class="QLineEdit" name="a6le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -495,7 +510,7 @@
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="sSPLineEdit_4">
+              <widget class="QLineEdit" name="a2le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -515,7 +530,7 @@
               </widget>
              </item>
              <item row="3" column="3">
-              <widget class="QLineEdit" name="sRLineEdit_5">
+              <widget class="QLineEdit" name="a7le">
                <property name="text">
                 <string>00000000</string>
                </property>
@@ -551,7 +566,7 @@
               <number>3</number>
              </property>
              <item row="0" column="1">
-              <widget class="QLineEdit" name="pCLineEdit_6">
+              <widget class="QLineEdit" name="haltle">
                <property name="text">
                 <string>0</string>
                </property>
@@ -568,10 +583,13 @@
                <property name="text">
                 <string>HALT</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QLineEdit" name="sRLineEdit_6">
+              <widget class="QLineEdit" name="istrle">
                <property name="text">
                 <string>0000000000000000</string>
                </property>
@@ -584,7 +602,7 @@
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QLineEdit" name="sRLineEdit_7">
+              <widget class="QLineEdit" name="mnemle">
                <property name="text">
                 <string>null</string>
                </property>
@@ -601,6 +619,9 @@
                <property name="text">
                 <string>ISTRUCTION</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
               </widget>
              </item>
              <item row="3" column="0">
@@ -615,9 +636,15 @@
                <property name="text">
                 <string>MNEMONIC</string>
                </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="1" column="1">
+            <layout class="QHBoxLayout" name="horizontalLayout_1"/>
            </item>
           </layout>
          </item>
@@ -855,7 +882,6 @@
     <addaction name="separator"/>
     <addaction name="actionProgram_output_frame"/>
     <addaction name="actionToggle_project_frame"/>
-    <addaction name="actionToggle_machine_area"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">

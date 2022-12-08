@@ -2965,6 +2965,8 @@ void destroy_codes()
                     }
 
                     free(reference->instances);
+
+                    reference->instances = NULL;
                 }
 
             }
@@ -2972,6 +2974,7 @@ void destroy_codes()
         }
 
         free(codemap);
+
     }
 
     codemap = NULL;

@@ -25,6 +25,11 @@
 
 
 extern "C" {
+
+    int assemble(int argc, char **argv);
+    void begin_emulator(char *path);
+    void end_emulator();
+    int emulate();
     const char* machine_status ();
 }
 
@@ -67,8 +72,11 @@ private slots:
 
     void generatePopupMenu( ProjectTreeItem *parent, QString filePath, ProjectManager::ProjectItemType type );
 
+    int pc_disc();
+    int org_disc(Editor *e);
+    int build(QString path);
+    void updateMachine();
     void run( QString path );
-    void printStdoutStderr();
 
     void disableRunProject( bool value );
     void disableEditorActions( int value );
@@ -78,6 +86,8 @@ private slots:
     void updateDataAfterRenaming(QString oldName, QString newName);
 
 private slots:
+    void to_bottom();
+
     void on_actionNewFile_triggered();
     void on_actionOpenFile_triggered();
 
@@ -109,9 +119,11 @@ private slots:
 
     void on_actionReload_project_triggered();
 
-    void on_actionToggle_machine_area_triggered();
-
     void on_actionToggle_project_frame_triggered();
+
+    void on_pushButton_4_released();
+
+    void on_pushButton_released();
 
 signals:
     void projectOpened();

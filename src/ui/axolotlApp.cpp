@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+int block_num;
+int pc;
 
 AxolotlApp::AxolotlApp(QWidget *parent)
     : QMainWindow(parent)
@@ -25,12 +27,15 @@ AxolotlApp::~AxolotlApp()
 
 void AxolotlApp::dynamicBinding()
 {
+
     connect(ui->hideBtn, &QPushButton::clicked, this, &AxolotlApp::on_actionProgram_output_frame_triggered);
 
     connect( this, &AxolotlApp::projectOpened, [=] { AxolotlApp::disableRunProject(false); } );
     connect( this, &AxolotlApp::projectClosed, [=] { AxolotlApp::disableRunProject(true); }  );
 
     connect( ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(disableEditorActions(int)) );
+
+    connect( ui->output, &QPlainTextEdit::textChanged, this, &AxolotlApp::to_bottom);
 
 }
 
@@ -50,6 +55,8 @@ void AxolotlApp::init()
     ui->actionCurrent_editor_zoom_out->setDisabled( true );
 
 
+    ui->sbs->hide();
+
     ConfigManager *conf = ConfigManager::getInstance();
 
     QJsonObject obj = conf->consoleAspect();
@@ -58,7 +65,7 @@ void AxolotlApp::init()
         ui->outputFrame->show();
         ui->outputFrame->setMinimumHeight(1);
         QJsonArray data = obj.value("ratio").toArray();
-        ui->splitter_3->setStretchFactor( data[0].toInt(), data[1].toInt() );
+        ui->splitter_3->setStretchFactor(0, 5);
         ui->actionProgram_output_frame->setText("Hide program output frame");
     }
     else
@@ -66,18 +73,6 @@ void AxolotlApp::init()
         ui->outputFrame->hide();
         ui->outputFrame->setMinimumHeight(0);
         ui->actionProgram_output_frame->setText("Show program output frame");
-    }
-
-    obj = conf->machineAspect();
-    if (obj.value("status").toInt() == 1)
-    {
-        ui->sbs->show();
-        QJsonArray data = obj.value("ratio").toArray();
-        ui->splitter_2->setStretchFactor( data[0].toInt(), data[1].toInt() );
-    }
-    else
-    {
-        ui->sbs->hide();
     }
 
     obj = conf->projectAspect();
@@ -95,6 +90,9 @@ void AxolotlApp::init()
         ui->treeWidget->setMinimumHeight(0);
     }
 
+
+    ui->pushButton_4->setDisabled(true);
+    ui->pushButton->setDisabled(true);
 
     //Init struct who contain project infos
     projectData.projectOpened = false;
@@ -455,6 +453,8 @@ void AxolotlApp::openProject( QString s68kPath )
                 SLOT(generatePopupMenu(ProjectTreeItem*,QString,ProjectManager::ProjectItemType))
         );
 
+        ui->treeWidget->show();
+
         emit projectOpened();
 
         setRecent( RECENT_PROJECTS_PATH, projectData.s68kPath );
@@ -537,51 +537,64 @@ void AxolotlApp::generatePopupMenu
     actionDelete.setParent( this );
     actionDelete.setIcon( close );
 
-    QAction actionRename;
-    actionRename.setText( "Rename" );
-    actionRename.setParent( this );
-
-    QAction actionOpen;
-    actionOpen.setText( "Open" );
-    actionOpen.setParent( this );
-    actionOpen.setIcon( folder );
-
     QAction actionAddSrc;
     actionAddSrc.setText( "Add Source File" );
     actionAddSrc.setParent( this );
     actionAddSrc.setIcon( newfile );
 
-    popupMenu.addAction( &actionOpen );
-    popupMenu.addSeparator();
-    popupMenu.addAction( &actionRename );
-    popupMenu.addAction( &actionDelete );
+    if (type == ProjectManager::ProjectItemType::Source)
+    {
+        QAction actionRename;
+        actionRename.setText( "Rename" );
+        actionRename.setParent( this );
 
-    connect( &actionOpen,   &QAction::triggered,
-             this, [=]{ AxolotlApp::openFile( filePath ); } );
+        QAction actionOpen;
+        actionOpen.setText( "Open" );
+        actionOpen.setParent( this );
+        actionOpen.setIcon( folder );
 
-    connect( &actionDelete, &QAction::triggered,
-             projectManager, [=]{ projectManager->deleteSrc( ui->treeWidget, QVector<QString>() << projectData.s68kPath
-                                                                                                << filePath
-                                                                                                << parent->text() ); } );
+        popupMenu.addAction( &actionOpen );
+        popupMenu.addSeparator();
+        popupMenu.addAction( &actionRename );
 
-    connect( &actionRename, &QAction::triggered,
-             projectManager, [=]{ projectManager->renameSrc( ui->treeWidget, QVector<QString>() << projectData.s68kPath
-                                                                                                << filePath
-                                                                                                << parent->text() ); } );
-    connect( projectManager, SIGNAL(fileNameChanged(QString,QString)), this, SLOT(updateDataAfterRenaming(QString,QString)) );
+        popupMenu.addAction( &actionDelete );
 
-    //connect( projectManager, &ProjectManager::)
 
-    if ( !type ) //true: FileMenu; false: FolderMenu
+        connect( &actionDelete, &QAction::triggered,
+                 projectManager, [=]{ projectManager->deleteSrc( ui->treeWidget, QVector<QString>() << projectData.s68kPath
+                                                                                                    << filePath
+                                                                                                    << parent->text() ); } );
+        connect( projectManager, SIGNAL(fileNameChanged(QString,QString)), this, SLOT(updateDataAfterRenaming(QString,QString)) );
+
+
+        connect( &actionOpen,   &QAction::triggered,
+                 this, [=]{ AxolotlApp::openFile( filePath ); } );
+
+        connect( &actionRename, &QAction::triggered,
+                 projectManager, [=]{ projectManager->renameSrc( ui->treeWidget, QVector<QString>() << projectData.s68kPath
+                                                                                                    << filePath
+                                                                                                    << parent->text() ); } );
+    }
+    else if (type == ProjectManager::ProjectItemType::Folder)
     {
         popupMenu.addAction( &actionAddSrc );
         connect( &actionAddSrc, &QAction::triggered,
                  projectManager, [=]{ projectManager->addSrc(ui->treeWidget, projectData.s68kPath); } );
-
-        popupMenu.removeAction( &actionDelete );
-        popupMenu.removeAction( &actionOpen );
-        popupMenu.removeAction( &actionRename );
     }
+    else
+    {
+
+        popupMenu.addAction( &actionDelete );
+
+
+        connect( &actionDelete, &QAction::triggered,
+                 projectManager, [=]{ projectManager->deleteSrc( ui->treeWidget, QVector<QString>() << projectData.s68kPath
+                                                                                                    << filePath
+                                                                                                    << parent->text() ); } );
+    }
+
+
+
     popupMenu.exec(pos);
 }
 
@@ -589,46 +602,185 @@ void AxolotlApp::generatePopupMenu
 /**
  * Exec main file of current project or current opened ( selected from tabWidget ) file
  */
+int AxolotlApp::build(QString path)
+{
+    QByteArray source = QByteArray(path.toUtf8());
+    QString msg = "[BUILD] " + source + "\n";
+    ui->output->insertPlainText(msg);
+
+    QByteArray filename = QByteArray(path.toUtf8());
+    filename.remove(path.indexOf('.'), path.size());
+    filename.append(".B68");
+
+    msg = "stray68k -a -c -i " + source + " -o " + filename + "\n";
+    ui->output->insertPlainText(msg);
+
+    char mo[] = "-o";
+    char mi[] = "-i";
+    char mc[] = "-c";
+
+    int argc = 7;
+    char *argv[argc];
+    argv[2] = mc;
+    argv[3] = mi;
+    argv[4] = source.data();
+    argv[5] = mo;
+    argv[6] = filename.data();
+
+    if (assemble(argc, argv))
+    {
+        ui->output->insertPlainText("[BUILD] Success\n");
+        ProManager *m = ProManager::getInstance();
+        filename.remove(0, filename.lastIndexOf('/') + 1);
+        m->addBinFile(filename);
+
+        return 1;
+    }
+    else
+    {
+        ui->output->insertPlainText("[BUILD] Fail\n");
+        return 0;
+    }
+}
+
+
+QString fixed4BReg(QString v)
+{
+    int max = 8;
+    int delta = max - v.size();
+
+    for (int i = 0; i < delta; ++i)
+        v.prepend('0');
+
+    return v;
+}
+
+QString fixedBinaryNum(QString v)
+{
+    QString s = QString::number(v.toUInt(nullptr, 16), 2);
+
+    int max = 16;
+    int delta = max - s.size();
+
+    for (int i = 0; i < delta; ++i)
+        s.prepend('0');
+
+    return s;
+}
+
+
+void AxolotlApp::updateMachine()
+{
+    QString json = QString(machine_status());
+
+    QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
+
+    QJsonObject jsonObject = doc.object();
+
+    QJsonObject CPU = jsonObject.value(QString("CPU")).toObject();
+    ui->a0le->setText(fixed4BReg(CPU["A0"].toString()));
+    ui->a1le->setText(fixed4BReg(CPU["A1"].toString()));
+    ui->a2le->setText(fixed4BReg(CPU["A2"].toString()));
+    ui->a3le->setText(fixed4BReg(CPU["A3"].toString()));
+    ui->a4le->setText(fixed4BReg(CPU["A4"].toString()));
+    ui->a5le->setText(fixed4BReg(CPU["A5"].toString()));
+    ui->a6le->setText(fixed4BReg(CPU["A6"].toString()));
+    ui->a7le->setText(fixed4BReg(CPU["A7"].toString()));
+
+    ui->d0le->setText(fixed4BReg(CPU["D0"].toString()));
+    ui->d1le->setText(fixed4BReg(CPU["D1"].toString()));
+    ui->d2le->setText(fixed4BReg(CPU["D2"].toString()));
+    ui->d3le->setText(fixed4BReg(CPU["D3"].toString()));
+    ui->d4le->setText(fixed4BReg(CPU["D4"].toString()));
+    ui->d5le->setText(fixed4BReg(CPU["D5"].toString()));
+    ui->d6le->setText(fixed4BReg(CPU["D6"].toString()));
+    ui->d7le->setText(fixed4BReg(CPU["D7"].toString()));
+
+    ui->usple->setText(fixed4BReg(CPU["US"].toString()));
+    ui->ssple->setText(fixed4BReg(CPU["SS"].toString()));
+    ui->pcle->setText(fixed4BReg(CPU["PC"].toString()));
+    ui->srle->setText(fixedBinaryNum(CPU["SR"].toString()));
+
+    QJsonValue RAM = jsonObject.value(QString("RAM"));
+    ui->haltle->setText(fixed4BReg(RAM["HALT"].toString()));
+
+    QJsonValue OPC = jsonObject.value(QString("OP"));
+    ui->istrle->setText(fixedBinaryNum(OPC["CODE"].toString()));
+    ui->mnemle->setText(OPC["MNEMONIC"].toString());
+
+
+    if (jsonObject.contains("IO"))
+    {
+        QJsonValue IO = jsonObject.value(QString("IO"));
+        if (IO["TYPE"].toString().compare("O") == 0)
+        {
+            ui->output->insertPlainText(IO["VAL"].toString());
+            ui->output->insertPlainText("");
+        }
+    }
+}
+
+
+void AxolotlApp::to_bottom()
+{
+    ui->output->verticalScrollBar()->setValue(ui->output->verticalScrollBar()->maximum());
+}
 
 void AxolotlApp::run( QString path )
-{
-    if ( axolotlProcesses.runnerProcess != nullptr )
-        axolotlProcesses.runnerProcess->deleteLater();
+{    
+    if(!build(path)) return;
+
+    QByteArray filename = QByteArray(path.toUtf8());
+    filename.remove(path.indexOf('.'), path.size());
+    filename.append(".B68");
 
     if ( ui->outputFrame->isHidden() ) on_actionProgram_output_frame_triggered();
 
     ui->stopBtn->setDisabled( false );
 
-    axolotlProcesses.runnerProcess = new QProcess;
-    axolotlProcesses.runnerProcess->setProgram( path );
-
-    connect( axolotlProcesses.runnerProcess, &QProcess::readyReadStandardOutput,
-             this, &AxolotlApp::printStdoutStderr );
-    connect( axolotlProcesses.runnerProcess, &QProcess::readyReadStandardError,
-             this, &AxolotlApp::printStdoutStderr );
-    connect( axolotlProcesses.runnerProcess, SIGNAL(finished(int)),
-             this, SLOT(on_stopBtn_clicked())     );
-
     QTime time;
     QString currTime = time.currentTime().toString();
 
-    ui->output->insertPlainText( "[" + currTime + "]" +" Running -> " + path + "\n\n" );
+    ui->output->insertPlainText( "[" + currTime + "]" +" Running -> " + filename + "\n" );
 
-    axolotlProcesses.runnerProcess->start();
-}
+    ConfigManager *conf = ConfigManager::getInstance();
+    QJsonObject obj = conf->machineAspect();
+    QJsonArray data = obj.value("ratio").toArray();
 
-
-void AxolotlApp::printStdoutStderr()
-{
-    QByteArray out = axolotlProcesses.runnerProcess->readAllStandardOutput();
-    ui->output->insertPlainText( out );
-
-    QByteArray err = axolotlProcesses.runnerProcess->readAllStandardError();
-    if ( !err.isEmpty() )
+    if (ui->sbs->isHidden())
     {
-        ui->output->insertPlainText( err );
+        ui->sbs->show();
+        ui->splitter_2->setStretchFactor( data[0].toInt(), data[1].toInt() );
+        conf->updateMachineAspect(1, data[0].toInt(), data[1].toInt());
     }
-    ui->output->verticalScrollBar()->setValue( ui->output->verticalScrollBar()->maximum() );
+
+    begin_emulator(filename.data());
+
+    updateMachine();
+
+    ui->pushButton_4->setDisabled(false);
+    ui->pushButton->setDisabled(false);
+
+    Editor *e = (Editor *) ui->tabWidget->currentWidget();
+    QTextCursor c = QTextCursor(e->document());
+    QTextCharFormat fmt1;
+    fmt1.setBackground(Qt::transparent);
+
+    for (int i = 0; i < e->document()->blockCount(); i++)
+    {
+        QTextBlock block = e->document()->findBlockByLineNumber(i);
+        int blockPos = block.position();
+
+        c.setPosition(blockPos);
+        c.select(QTextCursor::LineUnderCursor);
+        c.setCharFormat(fmt1);
+    }
+
+    pc = pc_disc();
+    block_num = org_disc(e);
+
+    e->setReadOnly(true);
+
 }
 
 
@@ -1011,28 +1163,6 @@ void AxolotlApp::on_actionProgram_output_frame_triggered()
 }
 
 
-void AxolotlApp::on_actionToggle_machine_area_triggered()
-{
-    ConfigManager *conf = ConfigManager::getInstance();
-    QJsonObject obj = conf->machineAspect();
-    QJsonArray data = obj.value("ratio").toArray();
-
-    if (ui->sbs->isHidden())
-    {
-        ui->sbs->show();
-        ui->splitter_2->setStretchFactor( data[0].toInt(), data[1].toInt() );
-        conf->updateMachineAspect(1, data[0].toInt(), data[1].toInt());
-
-
-    }
-    else
-    {
-        ui->sbs->hide();
-        conf->updateMachineAspect(0, data[0].toInt(), data[1].toInt());
-    }
-}
-
-
 void AxolotlApp::on_actionToggle_project_frame_triggered()
 {
     ConfigManager *conf = ConfigManager::getInstance();
@@ -1113,8 +1243,12 @@ void AxolotlApp::on_cleanBtn_clicked()
 void AxolotlApp::on_stopBtn_clicked()
 {
     ui->stopBtn->setDisabled( true );
-    axolotlProcesses.runnerProcess->deleteLater();
-    axolotlProcesses.runnerProcess = nullptr;
+    ui->pushButton->setDisabled( true );
+    ui->pushButton_4->setDisabled( true );
+
+    updateMachine();
+    end_emulator();
+
     ui->output->insertPlainText( "Program exited" );
 
     ui->output->insertPlainText( "\n\n" );
@@ -1135,5 +1269,153 @@ void AxolotlApp::on_actionReload_project_triggered()
 }
 
 
+int AxolotlApp::pc_disc()
+{
+    QString json = QString(machine_status());
+    QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
+    QJsonObject jsonObject = doc.object();
+    QJsonObject CPU = jsonObject.value(QString("CPU")).toObject();
 
+    int pc = CPU["PC"].toString().toInt(nullptr, 16);
+
+    return pc;
+}
+
+int AxolotlApp::org_disc(Editor *e)
+{
+    int i = 0;
+
+    QTextBlock block = e->document()->findBlockByLineNumber(i);
+
+    while (!block.text().contains(QRegExp("ORG")))
+        block = e->document()->findBlockByLineNumber(++i);
+
+    return i;
+}
+
+
+void AxolotlApp::on_pushButton_4_released()
+{
+    Editor *e = (Editor *) ui->tabWidget->currentWidget();
+
+    if (!emulate())
+    {
+        ui->pushButton_4->setDisabled(true);
+        ui->pushButton->setDisabled(true);
+        end_emulator();
+
+        updateMachine();
+
+        QTime time;
+        QString currTime = time.currentTime().toString();
+        ui->output->insertPlainText( "[" + currTime + "]" + " Terminated\n\n");
+
+        ui->stopBtn->setDisabled(true);
+        e->setReadOnly(false);
+    }
+    else
+    {
+        updateMachine();
+
+        QTextCharFormat fmt1;
+        fmt1.setBackground(Qt::transparent);
+
+        QTextBlock block = e->document()->findBlockByLineNumber(block_num);
+        int blockPos = block.position();
+
+        QTextCursor c = QTextCursor(e->document());
+
+        c.setPosition(blockPos);
+        c.select(QTextCursor::LineUnderCursor);
+        c.setCharFormat(fmt1);
+
+        QTextCharFormat fmt;
+        fmt.setBackground(QBrush(QColor(30, 30, 30), Qt::SolidPattern));
+
+        int local_pc = pc_disc();
+
+
+        if (local_pc < pc)
+        {
+            block_num -= (pc - local_pc) / 4;
+            block = e->document()->findBlockByLineNumber(block_num);
+        }
+        else
+        {
+            block = e->document()->findBlockByLineNumber(++block_num);
+            while (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}")))
+                block = e->document()->findBlockByLineNumber(++block_num);
+        }
+
+        blockPos = block.position();
+
+        c.setPosition(blockPos);
+        c.select(QTextCursor::LineUnderCursor);
+        c.setCharFormat(fmt);
+
+        pc = local_pc;
+    }
+
+}
+
+
+void AxolotlApp::on_pushButton_released()
+{
+    Editor *e = (Editor *) ui->tabWidget->currentWidget();
+
+    while (emulate())
+    {
+        updateMachine();
+
+        QTextCharFormat fmt1;
+        fmt1.setBackground(Qt::transparent);
+
+        QTextBlock block = e->document()->findBlockByLineNumber(block_num);
+        int blockPos = block.position();
+
+        QTextCursor c = QTextCursor(e->document());
+
+        c.setPosition(blockPos);
+        c.select(QTextCursor::LineUnderCursor);
+        c.setCharFormat(fmt1);
+
+        QTextCharFormat fmt;
+        fmt.setBackground(QBrush(QColor(30, 30, 30), Qt::SolidPattern));
+
+        int local_pc = pc_disc();
+
+
+        if (local_pc < pc)
+        {
+            block_num -= (pc - local_pc) / 4;
+            block = e->document()->findBlockByLineNumber(block_num);
+        }
+        else
+        {
+            block = e->document()->findBlockByLineNumber(++block_num);
+            while (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}")))
+                block = e->document()->findBlockByLineNumber(++block_num);
+        }
+
+        blockPos = block.position();
+
+        c.setPosition(blockPos);
+        c.select(QTextCursor::LineUnderCursor);
+        c.setCharFormat(fmt);
+
+        pc = local_pc;
+    }
+
+    end_emulator();
+
+    updateMachine();
+
+    QTime time;
+    QString currTime = time.currentTime().toString();
+    ui->output->insertPlainText( "[" + currTime + "]" + " Terminated \n\n");
+
+    ui->stopBtn->setDisabled(true);
+
+    e->setReadOnly(false);
+}
 

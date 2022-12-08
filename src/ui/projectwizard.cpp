@@ -103,7 +103,7 @@ void ProjectWizard::accept()
 
     QString proFile(newProjectFullpath);
     proFile.append(ui->newProjName->text());
-    proFile.append(".s68");
+    proFile.append(".s68k");
 
     s68kPath = proFile;
 

@@ -2,7 +2,7 @@
 
 ConfigManager::ConfigManager()
 {
-    configFile.setFileName( ":/config/config.json" );
+    configFile.setFileName( "config.json" );
 }
 
 

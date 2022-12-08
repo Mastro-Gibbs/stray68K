@@ -39,6 +39,7 @@ Editor::Editor( QWidget *parent ) : QPlainTextEdit( parent )
     connect( this, &Editor::blockCountChanged, this, &Editor::updateLineNumberAreaWidth );
     connect( this, &Editor::updateRequest,     this, &Editor::updateLineNumberArea );
 
+
     updateLineNumberAreaWidth( 0 );
 
 

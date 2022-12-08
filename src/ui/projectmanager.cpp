@@ -24,8 +24,9 @@ void ProjectManager::generateSkASMTree
     parent->setFont( QFont( "Ubuntu Mono" ) );
 
     QPixmap project  ( ":/icons/img/open.png" );
-    QPixmap s68kicon( ":/icons/img/file.png" );
-    QPixmap skasmicon( ":/icons/img/file.png" );
+    QPixmap fileicon( ":/icons/img/file.png" );
+    QPixmap s68kicon( ":/icons/img/s68k.png" );
+    QPixmap binicon( ":/icons/img/B68.png" );
 
     ProManager *proManager = ProManager::getInstance();
     proManager->setProFile( s68kPath );
@@ -35,6 +36,7 @@ void ProjectManager::generateSkASMTree
     QString projectName  = proManager->proData( ProManager::Name );
     QString mainFileName = proManager->proData( ProManager::Main );
     QVector<QString> sources  = proManager->sourcesToQStringVector();
+    QVector<QString> binary  = proManager->binaryToQStringVector();
 
     QString mainSourcePath( sourcePath);
     mainSourcePath.append ( mainFileName );
@@ -42,24 +44,29 @@ void ProjectManager::generateSkASMTree
     QTreeWidgetItem *projectFolder = new QTreeWidgetItem;
     QTreeWidgetItem *s68kFile     = new QTreeWidgetItem;
     QTreeWidgetItem *sourcesFolder = new QTreeWidgetItem;
+    QTreeWidgetItem *binaryFolder = new QTreeWidgetItem;
     QTreeWidgetItem *mainFile      = new QTreeWidgetItem;
 
     ProjectTreeItem *s68k    = new ProjectTreeItem( nullptr, s68kPath );
     ProjectTreeItem *mainItem = new ProjectTreeItem( nullptr, mainSourcePath );
     ProjectTreeItem *srcItem  = new ProjectTreeItem( nullptr, QString() );
+    ProjectTreeItem *binItem  = new ProjectTreeItem( nullptr, QString() );
 
     mainItem->setText     ( mainFileName );
-    s68k->setText        ( projectName + ".s68" );
+    s68k->setText        ( projectName + ".s68k" );
     srcItem->setText      ( "Sources");
+    binItem->setText      ( "Binary");
     projectFolder->setText( 0, projectName );
 
     projectFolder->setIcon( 0, project );
     sourcesFolder->setIcon( 0, project );
-    mainFile->setIcon     ( 0, skasmicon );
+    binaryFolder->setIcon( 0, project );
+    mainFile->setIcon     ( 0, fileicon );
     s68kFile->setIcon    ( 0, s68kicon );
 
     projectFolder->addChild( s68kFile );
     projectFolder->addChild( sourcesFolder );
+    projectFolder->addChild( binaryFolder );
     sourcesFolder->addChild( mainFile );
 
     QFont font = projectFolder->font( 0 );
@@ -68,12 +75,14 @@ void ProjectManager::generateSkASMTree
     projectFolder->setFont( 0, font );
     font.setPointSize( 11 );
     srcItem->setFont( font );
+    binItem->setFont( font );
 
     parent->addTopLevelItem( projectFolder );
     parent->expandItem     ( projectFolder );
     parent->setItemWidget  ( s68kFile,     0, s68k );
     parent->setItemWidget  ( mainFile,      0, mainItem );
     parent->setItemWidget  ( sourcesFolder, 0, srcItem );
+    parent->setItemWidget  ( binaryFolder, 0, binItem );
 
     mainPath = mainItem->getPath();
 
@@ -85,22 +94,39 @@ void ProjectManager::generateSkASMTree
         QTreeWidgetItem *sourceFile = new QTreeWidgetItem;
         ProjectTreeItem *sourceItem = new ProjectTreeItem( nullptr, localSourcePath );
         sourceItem->setText    ( sourceFileString );
-        sourceFile->setIcon    ( 0, skasmicon );
+        sourceFile->setIcon    ( 0, fileicon );
         sourceItem->setIconSize( QSize( 20, 20 ) );
         sourcesFolder->addChild( sourceFile );
         parent->setItemWidget  ( sourceFile, 0, sourceItem );
 
         connect( sourceItem, &ProjectTreeItem::leftClicked,   this, [=](){ ProjectManager::open( sourceItem->getPath() ); });
-        connect( sourceItem, &ProjectTreeItem::rightClicked,  this, [=](){ ProjectManager::generatePopupMenu( sourceItem, sourceItem->getPath(), File ); });
+        connect( sourceItem, &ProjectTreeItem::rightClicked,  this, [=](){ ProjectManager::generatePopupMenu( sourceItem, sourceItem->getPath(), Source ); });
+    }
+
+    foreach ( QString binaryFileString, binary )
+    {
+        QString localSourcePath( sourcePath );
+        localSourcePath.append ( binaryFileString );
+
+        QTreeWidgetItem *sourceFile = new QTreeWidgetItem;
+        ProjectTreeItem *sourceItem = new ProjectTreeItem( nullptr, localSourcePath );
+        sourceItem->setText    ( binaryFileString );
+        sourceFile->setIcon    ( 0, binicon );
+        sourceItem->setIconSize( QSize( 20, 20 ) );
+        binaryFolder->addChild( sourceFile );
+        parent->setItemWidget  ( sourceFile, 0, sourceItem );
+
+        connect( sourceItem, &ProjectTreeItem::rightClicked,  this, [=](){ ProjectManager::generatePopupMenu( sourceItem, sourceItem->getPath(), Binary ); });
     }
 
     connect( s68k,    &ProjectTreeItem::leftClicked,  this, [=](){ ProjectManager::open( s68k->getPath() ); });
     connect( mainItem, &ProjectTreeItem::leftClicked,  this, [=](){ ProjectManager::open( mainItem->getPath() ); });
 
-    connect( mainItem, &ProjectTreeItem::rightClicked,  this, [=](){ ProjectManager::generatePopupMenu( mainItem, mainItem->getPath(), File ); });
+    connect( mainItem, &ProjectTreeItem::rightClicked,  this, [=](){ ProjectManager::generatePopupMenu( mainItem, mainItem->getPath(), Source ); });
     connect( srcItem,  &ProjectTreeItem::rightClicked,  this, [=](){ ProjectManager::generatePopupMenu( srcItem, srcItem->getPath(), Folder ); });
 
     sourcesFolder->setExpanded( true );
+    binaryFolder->setExpanded( true );
 
     emit generatingFinished();
 }

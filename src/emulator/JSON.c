@@ -151,7 +151,7 @@ char* Jop(char *mnem, u32 code_promoted)
     char buf[100];
     u16 code = (u16) code_promoted;
 
-    sprintf(buf, "{\"OP\":{\"MENMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
+    sprintf(buf, "{\"OP\":{\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
 
     ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);

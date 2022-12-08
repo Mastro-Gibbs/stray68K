@@ -125,135 +125,135 @@ int assemble(int argc, char **argv)
 		exit_code = EXIT_FAILURE;
 	}
 
-	if (argc < 2 || print_usage)
-	{
-		fputs(
-            "**Assembler** an assembler for the Motorola 68000.\n"
-			"\n"
-            "**Options**\n"
-            " -i [path] - Input file.\n"
-			" -o [path] - Output file.\n"
-			" -l [path] - Listing file. Optional.\n"
-			" -s [path] - asm68k-style symbol file. Optional.\n"
-			" -c        - Enable case-insensitive mode.\n"
-			" -b        - Enable Bison's debug output.\n"
-			" -d        - Allow EQU/SET to descope local labels.\n"
-			, stdout);
-	}
-	else
-	{
-		if (output_file_path == NULL)
-		{
-            ASSSEMBLER_ERROR("Output file path must be specified with '-o'.");
-		}
-		else
-		{
-            if (input_file_path == NULL)
+    if (argc < 2 || print_usage)
+        {
+            fputs(
+                "**Assembler** an assembler for the Motorola 68000.\n"
+                "\n"
+                "**Options**\n"
+                " -i [path] - Input file.\n"
+                " -o [path] - Output file.\n"
+                " -l [path] - Listing file. Optional.\n"
+                " -s [path] - asm68k-style symbol file. Optional.\n"
+                " -c        - Enable case-insensitive mode.\n"
+                " -b        - Enable Bison's debug output.\n"
+                " -d        - Allow EQU/SET to descope local labels.\n"
+                , stdout);
+        }
+    else
+        {
+            if (output_file_path == NULL)
             {
-                ASSSEMBLER_ERROR("Could not open input file.");
+                ASSSEMBLER_ERROR("Output file path must be specified with '-o'.");
             }
-			else
-			{
-
-                if (!check_file_format(input_file_path, "X68"))
+            else
+            {
+                if (input_file_path == NULL)
                 {
-                    FASSSEMBLER_ERROR("Invalid file format in input file %s.", input_file_path);
-                }
-                else if (!check_file_format(output_file_path, "B68"))
-                {
-                    FASSSEMBLER_ERROR("Invalid file format in output file %s.", output_file_path);
+                    ASSSEMBLER_ERROR("Could not open input file.");
                 }
                 else
                 {
-                    char *tmp = "tmp";
-                    char *output_file_tmp_path;
-                    if((output_file_tmp_path = malloc(strlen(output_file_path) + strlen(tmp) + 1)) != NULL){
-                        output_file_tmp_path[0] = '\0';
-                        strcat(output_file_tmp_path, output_file_path);
-                        strcat(output_file_tmp_path, tmp);
-                    }
 
-                    FILE *input_file;
-                    FILE *output_file;
-                    FILE *output_file_tmp;
-
-                    input_file = fopen(input_file_path, "r");
-                    output_file_tmp = fopen(output_file_tmp_path, "wb");
-
-                    if (output_file_tmp == NULL)
+                    if (!check_file_format(input_file_path, "X68"))
                     {
-                        ASSSEMBLER_ERROR("Could not open output file.");
+                        FASSSEMBLER_ERROR("Invalid file format in input file %s.", input_file_path);
+                    }
+                    else if (!check_file_format(output_file_path, "B68"))
+                    {
+                        FASSSEMBLER_ERROR("Invalid file format in output file %s.", output_file_path);
                     }
                     else
                     {
-                        FILE *listing_file;
-                        FILE *symbol_file;
+                        char *tmp = "tmp";
+                        char *output_file_tmp_path;
+                        if((output_file_tmp_path = malloc(strlen(output_file_path) + strlen(tmp) + 1)) != NULL){
+                            output_file_tmp_path[0] = '\0';
+                            strcat(output_file_tmp_path, output_file_path);
+                            strcat(output_file_tmp_path, tmp);
+                        }
 
-                        if (listing_file_path == NULL)
+                        FILE *input_file;
+                        FILE *output_file;
+                        FILE *output_file_tmp;
+
+                        input_file = fopen(input_file_path, "r");
+                        output_file_tmp = fopen(output_file_tmp_path, "wb");
+
+                        if (output_file_tmp == NULL)
                         {
-                            listing_file = NULL;
+                            ASSSEMBLER_ERROR("Could not open output file.");
                         }
                         else
                         {
-                            listing_file = fopen(listing_file_path, "w");
+                            FILE *listing_file;
+                            FILE *symbol_file;
 
-                            if (listing_file == NULL)
-                                ASSSEMBLER_ERROR("Could not open listing file.");
-                        }
-
-                        if (symbol_file_path == NULL)
-                        {
-                            symbol_file = NULL;
-                        }
-                        else
-                        {
-                            symbol_file = fopen(symbol_file_path, "wb");
-
-                            if (symbol_file == NULL)
-                                ASSSEMBLER_ERROR("Could not open symbol file.");
-                        }
-
-                        if (!ClownAssembler_Assemble(input_file, output_file_tmp, listing_file, symbol_file, input_file_path, debug, case_insensitive, equ_set_descope_local_labels))
-                        {
-                            ASSSEMBLER_ERROR("Could not assemble.");
-                        }
-                        else
-                        {
-                            fclose(output_file_tmp);
-
-                            output_file_tmp = fopen(output_file_tmp_path, "rb");
-                            output_file     = fopen(output_file_path, "wb");
-
-                            if (output_file == NULL || output_file_tmp == NULL)
+                            if (listing_file_path == NULL)
                             {
-                                ASSSEMBLER_ERROR("Could not open output file.");
+                                listing_file = NULL;
                             }
                             else
                             {
-                                char ch;
-                                while(fread(&ch, 1, 1, output_file_tmp) != 0)
-                                      fputc(ch, output_file);
+                                listing_file = fopen(listing_file_path, "w");
 
-                                fclose(output_file);
+                                if (listing_file == NULL)
+                                    ASSSEMBLER_ERROR("Could not open listing file.");
                             }
+
+                            if (symbol_file_path == NULL)
+                            {
+                                symbol_file = NULL;
+                            }
+                            else
+                            {
+                                symbol_file = fopen(symbol_file_path, "wb");
+
+                                if (symbol_file == NULL)
+                                    ASSSEMBLER_ERROR("Could not open symbol file.");
+                            }
+
+                            if (!ClownAssembler_Assemble(input_file, output_file_tmp, listing_file, symbol_file, input_file_path, debug, case_insensitive, equ_set_descope_local_labels))
+                            {
+                                ASSSEMBLER_ERROR("Could not assemble.");
+                            }
+                            else
+                            {
+                                fclose(output_file_tmp);
+
+                                output_file_tmp = fopen(output_file_tmp_path, "rb");
+                                output_file     = fopen(output_file_path, "wb");
+
+                                if (output_file == NULL || output_file_tmp == NULL)
+                                {
+                                    ASSSEMBLER_ERROR("Could not open output file.");
+                                }
+                                else
+                                {
+                                    char ch;
+                                    while(fread(&ch, 1, 1, output_file_tmp) != 0)
+                                          fputc(ch, output_file);
+
+                                    fclose(output_file);
+                                }
+                            }
+
+                            if (listing_file != NULL)
+                                fclose(listing_file);
+
+                            fclose(output_file_tmp);
+
+                            remove(output_file_tmp_path);
                         }
 
-                        if (listing_file != NULL)
-                            fclose(listing_file);
+                        if (output_file_tmp_path)
+                            free(output_file_tmp_path);
 
-                        fclose(output_file_tmp);
-
-                        remove(output_file_tmp_path);
+                        fclose(input_file);
                     }
-
-                    if (output_file_tmp_path)
-                        free(output_file_tmp_path);
-
-                    fclose(input_file);
                 }
-			}
-		}
-	}
+            }
+        }
 
-	return exit_code;
+    return !exit_code;
 }

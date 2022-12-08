@@ -430,7 +430,7 @@ void iotask(struct EmulationMachine *em)
         {
             em->Machine.IO.buffer  = str;
 
-            _io_dumps(em);
+            emit_dump(em);
 
             IO_TASK(em->ExecArgs.descriptive_mode, "%s", str)
             free(str);
@@ -444,10 +444,12 @@ void iotask(struct EmulationMachine *em)
         {
             em->Machine.IO.buffer  = str;
 
-            _io_dumps(em);
+            emit_dump(em);
             free(str);
         }
     }
+
+
 }
 
 

@@ -29,6 +29,8 @@ private:
 
     QTextCharFormat symbolsFormat;
     QTextCharFormat namesFormat;
+    QTextCharFormat successFormat;
+    QTextCharFormat buildFormat;
     QTextCharFormat timeFormat;
     QTextCharFormat disabledFormat;
     QTextCharFormat enabledFormat;

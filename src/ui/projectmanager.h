@@ -27,7 +27,8 @@ public:
     enum ProjectItemType
     {
         Folder = 0,
-        File   = 1
+        Source = 1,
+        Binary = 2
     };
 
     inline const QString &getMainPath() const

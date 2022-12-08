@@ -26,16 +26,75 @@ void ProManager::makeIt(QVector<QString> data)
     write( bytes );
 }
 
+QJsonObject ProManager::read()
+{
+    proFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QString val = proFile.readAll();
+    proFile.close();
+
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(val.toUtf8());
+
+    return jsonDocument.object();
+}
+
+void ProManager::addBinFile( QString fileName )
+{
+    QJsonObject obj = read();
+
+    QVector<QString> sourcesList;
+    sourcesList = binaryToQStringVector();
+    sourcesList.removeOne( fileName );
+
+    QJsonArray arraySources;
+    foreach ( QString srcPath, sourcesList )
+    {
+        arraySources << srcPath;
+    }
+
+    arraySources << fileName;
+    obj.remove("binary");
+    obj.insert( "binary", arraySources );
+
+    QJsonDocument document;
+    document.setObject( obj );
+    QByteArray bytes = document.toJson( QJsonDocument::Indented );
+
+    write( bytes );
+}
+
+
+void ProManager::removeBinFile( QString path )
+{
+    QJsonObject obj = read();
+
+    QVector<QString> sourcesList;
+    sourcesList = binaryToQStringVector();
+    sourcesList.removeOne( path );
+
+    QJsonArray arraySources;
+    foreach ( QString srcPath, sourcesList )
+    {
+        arraySources << srcPath;
+    }
+
+    obj.insert( "binary", arraySources );
+
+    QJsonDocument document;
+    document.setObject( obj );
+    QByteArray bytes = document.toJson( QJsonDocument::Indented );
+
+    write( bytes );
+}
+
 
 void ProManager::addSourceFile( QString fileName )
 {
-    QJsonObject obj;
-    obj.insert( "name", proData( Name ) );
-    obj.insert( "main", proData( Main ) );
+    QJsonObject obj = read();
 
     QJsonArray arraySources;
     arraySources = sources();
     arraySources << fileName;
+    obj.remove("sources");
     obj.insert( "sources", arraySources );
 
     QJsonDocument document;
@@ -48,9 +107,7 @@ void ProManager::addSourceFile( QString fileName )
 
 void ProManager::removeSourceFile( QString path )
 {
-    QJsonObject obj;
-    obj.insert( "name", proData( Name ) );
-    obj.insert( "main", proData( Main ) );
+    QJsonObject obj = read();
 
     QVector<QString> sourcesList;
     sourcesList = sourcesToQStringVector();
@@ -117,6 +174,38 @@ QJsonArray ProManager::sources()
 QVector<QString> ProManager::sourcesToQStringVector()
 {
     QJsonArray jsonArraySources = sources();
+    QVariantList sourcesVariant = jsonArraySources.toVariantList();
+
+    QVector<QString> sourcesList;
+
+    foreach( QVariant elem, sourcesVariant )
+    {
+        sourcesList.append( elem.toString() );
+    }
+
+    return sourcesList;
+}
+
+
+QJsonArray ProManager::binary()
+{
+    proFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QString val = proFile.readAll();
+    proFile.close();
+
+    QJsonDocument jsonDocument = QJsonDocument::fromJson(val.toUtf8());
+
+    QJsonObject jsonObject = jsonDocument.object();
+
+    QJsonValue sources = jsonObject.value( "binary" );
+
+    return sources.toArray();
+}
+
+
+QVector<QString> ProManager::binaryToQStringVector()
+{
+    QJsonArray jsonArraySources = binary();
     QVariantList sourcesVariant = jsonArraySources.toVariantList();
 
     QVector<QString> sourcesList;

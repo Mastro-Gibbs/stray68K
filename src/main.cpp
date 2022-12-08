@@ -62,12 +62,7 @@ int usage(char *param)
     return (EXIT_FAILURE);
 }
 
-
-extern "C" {
-    int assemble(int argc, char **argv);
-    int emulate(int argc, char **argv);
-}
-
+/*
 int run(int argc, char **argv)
 {
     int exit_code = EXIT_FAILURE;
@@ -86,6 +81,7 @@ int run(int argc, char **argv)
 
     return (exit_code);
 }
+*/
 
 
 #include "ui/axolotlApp.h"

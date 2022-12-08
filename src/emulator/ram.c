@@ -6,7 +6,7 @@ void __show_ram__ (u32 _start, u32 _end, u32 _ptr, char *pcptr_color);
 void __show_ram_stack__ (u32 _top, u32 _bottom);
 
 
-struct EmulationMachine *emulator;
+struct EmulationMachine *emulatorm;
 m68k_ram *ram = NULL;
 
 
@@ -15,7 +15,7 @@ m68k_ram* init_ram(struct EmulationMachine *em)
 {
     if (!ram)
     {
-        emulator = em;
+        emulatorm = em;
 
         ram = malloc(sizeof (*ram));
 
@@ -68,8 +68,12 @@ void destroy_ram(void)
     {
         if (ram->ram)
             free(ram->ram);
+        ram->ram = NULL;
+
 
         free(ram);
+
+        ram = NULL;
     }
 }
 
@@ -82,7 +86,7 @@ void check_addr(u32 pointer, u32 iospan)
         sprintf(panic_str, "Seg-fault: illegal memory address, address: 0x%X, limit: 0x%X",
                  pointer + iospan, ram->size);
 
-        emulator->Machine.State = PANIC_STATE;
+        emulatorm->Machine.State = PANIC_STATE;
 
         PANIC(panic_str);
 

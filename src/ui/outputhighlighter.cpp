@@ -21,8 +21,7 @@ void OutputHighlighter::setHiglightFormat()
     namesFormat.setFontWeight(100);
     namesFormat.setForeground(QColor(255, 210, 0));
     const QString namesPatterns[] = {
-        QStringLiteral("\\bApp\\b"),
-        QStringLiteral("\\bSkAsm\\b"),
+        QStringLiteral("\\bTerminated\\b"),
         QStringLiteral("\\bRunning\\b"),
         QStringLiteral("\\bLocated in\\b"),
         QStringLiteral("\\bProgram exited\\b")
@@ -33,6 +32,18 @@ void OutputHighlighter::setHiglightFormat()
         rule.format = namesFormat;
         highlightingRules.append(rule);
     }
+
+    successFormat.setFontWeight(100);
+    successFormat.setForeground(QColor(42, 200, 61));
+    rule.pattern = QRegularExpression(QStringLiteral("\\bSuccess\\b"));
+    rule.format = successFormat;
+    highlightingRules.append(rule);
+
+    buildFormat.setFontWeight(100);
+    buildFormat.setForeground(QColor(212, 138, 250));
+    rule.pattern = QRegularExpression(QStringLiteral("\\bBUILD\\b"));
+    rule.format = buildFormat;
+    highlightingRules.append(rule);
 }
 
 

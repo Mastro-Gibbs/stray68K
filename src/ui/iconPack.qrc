@@ -19,5 +19,7 @@
         <file>img/param.png</file>
         <file>img/splash.jpg</file>
         <file>img/file.png</file>
+        <file>img/B68.png</file>
+        <file>img/s68k.png</file>
     </qresource>
 </RCC>
