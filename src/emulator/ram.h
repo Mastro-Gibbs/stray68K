@@ -25,5 +25,7 @@ void write_word(const u32 pointer, const u16 value);
 void write_long(const u32 pointer, const u32 value);
 
 
+unsigned char* read_chunk(const unsigned int pointer, const unsigned int end);
+
 
 #endif // __RAM_H__68000

@@ -42,6 +42,8 @@ void AxolotlApp::dynamicBinding()
 
 void AxolotlApp::init()
 {
+    run_mode = false;
+
     ui->tabWidget->setTabsClosable( true );
     ui->tabWidget->setMovable( true );
 
@@ -54,6 +56,7 @@ void AxolotlApp::init()
     ui->actionCurrent_editor_zoom_in->setDisabled ( true );
     ui->actionCurrent_editor_zoom_out->setDisabled( true );
 
+    ui->actionMemory->setDisabled( true );
 
     ui->sbs->hide();
 
@@ -630,9 +633,13 @@ int AxolotlApp::build(QString path)
     if (assemble(argc, argv))
     {
         ui->output->insertPlainText("[BUILD] Success\n");
-        ProManager *m = ProManager::getInstance();
-        filename.remove(0, filename.lastIndexOf('/') + 1);
-        m->addBinFile(filename);
+        if (projectData.projectOpened)
+        {
+            ProManager *m = ProManager::getInstance();
+            filename.remove(0, filename.lastIndexOf('/') + 1);
+            m->addBinFile(filename);
+        }
+
 
         return 1;
     }
@@ -760,6 +767,7 @@ void AxolotlApp::run( QString path )
 
     ui->pushButton_4->setDisabled(false);
     ui->pushButton->setDisabled(false);
+    ui->actionMemory->setDisabled(false);
 
     Editor *e = (Editor *) ui->tabWidget->currentWidget();
     QTextCursor c = QTextCursor(e->document());
@@ -1245,6 +1253,7 @@ void AxolotlApp::on_stopBtn_clicked()
     ui->stopBtn->setDisabled( true );
     ui->pushButton->setDisabled( true );
     ui->pushButton_4->setDisabled( true );
+    ui->actionMemory->setDisabled(true);
 
     updateMachine();
     end_emulator();
@@ -1311,7 +1320,24 @@ void AxolotlApp::on_pushButton_4_released()
         ui->output->insertPlainText( "[" + currTime + "]" + " Terminated\n\n");
 
         ui->stopBtn->setDisabled(true);
+        ui->pushButton->setDisabled(true);
+        ui->pushButton_4->setDisabled(true);
+        ui->actionMemory->setDisabled(true);
         e->setReadOnly(false);
+
+        QTextCursor c = QTextCursor(e->document());
+        QTextCharFormat fmt1;
+        fmt1.setBackground(Qt::transparent);
+
+        for (int i = 0; i < e->document()->blockCount(); i++)
+        {
+            QTextBlock block = e->document()->findBlockByLineNumber(i);
+            int blockPos = block.position();
+
+            c.setPosition(blockPos);
+            c.select(QTextCursor::LineUnderCursor);
+            c.setCharFormat(fmt1);
+        }
     }
     else
     {
@@ -1415,7 +1441,36 @@ void AxolotlApp::on_pushButton_released()
     ui->output->insertPlainText( "[" + currTime + "]" + " Terminated \n\n");
 
     ui->stopBtn->setDisabled(true);
+    ui->pushButton->setDisabled(true);
+    ui->pushButton_4->setDisabled(true);
+    ui->actionMemory->setDisabled(true);
 
     e->setReadOnly(false);
+
+    QTextCursor c = QTextCursor(e->document());
+    QTextCharFormat fmt1;
+    fmt1.setBackground(Qt::transparent);
+
+    for (int i = 0; i < e->document()->blockCount(); i++)
+    {
+        QTextBlock block = e->document()->findBlockByLineNumber(i);
+        int blockPos = block.position();
+
+        c.setPosition(blockPos);
+        c.select(QTextCursor::LineUnderCursor);
+        c.setCharFormat(fmt1);
+    }
+}
+
+
+void AxolotlApp::on_actionMemory_triggered()
+{
+    if ( memory != nullptr ) memory->deleteLater();
+
+    memory = new uimemory(this);
+    memory->insert();
+    memory->go();
+    memory->show();
+
 }
 

@@ -122,6 +122,20 @@ u32 read_long(const u32 pointer)
 }
 
 
+unsigned char* read_chunk(const unsigned int pointer, const unsigned int end)
+{
+    check_addr(pointer, end);
+
+    u8 *read = malloc(sizeof (u8) * end+1);
+
+    for (u32 iter = 0; iter < end; iter++)
+        read[iter] = ram->ram[pointer + iter];
+
+    read[end] = '\0';
+
+    return read;
+}
+
 
 /* MEMORY WRITE */
 void write_byte(const u32 pointer, const u8 value)
@@ -349,7 +363,6 @@ void __show_ram_stack__ (u32 _top, u32 _bottom)
 
     printf("\n\n");
 }
-
 
 
 

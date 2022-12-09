@@ -882,6 +882,7 @@
     <addaction name="separator"/>
     <addaction name="actionProgram_output_frame"/>
     <addaction name="actionToggle_project_frame"/>
+    <addaction name="actionMemory"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -987,7 +988,7 @@
     <string>Show program output frame</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Shift+T</string>
+    <string>Ctrl+T</string>
    </property>
   </action>
   <action name="actionRun_project">
@@ -1013,12 +1014,20 @@
     <string>Toggle project frame</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+T</string>
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="actionToggle_machine_area">
    <property name="text">
     <string>Toggle machine area</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
+   </property>
+  </action>
+  <action name="actionMemory">
+   <property name="text">
+    <string>Memory</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>

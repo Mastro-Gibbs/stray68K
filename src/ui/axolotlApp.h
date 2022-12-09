@@ -19,6 +19,7 @@
 #include "promanager.h"
 #include "projectmanager.h"
 #include "settingsmanager.h"
+#include "uimemory.h"
 
 #define RECENT_FILES_PATH    "recent_files"
 #define RECENT_PROJECTS_PATH "recent_projects"
@@ -125,6 +126,8 @@ private slots:
 
     void on_pushButton_released();
 
+    void on_actionMemory_triggered();
+
 signals:
     void projectOpened();
     void projectClosed();
@@ -148,18 +151,14 @@ private:
         QString projectPath;
     };
 
-    struct AxolotlProcesses
-    {
-        QProcess *runnerProcess = nullptr ;
-        QProcess *finder        = nullptr;
-    };
-
-    AxolotlProcesses axolotlProcesses;
     ProjectData      projectData;
+
+    bool run_mode;
 
     ProjectWizard  *projectWizard    = nullptr;
     ProjectManager *projectManager   = nullptr;
     SettingsManager *settingsManager = nullptr;
+    uimemory       *memory           = nullptr;
 
     Ui::AxolotlApp *ui;
 };
