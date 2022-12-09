@@ -1296,7 +1296,7 @@ int AxolotlApp::org_disc(Editor *e)
 
     QTextBlock block = e->document()->findBlockByLineNumber(i);
 
-    while (!block.text().contains(QRegExp("ORG")))
+    while (!block.text().contains(QRegExp("ORG")) && !block.text().contains(QRegExp("org")))
         block = e->document()->findBlockByLineNumber(++i);
 
     return i;
