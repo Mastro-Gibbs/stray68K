@@ -24,6 +24,8 @@
 
 
 
+
+
 int check_file_format(const char* name, const char* extension)
 {
     const char* ldot = strrchr(name, '.');

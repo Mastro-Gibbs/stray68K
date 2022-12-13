@@ -39,6 +39,7 @@
                         "DC"
                       ],
         "istruction" : [
+                "BSR",
                 "ADD",
                 "ADDA",
                 "ADDI",

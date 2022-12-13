@@ -106,6 +106,7 @@ typedef struct SemanticState
 	const char *source_line;
 	unsigned int current_if_level;
 	unsigned int false_if_level;
+    char* _asseble_error;
 	cc_bool end;
 	enum
 	{
@@ -180,15 +181,57 @@ void write_simhalt(SemanticState *state)
     }
 }
 
+char *as = NULL;
+
+void asseble_error(SemanticState *state, const char *cause, size_t len)
+{
+    if (state->_asseble_error == NULL)
+    {
+        state->_asseble_error = (char *) malloc(sizeof(char) * (len + 1));
+        snprintf(state->_asseble_error, len+1, "%s", cause);
+    }
+    else
+    {
+        state->_asseble_error = (char *) realloc(state->_asseble_error, sizeof(char) * (strlen(state->_asseble_error) + len + 1));
+        snprintf(state->_asseble_error+strlen(state->_asseble_error), len+1, "%s", cause);
+    }
+
+    as = state->_asseble_error;
+}
+
+
+const char* assemble_status()
+{
+    char *src = as;
+    char *str = Jexception(src, 3);
+    return (str);
+}
+
 
 static void ErrorMessageCommon(SemanticState *state)
 {
 	const Location *location;
 
 	for (location = state->location; location != NULL; location = location->previous)
+    {
         fprintf(stderr, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
 
-    fprintf(stderr, "\n\t\033[01m\033[37m%s\033[0m\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+        int size = snprintf(NULL, 0, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+
+        char *str = (char *)malloc(sizeof(char) * (size+1));
+        snprintf(str, size, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+
+        asseble_error(state, str, size);
+        free(str);
+    }
+    fprintf(stderr, "\n\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+
+    int size = snprintf(NULL, 0, "\n\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+
+    char *str = (char *)malloc(sizeof(char) * (size+1));
+    snprintf(str, size, "\n\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+    asseble_error(state, str, size);
+    free(str);
 }
 
 static void SimpleSemanticWarning(const char *fmt, ...)
@@ -223,7 +266,17 @@ ATTRIBUTE_PRINTF(2, 3) static void SemanticError(SemanticState *state, const cha
 
 	va_start(args, fmt);
 	vfprintf(stderr, fmt, args);
-	va_end(args);
+    va_end(args);
+    va_start(args, fmt);
+    int size = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+    va_start(args, fmt);
+    char *str = (char *)malloc(sizeof(char) * (size+1));
+    vsnprintf(str, size, fmt, args);
+    va_end(args);
+
+    asseble_error(state, str, size);
+    free(str);
 
 	ErrorMessageCommon(state);
 
@@ -262,6 +315,10 @@ void m68kasm_warning(void *scanner, Statement *statement, const char *message)
 
     fprintf(stderr, "[\033[93mASM WARNING\033[0m] %s", message);
 
+    int size = snprintf(NULL, 0, "%s", message);
+
+    asseble_error(state, message, size);
+
 	ErrorMessageCommon(state);
 }
 
@@ -273,7 +330,13 @@ void m68kasm_error(void *scanner, Statement *statement, const char *message)
 
     fprintf(stderr, "[\033[91mASM ERROR\033[0m] %s", message);
 
+    int size = snprintf(NULL, 0, "%s", message);
+
+    asseble_error(state, message, size);
+
 	ErrorMessageCommon(state);
+
+    state->success = cc_false;
 }
 
 static void* MallocAndHandleError(SemanticState *state, size_t size)
@@ -5314,6 +5377,7 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
 	state.mode = MODE_NORMAL;
 	state.end = cc_false;
     state.root_path = ExtractPathRoot(input_file_path);
+    state._asseble_error = NULL;
 
 	/* Set the location path (note that we're taking care to not do this before the state is fully initialised). */
 	location.file_path = DuplicateStringAndHandleError(&state, input_file_path);

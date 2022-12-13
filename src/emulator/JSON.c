@@ -192,6 +192,10 @@ char* Jexception(char* cause, u32 type)
     {
         sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CAUSE\":\"%s\"}}", "TYPE", "EMULATOR-ERROR", cause);
     }
+    else if (type == 3)
+    {
+        sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CAUSE\":\"%s\"}}", "TYPE", "ASSEMBLER ERROR", cause);
+    }
 
     size_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);

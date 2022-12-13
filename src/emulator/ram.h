@@ -26,6 +26,7 @@ void write_long(const u32 pointer, const u32 value);
 
 
 unsigned char* read_chunk(const unsigned int pointer, const unsigned int end);
+unsigned char* read_stack(const unsigned int pointer);
 
 
 #endif // __RAM_H__68000

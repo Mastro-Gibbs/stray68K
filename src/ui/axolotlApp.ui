@@ -883,6 +883,7 @@
     <addaction name="actionProgram_output_frame"/>
     <addaction name="actionToggle_project_frame"/>
     <addaction name="actionMemory"/>
+    <addaction name="actionStack"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -1031,6 +1032,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionStack">
+   <property name="text">
+    <string>Stack</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Alt+S</string>
    </property>
   </action>
  </widget>

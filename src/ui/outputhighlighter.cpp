@@ -44,6 +44,18 @@ void OutputHighlighter::setHiglightFormat()
     rule.pattern = QRegularExpression(QStringLiteral("\\bBUILD\\b"));
     rule.format = buildFormat;
     highlightingRules.append(rule);
+
+    asFormat.setFontWeight(100);
+    asFormat.setForeground(QColor(230, 70, 70));
+    rule.pattern = QRegularExpression(QStringLiteral("\\bASSEMBLER ERROR\\b"));
+    rule.format = asFormat;
+    highlightingRules.append(rule);
+
+    aeFormat.setFontWeight(100);
+    aeFormat.setForeground(QColor(245, 100, 100));
+    rule.pattern = QRegularExpression(QStringLiteral("\\bASM ERROR\\b"));
+    rule.format = aeFormat;
+    highlightingRules.append(rule);
 }
 
 

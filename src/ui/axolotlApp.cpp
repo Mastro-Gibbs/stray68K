@@ -645,6 +645,36 @@ int AxolotlApp::build(QString path)
     }
     else
     {
+        QString json = QString(assemble_status());
+
+        QJsonDocument doc = QJsonDocument::fromJson(json.toUtf8());
+
+        QJsonObject jsonObject = doc.object();
+
+        if (jsonObject.contains("EXCEPTION"))
+        {
+            QJsonValue EXC = jsonObject.value(QString("EXCEPTION"));
+            QJsonObject EXCObj = EXC.toObject();
+
+            if (ui->outputFrame->isHidden())
+            {
+                ConfigManager *conf = ConfigManager::getInstance();
+                QJsonObject obj = conf->consoleAspect();
+                QJsonArray data = obj.value("ratio").toArray();
+                ui->outputFrame->show();
+                ui->outputFrame->setMinimumHeight(1);
+                ui->splitter_3->setStretchFactor( data[0].toInt(), data[1].toInt() );
+                ui->actionProgram_output_frame->setText("Hide program output frame");
+                conf->updateConsoleAspect(1, data[0].toInt(), data[1].toInt());
+            }
+
+            if (EXCObj.contains("CAUSE"))
+            {
+                ui->output->insertPlainText("[" + EXC["TYPE"].toString() + "] " +
+                                                  EXC["CAUSE"].toString() + "\n");
+            }
+        }
+
         ui->output->insertPlainText("[BUILD] Fail\n");
         return 0;
     }
@@ -684,6 +714,8 @@ void AxolotlApp::updateMachine()
 
     QJsonObject jsonObject = doc.object();
 
+    //qDebug() << jsonObject;
+
     QJsonObject CPU = jsonObject.value(QString("CPU")).toObject();
     ui->a0le->setText(fixed4BReg(CPU["A0"].toString()));
     ui->a1le->setText(fixed4BReg(CPU["A1"].toString()));
@@ -715,7 +747,6 @@ void AxolotlApp::updateMachine()
     ui->istrle->setText(fixedBinaryNum(OPC["CODE"].toString()));
     ui->mnemle->setText(OPC["MNEMONIC"].toString());
 
-
     if (jsonObject.contains("IO"))
     {
         QJsonValue IO = jsonObject.value(QString("IO"));
@@ -725,6 +756,38 @@ void AxolotlApp::updateMachine()
             ui->output->insertPlainText("");
         }
     }
+
+    if (jsonObject.contains("EXCEPTION"))
+    {
+        QJsonValue EXC = jsonObject.value(QString("EXCEPTION"));
+        QJsonObject EXCObj = EXC.toObject();
+
+        if (ui->outputFrame->isHidden())
+        {
+            ConfigManager *conf = ConfigManager::getInstance();
+            QJsonObject obj = conf->consoleAspect();
+            QJsonArray data = obj.value("ratio").toArray();
+            ui->outputFrame->show();
+            ui->outputFrame->setMinimumHeight(1);
+            ui->splitter_3->setStretchFactor( data[0].toInt(), data[1].toInt() );
+            ui->actionProgram_output_frame->setText("Hide program output frame");
+            conf->updateConsoleAspect(1, data[0].toInt(), data[1].toInt());
+        }
+
+        if (EXCObj.contains("CAUSE"))
+        {
+            ui->output->insertPlainText("[" + EXC["TYPE"].toString() + "] " +
+                                              EXC["CAUSE"].toString() + "\n");
+        }
+        else
+        {
+            ui->output->insertPlainText("[" + EXC["TYPE"].toString() + "] " +
+                                              EXC["MNEM"].toString() + ", code: " +
+                                              EXC["CODE"].toString() + "\n");
+        }
+    }
+
+
 }
 
 
@@ -784,8 +847,35 @@ void AxolotlApp::run( QString path )
         c.setCharFormat(fmt1);
     }
 
+
     pc = pc_disc();
     block_num = org_disc(e);
+
+    QTextCharFormat fmt;
+    fmt.setBackground(QBrush(QColor(30, 30, 30), Qt::SolidPattern));
+
+    int local_pc = pc_disc();
+
+    QTextBlock block = e->document()->findBlockByLineNumber(block_num);
+    int blockPos = block.position();
+
+    if (local_pc < pc)
+    {
+        block_num -= (pc - local_pc) / 4;
+        block = e->document()->findBlockByLineNumber(block_num);
+    }
+    else
+    {
+        block = e->document()->findBlockByLineNumber(++block_num);
+        while (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}")))
+            block = e->document()->findBlockByLineNumber(++block_num);
+    }
+
+    blockPos = block.position();
+
+    c.setPosition(blockPos);
+    c.select(QTextCursor::LineUnderCursor);
+    c.setCharFormat(fmt);
 
     e->setReadOnly(true);
 
@@ -1255,13 +1345,43 @@ void AxolotlApp::on_stopBtn_clicked()
     ui->pushButton_4->setDisabled( true );
     ui->actionMemory->setDisabled(true);
 
-    updateMachine();
+    if (memory)
+        memory->go();
+
+    if (stack)
+        stack->go();
+
     end_emulator();
+
+    emit end_emulation();
+
+    updateMachine();
+
+    QTime time;
+    QString currTime = time.currentTime().toString();
+    ui->output->insertPlainText( "[" + currTime + "]" + " Killed \n\n");
+
+    Editor *e = (Editor *) ui->tabWidget->currentWidget();
+    e->setReadOnly(false);
+
+    QTextCursor c = QTextCursor(e->document());
+    QTextCharFormat fmt1;
+    fmt1.setBackground(Qt::transparent);
+
+    for (int i = 0; i < e->document()->blockCount(); i++)
+    {
+        QTextBlock block = e->document()->findBlockByLineNumber(i);
+        int blockPos = block.position();
+
+        c.setPosition(blockPos);
+        c.select(QTextCursor::LineUnderCursor);
+        c.setCharFormat(fmt1);
+    }
 
     ui->output->insertPlainText( "Program exited" );
 
     ui->output->insertPlainText( "\n\n" );
-    ui->statusbar->showMessage( "Program terminated!", 5000 );
+    ui->statusbar->showMessage( "Program killed!", 5000 );
 }
 
 
@@ -1307,11 +1427,20 @@ void AxolotlApp::on_pushButton_4_released()
 {
     Editor *e = (Editor *) ui->tabWidget->currentWidget();
 
-    if (!emulate())
+    if (is_last_istr() || !emulate())
     {
         ui->pushButton_4->setDisabled(true);
         ui->pushButton->setDisabled(true);
+
+        if (memory)
+            memory->go();
+
+        if (stack)
+            stack->go();
+
         end_emulator();
+
+        emit end_emulation();
 
         updateMachine();
 
@@ -1338,10 +1467,18 @@ void AxolotlApp::on_pushButton_4_released()
             c.select(QTextCursor::LineUnderCursor);
             c.setCharFormat(fmt1);
         }
+
+        ui->statusbar->showMessage( "Program terminated!", 5000 );
     }
     else
     {
         updateMachine();
+
+        if (memory)
+            memory->go();
+
+        if (stack)
+            stack->go();
 
         QTextCharFormat fmt1;
         fmt1.setBackground(Qt::transparent);
@@ -1369,7 +1506,8 @@ void AxolotlApp::on_pushButton_4_released()
         else
         {
             block = e->document()->findBlockByLineNumber(++block_num);
-            while (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}")))
+            while ((block_num+1) < e->document()->blockCount() &&
+                   (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}"))))
                 block = e->document()->findBlockByLineNumber(++block_num);
         }
 
@@ -1390,8 +1528,14 @@ void AxolotlApp::on_pushButton_released()
     Editor *e = (Editor *) ui->tabWidget->currentWidget();
 
     while (emulate())
-    {
+    {        
         updateMachine();
+
+        if (memory)
+            memory->go();
+
+        if (stack)
+            stack->go();
 
         QTextCharFormat fmt1;
         fmt1.setBackground(Qt::transparent);
@@ -1419,7 +1563,8 @@ void AxolotlApp::on_pushButton_released()
         else
         {
             block = e->document()->findBlockByLineNumber(++block_num);
-            while (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}")))
+            while ((block_num+1) < e->document()->blockCount() &&
+                   (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}"))))
                 block = e->document()->findBlockByLineNumber(++block_num);
         }
 
@@ -1433,6 +1578,8 @@ void AxolotlApp::on_pushButton_released()
     }
 
     end_emulator();
+
+    emit end_emulation();
 
     updateMachine();
 
@@ -1460,6 +1607,8 @@ void AxolotlApp::on_pushButton_released()
         c.select(QTextCursor::LineUnderCursor);
         c.setCharFormat(fmt1);
     }
+
+    ui->statusbar->showMessage( "Program terminated!", 5000 );
 }
 
 
@@ -1472,5 +1621,16 @@ void AxolotlApp::on_actionMemory_triggered()
     memory->go();
     memory->show();
 
+}
+
+
+void AxolotlApp::on_actionStack_triggered()
+{
+    if ( stack != nullptr ) stack->deleteLater();
+
+    stack = new uistack(this);
+    stack->insert();
+    stack->go();
+    stack->show();
 }
 

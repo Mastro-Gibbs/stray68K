@@ -147,9 +147,7 @@ void __init(struct EmulationMachine *this)
 
     if (this->Machine.State == PANIC_STATE)
     {
-        PANIC(this->Machine.Exception.panic_cause);
-
-        emit_dump(this);
+        PANIC(this, this->Machine.Exception.panic_cause);
 
         exit(EXIT_FAILURE);
     }
@@ -158,9 +156,7 @@ void __init(struct EmulationMachine *this)
 
     if (this->Machine.State == PANIC_STATE)
     {
-        PANIC(this->Machine.Exception.panic_cause);
-
-        emit_dump(this);
+        PANIC(this, this->Machine.Exception.panic_cause);
 
         exit(EXIT_FAILURE);
     }
@@ -169,24 +165,25 @@ void __init(struct EmulationMachine *this)
 
     if (this->Machine.State == PANIC_STATE)
     {
-        PANIC(this->Machine.Exception.panic_cause);
-
-        emit_dump(this);
+        PANIC(this, this->Machine.Exception.panic_cause);
 
         exit(EXIT_FAILURE);
     }
 }
 
 
+
+
+struct EmulationMachine *emulator = NULL;
+
 void __turnoff()
 {
+    if (emulator->Machine.IO.buffer)
+        free(emulator->Machine.IO.buffer);
     destroy_cpu();
     destroy_ram();
     destroy_codes();
 }
-
-
-struct EmulationMachine *emulator = NULL;
 
 void obtain_emulation_machine(char *path)
 {
@@ -247,6 +244,7 @@ void end_emulator()
     emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
                            (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
 
+    emulator->Machine.IO.Type = IO_UNDEF;
     emulator->Machine.State = FINAL_STATE;
 
     emit_dump(emulator);
@@ -255,6 +253,12 @@ void end_emulator()
 
     free(emulator);
     emulator = NULL;
+}
+
+
+int is_last_istr()
+{
+    return (emulator->Machine.cpu->pc + WORD_SPAN) < emulator->Machine.RuntimeData.simhalt ? 0 : 1;
 }
 
 
@@ -273,19 +277,18 @@ int emulate()
             switch (emulator->Machine.State) {
                 case PANIC_STATE:
                 {
-                    PANIC(emulator->Machine.Exception.panic_cause)
+                    PANIC(emulator, emulator->Machine.Exception.panic_cause)
                     break;
                 }
                 case TRAP_STATE:
                 {
-                    TRAPEXC(emulator->Machine.Exception.trap_cause)
+                    TRAPEXC(emulator, emulator->Machine.Exception.trap_cause)
                     break;
                 }
                 default:
                     break;
             }
 
-            emulator->Machine.turnoff();
 
             return (RETURN_ERR);
         }

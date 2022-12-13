@@ -13,7 +13,8 @@
  * MACRO used to raise a critical trap code.
  *
  */
-#define TRAPEXC(cause)  do {                                         \
+#define TRAPEXC(mc,cause)  do {                                         \
+                            emit_dump(mc);                           \
                             printf("[\033[01m\033[35mTRAP\033[0m] ");\
                             printf("%s\n", cause);                   \
                             fflush(stdout);                          \
@@ -24,7 +25,8 @@
  * MACRO used to turn system into PANIC mode aka something that the sys don't know how to handle it.
  *
  */
-#define PANIC(cause) do {                                          \
+#define PANIC(mc,cause) do {                                          \
+                        emit_dump(mc);                              \
                         printf("[\033[01m\033[91mPANIC\033[0m] "); \
                         printf("%s\n", cause);                     \
                         fflush(stdout);                            \

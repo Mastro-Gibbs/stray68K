@@ -30,6 +30,14 @@ public:
 private slots:
     void on_pushButton_released();
 
+    void on_nextbtn_released();
+
+    void on_prevbtn_released();
+
+public slots:
+    void disable_go_btn();
+    void enable_go_btn();
+
 private:
     Ui::uimemory *ui;
 };

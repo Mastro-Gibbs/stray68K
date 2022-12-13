@@ -31,6 +31,8 @@ private:
     QTextCharFormat namesFormat;
     QTextCharFormat successFormat;
     QTextCharFormat buildFormat;
+    QTextCharFormat asFormat;
+    QTextCharFormat aeFormat;
     QTextCharFormat timeFormat;
     QTextCharFormat disabledFormat;
     QTextCharFormat enabledFormat;

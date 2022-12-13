@@ -88,7 +88,7 @@ void check_addr(u32 pointer, u32 iospan)
 
         emulatorm->Machine.State = PANIC_STATE;
 
-        PANIC(panic_str);
+        PANIC(emulatorm, panic_str);
 
         char* buf = Jexception(panic_str, 2);
         printf("%s\n", buf);
@@ -132,6 +132,18 @@ unsigned char* read_chunk(const unsigned int pointer, const unsigned int end)
         read[iter] = ram->ram[pointer + iter];
 
     read[end] = '\0';
+
+    return read;
+}
+
+unsigned char* read_stack(const unsigned int pointer)
+{
+    u8 *read = malloc(sizeof (u8) * 41);
+
+    for (u32 iter = 40; iter > 0; iter--)
+        read[40 - iter] = ram->ram[(pointer+4) - iter];
+
+    read[40] = '\0';
 
     return read;
 }

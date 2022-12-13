@@ -20,6 +20,7 @@
 #include "projectmanager.h"
 #include "settingsmanager.h"
 #include "uimemory.h"
+#include "uistack.h"
 
 #define RECENT_FILES_PATH    "recent_files"
 #define RECENT_PROJECTS_PATH "recent_projects"
@@ -30,8 +31,11 @@ extern "C" {
     int assemble(int argc, char **argv);
     void begin_emulator(char *path);
     void end_emulator();
+    int is_last_istr();
     int emulate();
     const char* machine_status ();
+
+    const char* assemble_status();
 }
 
 
@@ -128,9 +132,13 @@ private slots:
 
     void on_actionMemory_triggered();
 
+    void on_actionStack_triggered();
+
 signals:
     void projectOpened();
     void projectClosed();
+
+    void end_emulation();
 
 
 private:
@@ -159,6 +167,7 @@ private:
     ProjectManager *projectManager   = nullptr;
     SettingsManager *settingsManager = nullptr;
     uimemory       *memory           = nullptr;
+    uistack        *stack            = nullptr;
 
     Ui::AxolotlApp *ui;
 };

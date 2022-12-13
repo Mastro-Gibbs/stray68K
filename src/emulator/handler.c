@@ -931,7 +931,6 @@ u32 TRAP(void)
     {
         emulation->Machine.State = IO_STATE;
         iotask(emulation);
-        emulation->Machine.State = EXECUTION_STATE;
         return (RETURN_OK);
     }
     else
@@ -3014,6 +3013,8 @@ void preset_hander(struct EmulationMachine *em) { emulation = em; }
 
 u32 run_opcode()
 {
+    emulation->Machine.State = EXECUTION_STATE;
+
     m68k_opcode* const tmp = get_opcode_t();
 
     if (tmp == NULL)
@@ -3023,12 +3024,12 @@ u32 run_opcode()
         return (RETURN_ERR);
     }
 
-    emit_dump(emulation);
-
     const u32 res = tmp->handler();
 
     if (res != RETURN_OK_PC_NO_INCR)
         INCR_PC(WORD_SPAN);
+
+    emit_dump(emulation);
 
     return res;
 }

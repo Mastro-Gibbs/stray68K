@@ -422,6 +422,9 @@ void iotask(struct EmulationMachine *em)
 {
     char *str = NULL;
 
+    if (em->Machine.IO.buffer)
+        free(em->Machine.IO.buffer);
+
     if (em->Machine.IO.Type == OUTPUT)
     {
         EVAL_PRINT_SEQUENCE(str)
@@ -430,10 +433,7 @@ void iotask(struct EmulationMachine *em)
         {
             em->Machine.IO.buffer  = str;
 
-            emit_dump(em);
-
             IO_TASK(em->ExecArgs.descriptive_mode, "%s", str)
-            free(str);
         }
     }
     else if (em->Machine.IO.Type == INPUT)
@@ -443,9 +443,6 @@ void iotask(struct EmulationMachine *em)
         if (str != NULL)
         {
             em->Machine.IO.buffer  = str;
-
-            emit_dump(em);
-            free(str);
         }
     }
 
@@ -453,10 +450,7 @@ void iotask(struct EmulationMachine *em)
 }
 
 
-#include <unistd.h>
-void machine_waiter(struct EmulationMachine *em)
-{
-}
+
 
 #include "JSON.h"
 
@@ -473,6 +467,8 @@ void emit_dump(struct EmulationMachine *em)
             _dump = Jexception(em->Machine.Exception.panic_cause, PANIC_EXC_TYPE);
         else if (em->Machine.State == MERR_STATE)
             _dump = Jexception(em->Machine.Exception.merr_cause, MERR_EXC_TYPE);
+        else if (em->Machine.State == TRAP_STATE)
+            _dump = Jexception(em->Machine.Exception.merr_cause, TRAP_EXC_TYPE);
     }
     else
     {
@@ -485,7 +481,7 @@ void emit_dump(struct EmulationMachine *em)
         _dump = Jconcat2(_dump, Jop,     em->Machine.RuntimeData.mnemonic, em->Machine.RuntimeData.operation_code);
         _dump = Jconcat2(_dump, Jchrono, em->Machine.Chrono.dt);
 
-        if (em->Machine.IO.buffer != NULL && em->Machine.IO.Type != IO_UNDEF)
+        if (em->Machine.State == IO_STATE)
             _dump = Jconcat2(_dump, Jio, em->Machine.IO.buffer, em->Machine.IO.Type);
 
         if (em->Machine.State == TRAP_STATE)
