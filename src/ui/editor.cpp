@@ -57,7 +57,6 @@ void Editor::initializeCompleter( QString projectPath )
 {
     m_completer = new Completer( this );
     m_completer->setPathProject( projectPath );
-    m_completer->generateTLTree();
 }
 
 void Editor::callCompleter()

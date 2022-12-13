@@ -57,6 +57,7 @@ void AxolotlApp::init()
     ui->actionCurrent_editor_zoom_out->setDisabled( true );
 
     ui->actionMemory->setDisabled( true );
+    ui->actionStack->setDisabled( true );
 
     ui->sbs->hide();
 
@@ -831,6 +832,7 @@ void AxolotlApp::run( QString path )
     ui->pushButton_4->setDisabled(false);
     ui->pushButton->setDisabled(false);
     ui->actionMemory->setDisabled(false);
+    ui->actionStack->setDisabled(false);
 
     Editor *e = (Editor *) ui->tabWidget->currentWidget();
     QTextCursor c = QTextCursor(e->document());
@@ -1134,7 +1136,7 @@ void AxolotlApp::on_actionSave_triggered()
 void AxolotlApp::on_actionSave_as_triggered()
 {
 
-    QFileDialog* fd = new QFileDialog(this, "Save as...", "", tr("SkASM File / .skasm;;Plancton File / .plct"));
+    QFileDialog* fd = new QFileDialog(this, "Save as...", "", tr("Stray68K File (.X68)"));
     QString fname;
 
     fd->setFileMode(QFileDialog::AnyFile);
@@ -1146,9 +1148,13 @@ void AxolotlApp::on_actionSave_as_triggered()
         if (!fl.isEmpty()) fname = fl[0];
         else return;
 
-        if(fd->selectedNameFilter() == "SkASM File / .skasm")         fname += ".skasm";
-        else if (fd->selectedNameFilter() == "Plancton File / .plct") fname += ".plct";
+        if (fname.contains(QChar('.')))
+        {
+            int fio = fname.indexOf(QChar('.'));
+            fname.remove(fio, fname.size());
+        }
 
+        fname += ".X68";
 
         Editor *currEditor = (Editor*) ui->tabWidget->currentWidget();
         QString editorData(currEditor->toPlainText());
@@ -1344,6 +1350,7 @@ void AxolotlApp::on_stopBtn_clicked()
     ui->pushButton->setDisabled( true );
     ui->pushButton_4->setDisabled( true );
     ui->actionMemory->setDisabled(true);
+    ui->actionStack->setDisabled(true);
 
     if (memory)
         memory->go();
@@ -1452,6 +1459,7 @@ void AxolotlApp::on_pushButton_4_released()
         ui->pushButton->setDisabled(true);
         ui->pushButton_4->setDisabled(true);
         ui->actionMemory->setDisabled(true);
+        ui->actionStack->setDisabled(true);
         e->setReadOnly(false);
 
         QTextCursor c = QTextCursor(e->document());
@@ -1591,6 +1599,7 @@ void AxolotlApp::on_pushButton_released()
     ui->pushButton->setDisabled(true);
     ui->pushButton_4->setDisabled(true);
     ui->actionMemory->setDisabled(true);
+    ui->actionStack->setDisabled(true);
 
     e->setReadOnly(false);
 

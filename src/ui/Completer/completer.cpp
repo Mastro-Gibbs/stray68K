@@ -241,73 +241,8 @@ void Completer::insertItems()
 
 
 
-void Completer::generateTLTree()
-{
-    CompleterParser parser;
-    TLVector newVec = parser.findIncludedFiles( parsingTree.root.rootText() );
-
-    for( int index = 0; index < newVec.len(); index++ )
-    {
-        parsingTree.nodes.insert( newVec.childs[ index ] );
-    }
-
-    parsingTree.nodes.DEBUG();
-}
-
-
-
 void Completer::checkForUpdate()
 {
-    CompleterParser parser;
-    TLVector newVec = parser.findIncludedFiles( parsingTree.root.rootText() );
-
-    for( int index = 0; index < newVec.len(); index++ )
-    {
-        TLTChildNode *curr = newVec.childs[ index ];
-        if ( !parsingTree.nodes.contains( curr ) )
-        {
-            QFileInfo info( parsingTree.projectPath + curr->nodeName );
-            if ( info.exists() )
-            {
-                curr->setDate( info.lastModified() );
-                parsingTree.nodes.insert( curr );
-            }
-        }
-    }
-
-    TLVector vec = parsingTree.nodes.intersection( newVec );
-
-    if ( vec.len() != 0 )
-    {
-        for ( int index = 0; index < vec.len(); index++ )
-        {
-            QString nodeName = vec.childs[ index ]->nodeName;
-            QMap<QString, SuggestionType> wordsToRemove;
-
-            if ( parsingTree.nodes.remove( vec.childs[ index ] ) != -1 )
-            {
-                QFile file( parsingTree.projectPath + nodeName );
-                if ( file.open( QIODevice::ReadOnly | QIODevice::Text ) )
-                {
-                    QTextStream in ( &file );
-                    wordsToRemove = parser.findNewKeyw( in.readAll() );
-                    file.close();
-                }
-                if ( !wordsToRemove.isEmpty() )
-                {
-                    const auto elems = wordsToRemove.keys();
-                    for ( const QString &elem : elems )
-                    {
-                        knownWords.dynamicWords.remove( elem );
-                    }
-                }
-            }
-        }
-
-    }
-
-    parsingTree.nodes.DEBUG();
-
     discoverIncludedWords();
 }
 
@@ -317,22 +252,9 @@ void Completer::discoverIncludedWords()
 {
     CompleterParser parser;
 
-    for( int index = 0; index < parsingTree.nodes.len(); index++ )
-    {
-        TLTChildNode *curr = parsingTree.nodes.childs[ index ];
-        QFileInfo info( parsingTree.projectPath + curr->nodeName );
-        if ( curr->testDate( info.lastModified() ) && curr->testAndSet() )
-        {
-            QFile file( parsingTree.projectPath + curr->nodeName );
-            if ( file.open( QIODevice::ReadOnly | QIODevice::Text ) )
-            {
-                QTextStream in ( &file );
-                QMap<QString, SuggestionType> words = parser.findNewKeyw( in.readAll() );
-                knownWords.dynamicWords.insert( words );
-                file.close();
-            }
-        }
-    }
+    QMap<QString, SuggestionType> words = parser.findNewKeyw( parsingTree.root.rootText() );
+    knownWords.dynamicWords.clear();
+    knownWords.dynamicWords.insert(words);
 }
 
 

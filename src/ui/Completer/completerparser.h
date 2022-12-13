@@ -18,9 +18,6 @@ public:
 
     QMap<QString, SuggestionType> findNewKeyw( QString sourceText );
 
-    TLVector findIncludedFiles ( QString sourceText );
-
-
 private:
     QRegularExpression labelRX;
 };

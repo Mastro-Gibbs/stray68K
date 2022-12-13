@@ -104,7 +104,7 @@ void uistack::on_pushButton_released()
 
     if (value > 0xFFFFFC)
     {
-        ui->label->setText("Invalid address: too large address");
+        ui->label->setText("Invalid address\ntoo large address");
         return;
     }
 
@@ -148,7 +148,7 @@ void uistack::on_pushButton_released()
         free(raw_ram);
     }
     else
-        ui->label->setText("Invalid address: pass a multiple of 0x04");
+        ui->label->setText("Invalid address\npass a multiple of 0x04");
 
 }
 
