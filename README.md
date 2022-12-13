@@ -16,6 +16,9 @@
               
 Stray motorola 68000 emulator, include assembler and emulator.  
 
+UI branch, contains a graphics component developed in Qt/C++ 5.15.3 which aims to wrap the stray68K core.  
+
+
 #### Emulation Machine
 The emulator is based on a **pseudo-state machine** and a series of functions that emulate the behavior of the operations performed by the Motorola 68000 processor.
 Possible states:
@@ -75,7 +78,7 @@ Just clone and invoke makefile
   $ cd stray68K
   ```
   ```bash
-  $ make
+  $ make -j<number_of_cpu_cores>
   ```
   ```bash
   $ cd build
@@ -87,88 +90,10 @@ Just clone and invoke makefile
 
 ## Usage
 
-- Commands & Options and Arguments aka man-page
-  ```bash
-        stray68K an emulator for Motorola 68000.
-
-        Modality
-        -Assembler:
-          -a [opts|args] -Invoke assembler. See help.
-        -Emulator:
-          -e [path] -STANDARD MODE. Input executable file. To generate it use assembler options.
-          -s [path] -STEP-BY-STEP MODE. Like option '-e' but run executable file step by step (debug mode).
-
-        Emulator options list
-        [-q] -Mean quiet output.
-              This option is prohibited in STEP-BY-STEP MODE.
-        [-d] -Mean descriptive output.
-              This option is prohibited in STANDARD MODE.
-        [-t] -Perform a chrono calculation and print it.
-              This option is prohibited in STEP-BY-STEP MODE.
-        [-j] -Perform JSON machine encoding output.
-
-        You cannot combine '-d' and '-q' options.
-        You cannot combine '-j' and '-t' options.
-        You cannot combine JSON encoding option 'dump' and 'concat'.
-        You cannot use JSON encoding option (-j) alone.
-        You cannot use JSON chrono encoding (-j chrono) in step-by-step mode.
-
-        JSON encoding commands
-        [cpu]    -Mean cpu encoding.
-        [ram]    -Mean ram encoding.
-        [chrono] -Mean chrono encoding (ns).
-        [op]     -Mean op mnemonic and code encoding (base 10).
-        [io]     -Show io operation in JSON format.
-        [dump]   -Perform sys dump in JSON format.
-        [concat] -Perform JSON concat, must pass at least two listed above commands.
-
-        STEP-BY-STEP MODE's options asked from stdin
-        [s] -Asks for top address and print current stack.
-        [r] -Asks for ram offsets and print selected ram chunk.
-        [n] -Execute next istruction.
-        [t] -Terminate the program. The execution proceeds to the end.
-        
-        Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)
-        
-        Options:
-         -i [path] -Input file, must be .X68 file extesion.
-         -o [path] -Output file, must be .B68 file extesion.
-         -l [path] -Listing file. Optional.
-         -s [path] -asm68k-style symbol file. Optional.
-         -c        -Enable case-insensitive mode.
-         -b        -Enable Bison's debug output.
-         -d        -Allow EQU/SET to descope local labels.
-  ```
-
-
-- Print help.
+- To run.
   ```bash
   $ ./stray68K 
   ```
-- To perform a ```compilation```.
-  ```bash
-  $ ./stray68K -a -i ../examples/GenericTester/generic.X68 -o ../examples/GenericTester/generic.B68
-  ```
-- To perform a quiet ```execution```.
-  ```bash
-  $ ./stray68K -e ../examples/IO/io.B68 -q
-  ```
-- To perform a quiet ```execution``` with cpu, ram and chrono dumps in JSON format.
-  ```bash
-  $ ./stray68K -e ../examples/IO/io.B68 -j cpu ram chrono concat -q
-  ```
-- To perform a descriptive ```execution step by step```.
-  ```bash
-  $ ./stray68K -s ../examples/GenericTester/generic.B68 -d
-  ```
-- To perform a descriptive ```execution step by step``` with system dump in JSON format.
-  ```bash
-  $ ./stray68K -s ../examples/GenericTester/generic.B68 -d -j dump
-  ```
-- To perform a chrono test ```execution```.
-  ```bash
-  $ ./stray68K -s ../examples/SpeedTest/speed.B68 -d -t
-  ```  
 
 ---
 

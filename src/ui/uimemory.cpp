@@ -1,5 +1,5 @@
 #include "uimemory.h"
-#include "ui_uimemory.h"
+#include "objects/ui_uimemory.h"
 
 
 

@@ -1,5 +1,5 @@
 #include "axolotlApp.h"
-#include "ui_axolotlApp.h"
+#include "objects/ui_axolotlApp.h"
 
 #include <iostream>
 
@@ -852,34 +852,6 @@ void AxolotlApp::run( QString path )
 
     pc = pc_disc();
     block_num = org_disc(e);
-
-    QTextCharFormat fmt;
-    fmt.setBackground(QBrush(QColor(30, 30, 30), Qt::SolidPattern));
-
-    int local_pc = pc_disc();
-
-    QTextBlock block = e->document()->findBlockByLineNumber(block_num);
-    int blockPos = block.position();
-
-    if (local_pc < pc)
-    {
-        block_num -= (pc - local_pc) / 4;
-        block = e->document()->findBlockByLineNumber(block_num);
-    }
-    else
-    {
-        block = e->document()->findBlockByLineNumber(++block_num);
-        while (!block.text().contains(QRegExp("\\S")) || block.text().contains(QRegExp("(^[aA-zZ0-9_]+:){1}")))
-            block = e->document()->findBlockByLineNumber(++block_num);
-    }
-
-    blockPos = block.position();
-
-    c.setPosition(blockPos);
-    c.select(QTextCursor::LineUnderCursor);
-    c.setCharFormat(fmt);
-
-    e->setReadOnly(true);
 
 }
 

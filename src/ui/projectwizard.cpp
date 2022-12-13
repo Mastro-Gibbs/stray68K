@@ -1,5 +1,5 @@
 #include "projectwizard.h"
-#include "ui_projectwizard.h"
+#include "objects/ui_projectwizard.h"
 
 ProjectWizard::ProjectWizard(QWidget *parent) :
     QWizard(parent),

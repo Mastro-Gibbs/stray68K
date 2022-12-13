@@ -1,5 +1,5 @@
 #include "sourceadder.h"
-#include "ui_sourceadder.h"
+#include "objects/ui_sourceadder.h"
  #include <iostream>
 
 SourceAdder::SourceAdder(QWidget *parent) :

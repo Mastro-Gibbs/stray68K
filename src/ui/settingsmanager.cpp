@@ -1,5 +1,5 @@
 #include "settingsmanager.h"
-#include "ui_settingsmanager.h"
+#include "objects/ui_settingsmanager.h"
 
 SettingsManager::SettingsManager(QWidget *parent) :
     QDialog(parent),

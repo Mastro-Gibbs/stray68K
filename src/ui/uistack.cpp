@@ -1,5 +1,5 @@
 #include "uistack.h"
-#include "ui_uistack.h"
+#include "objects/ui_uistack.h"
 
 uistack::uistack(QWidget *parent) :
     QWidget(parent),

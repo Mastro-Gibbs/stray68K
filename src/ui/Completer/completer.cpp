@@ -1,5 +1,5 @@
 #include "completer.h"
-#include "ui_completer.h"
+#include "objects/ui_completer.h"
 
 #include "../editor.h"
 

@@ -1,5 +1,5 @@
 #include "fileoptions.h"
-#include "ui_fileoptions.h"
+#include "objects/ui_fileoptions.h"
 
 #include <QDebug>
 

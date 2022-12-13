@@ -23,9 +23,9 @@
         }
     },
     "consoleFont": "Ubuntu Mono",
-    "consoleFontSize": 13,
+    "consoleFontSize": 11,
     "editorFont": "Ubuntu Mono",
-    "editorFontSize": 11,
+    "editorFontSize": 13,
     "projectData": {
         "path": "",
         "state": 0
