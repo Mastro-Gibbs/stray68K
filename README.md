@@ -7,6 +7,7 @@
 	╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝  ╚════╝ ╚═╝  ╚═╝
 
 [![forthebadge](https://img.shields.io/badge/BASED-gray?style=for-the-badge&logo=c&labelColor=546CAF)]()  
+[![forthebadge](https://img.shields.io/badge/BASED-gray?style=for-the-badge&logo=qt&labelColor=16B216)]()  
 [![forthebadge](https://img.shields.io/badge/Lex-BASED-gray?style=for-the-badge&labelColor=10AA10&logoColor=darkgray)]()  
 [![forthebadge](https://img.shields.io/badge/Yacc-BASED-gray?style=for-the-badge&labelColor=991030&logoColor=darkgray)]()   
 
