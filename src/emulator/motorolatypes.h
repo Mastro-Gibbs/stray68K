@@ -59,8 +59,6 @@ typedef struct __m68k__cpu__
 
     u32 (*exec) (struct EmulationMachine *em); // runner
 
-    void (*show)(void);
-
 } m68k_cpu;
 
 
@@ -69,9 +67,6 @@ typedef struct __m68k__ram__
 {
     u8 *ram;
     u32 size;
-
-    void (*show)  (u32 _start, u32 _end, u32 _ptr, char *pcptr_color);
-    void (*stack) (u32 _top, u32 _bottom);
 
 } m68k_ram;
 
@@ -101,26 +96,8 @@ typedef struct __m68k__codemap__
 //EMULATOR MACHINE COMPLEX STRUCT
 struct EmulationMachine
 {
-    enum { EMULATE_STD = 0, EMULATE_SBS = 1 } EmuType;
-
     struct
     {
-        struct
-        {
-            bit is_activated;
-
-            bit cpu;
-            bit ram;
-            bit chrono;
-            bit op;
-            bit io;
-
-            bit concat;
-            bit dump;
-        } JSON;
-
-        bit  descriptive_mode;
-        bit  quiet_mode;
         bit  chrono_mode;
         char *executable_path;
     } ExecArgs;
@@ -147,7 +124,6 @@ struct EmulationMachine
             u16  operation_code;
             char *mnemonic;
 
-            bit sbs_printer_enabler;
             u32 simhalt;
             u32 org_pointer;
             u32 last_loaded_byte_index;

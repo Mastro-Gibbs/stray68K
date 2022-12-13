@@ -56,7 +56,6 @@
                             sprintf(em->Machine.Exception.merr_cause, fmt, ##__VA_ARGS__); \
                             printf ("%s\n", em->Machine.Exception.merr_cause);             \
                             fflush(stdout);                              \
-                            if (em->ExecArgs.JSON.is_activated) emit_dump(em); \
                             destroy_cpu();                               \
                             destroy_ram();                               \
                             exit(-1);                                    \
@@ -67,80 +66,11 @@
  * MACRO used to prepend a tag to IO emulator.
  *
  */
-#define IO_TASK(descr, fmt, ...) do {                            \
-                                    IO_TASK_TAG(descr)           \
+#define IO_TASK(fmt, ...) do {                            \
                                     printf (fmt, ##__VA_ARGS__); \
                                     fflush(stdout);              \
                                 } while (0);
 
-
-
-/*
- * MACRO used to prepend a tag to IO emulator loop.
- * It's different from the previous macro because this one allows to print sequences of chars (strings).
- *
- */
-#define IO_TASK_TAG(descr)  do {                                            \
-                                if (descr)                                  \
-                                    printf("[\033[01m\033[95mIO\033[0m] "); \
-                                fflush(stdout);                             \
-                            } while (0);
-
-
-/*
- * MACRO used to prepend a tag to step-by-step mode.
- *
- */
-#define SBS_DEBUGGER(fmt, ...)do {                                \
-                        printf("[\033[01m\033[94mDEBUGGER\033[0m] "); \
-                        printf (fmt, ##__VA_ARGS__);              \
-                        fflush(stdout);                           \
-                    } while (0);
-
-
-/*
- * MACRO used to print bits of number.
- *
- */
-#define bprintf(x)                                               \
-  do {                                                           \
-    unsigned long long a__ = (x);                                \
-    size_t bits__ = sizeof(x) * 8;                               \
-    printf(#x ": ");                                             \
-    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
-    putchar('\n');                                               \
-  } while (0);
-
-
-/*
- * MACRO used to print bits of number with bit's highlight.
- *
- */
-#define bprintf_ht(x)                                            \
-  do {                                                           \
-    unsigned long long a__ = (x);                                \
-    size_t bits__ = sizeof(x) * 8;                               \
-    printf("\033[01m\033[37m");                                  \
-    printf(#x);                                                  \
-    printf("\033[0m: ");                                         \
-    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
-    putchar('\n');                                               \
-  } while (0);
-
-
-/*
- * MACRO used to print bits of number with bit's highlight and 4 space tab.
- *
- */
-#define bprintf_ht_4s(x)                                         \
-  do {                                                           \
-    unsigned long long a__ = (x);                                \
-    size_t bits__ = sizeof(x) * 8;                               \
-    printf("\033[01m\033[37m");                                  \
-    printf(#x);                                                  \
-    printf("\033[0m:     ");                                     \
-    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
-  } while (0);
 
 
 
@@ -531,12 +461,5 @@ bit   is_addr_to_data_op(ADDRMode *mode);
 char* trap_code_toString(u32 trapcode);
 void  iotask(struct EmulationMachine *em);
 
-
-/* EMULATION MACHINE */
-void machine_waiter (struct EmulationMachine *em);
-void emit_sys_status(struct EmulationMachine *em);
-void emit_dump      (struct EmulationMachine *em);
-void emit_jio       (struct EmulationMachine *em);
-void emit_jconcat   (struct EmulationMachine *em);
 
 #endif // __UTILS_H__68000

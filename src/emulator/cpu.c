@@ -5,7 +5,6 @@
 
 
 u32 __exec__(struct EmulationMachine *em);
-void __show__(void);
 
 
 m68k_cpu *cpu = NULL;
@@ -48,7 +47,6 @@ void reset_cpu(void)
         cpu->sr  = 0x2000;
 
         cpu->exec = __exec__;
-        cpu->show = __show__;
     }
 }
 
@@ -77,178 +75,6 @@ u32 __exec__(struct EmulationMachine *em)
 
     return run_opcode();
 }
-
-
-void __show__(void)
-{
-    char d = 0x30, a = 0x30;
-    char id[3];
-
-    printf("\n                                                      [\033[01m\033[37mCPU STATUS\033[0m]\n\n");
-
-    id[2] = '\0';
-
-    id[0] = 'D';
-    for (u8 i = 1; i <= 4; i++) // data regs
-    {
-        id[1] = d++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->data_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    printf("| ");
-
-    id[0] = 'A';
-    for (u8 i = 1; i <= 4; i++) // addr regs
-    {
-        id[1] = a++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    printf("\n");
-    id[0] = 'D';
-    for (u8 i = 5; i <= 8; i++) // data regs
-    {
-        id[1] = d++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->data_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    printf("| ");
-
-    id[0] = 'A';
-    for (u8 i = 4; i <= 6; i++) // addr regs
-    {
-        id[1] = a++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    u8 iter = 4;
-    printf("\033[01m\033[37mA7\033[0m: 0x");
-
-    u32 *curr = ((cpu->sr & SUPERVISOR) ? 1 : 0) ? &cpu->ssp : &cpu->usp;
-
-    do
-    {
-        u8 inner = *curr >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    printf("\n");
-
-    printf("-------------------------------------------------------------------------------------------------------------------------\n");
-
-    iter = 4;
-    printf("\033[01m\033[37mUS\033[0m: 0x");
-    do
-    {
-        u8 inner = cpu->usp >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    printf("\n");
-
-    iter = 4;
-    printf("\033[01m\033[37mSS\033[0m: 0x");
-    do
-    {
-        u8 inner = cpu->ssp >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    iter = 4;
-    printf("\n\033[01m\033[37mPC\033[0m: 0x");
-    do
-    {
-        u8 inner = cpu->pc >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    srflags SR = cpu->sr;
-
-    printf("\n");
-
-    bprintf_ht(SR);
-
-    printf("\033[01m\033[37m    t s        xnzvc\033[0m\n");
-
-}
-
-
 
 
 // DATA REGS GETTER & SETTER

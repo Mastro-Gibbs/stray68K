@@ -3020,8 +3020,6 @@ u32 run_opcode()
         return (RETURN_ERR);
     }
 
-    machine_waiter(emulation);
-
     const u32 res = tmp->handler();
 
     if (res != RETURN_OK_PC_NO_INCR)
