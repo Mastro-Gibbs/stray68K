@@ -5,14 +5,20 @@
 ; Author: Stefano Fattore aka MastroGibbs
 ;
 ; assemble: ./stray68K -a -i ../examples/SpeedTest/speed.X68 -o ../examples/SpeedTest/speed.B68 
-; run:      ./stray68K -e ../examples/SpeedTest/speed.B68 -q -t
+; run:      ./stray68K -e ../examples/SpeedTest/speed.B68 -t
 
-    ORG     $1010
+    ORG     $1000
 
     MOVE.L  #$0000FFFF,D1
     MOVE.L  #$FFFFFFFF,D0
 
+    LEA	    str,A0
+
 _LOOP:
     ADDQ.L  #1,D0
     CMP.L   D1,D0
+    TRAP    #15
     BLT     _LOOP
+
+
+str:	DC.B	"%LX0\n",0
