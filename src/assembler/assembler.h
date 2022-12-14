@@ -4,9 +4,9 @@
 #include "clowncommon.h"
 #include "semantic.h"
 
-#define ASSSEMBLER_ERROR(message) do { fputs("[\033[31m\033[01mASSEMBLER ERROR\033[0m] " message "\n", stderr); exit_code = EXIT_FAILURE;} while (0)
+#define ASSEMBLER_ERROR(message) do { fputs("[ASSEMBLER ERROR] " message "\n", stderr); exit_code = EXIT_FAILURE;} while (0)
 
-#define FASSSEMBLER_ERROR(fmt, ...) do { printf("[\033[31m\033[01mASSEMBLER ERROR\033[0m] "); printf (fmt, ##__VA_ARGS__); printf ("\n"); exit_code = EXIT_FAILURE;} while (0)
+#define FASSEMBLER_ERROR(fmt, ...) do { printf("[ASSEMBLER ERROR] "); printf (fmt, ##__VA_ARGS__); printf ("\n"); exit_code = EXIT_FAILURE;} while (0)
 
 
 int assemble(int argc, char **argv);

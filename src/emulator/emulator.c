@@ -30,21 +30,7 @@ bit halt_compare(u8 *s1)
 bit _is_valid_file(struct EmulationMachine *em)
 {
     FILE    *fp;
-
-    const char* ldot = strrchr(em->ExecArgs.executable_path, '.');
-    if (ldot != NULL)
-    {
-        size_t length = strlen("B68");
-        if (strncmp(ldot + 1, "B68", length) != 0)
-        {
-            EMULATOR_ERROR("File extension not valid, be sure to pass '.B68' format.")
-        }
-    }
-
     fp = fopen(em->ExecArgs.executable_path, "r");
-
-    if (fp == NULL)
-        EMULATOR_ERROR("File not found, be sure to pass correct path.")
 
     fseek(fp, 0L, SEEK_END);
     if (ftell(fp) == 0L)
@@ -134,32 +120,12 @@ void load_bytecode(struct EmulationMachine *em)
 /* EMULATOR UTILS*/
 void parse_args(struct EmulationMachine *em, int argc, char **argv)
 {
-    if (argc < 3)
-    {
-        fputs(
-            "**stray68K** an emulator for Motorola 68000.\n"
-            "\n"
-            "**Modality**\n"
-            " -Assembler:\n"
-            "   -a [opts|args] -Invoke assembler. See help.\n"
-            " -Emulator:\n"
-            "   -e [path] -STANDARD MODE. Input executable file. To generate it use assembler options.\n"
-            "\n"
-            "**Emulator option**\n"
-            " [-t] -Perform a chrono calculation and print it.\n"
-            "       This option is prohibited in STEP-BY-STEP MODE.\n"
-            "\n\n",
-        stdout);
-
-        EMULATOR_ERROR("Too few params")
-    }
-
-    em->ExecArgs.executable_path  = argv[2];
+    em->ExecArgs.executable_path  = argv[1];
     em->ExecArgs.chrono_mode      = FALSE;
 
     _is_valid_file(em);
 
-    for (s32 i = 3; i < argc; i++)
+    for (s32 i = 2; i < argc; i++)
     {
         if (strlen(argv[i]) == 2)
         {

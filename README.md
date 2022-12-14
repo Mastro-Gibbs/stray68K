@@ -95,9 +95,9 @@ Just clone and invoke makefile
 
         Modality
         -Assembler:
-          -a [opts|args] -Invoke assembler. See help.
+          <filepath> [options] -Invoke assembler. Be sure to pass a .X68 file. See help.
         -Emulator:
-          -e [path] -STANDARD MODE. Input executable file. To generate it use assembler options.
+          <filepath> [options] -Be sure to pass a .B68 file. To generate it use assembler options.
 
         Emulator option
         [-t] -Perform a chrono calculation and print it.
@@ -105,8 +105,7 @@ Just clone and invoke makefile
         Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)
         
         Options:
-         -i [path] -Input file, must be .X68 file extesion.
-         -o [path] -Output file, must be .B68 file extesion.
+         -o [path] -Output file. Optional.
          -l [path] -Listing file. Optional.
          -s [path] -asm68k-style symbol file. Optional.
          -c        -Enable case-insensitive mode.
@@ -121,15 +120,15 @@ Just clone and invoke makefile
   ```
 - To perform a ```compilation```.
   ```bash
-  $ ./stray68K -a -i ../examples/GenericTester/generic.X68 -o ../examples/GenericTester/generic.B68
+  $ ./stray68K ../examples/GenericTester/generic.X68
   ```
 - To perform a ```execution```.
   ```bash
-  $ ./stray68K -e ../examples/IO/io.B68
+  $ ./stray68K ../examples/IO/io.B68
   ```
 - To perform a chrono test ```execution```.
   ```bash
-  $ ./stray68K -e ../examples/SpeedTest/speed.B68 -t
+  $ ./stray68K ../examples/SpeedTest/speed.B68 -t
   ```  
 
 ---
