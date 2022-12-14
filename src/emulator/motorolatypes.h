@@ -120,7 +120,6 @@ struct EmulationMachine
         } JSON;
 
         bit  descriptive_mode;
-        bit  quiet_mode;
         bit  chrono_mode;
         char *executable_path;
     } ExecArgs;

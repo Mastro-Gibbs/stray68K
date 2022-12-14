@@ -93,21 +93,20 @@ Just clone and invoke makefile
 
         Modality
         -Assembler:
-          -a [opts|args] -Invoke assembler. See help.
+          <filepath> [options] -Invoke assembler. Be sure to pass a .X68 file.
         -Emulator:
-          -e [path] -STANDARD MODE. Input executable file. To generate it use assembler options.
-          -s [path] -STEP-BY-STEP MODE. Like option '-e' but run executable file step by step (debug mode).
+          <filepath> [options] -Be sure to pass a .68 file. To generate it use assembler options.
+
 
         Emulator options list
-        [-q] -Mean quiet output.
-              This option is prohibited in STEP-BY-STEP MODE.
+        [-s] -STEP_BY_STEP mode.
+
         [-d] -Mean descriptive output.
               This option is prohibited in STANDARD MODE.
         [-t] -Perform a chrono calculation and print it.
               This option is prohibited in STEP-BY-STEP MODE.
         [-j] -Perform JSON machine encoding output.
 
-        You cannot combine '-d' and '-q' options.
         You cannot combine '-j' and '-t' options.
         You cannot combine JSON encoding option 'dump' and 'concat'.
         You cannot use JSON encoding option (-j) alone.
@@ -131,8 +130,7 @@ Just clone and invoke makefile
         Assembler: an assembler for the Motorola 68000. (thanks to Clownacy)
         
         Options:
-         -i [path] -Input file, must be .X68 file extesion.
-         -o [path] -Output file, must be .B68 file extesion.
+         -o [path] -Output file. Optional.
          -l [path] -Listing file. Optional.
          -s [path] -asm68k-style symbol file. Optional.
          -c        -Enable case-insensitive mode.
@@ -147,27 +145,23 @@ Just clone and invoke makefile
   ```
 - To perform a ```compilation```.
   ```bash
-  $ ./stray68K -a -i ../examples/GenericTester/generic.X68 -o ../examples/GenericTester/generic.B68
+  $ ./stray68K ../examples/GenericTester/generic.X68
   ```
-- To perform a quiet ```execution```.
+- To perform a  ```execution``` with cpu, ram and chrono dumps in JSON format.
   ```bash
-  $ ./stray68K -e ../examples/IO/io.B68 -q
-  ```
-- To perform a quiet ```execution``` with cpu, ram and chrono dumps in JSON format.
-  ```bash
-  $ ./stray68K -e ../examples/IO/io.B68 -j cpu ram chrono concat -q
+  $ ./stray68K ../examples/IO/io.B68 -j cpu ram chrono concat
   ```
 - To perform a descriptive ```execution step by step```.
   ```bash
-  $ ./stray68K -s ../examples/GenericTester/generic.B68 -d
+  $ ./stray68K ../examples/GenericTester/generic.B68 -s -d
   ```
 - To perform a descriptive ```execution step by step``` with system dump in JSON format.
   ```bash
-  $ ./stray68K -s ../examples/GenericTester/generic.B68 -d -j dump
+  $ ./stray68K ../examples/GenericTester/generic.B68 -s -d -j dump
   ```
 - To perform a chrono test ```execution```.
   ```bash
-  $ ./stray68K -s ../examples/SpeedTest/speed.B68 -d -t
+  $ ./stray68K ../examples/SpeedTest/speed.B68 -t
   ```  
 
 ---

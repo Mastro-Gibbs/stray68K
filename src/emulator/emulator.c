@@ -31,21 +31,7 @@ bit halt_compare(u8 *s1)
 bit _is_valid_file(struct EmulationMachine *em)
 {
     FILE    *fp;
-
-    const char* ldot = strrchr(em->ExecArgs.executable_path, '.');
-    if (ldot != NULL)
-    {
-        size_t length = strlen("B68");
-        if (strncmp(ldot + 1, "B68", length) != 0)
-        {
-            EMULATOR_ERROR("File extension not valid, be sure to pass '.B68' format.")
-        }
-    }
-
     fp = fopen(em->ExecArgs.executable_path, "r");
-
-    if (fp == NULL)
-        EMULATOR_ERROR("File not found, be sure to pass correct path.")
 
     fseek(fp, 0L, SEEK_END);
     if (ftell(fp) == 0L)
@@ -135,56 +121,8 @@ void load_bytecode(struct EmulationMachine *em)
 /* EMULATOR UTILS*/
 void parse_args(struct EmulationMachine *em, int argc, char **argv)
 {
-    if (argc < 3)
-    {
-        fputs(
-            "**stray68K** an emulator for Motorola 68000.\n"
-            "\n"
-            "**Modality**\n"
-            " -Assembler:\n"
-            "   -a [opts|args] -Invoke assembler. See help.\n"
-            " -Emulator:\n"
-            "   -e [path] -STANDARD MODE. Input executable file. To generate it use assembler options.\n"
-            "   -s [path] -STEP-BY-STEP MODE. Like option '-e' but run executable file step by step (debug mode).\n"
-            "\n"
-            "**Emulator options list**\n"
-            " [-q] -Mean quiet output.\n"
-            "       This option is prohibited in STEP-BY-STEP MODE.\n"
-            " [-d] -Mean descriptive output.\n"
-            "       This option is prohibited in STANDARD MODE.\n"
-            " [-t] -Perform a chrono calculation and print it.\n"
-            "       This option is prohibited in STEP-BY-STEP MODE.\n"
-            " [-j] -Perform JSON machine encoding output.\n"
-            "\n"
-            " You cannot combine '-d' and '-q' options.\n"
-            " You cannot combine '-j' and '-t' options.\n"
-            " You cannot combine JSON encoding option 'dump' and 'concat'.\n"
-            " You cannot use JSON encoding option (-j) alone.\n"
-            " You cannot use JSON chrono encoding (-j chrono) in step-by-step mode.\n"
-            "\n"
-            "**JSON encoding commands**\n"
-            " [cpu]    -Mean cpu encoding.\n"
-            " [ram]    -Mean ram encoding.\n"
-            " [chrono] -Mean chrono encoding (ns).\n"
-            " [op]     -Mean op mnemonic and code encoding (base 10).\n"
-            " [io]     -Show io operation in JSON format.\n"
-            " [dump]   -Perform sys dump in JSON format.\n"
-            " [concat] -Perform JSON concat, must pass at least two listed above commands.\n"
-            "\n"
-            "**STEP-BY-STEP MODE's options asked from stdin**\n"
-            " [s] -Asks for top address and print current stack.\n"
-            " [r] -Asks for ram offsets and print selected ram chunck.\n"
-            " [n] -Execute next istruction.\n"
-            " [t] -Terminate the program. The execution proceeds to the end.\n"
-            "\n\n",
-        stdout);
-
-        EMULATOR_ERROR("Too few params")
-    }
-
-    em->ExecArgs.executable_path  = argv[2];
+    em->ExecArgs.executable_path  = argv[1];
     em->ExecArgs.descriptive_mode = FALSE;
-    em->ExecArgs.quiet_mode       = FALSE;
     em->ExecArgs.chrono_mode      = FALSE;
 
     em->ExecArgs.JSON.is_activated = FALSE;
@@ -198,15 +136,18 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
 
     _is_valid_file(em);
 
-    for (s32 i = 3; i < argc; i++)
+    for (s32 i = 2; i < argc; i++)
     {
         if (strlen(argv[i]) == 2)
         {
             if (argv[i][0] == '-' && argv[i][1] == 'd')
                 em->ExecArgs.descriptive_mode = TRUE;
 
-            else if (argv[i][0] == '-' && argv[i][1] == 'q')
-                em->ExecArgs.quiet_mode = TRUE;
+            else if (argv[i][0] == '-' && argv[i][1] == 's')
+            {
+                em->EmuType = EMULATE_SBS;
+                em->Machine.RuntimeData.sbs_printer_enabler = TRUE;
+            }
 
             else if (argv[i][0] == '-' && argv[i][1] == 't')
                 em->ExecArgs.chrono_mode = TRUE;
@@ -245,8 +186,6 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
         else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
     }
 
-    if (em->EmuType == EMULATE_SBS && em->ExecArgs.quiet_mode)
-        EMULATOR_ERROR("Cannot use quiet option (-q) in step-by-step mode.")
 
     if (em->EmuType == EMULATE_SBS && em->ExecArgs.chrono_mode)
         EMULATOR_ERROR("Cannot use timer option (-t) in step-by-step mode.")
@@ -256,9 +195,6 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
 
     if (em->EmuType == EMULATE_STD && em->ExecArgs.descriptive_mode)
         EMULATOR_ERROR("Cannot use descriptive option (-d) in normal mode.")
-
-    if (em->ExecArgs.descriptive_mode && em->ExecArgs.quiet_mode)
-        EMULATOR_ERROR("Cannot combine '-d' and '-q' options.")
 
     if (em->ExecArgs.chrono_mode && em->ExecArgs.JSON.is_activated)
         EMULATOR_ERROR("Cannot combine '-t' and JSON encoder '-j' options.")
@@ -356,13 +292,7 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
     em.Machine.IO.buffer  = NULL;
     em.Machine.IO.Type    = IO_UNDEF;
 
-    if (argv[1][1] == 'e')
-        em.EmuType = EMULATE_STD;
-    else
-    {
-        em.Machine.RuntimeData.sbs_printer_enabler = TRUE;
-        em.EmuType = EMULATE_SBS;
-    }
+    em.EmuType = EMULATE_STD;
 
     parse_args(&em, argc, argv);
 

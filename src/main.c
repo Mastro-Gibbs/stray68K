@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "stray_m68k.h"
 
@@ -13,12 +14,13 @@ int usage(char *param)
         "\n"
         "**Modality**\n"
         " -Assembler:\n"
-        "   -a [opts|args] -Invoke assembler. See help.\n"
+        "   <filepath> [options] -Invoke assembler. Be sure to pass a .X68 file.\n"
         " -Emulator:\n"
-        "   -e [path] -STANDARD MODE. Input executable file. To generate it use assembler options.\n"
-        "   -s [path] -STEP-BY-STEP MODE. Like option '-e' but run executable file step by step (debug mode).\n"
+        "   <filepath> [options] -Be sure to pass a .68 file. To generate it use assembler options.\n"
         "\n"
         "**Emulator options list**\n"
+        " [-q] -STEP-BY-STEP mode.\n"
+        "\n"
         " [-q] -Mean quiet output.\n"
         "       This option is prohibited in STEP-BY-STEP MODE.\n"
         " [-d] -Mean descriptive output.\n"
@@ -51,8 +53,7 @@ int usage(char *param)
         "**Assembler** an assembler for the Motorola 68000. (thanks to Clownacy)\n"
         "\n"
         "**Options**\n"
-        " -i [path] -Input file, must be .X68 file extesion.\n"
-        " -o [path] -Output file, must be .B68 file extesion.\n"
+        " -o [path] -Output file, Optional.\n"
         " -l [path] -Listing file. Optional.\n"
         " -s [path] -asm68k-style symbol file. Optional.\n"
         " -c        -Enable case-insensitive mode.\n"
@@ -64,28 +65,54 @@ int usage(char *param)
 }
 
 
-int run(int argc, char **argv)
+struct
+{
+    int (*handler)(int argc, char** argv);
+} Runner;
+
+
+int detect_format(const char* filepath)
+{
+    if (access(filepath, F_OK) != 0)
+    {
+        fputs("Be sure to pass an existing file.\n", stdout);
+        return (EXIT_FAILURE);
+    }
+
+    const char* ldot = strrchr(filepath, '.');
+    if (ldot != NULL)
+    {
+        size_t length = strlen("B68");
+        if (strncmp(ldot + 1, "B68", length) == 0)
+            Runner.handler = emulate;
+        else
+            Runner.handler = assemble;
+
+        return (EXIT_SUCCESS);
+    }
+    else
+    {
+        fputs("Be sure to pass a '.X68' or '.B68' file.\n", stdout);
+    }
+
+    return (EXIT_FAILURE);
+}
+
+int parseargs(int argc, char **argv)
 {
     int exit_code = EXIT_FAILURE;
 
     if (argc == 1) return usage(NULL);
 
-    if (strlen(argv[1]) != 2) return usage(argv[1]);
-
-    if (argv[1][0] != '-') return usage(argv[1]);
-
-    if (argv[1][1] == 'e' || argv[1][1] == 's')
-        exit_code = emulate(argc, argv);
-    else if (argv[1][1] == 'a')
-        exit_code = assemble(argc, argv);
-    else return usage(argv[1]);
+    if (detect_format(argv[1]) == EXIT_SUCCESS)
+        exit_code = Runner.handler(argc, argv);
 
     return (exit_code);
 }
 
 
+
 int main(int argc,  char** argv)
 {
-    return run(argc, argv);
+    return parseargs(argc, argv);
 }
-

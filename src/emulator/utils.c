@@ -573,68 +573,13 @@ void machine_waiter(struct EmulationMachine *em)
 #include "JSON.h"
 void emit_sys_status(struct EmulationMachine *em)
 {
-    if (em->EmuType == EMULATE_SBS && em->Machine.RuntimeData.sbs_printer_enabler)
+    if (em->EmuType == EMULATE_SBS)
     {
         if (system("clear") == -1)
         {
             return;
         }
-    }
 
-    if (em->ExecArgs.JSON.is_activated)
-    {
-        if (
-            em->Machine.State != TRAP_STATE  &&
-            em->Machine.State != PANIC_STATE &&
-            em->Machine.State != MERR_STATE  &&
-            (em->ExecArgs.quiet_mode && em->Machine.State != FINAL_STATE)
-           ) goto maybe_sbs_print;
-
-        char *buf = NULL;
-
-        if (em->ExecArgs.JSON.dump)
-        {
-            emit_dump(em);
-        }
-        else if (em->ExecArgs.JSON.concat)
-        {
-            emit_jconcat(em);
-        }
-        else
-        {
-            if (em->ExecArgs.JSON.cpu)
-            {
-                buf = Jcpu();
-                printf("%s\n", buf);
-                free(buf);
-            }
-
-            if (em->ExecArgs.JSON.ram)
-            {
-                buf = Jram(em->Machine.RuntimeData.org_pointer, em->Machine.RuntimeData.last_loaded_byte_index, em->Machine.RuntimeData.simhalt);
-                printf("%s\n", buf);
-                free(buf);
-            }
-
-            if (em->ExecArgs.JSON.op)
-            {
-                buf = Jop(em->Machine.RuntimeData.mnemonic, em->Machine.RuntimeData.operation_code);
-                printf("%s\n", buf);
-                free(buf);
-            }
-
-            if (em->Machine.State == FINAL_STATE && em->ExecArgs.JSON.chrono)
-            {
-                buf = Jchrono(em->Machine.Chrono.dt);
-                printf("%s\n", buf);
-                free(buf);
-            }
-        }
-    }
-
-maybe_sbs_print:
-    if (!em->ExecArgs.quiet_mode && em->Machine.RuntimeData.sbs_printer_enabler)
-    {
         u32 _start = em->Machine.RuntimeData.org_pointer;
         u32 _end   = (em->Machine.RuntimeData.last_loaded_byte_index | 0x0000000F) + 0x11;
         u32 _ptr   = em->Machine.cpu->pc;
@@ -685,12 +630,55 @@ maybe_sbs_print:
         }
 
         fflush(stdout);
+
+    }
+
+    if (em->ExecArgs.JSON.is_activated)
+    {
+        char *buf = NULL;
+
+        if (em->ExecArgs.JSON.dump)
+        {
+            emit_dump(em);
+        }
+        else if (em->ExecArgs.JSON.concat)
+        {
+            emit_jconcat(em);
+        }
+        else
+        {
+            if (em->ExecArgs.JSON.cpu)
+            {
+                buf = Jcpu();
+                printf("%s\n", buf);
+                free(buf);
+            }
+
+            if (em->ExecArgs.JSON.ram)
+            {
+                buf = Jram(em->Machine.RuntimeData.org_pointer, em->Machine.RuntimeData.last_loaded_byte_index, em->Machine.RuntimeData.simhalt);
+                printf("%s\n", buf);
+                free(buf);
+            }
+
+            if (em->ExecArgs.JSON.op)
+            {
+                buf = Jop(em->Machine.RuntimeData.mnemonic, em->Machine.RuntimeData.operation_code);
+                printf("%s\n", buf);
+                free(buf);
+            }
+
+            if (em->Machine.State == FINAL_STATE && em->ExecArgs.JSON.chrono)
+            {
+                buf = Jchrono(em->Machine.Chrono.dt);
+                printf("%s\n", buf);
+                free(buf);
+            }
+        }
     }
 
     if (em->Machine.State == FINAL_STATE && em->ExecArgs.chrono_mode)
     {
-        if (!em->ExecArgs.quiet_mode)
-            printf("-------------------------------------------------------------------------------------------------------------------------\n");
         printf("\033[01m\033[37mTimer\033[0m: %.3fms -> %.3fs\n",
                (f64) em->Machine.Chrono.dt / (f64) 1000,
                (f64) em->Machine.Chrono.dt / (f64) 1000000);
