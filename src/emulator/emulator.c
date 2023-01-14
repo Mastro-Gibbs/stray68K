@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "cpu.h"
 #include "ram.h"
@@ -13,6 +14,8 @@
 #define SIMHALT_SYMBOL  0xAC
 #define ORG_SYMBOL      'o'
 #define ORG_DEFAULT     0x00000000
+
+#define RAM_MAX_SIZE    0x00FFFFFF
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
@@ -57,6 +60,32 @@ bit _is_valid_file(struct EmulationMachine *em)
 }
 
 
+u32 peek_ORG_from_file(struct EmulationMachine *em)
+{
+    FILE *fp;
+
+    s8  is_org = 0;
+    u8  org[4];
+    u32 value = ORG_DEFAULT;
+
+    fp = fopen(em->ExecArgs.executable_path, "rb");
+
+    if (fread(&is_org, 1, 1, fp) == 0)
+        EMULATOR_ERROR("Error incomes while loading invalid binary");
+
+    if (is_org == ORG_SYMBOL)
+    {
+        if (fread(org, ARRAY_SIZE(org), sizeof (*org), fp) == 0)
+            EMULATOR_ERROR("Error incomes while loading binary");
+
+        value = (org[0] << 24) | (org[1] << 16) | (org[2] << 8) | org[3];
+    }
+
+    fclose(fp);
+
+    return value;
+}
+
 
 FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
 {
@@ -86,6 +115,42 @@ FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
 
     return fp;
 }
+
+
+u32 obtain_heap_size(char *st)
+{
+    u32 base;
+    u32 multiplier;
+
+    size_t len;
+
+    len = strlen(st);
+
+    for (size_t p = 0; p < len - 1; p++)
+        if (!isdigit(st[p])) return FALSE;
+
+    char st_cpy[len];
+    snprintf(st_cpy, len, "%s", st);
+
+    base = strtoul(st_cpy, 0L, 10);
+
+    switch (st[len-1])
+    {
+        case 'K':
+        case 'k':
+            multiplier = 1024;
+            break;
+        case 'M':
+        case 'm':
+            multiplier = 1048576;
+            break;
+        default:
+            return FALSE;
+    }
+
+    return (base * multiplier);
+}
+
 
 void load_bytecode(struct EmulationMachine *em)
 {
@@ -136,6 +201,8 @@ void load_bytecode(struct EmulationMachine *em)
 void parse_args(struct EmulationMachine *em, char *path)
 {
     em->ExecArgs.executable_path  = path;
+
+    em->Machine.RuntimeData.RAM_SIZE = RAM_MAX_SIZE;
 
     _is_valid_file(em);
 }
@@ -199,7 +266,6 @@ void obtain_emulation_machine(char *path)
     emulator->Machine.RuntimeData.last_loaded_byte_index = 0;
     emulator->Machine.RuntimeData.sbs_printer_enabler    = FALSE;
 
-    emulator->Machine.RuntimeData.RAM_SIZE = 0x00FFFFFF;
     emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX = 0x01000000;
     emulator->Machine.RuntimeData.JSR_CALL_COUNTER   = 0;
 
