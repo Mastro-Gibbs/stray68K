@@ -18,7 +18,7 @@
 
 m68k_cpu* init_cpu(struct EmulationMachine *em);
 m68k_cpu* get_cpu(void);
-void      reset_cpu(void);
+void      reset_cpu(struct EmulationMachine *em);
 void      destroy_cpu(void);
 
 

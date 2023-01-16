@@ -198,28 +198,29 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
         {
             if (argv[i][0] == '-' && argv[i][1] == 't')
                 em->ExecArgs.chrono_mode = TRUE;
-            else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
-        }
 
-        else if (strcmp(argv[i], "--heap-size") == 0)
-        {
-            u32 heap_size = obtain_heap_size(argv[i+1]);
-            u32 org_ptr   = peek_ORG_from_file(em);
-
-            if (heap_size)
+            else if (strcmp(argv[i], "--heap-size") == 0)
             {
-                if (heap_size < org_ptr)
-                {   EMULATOR_ERROR("Too low heap size value '%s' at position %d.", argv[i+1], i+1); }
-                else if (heap_size >= RAM_MAX_SIZE)
-                {   EMULATOR_ERROR("Too high heap size value '%s' at position %d.", argv[i+1], i+1); }
-                else if (heap_size > org_ptr && heap_size < (org_ptr + 0x2000))
-                {   WARNING("Defined heap size value '%s' may be too small.", argv[i+1]); }
+                u32 heap_size = obtain_heap_size(argv[i+1]);
+                u32 org_ptr   = peek_ORG_from_file(em);
 
-                em->Machine.RuntimeData.RAM_SIZE = heap_size;
+                if (heap_size)
+                {
+                    if (heap_size < org_ptr)
+                    {   EMULATOR_ERROR("Too low heap size value '%s' at position %d.", argv[i+1], i+1); }
+                    else if (heap_size >= RAM_MAX_SIZE)
+                    {   EMULATOR_ERROR("Too high heap size value '%s' at position %d.", argv[i+1], i+1); }
+                    else if (heap_size > org_ptr && heap_size < (org_ptr + 0x2000))
+                    {   WARNING("Defined heap size value '%s' may be too small.", argv[i+1]); }
+
+                    em->Machine.RuntimeData.RAM_SIZE = heap_size;
+                }
+                else EMULATOR_ERROR("Invalid heap size value '%s' at position %d.", argv[i+1], i+1);
+
+                ++i;
             }
-            else EMULATOR_ERROR("Invalid heap size value '%s' at position %d.", argv[i+1], i+1);
 
-            ++i;
+            else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
         }
 
         else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
