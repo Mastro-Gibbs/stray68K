@@ -1548,7 +1548,7 @@ u32 DIVU(void)
 
     int remainder = (int)(*dVal % *sVal) & 0xFFFF;
 
-    write_datareg(*dst, remainder, NULL);
+    write_datareg(*dst, remainder << 16, NULL);
     write_datareg(*dst, _val,      &size);
 
     SET_SRFLAGS(divu, LONG, 0, 0, _val);
@@ -1599,9 +1599,10 @@ u32 DIVS(void)
 
         return (RETURN_ERR);
     }
+
     int remainder = (int)(signed_dVal % signed_sVal) & 0xFFFF;
 
-    write_datareg(*dst, remainder, NULL);
+    write_datareg(*dst, remainder << 16, NULL);
     write_datareg(*dst, _val,      &size);
 
     SET_SRFLAGS(divs, LONG, 0, 0, _val);
@@ -3019,6 +3020,8 @@ u32 run_opcode()
         sprintf(emulation->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", emulation->Machine.RuntimeData.operation_code);
         return (RETURN_ERR);
     }
+
+    machine_waiter(emulation);
 
     const u32 res = tmp->handler();
 
