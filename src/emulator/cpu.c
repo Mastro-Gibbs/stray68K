@@ -23,7 +23,7 @@ m68k_cpu* init_cpu(struct EmulationMachine *em)
             return (NULL);
         }
 
-        reset_cpu();
+        reset_cpu(em);
     }
 
     return (cpu);
@@ -31,7 +31,7 @@ m68k_cpu* init_cpu(struct EmulationMachine *em)
 
 m68k_cpu* get_cpu(void) { return (cpu); }
 
-void reset_cpu(void)
+void reset_cpu(struct EmulationMachine *em)
 {
     if (cpu)
     {
@@ -43,8 +43,8 @@ void reset_cpu(void)
             cpu->addr_r[iter] = 0x00000000;
 
         cpu->pc  = 0x00000000;
-        cpu->usp = 0x00FF0000;
-        cpu->ssp = 0x01000000;
+        cpu->usp = 0x00000000;
+        cpu->ssp = em->Machine.RuntimeData.RAM_SIZE + 1;
         cpu->sr  = 0x2000;
 
         cpu->exec = __exec__;
