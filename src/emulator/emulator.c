@@ -164,6 +164,10 @@ u32 obtain_heap_size(char *st)
 
     switch (st[len-1])
     {
+        case 'B':
+        case 'b':
+            multiplier = 1;
+            break;
         case 'K':
         case 'k':
             multiplier = 1024;
@@ -179,6 +183,23 @@ u32 obtain_heap_size(char *st)
     return (base * multiplier);
 }
 
+
+s64 get_file_size(struct EmulationMachine *em)
+{
+    FILE  *fp;
+    s64   size = 0;
+
+    fp = fopen(em->ExecArgs.executable_path, "rb");
+
+    if (fp)
+    {
+        fseek(fp, 0, SEEK_END);
+        size = ftell(fp);
+        fclose(fp);
+    }
+
+    return size;
+}
 
 
 /* EMULATOR UTILS*/
@@ -221,19 +242,20 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
             {
                 u32 heap_size = obtain_heap_size(argv[i+1]);
                 u32 org_ptr   = peek_ORG_from_file(em);
+                s64 min       = org_ptr + get_file_size(em);
+
+                if ((min % 2) != 0) ++min;
 
                 if (heap_size)
                 {
-                    if (heap_size < org_ptr)
-                    {   EMULATOR_ERROR("Too low heap size value '%s' at position %d.", argv[i+1], i+1); }
+                    if (heap_size < org_ptr || heap_size <= (min-1))
+                    {   EMULATOR_ERROR("Too low heap size value '%s' => %dB, minimum %ldB.", argv[i+1], heap_size, min); }
                     else if (heap_size >= RAM_MAX_SIZE)
-                    {   EMULATOR_ERROR("Too high heap size value '%s' at position %d.", argv[i+1], i+1); }
-                    else if (heap_size > org_ptr && heap_size < (org_ptr + 0x2000))
-                    {   WARNING("Defined heap size value '%s' may be too small.", argv[i+1]); }
+                    {   EMULATOR_ERROR("Too high heap size value '%s' => %dB, minimum %ldB.", argv[i+1], heap_size, min); }
 
                     em->Machine.RuntimeData.RAM_SIZE = heap_size;
                 }
-                else EMULATOR_ERROR("Invalid heap size value '%s' at position %d.", argv[i+1], i+1);
+                else EMULATOR_ERROR("Invalid heap size value '%s'.", argv[i+1]);
 
                 ++i;
             }

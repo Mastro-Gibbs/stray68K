@@ -138,7 +138,8 @@ struct EmulationMachine
             WARNING_STATE   = 4,
             TRAP_STATE      = 5,
             MERR_STATE      = 6,
-            IO_STATE        = 7
+            IO_STATE        = 7,
+            SLEEP_STATE     = 8
         } State;
 
         struct
