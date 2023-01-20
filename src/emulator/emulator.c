@@ -242,6 +242,17 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
 
                 ++i;
             }
+            
+            else if (strcmp(argv[i], "--min-heap") == 0)
+            {
+                u32 org_ptr   = peek_ORG_from_file(em);
+                s64 min       = org_ptr + get_file_size(em);
+
+                if ((min % 2) != 0) ++min;
+
+                EMULATOR_OUT("Required minimum heap size => %ld bytes.\n", min);
+            }
+
 
             else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
         }
@@ -280,6 +291,13 @@ void __init(struct EmulationMachine *this)
 
         exit(EXIT_FAILURE);
     }
+    
+    preset_hander(this);
+
+    load_bytecode(this);
+
+    this->Machine.State = EXECUTION_STATE;
+    
 }
 
 
@@ -326,12 +344,6 @@ int emulate(int argc, char** argv)
 {
     struct EmulationMachine em = obtain_emulation_machine(argc, argv);
     em.Machine.init(&em);
-
-    preset_hander(&em);
-
-    load_bytecode(&em);
-
-    em.Machine.State = EXECUTION_STATE;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
     while(em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt)
