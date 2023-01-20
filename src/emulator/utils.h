@@ -63,6 +63,17 @@
                         } while (0);
 
 
+#define EMULATOR_OUT(fmt, ...) do {                                   \
+                            printf("[\033[01m\033[93mINFO\033[0m] "); \
+                            printf (fmt, ##__VA_ARGS__);              \
+                            fflush(stdout);                              \
+                            if (em->ExecArgs.JSON.is_activated) emit_dump(em); \
+                            destroy_cpu();                               \
+                            destroy_ram();                               \
+                            exit(-1);                                    \
+                        } while (0);
+
+
 /*
  * MACRO used to prepend a tag to IO emulator.
  *

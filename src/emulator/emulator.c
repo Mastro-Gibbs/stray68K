@@ -260,6 +260,16 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
                 ++i;
             }
 
+            else if (strcmp(argv[i], "--min-heap") == 0)
+            {
+                u32 org_ptr   = peek_ORG_from_file(em);
+                s64 min       = org_ptr + get_file_size(em);
+
+                if ((min % 2) != 0) ++min;
+
+                EMULATOR_OUT("Required minimum heap size => %ld bytes.\n", min);
+            }
+
             else if (argv[i][0] == '-' && argv[i][1] == 'j')
             {
                 em->ExecArgs.JSON.is_activated = TRUE;
@@ -366,6 +376,14 @@ void __init(struct EmulationMachine *this)
 
         exit(EXIT_FAILURE);
     }
+
+    preset_hander(this);
+
+    load_bytecode(this);
+
+    emit_sys_status(this); // for no-quiet mode
+
+    this->Machine.State = EXECUTION_STATE;
 }
 
 
@@ -414,15 +432,8 @@ struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
 int emulate(int argc, char** argv)
 {
     struct EmulationMachine em = obtain_emulation_machine(argc, argv);
+
     em.Machine.init(&em);
-
-    preset_hander(&em);
-
-    load_bytecode(&em);
-
-    emit_sys_status(&em); // for no-quiet mode
-
-    em.Machine.State = EXECUTION_STATE;
 
     clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
     while(em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt)
