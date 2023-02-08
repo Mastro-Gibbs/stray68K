@@ -4,13 +4,13 @@
 #include <string.h>
 
 
-u32 __exec__(struct EmulationMachine *em);
+u32 __exec__(struct EmulationMachine* restrict em);
 void __show__(void);
 
 
 m68k_cpu *cpu = NULL;
 
-m68k_cpu* init_cpu(struct EmulationMachine *em)
+m68k_cpu* init_cpu(struct EmulationMachine* restrict em)
 {
     if (!cpu)
     {
@@ -31,7 +31,7 @@ m68k_cpu* init_cpu(struct EmulationMachine *em)
 
 m68k_cpu* get_cpu(void) { return (cpu); }
 
-void reset_cpu(struct EmulationMachine *em)
+void reset_cpu(struct EmulationMachine* restrict em)
 {
     if (cpu)
     {
@@ -62,7 +62,7 @@ void destroy_cpu(void)
 }
 
 
-u32 __exec__(struct EmulationMachine *em)
+u32 __exec__(struct EmulationMachine* restrict em)
 {
     u32 istruction_ptr = em->Machine.cpu->pc;
 
@@ -263,7 +263,7 @@ u32 read_datareg(const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_datareg(const u32 reg, const u32 val, opsize* const size)
+void  write_datareg(const u32 reg, const u32 val, opsize* const restrict size)
 {
     opsize static_size;
 
@@ -312,7 +312,7 @@ u32 read_addrreg(const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
+void  write_addrreg(const u32 reg, const u32 val, opsize* const restrict size)
 {
     if (reg > 7) return;
 

@@ -11,7 +11,7 @@ m68k_ram *ram = NULL;
 
 
 
-m68k_ram* init_ram(struct EmulationMachine *em)
+m68k_ram* init_ram(struct EmulationMachine* restrict em)
 {
     if (!ram)
     {

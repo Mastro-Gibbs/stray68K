@@ -2745,7 +2745,7 @@ m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemon
 
 }
 
-void init_opcodes(struct EmulationMachine *em)
+void init_opcodes(struct EmulationMachine* restrict em)
 {
     if (!codemap)
     {
@@ -3090,7 +3090,7 @@ m68k_opcode* get_opcode_t()
  * RUNNER
  *
  */
-void preset_hander(struct EmulationMachine *em) { emulation = em; }
+void preset_hander(struct EmulationMachine* restrict em) { emulation = em; }
 
 
 u32 run_opcode()

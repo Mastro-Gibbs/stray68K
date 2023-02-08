@@ -32,7 +32,7 @@ bit halt_compare(u8 *s1)
 
 
 /* LOADER */
-bit _is_valid_file(struct EmulationMachine *em)
+bit _is_valid_file(struct EmulationMachine* const restrict em)
 {
     FILE    *fp;
     fp = fopen(em->ExecArgs.executable_path, "r");
@@ -46,7 +46,7 @@ bit _is_valid_file(struct EmulationMachine *em)
     return 1;
 }
 
-u32 peek_ORG_from_file(struct EmulationMachine *em)
+u32 peek_ORG_from_file(struct EmulationMachine* const restrict em)
 {
     FILE *fp;
 
@@ -72,7 +72,7 @@ u32 peek_ORG_from_file(struct EmulationMachine *em)
     return value;
 }
 
-FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
+FILE* open_file_and_extract_ORG(struct EmulationMachine* restrict em)
 {
     FILE *fp;
 
@@ -101,7 +101,7 @@ FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
     return fp;
 }
 
-void load_bytecode(struct EmulationMachine *em)
+void load_bytecode(struct EmulationMachine* restrict em)
 {
     FILE  *fp;
 
@@ -145,7 +145,7 @@ void load_bytecode(struct EmulationMachine *em)
 }
 
 
-u32 obtain_heap_size(char *st)
+u32 obtain_heap_size(char* const restrict st)
 {
     u32 base;
     u32 multiplier;
@@ -184,7 +184,7 @@ u32 obtain_heap_size(char *st)
 }
 
 
-s64 get_file_size(struct EmulationMachine *em)
+s64 get_file_size(struct EmulationMachine* const restrict em)
 {
     FILE  *fp;
     s64   size = 0;
@@ -203,7 +203,7 @@ s64 get_file_size(struct EmulationMachine *em)
 
 
 /* EMULATOR UTILS*/
-void parse_args(struct EmulationMachine *em, int argc, char **argv)
+void parse_args(struct EmulationMachine* restrict em, int argc, char **argv)
 {
     em->ExecArgs.executable_path  = argv[1];
     em->ExecArgs.descriptive_mode = FALSE;
@@ -339,7 +339,7 @@ void parse_args(struct EmulationMachine *em, int argc, char **argv)
 }
 
 
-void __init(struct EmulationMachine *this)
+void __init(struct EmulationMachine* restrict this)
 {
     this->Machine.cpu = init_cpu(this);
 

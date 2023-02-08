@@ -145,7 +145,7 @@ char* Jchrono(u64 usec)
 
 }
 
-char* Jop(char *mnem, u32 code_promoted)
+char* Jop(char* const restrict mnem, u32 code_promoted)
 {
     char *res;
     char buf[100];
@@ -164,7 +164,7 @@ char* Jop(char *mnem, u32 code_promoted)
 }
 
 
-char* Jexception(char* cause, u32 type)
+char* Jexception(char* restrict cause, u32 type)
 {
     char *res;
     char buf[300];
@@ -238,7 +238,7 @@ char* Jexception(char* cause, u32 type)
                                                     iostr[j] = '\0'; \
                                                 } while(0);
 
-char* Jio(char* io, u32 type)
+char* Jio(char* const restrict io, u32 type)
 {
     char *res;
     ssize_t size = strlen(io) + 1;
@@ -268,7 +268,7 @@ char* Jio(char* io, u32 type)
     return res;
 }
 
-char* Jconcat(char *dst, char *src)
+char* Jconcat(char* dst, char* const restrict src)
 {
     const size_t dsts = strlen(dst);
     const size_t srcs = strlen(src);

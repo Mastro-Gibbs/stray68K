@@ -57,7 +57,7 @@ typedef struct __m68k__cpu__
 
     srflags sr;        // status register flags
 
-    u32 (*exec) (struct EmulationMachine *em); // runner
+    u32 (*exec) (struct EmulationMachine* restrict em); // runner
 
     void (*show)(void);
 

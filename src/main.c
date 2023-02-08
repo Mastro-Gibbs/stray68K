@@ -70,7 +70,7 @@ struct
 } Runner;
 
 
-int detect_format(const char* filepath)
+int detect_format(const char* const restrict filepath)
 {
     if (access(filepath, F_OK) != 0)
     {
@@ -97,7 +97,7 @@ int detect_format(const char* filepath)
     return (EXIT_FAILURE);
 }
 
-int parseargs(int argc, char **argv)
+int fork_and_run(int argc, char **argv)
 {
     int exit_code = EXIT_FAILURE;
 
@@ -113,5 +113,5 @@ int parseargs(int argc, char **argv)
 
 int main(int argc,  char** argv)
 {
-    return parseargs(argc, argv);
+    return fork_and_run(argc, argv);
 }

@@ -16,18 +16,18 @@
 
 #include <stdlib.h>
 
-m68k_cpu* init_cpu(struct EmulationMachine *em);
+m68k_cpu* init_cpu(struct EmulationMachine* restrict em);
 m68k_cpu* get_cpu(void);
-void      reset_cpu(struct EmulationMachine *em);
+void      reset_cpu(struct EmulationMachine* restrict em);
 void      destroy_cpu(void);
 
 
 /* REGS */
 u32  read_datareg(const u32 reg);
-void write_datareg(const u32 reg, const u32 val, opsize* const size);
+void write_datareg(const u32 reg, const u32 val, opsize* const restrict size);
 
 u32  read_addrreg(const u32 reg);
-void write_addrreg(const u32 reg, const u32 val, opsize* const size);
+void write_addrreg(const u32 reg, const u32 val, opsize* const restrict size);
 
 void incr_addr_reg(const u32 reg, const opsize size);
 void decr_addr_reg(const u32 reg, const opsize size);

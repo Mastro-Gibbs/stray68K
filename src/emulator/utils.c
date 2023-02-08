@@ -51,7 +51,7 @@ u32 hash (const char* word)
 
 
 /* IO EA */
-u32 read_ram(u32 *addr, opsize *size)
+u32 read_ram(u32* const restrict addr, opsize* const restrict size)
 {
     switch (*size) {
         case BYTE:
@@ -77,7 +77,7 @@ sspan size_to_span(const opsize size)
     }
 }
 
-bit is_ram_op(ADDRMode* const mode)
+bit is_ram_op(ADDRMode* const restrict mode)
 {
     switch (*mode)
     {
@@ -92,7 +92,7 @@ bit is_ram_op(ADDRMode* const mode)
 }
 
 
-bit is_addr_to_data_op(ADDRMode* const mode)
+bit is_addr_to_data_op(ADDRMode* const restrict mode)
 {
     switch (*mode)
     {
@@ -129,7 +129,7 @@ char* trap_code_toString(const u32 trapcode)
 }
 
 
-void _io_dumps(struct EmulationMachine *em)
+void _io_dumps(struct EmulationMachine* restrict em)
 {
     emit_jio(em);
 
@@ -420,7 +420,7 @@ void _io_dumps(struct EmulationMachine *em)
                                         } \
                                     } while(0);
 
-void iotask(struct EmulationMachine *em)
+void iotask(struct EmulationMachine* restrict em)
 {
     char *str = NULL;
 
@@ -454,7 +454,7 @@ void iotask(struct EmulationMachine *em)
 
 
 #include <unistd.h>
-void machine_waiter(struct EmulationMachine *em)
+void machine_waiter(struct EmulationMachine* restrict em)
 {
     if (em->Machine.RuntimeData.sbs_printer_enabler)
     {
@@ -571,7 +571,7 @@ void machine_waiter(struct EmulationMachine *em)
 }
 
 #include "JSON.h"
-void emit_sys_status(struct EmulationMachine *em)
+void emit_sys_status(struct EmulationMachine* restrict em)
 {
     if (em->EmuType == EMULATE_SBS)
     {
@@ -687,7 +687,7 @@ void emit_sys_status(struct EmulationMachine *em)
     fflush(stdout);
 }
 
-void emit_dump(struct EmulationMachine *em)
+void emit_dump(struct EmulationMachine* restrict em)
 {
     char *buf = NULL;
 
@@ -724,7 +724,7 @@ void emit_dump(struct EmulationMachine *em)
     free(buf);
 }
 
-void emit_jio(struct EmulationMachine *em)
+void emit_jio(struct EmulationMachine* restrict em)
 {
     if (em->ExecArgs.JSON.is_activated && em->ExecArgs.JSON.io)
     {
@@ -737,7 +737,7 @@ void emit_jio(struct EmulationMachine *em)
     }
 }
 
-void emit_jconcat(struct EmulationMachine *em)
+void emit_jconcat(struct EmulationMachine* restrict em)
 {
     char *buf = NULL;
 
