@@ -13,7 +13,8 @@
  * MACRO used to raise a critical trap code.
  *
  */
-#define TRAPEXC(cause)  do {                                         \
+#define TRAPEXC(mc,cause)  do {                                         \
+                            emit_dump(mc);                           \
                             printf("[\033[01m\033[35mTRAP\033[0m] ");\
                             printf("%s\n", cause);                   \
                             fflush(stdout);                          \
@@ -24,7 +25,8 @@
  * MACRO used to turn system into PANIC mode aka something that the sys don't know how to handle it.
  *
  */
-#define PANIC(cause) do {                                          \
+#define PANIC(mc,cause) do {                                          \
+                        emit_dump(mc);                              \
                         printf("[\033[01m\033[91mPANIC\033[0m] "); \
                         printf("%s\n", cause);                     \
                         fflush(stdout);                            \
@@ -55,17 +57,6 @@
                             printf("[\033[01m\033[91mEMULATOR ERROR\033[0m] ");            \
                             sprintf(em->Machine.Exception.merr_cause, fmt, ##__VA_ARGS__); \
                             printf ("%s\n", em->Machine.Exception.merr_cause);             \
-                            fflush(stdout);                              \
-                            if (em->ExecArgs.JSON.is_activated) emit_dump(em); \
-                            destroy_cpu();                               \
-                            destroy_ram();                               \
-                            exit(-1);                                    \
-                        } while (0);
-
-
-#define EMULATOR_OUT(fmt, ...) do {                                   \
-                            printf("[\033[01m\033[93mINFO\033[0m] "); \
-                            printf (fmt, ##__VA_ARGS__);              \
                             fflush(stdout);                              \
                             if (em->ExecArgs.JSON.is_activated) emit_dump(em); \
                             destroy_cpu();                               \
@@ -530,24 +521,24 @@ u32 hash (const char* word);
 
 
 /* IO EA */
-u32 read_ram(u32* const restrict addr, opsize* const restrict size);
+u32 read_ram(u32 *addr, opsize *size);
 
 /* MISC */
 sspan size_to_span(opsize size);
-bit   is_ram_op(ADDRMode* const restrict mode);
-bit   is_addr_to_data_op(ADDRMode* const restrict mode);
+bit   is_ram_op(ADDRMode *mode);
+bit   is_addr_to_data_op(ADDRMode *mode);
 
 
 /* TRAP */
 char* trap_code_toString(u32 trapcode);
-void  iotask(struct EmulationMachine* restrict em);
+void  iotask(struct EmulationMachine *em);
 
 
 /* EMULATION MACHINE */
-void machine_waiter (struct EmulationMachine* restrict em);
-void emit_sys_status(struct EmulationMachine* restrict em);
-void emit_dump      (struct EmulationMachine* restrict em);
-void emit_jio       (struct EmulationMachine* restrict em);
-void emit_jconcat   (struct EmulationMachine* restrict em);
+void machine_waiter (struct EmulationMachine *em);
+void emit_dump      (struct EmulationMachine *em);
+const char* machine_status ();
+void emit_jio       (struct EmulationMachine *em);
+void emit_jconcat   (struct EmulationMachine *em);
 
 #endif // __UTILS_H__68000

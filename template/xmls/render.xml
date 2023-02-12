@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF8"?>
+<messages>
+
+    <message id="render-msg">
+        <div class="container3-col">
+            <div class="button-box2 containeritem-navbar">
+                <div class="float-left">
+                    ${code}
+                    ${memory}
+                    ${console}
+                    ${clear-btn}
+                </div>
+                <div class="float-right">
+                    ${compile}
+                    ${run}
+                    ${debug}
+                </div>
+            </div>
+            <div class="button-box3 containeritem-navbar2">
+                ${next}
+                ${stop}
+                ${terminate}
+                ${clr}
+            </div>
+            <div class="containeritem-widget">
+                ${widget}
+            </div>
+
+            <div class="containeritem-widget2">
+                ${register_render}
+            </div>
+        </div>
+    </message>
+
+</messages>

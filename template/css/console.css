@@ -1,0 +1,16 @@
+.console {
+    margin-top: 20px;
+    padding-top: 10px;
+    color: beige;
+    font-size: x-large;
+    font-family: monospace;
+    background-color: #0f0f0f;
+    border: 0px;
+    width: 99%;
+    height: 800px;
+    resize: none;
+}
+
+.console:focus {
+    outline: none;
+}

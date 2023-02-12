@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF8"?>
+<messages>
+
+    <message id="editor-msg">
+        <div class="container2-col">
+            <div class="">
+                ${row_counter}
+            </div>
+            <div class="">
+                ${editor}
+            </div>
+        </div>
+    </message>
+
+</messages>

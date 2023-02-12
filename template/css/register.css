@@ -1,0 +1,82 @@
+.container4-col {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 20% 25% 20% 25%;
+    column-gap: 2%;
+    border-radius: 5px;
+    row-gap: 1%;
+}
+
+.register-label-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.register-label {
+    width: 100%;
+    height: 20px;
+    font-size: 18px;
+    font-family: monospace;
+}
+
+.register-data {
+    width: 100%;
+    height: 26px;
+    font-size: 18px;
+    font-family: monospace;
+    overflow: hidden;
+}
+
+.register-data-2byte {
+    text-align: center;
+    overflow: hidden;
+    width: 100%;
+    height: 26px;
+    font-size: 18px;
+    font-family: monospace;
+    background-color: #383838;
+    color: beige;
+    resize: none;
+    border: none;
+}
+
+.register-data-8bit {
+    text-align: center;
+    overflow: hidden;
+    width: 100%;
+    height: 26px;
+    font-size: 18px;
+    font-family: monospace;
+    background-color: #383838;
+    color: beige;
+    resize: none;
+    border: none;
+}
+
+.register-data-16bit {
+    text-align: center;
+    overflow: hidden;
+    width: 100%;
+    height: 26px;
+    font-size: 18px;
+    font-family: monospace;
+    background-color: #383838;
+    color: beige;
+    resize: none;
+    border: none;
+}
+
+.register-data-8bit:focus .register-data-2byte:focus .register-data-16bit:focus {
+    outline: none;
+}
+
+.xx-large {
+    grid-column-start: 1;
+    grid-column-end: 3;
+}
+
+.one-row-reg {
+    grid-column-start: 3;
+    grid-column-end: 5;
+}

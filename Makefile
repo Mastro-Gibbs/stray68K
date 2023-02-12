@@ -11,9 +11,15 @@ MKDIR         = mkdir -p
 DEL_DIR       = rmdir
 ROOT_DIR      := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
+CXX       = g++
+CXXFLAGS  = -std=c++14
+LIBS      = -lwthttp -lwt
 
 LEX           = flex
 YACC          = bison
+
+PORT ?= 8080
+HOST ?= 127.0.0.1
 
 ####### Output directory
 
@@ -21,6 +27,7 @@ OBJECTS_DIR   = objects
 BUILD_DIR     = build
 ASSEMBLER_DIR = $(ROOT_DIR)/src/assembler
 EMULATOR_DIR  = $(ROOT_DIR)/src/emulator
+WWW_DIR       = $(ROOT_DIR)/src/www
 SOURCE_DIR    = $(ROOT_DIR)/src
 
 ####### Files
@@ -37,7 +44,14 @@ SOURCES       = $(EMULATOR_DIR)/emulator.c \
 		$(EMULATOR_DIR)/handler.c \
 		$(SOURCE_DIR)/main.c \
 		$(EMULATOR_DIR)/ram.c \
-		$(EMULATOR_DIR)/utils.c 
+		$(EMULATOR_DIR)/utils.c \
+		$(WWW_DIR)/header.cpp \
+		$(WWW_DIR)/footer.cpp \
+		$(WWW_DIR)/editor.cpp \
+		$(WWW_DIR)/dispatcher.cpp \
+		$(WWW_DIR)/memory.cpp \
+		$(WWW_DIR)/console.cpp \
+		$(WWW_DIR)/register.cpp
 
 OBJECTS       = $(OBJECTS_DIR)/emulator.o \
 		$(OBJECTS_DIR)/assembler.o \
@@ -51,23 +65,30 @@ OBJECTS       = $(OBJECTS_DIR)/emulator.o \
 		$(OBJECTS_DIR)/ram.o \
 		$(OBJECTS_DIR)/handler.o \
 		$(OBJECTS_DIR)/JSON.o \
-		$(OBJECTS_DIR)/utils.o
+		$(OBJECTS_DIR)/utils.o \
+		$(OBJECTS_DIR)/header.o \
+		$(OBJECTS_DIR)/footer.o \
+		$(OBJECTS_DIR)/editor.o \
+		$(OBJECTS_DIR)/dispatcher.o \
+		$(OBJECTS_DIR)/memory.o \
+		$(OBJECTS_DIR)/console.o \
+		$(OBJECTS_DIR)/register.o
 
-TARGET        = $(BUILD_DIR)/stray68K
+TARGET        = $(BUILD_DIR)/stray68K-Web
 
 
 
-first: object_dir build_dir all
+first: all
 
 
 ####### Build rules
 
-$(BUILD_DIR)/stray68K:  $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS)
+$(BUILD_DIR)/stray68K-Web:  $(OBJECTS)
+	$(CXX) $(CFLAGS) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
 
 generators: $(ASSEMBLER_DIR)/lexical.c $(ASSEMBLER_DIR)/lexical.h $(ASSEMBLER_DIR)/syntactic.c $(ASSEMBLER_DIR)/syntactic.h
 
-all: generators $(BUILD_DIR)/stray68K
+all: generators $(BUILD_DIR)/stray68K-Web
 
 
 clean:
@@ -83,11 +104,16 @@ rebuild: cleanall all
 
 ####### Create dirs
 
-object_dir:
-	@$(MKDIR) objects
 
-build_dir:
-	@$(MKDIR) build
+deepclean:
+	rm -f $(TARGET)
+	rm -f $(OBJECTS)
+	rm -rf $(OBJECTS_DIR)
+	rm -rf $(BUILD_DIR)
+
+create:
+	mkdir build
+	mkdir objects
 
 
 ####### Compile
@@ -146,19 +172,6 @@ $(OBJECTS_DIR)/cpu.o: $(EMULATOR_DIR)/cpu.c $(EMULATOR_DIR)/cpu.h \
 		$(EMULATOR_DIR)/ram.h
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/cpu.o $(EMULATOR_DIR)/cpu.c
 
-$(OBJECTS_DIR)/main.o: $(SOURCE_DIR)/main.c $(SOURCE_DIR)/stray_m68k.h \
-		$(EMULATOR_DIR)/emulator.h \
-		$(EMULATOR_DIR)/cpu.h \
-		$(EMULATOR_DIR)/handler.h \
-		$(EMULATOR_DIR)/motorolatypes.h \
-		$(EMULATOR_DIR)/enums.h \
-		$(EMULATOR_DIR)/utils.h \
-		$(EMULATOR_DIR)/ram.h \
-		$(ASSEMBLER_DIR)/assembler.h \
-		$(ASSEMBLER_DIR)/clowncommon.h \
-		$(ASSEMBLER_DIR)/semantic.h \
-		$(ASSEMBLER_DIR)/syntactic.h
-	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/main.o $(SOURCE_DIR)/main.c
 
 $(OBJECTS_DIR)/ram.o: $(EMULATOR_DIR)/ram.c $(EMULATOR_DIR)/ram.h \
 		$(EMULATOR_DIR)/motorolatypes.h \
@@ -193,3 +206,43 @@ $(OBJECTS_DIR)/utils.o: $(EMULATOR_DIR)/utils.c $(EMULATOR_DIR)/utils.h \
 		$(EMULATOR_DIR)/handler.h 
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/utils.o $(EMULATOR_DIR)/utils.c
 
+$(OBJECTS_DIR)/main.o: $(SOURCE_DIR)/main.cpp \
+		$(SOURCE_DIR)/stray_m68k.h \
+		$(EMULATOR_DIR)/emulator.h \
+		$(EMULATOR_DIR)/cpu.h \
+		$(EMULATOR_DIR)/handler.h \
+		$(EMULATOR_DIR)/motorolatypes.h \
+		$(EMULATOR_DIR)/enums.h \
+		$(EMULATOR_DIR)/utils.h \
+		$(EMULATOR_DIR)/ram.h \
+		$(ASSEMBLER_DIR)/assembler.h \
+		$(ASSEMBLER_DIR)/clowncommon.h \
+		$(ASSEMBLER_DIR)/semantic.h \
+		$(ASSEMBLER_DIR)/syntactic.h
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/main.o -c $(SOURCE_DIR)/main.cpp $(LIBS)
+
+$(OBJECTS_DIR)/header.o: $(WWW_DIR)/header.cpp $(WWW_DIR)/header.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/header.o -c $(WWW_DIR)/header.cpp $(LIBS)
+
+$(OBJECTS_DIR)/footer.o: $(WWW_DIR)/footer.cpp $(WWW_DIR)/footer.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/footer.o -c $(WWW_DIR)/footer.cpp $(LIBS)
+
+$(OBJECTS_DIR)/editor.o: $(WWW_DIR)/editor.cpp $(WWW_DIR)/editor.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/editor.o -c $(WWW_DIR)/editor.cpp $(LIBS)
+
+$(OBJECTS_DIR)/dispatcher.o: $(WWW_DIR)/dispatcher.cpp $(WWW_DIR)/dispatcher.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/dispatcher.o -c $(WWW_DIR)/dispatcher.cpp $(LIBS)
+
+$(OBJECTS_DIR)/memory.o: $(WWW_DIR)/memory.cpp $(WWW_DIR)/memory.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/memory.o -c $(WWW_DIR)/memory.cpp $(LIBS)
+
+$(OBJECTS_DIR)/console.o: $(WWW_DIR)/console.cpp $(WWW_DIR)/console.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/console.o -c $(WWW_DIR)/console.cpp $(LIBS)
+
+$(OBJECTS_DIR)/register.o: $(WWW_DIR)/register.cpp $(WWW_DIR)/register.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/register.o -c $(WWW_DIR)/register.cpp $(LIBS)
+
+
+deploy:
+	./$(TARGET) --docroot . --http-address $(HOST) --http-port $(PORT) --resources-dir=template/resources
+	

@@ -57,7 +57,7 @@ typedef struct __m68k__cpu__
 
     srflags sr;        // status register flags
 
-    u32 (*exec) (struct EmulationMachine* restrict em); // runner
+    u32 (*exec) (struct EmulationMachine *em); // runner
 
     void (*show)(void);
 
@@ -120,6 +120,7 @@ struct EmulationMachine
         } JSON;
 
         bit  descriptive_mode;
+        bit  quiet_mode;
         bit  chrono_mode;
         char *executable_path;
     } ExecArgs;
@@ -138,8 +139,7 @@ struct EmulationMachine
             WARNING_STATE   = 4,
             TRAP_STATE      = 5,
             MERR_STATE      = 6,
-            IO_STATE        = 7,
-            SLEEP_STATE     = 8
+            IO_STATE        = 7
         } State;
 
         struct
@@ -182,7 +182,7 @@ struct EmulationMachine
             enum { INPUT = 0,    OUTPUT = 1,  IO_UNDEF = 2 } Type;
         } IO;
 
-        void (*init)    (struct EmulationMachine *this);
+        void (*init)    (struct EmulationMachine *_this);
         void (*turnoff) ();
 
     } Machine;

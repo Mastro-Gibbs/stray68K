@@ -19,7 +19,6 @@
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-
 bit halt_compare(u8 *s1)
 {
     u8 halt[8] = {0xAC, 0xAC, 0xFF, 0xFF, 0xFF, 0xFF, 0xAC, 0xAC};
@@ -32,10 +31,24 @@ bit halt_compare(u8 *s1)
 
 
 /* LOADER */
-bit _is_valid_file(struct EmulationMachine* const restrict em)
+bit _is_valid_file(struct EmulationMachine *em)
 {
     FILE    *fp;
+
+    const char* ldot = strrchr(em->ExecArgs.executable_path, '.');
+    if (ldot != NULL)
+    {
+        size_t length = strlen("B68");
+        if (strncmp(ldot + 1, "B68", length) != 0)
+        {
+            EMULATOR_ERROR("File extension not valid, be sure to pass '.B68' format.")
+        }
+    }
+
     fp = fopen(em->ExecArgs.executable_path, "r");
+
+    if (fp == NULL)
+        EMULATOR_ERROR("File not found, be sure to pass correct path.")
 
     fseek(fp, 0L, SEEK_END);
     if (ftell(fp) == 0L)
@@ -46,7 +59,8 @@ bit _is_valid_file(struct EmulationMachine* const restrict em)
     return 1;
 }
 
-u32 peek_ORG_from_file(struct EmulationMachine* const restrict em)
+
+u32 peek_ORG_from_file(struct EmulationMachine *em)
 {
     FILE *fp;
 
@@ -72,7 +86,8 @@ u32 peek_ORG_from_file(struct EmulationMachine* const restrict em)
     return value;
 }
 
-FILE* open_file_and_extract_ORG(struct EmulationMachine* restrict em)
+
+FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
 {
     FILE *fp;
 
@@ -101,7 +116,43 @@ FILE* open_file_and_extract_ORG(struct EmulationMachine* restrict em)
     return fp;
 }
 
-void load_bytecode(struct EmulationMachine* restrict em)
+
+u32 obtain_heap_size(char *st)
+{
+    u32 base;
+    u32 multiplier;
+
+    size_t len;
+
+    len = strlen(st);
+
+    for (size_t p = 0; p < len - 1; p++)
+        if (!isdigit(st[p])) return FALSE;
+
+    char st_cpy[len];
+    snprintf(st_cpy, len, "%s", st);
+
+    base = strtoul(st_cpy, 0L, 10);
+
+    switch (st[len-1])
+    {
+        case 'K':
+        case 'k':
+            multiplier = 1024;
+            break;
+        case 'M':
+        case 'm':
+            multiplier = 1048576;
+            break;
+        default:
+            return FALSE;
+    }
+
+    return (base * multiplier);
+}
+
+
+void load_bytecode(struct EmulationMachine *em)
 {
     FILE  *fp;
 
@@ -145,210 +196,25 @@ void load_bytecode(struct EmulationMachine* restrict em)
 }
 
 
-u32 obtain_heap_size(char* const restrict st)
-{
-    u32 base;
-    u32 multiplier;
-
-    size_t len;
-
-    len = strlen(st);
-
-    for (size_t p = 0; p < len - 1; p++)
-        if (!isdigit(st[p])) return FALSE;
-
-    char st_cpy[len];
-    snprintf(st_cpy, len, "%s", st);
-
-    base = strtoul(st_cpy, 0L, 10);
-
-    switch (st[len-1])
-    {
-        case 'B':
-        case 'b':
-            multiplier = 1;
-            break;
-        case 'K':
-        case 'k':
-            multiplier = 1024;
-            break;
-        case 'M':
-        case 'm':
-            multiplier = 1048576;
-            break;
-        default:
-            return FALSE;
-    }
-
-    return (base * multiplier);
-}
-
-
-s64 get_file_size(struct EmulationMachine* const restrict em)
-{
-    FILE  *fp;
-    s64   size = 0;
-
-    fp = fopen(em->ExecArgs.executable_path, "rb");
-
-    if (fp)
-    {
-        fseek(fp, 0, SEEK_END);
-        size = ftell(fp);
-        fclose(fp);
-    }
-
-    return size;
-}
-
 
 /* EMULATOR UTILS*/
-void parse_args(struct EmulationMachine* restrict em, int argc, char **argv)
+void parse_args(struct EmulationMachine *em, char *path)
 {
-    em->ExecArgs.executable_path  = argv[1];
-    em->ExecArgs.descriptive_mode = FALSE;
-    em->ExecArgs.chrono_mode      = FALSE;
-
-    em->ExecArgs.JSON.is_activated = FALSE;
-    em->ExecArgs.JSON.cpu    = FALSE;
-    em->ExecArgs.JSON.ram    = FALSE;
-    em->ExecArgs.JSON.chrono = FALSE;
-    em->ExecArgs.JSON.op     = FALSE;
-    em->ExecArgs.JSON.dump   = FALSE;
-    em->ExecArgs.JSON.io     = FALSE;
-    em->ExecArgs.JSON.concat = FALSE;
-
-    _is_valid_file(em);
+    em->ExecArgs.executable_path  = path;
 
     em->Machine.RuntimeData.RAM_SIZE = RAM_MAX_SIZE;
 
-    for (s32 i = 2; i < argc; i++)
-    {
-        if (strlen(argv[i]) >= 2)
-        {
-            if (argv[i][0] == '-' && argv[i][1] == 'd')
-                em->ExecArgs.descriptive_mode = TRUE;
-
-            else if (argv[i][0] == '-' && argv[i][1] == 's')
-            {
-                em->EmuType = EMULATE_SBS;
-                em->Machine.RuntimeData.sbs_printer_enabler = TRUE;
-            }
-
-            else if (argv[i][0] == '-' && argv[i][1] == 't')
-                em->ExecArgs.chrono_mode = TRUE;
-
-            else if (strcmp(argv[i], "--heap-size") == 0)
-            {
-                u32 heap_size = obtain_heap_size(argv[i+1]);
-                u32 org_ptr   = peek_ORG_from_file(em);
-                s64 min       = org_ptr + get_file_size(em);
-
-                if ((min % 2) != 0) ++min;
-
-                if (heap_size)
-                {
-                    if (heap_size < org_ptr || heap_size <= (min-1))
-                    {   EMULATOR_ERROR("Too low heap size value '%s' => %dB, minimum %ldB.", argv[i+1], heap_size, min); }
-                    else if (heap_size >= RAM_MAX_SIZE)
-                    {   EMULATOR_ERROR("Too high heap size value '%s' => %dB, minimum %ldB.", argv[i+1], heap_size, min); }
-
-                    em->Machine.RuntimeData.RAM_SIZE = heap_size;
-                }
-                else EMULATOR_ERROR("Invalid heap size value '%s'.", argv[i+1]);
-
-                ++i;
-            }
-
-            else if (strcmp(argv[i], "--min-heap") == 0)
-            {
-                u32 org_ptr   = peek_ORG_from_file(em);
-                s64 min       = org_ptr + get_file_size(em);
-
-                if ((min % 2) != 0) ++min;
-
-                EMULATOR_OUT("Required minimum heap size => %ld bytes.\n", min);
-            }
-
-            else if (argv[i][0] == '-' && argv[i][1] == 'j')
-            {
-                em->ExecArgs.JSON.is_activated = TRUE;
-
-                u32 i_clone = i;
-                for (u16 j = i_clone+1; j < argc; j++)
-                {
-                    if (strcmp(argv[j], "cpu") == 0)
-                        em->ExecArgs.JSON.cpu = TRUE;
-                    else if (strcmp(argv[j], "ram") == 0)
-                        em->ExecArgs.JSON.ram = TRUE;
-                    else if (strcmp(argv[j], "chrono") == 0)
-                        em->ExecArgs.JSON.chrono = TRUE;
-                    else if (strcmp(argv[j], "op") == 0)
-                        em->ExecArgs.JSON.op = TRUE;
-                    else if (strcmp(argv[j], "dump") == 0)
-                        em->ExecArgs.JSON.dump = TRUE;
-                    else if (strcmp(argv[j], "io") == 0)
-                        em->ExecArgs.JSON.io = TRUE;
-                    else if (strcmp(argv[j], "concat") == 0)
-                        em->ExecArgs.JSON.concat = TRUE;
-                    else if (argv[j][0] == '-')
-                        break;
-                    else
-                        EMULATOR_ERROR("Invalid JSON formatter '%s' at position %d.", argv[j], j);
-
-                    i++;
-                }
-            }
-            else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
-        }
-        else EMULATOR_ERROR("Invalid param '%s' at position %d.", argv[i], i);
-    }
-
-
-    if (em->EmuType == EMULATE_SBS && em->ExecArgs.chrono_mode)
-        EMULATOR_ERROR("Cannot use timer option (-t) in step-by-step mode.")
-
-    if (em->EmuType == EMULATE_SBS && em->ExecArgs.JSON.chrono)
-        EMULATOR_ERROR("Cannot use JSON timer encoding (-j chrono) in step-by-step mode.")
-
-    if (em->EmuType == EMULATE_STD && em->ExecArgs.descriptive_mode)
-        EMULATOR_ERROR("Cannot use descriptive option (-d) in normal mode.")
-
-    if (em->ExecArgs.chrono_mode && em->ExecArgs.JSON.is_activated)
-        EMULATOR_ERROR("Cannot combine '-t' and JSON encoder '-j' options.")
-
-    if (em->ExecArgs.JSON.dump && em->ExecArgs.JSON.concat)
-        EMULATOR_ERROR("Cannot combine JSON encoding option 'dump' and 'concat'.")
-
-    if (em->ExecArgs.JSON.is_activated)
-    {
-        u8 c_c = 0;
-        if (em->ExecArgs.JSON.cpu)    c_c++;
-        if (em->ExecArgs.JSON.ram)    c_c++;
-        if (em->ExecArgs.JSON.op)     c_c++;
-        if (em->ExecArgs.JSON.chrono) c_c++;
-        if (em->ExecArgs.JSON.dump)   c_c++;
-        if (em->ExecArgs.JSON.io)     c_c++;
-
-        if (em->ExecArgs.JSON.concat && c_c < 2)
-            EMULATOR_ERROR("To use 'concat' JSON util, must pass at least two formatter params.")
-
-        if (em->ExecArgs.JSON.is_activated && c_c == 0)
-            EMULATOR_ERROR("Cannot use JSON encoding option (-j) alone.")
-    }
+    _is_valid_file(em);
 }
 
 
-void __init(struct EmulationMachine* restrict this)
+void __init(struct EmulationMachine *this)
 {
     this->Machine.cpu = init_cpu(this);
 
     if (this->Machine.State == PANIC_STATE)
     {
-        PANIC(this->Machine.Exception.panic_cause);
-
-        if (this->ExecArgs.JSON.is_activated)
-            emit_dump(this);
+        PANIC(this, this->Machine.Exception.panic_cause);
 
         exit(EXIT_FAILURE);
     }
@@ -357,10 +223,7 @@ void __init(struct EmulationMachine* restrict this)
 
     if (this->Machine.State == PANIC_STATE)
     {
-        PANIC(this->Machine.Exception.panic_cause);
-
-        if (this->ExecArgs.JSON.is_activated)
-            emit_dump(this);
+        PANIC(this, this->Machine.Exception.panic_cause);
 
         exit(EXIT_FAILURE);
     }
@@ -369,118 +232,137 @@ void __init(struct EmulationMachine* restrict this)
 
     if (this->Machine.State == PANIC_STATE)
     {
-        PANIC(this->Machine.Exception.panic_cause);
-
-        if (this->ExecArgs.JSON.is_activated)
-            emit_dump(this);
+        PANIC(this, this->Machine.Exception.panic_cause);
 
         exit(EXIT_FAILURE);
     }
-
-    preset_hander(this);
-
-    load_bytecode(this);
-
-    emit_sys_status(this); // for no-quiet mode
-
-    this->Machine.State = EXECUTION_STATE;
 }
 
 
+
+
+struct EmulationMachine *emulator = NULL;
+
 void __turnoff()
 {
+    if (emulator->Machine.IO.buffer)
+        free(emulator->Machine.IO.buffer);
     destroy_cpu();
     destroy_ram();
     destroy_codes();
 }
 
-
-struct EmulationMachine obtain_emulation_machine(int argc, char **argv)
+void obtain_emulation_machine(char *path)
 {
-    struct EmulationMachine em;
+    emulator = malloc(sizeof(* emulator));
 
-    em.Machine.State = BEGIN_STATE;
+    emulator->Machine.State = BEGIN_STATE;
 
-    em.Machine.RuntimeData.operation_code = 0;
-    em.Machine.RuntimeData.mnemonic       = NULL;
+    emulator->Machine.RuntimeData.operation_code = 0;
+    emulator->Machine.RuntimeData.mnemonic       = NULL;
 
-    em.Machine.RuntimeData.org_pointer = ORG_DEFAULT;
-    em.Machine.RuntimeData.simhalt     = 0;
-    em.Machine.RuntimeData.last_loaded_byte_index = 0;
-    em.Machine.RuntimeData.sbs_printer_enabler    = FALSE;
+    emulator->Machine.RuntimeData.org_pointer = ORG_DEFAULT;
+    emulator->Machine.RuntimeData.simhalt     = 0;
+    emulator->Machine.RuntimeData.last_loaded_byte_index = 0;
+    emulator->Machine.RuntimeData.sbs_printer_enabler    = FALSE;
 
-    em.Machine.RuntimeData.STACK_BOTTOM_INDEX = 0x01000000;
-    em.Machine.RuntimeData.JSR_CALL_COUNTER   = 0;
+    emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX = 0x01000000;
+    emulator->Machine.RuntimeData.JSR_CALL_COUNTER   = 0;
 
-    em.Machine.Chrono.dt = 0;
+    emulator->Machine.Chrono.dt = 0;
 
-    em.Machine.IO.buffer  = NULL;
-    em.Machine.IO.Type    = IO_UNDEF;
+    emulator->Machine.IO.buffer  = NULL;
+    emulator->Machine.IO.Type    = IO_UNDEF;
 
-    em.EmuType = EMULATE_STD;
+    emulator->Machine.RuntimeData.sbs_printer_enabler = TRUE;
+    emulator->EmuType = EMULATE_SBS;
 
-    parse_args(&em, argc, argv);
+    parse_args(emulator, path);
 
-    em.Machine.init    = __init;
-    em.Machine.turnoff = __turnoff;
+    emulator->Machine.init    = __init;
+    emulator->Machine.turnoff = __turnoff;
 
-    return em;
+}
+
+
+
+
+void begin_emulator(char *path)
+{
+    obtain_emulation_machine(path);
+    emulator->Machine.init(emulator);
+
+    preset_hander(emulator);
+
+    load_bytecode(emulator);
+
+    emulator->Machine.State = EXECUTION_STATE;
+
+    emit_dump(emulator);
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_begin);
+}
+
+void end_emulator()
+{
+    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
+
+    emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
+                           (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
+
+    emulator->Machine.IO.Type = IO_UNDEF;
+    emulator->Machine.State = FINAL_STATE;
+
+    emit_dump(emulator);
+
+    emulator->Machine.turnoff();
+
+    free(emulator);
+    emulator = NULL;
+}
+
+
+int is_last_istr()
+{
+    return (emulator->Machine.cpu->pc + WORD_SPAN) < emulator->Machine.RuntimeData.simhalt ? 0 : 1;
 }
 
 
 /* EMULATOR */
-int emulate(int argc, char** argv)
+int emulate()
 {
-    struct EmulationMachine em = obtain_emulation_machine(argc, argv);
-
-    em.Machine.init(&em);
-
-    clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_begin);
-    while(em.Machine.cpu->pc < em.Machine.RuntimeData.simhalt)
+    if (emulator->Machine.cpu->pc < emulator->Machine.RuntimeData.simhalt)
     {
-        if (em.Machine.cpu->exec(&em) == RETURN_ERR)
+        if (emulator->Machine.cpu->exec(emulator) == RETURN_ERR)
         {
-            clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_end);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
 
-            em.Machine.Chrono.dt = (em.Machine.Chrono.t_end.tv_sec - em.Machine.Chrono.t_begin.tv_sec) * 1000000 +
-                                   (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
+            emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
+                                   (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
 
-            switch (em.Machine.State) {
+            switch (emulator->Machine.State) {
                 case PANIC_STATE:
                 {
-                    PANIC(em.Machine.Exception.panic_cause)
+                    PANIC(emulator, emulator->Machine.Exception.panic_cause)
                     break;
                 }
                 case TRAP_STATE:
                 {
-                    TRAPEXC(em.Machine.Exception.trap_cause)
+                    TRAPEXC(emulator, emulator->Machine.Exception.trap_cause)
                     break;
                 }
                 default:
                     break;
             }
 
-            emit_sys_status(&em);
 
-            em.Machine.turnoff();
-
-            return (EXIT_FAILURE);
+            return (RETURN_ERR);
         }
+
+        return (RETURN_OK);
     }
-    clock_gettime(CLOCK_MONOTONIC_RAW, &em.Machine.Chrono.t_end);
 
-    em.Machine.Chrono.dt = (em.Machine.Chrono.t_end.tv_sec - em.Machine.Chrono.t_begin.tv_sec) * 1000000 +
-                           (em.Machine.Chrono.t_end.tv_nsec - em.Machine.Chrono.t_begin.tv_nsec) / 1000;
-
-    em.Machine.State = FINAL_STATE;
-
-    machine_waiter(&em);  // for sbs mode
-
-    emit_sys_status(&em); // for no-quiet mode
-
-    em.Machine.turnoff();
-
-    return (EXIT_SUCCESS);
+    return (RETURN_ERR);
 }
 
 

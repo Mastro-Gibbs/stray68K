@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF8"?>
+<messages>
+
+    <message id="register-msg">
+        <div class="container4-col">
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D0
+                </span>
+            </div>
+            <div class="register-data">
+                ${d0}
+            </div>
+            
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A0
+                </span>
+            </div>
+            <div class="register-data">
+                ${a0}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D1
+                </span>
+            </div>
+            <div class="register-data">
+                ${d1}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A1
+                </span>
+            </div>
+            <div class="register-data">
+                ${a1}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D2
+                </span>
+            </div>
+            <div class="register-data">
+                ${d2}
+            </div>
+            
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A2
+                </span>
+            </div>
+            <div class="register-data">
+                ${a2}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D3
+                </span>
+            </div>
+            <div class="register-data">
+                ${d3}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A3
+                </span>
+            </div>
+            <div class="register-data">
+                ${a3}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D4
+                </span>
+            </div>
+            <div class="register-data">
+                ${d4}
+            </div>
+            
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A4
+                </span>
+            </div>
+            <div class="register-data">
+                ${a4}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D5
+                </span>
+            </div>
+            <div class="register-data">
+                ${d5}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A5
+                </span>
+            </div>
+            <div class="register-data">
+                ${a5}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D6
+                </span>
+            </div>
+            <div class="register-data">
+                ${d6}
+            </div>
+            
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A6
+                </span>
+            </div>
+            <div class="register-data">
+                ${a6}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg D7
+                </span>
+            </div>
+            <div class="register-data">
+                ${d7}
+            </div>
+
+            <div class="register-label-container">
+                <span class="register-label">
+                    Reg A7
+                </span>
+            </div>
+            <div class="register-data">
+                ${a7}
+            </div>
+
+            <div class="">
+                ${break}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    User Stack Pointer
+                </span>
+            </div>
+            <div class="register-data">
+                ${usp}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    System Stack Pointer
+                </span>
+            </div>
+            <div class="register-data">
+                ${ssp}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Program Counter
+                </span>
+            </div>
+            <div class="register-data">
+                ${pc}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Condition Code Reg 
+                </span>
+            </div>
+            <div class="one-row-reg register-data">
+                ${ccr}
+            </div>
+
+            <div class="">
+                ${break}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Mnemonic code
+                </span>
+            </div>
+            <div class="register-data">
+                ${mnem}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Hex Code
+                </span>
+            </div>
+            <div class="register-data">
+                ${hcode}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Bit Code 
+                </span>
+            </div>
+            <div class="one-row-reg register-data">
+                ${bcode}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Time&nbsp;(ms)
+                </span>
+            </div>
+            <div class="one-row-reg register-data">
+                ${time}
+            </div>
+            
+        </div>
+    </message>
+
+</messages>

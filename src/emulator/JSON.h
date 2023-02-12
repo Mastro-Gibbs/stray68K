@@ -12,15 +12,15 @@ char* Jstack(u32 bottom, u32 top);
 
 char* Jchrono(u64 usec);
 
-char* Jop(char* const restrict mnem, u32 code_promoted);
+char* Jop(char *mnem, u32 code_promoted);
 
-char* Jexception(char* restrict cause, u32 type);
+char* Jexception(char* cause, u32 type);
 
-char* Jio(char* const restrict io, u32 type);
+char* Jio(char* io, u32 type);
 
-char* Jconcat(char* dst, char* const restrict src);
+char* Jconcat(char *dst, char *src);
 
-char* Jconcat2(char* dst, char* (*Jsrc)(), ...);
+char* Jconcat2(char *dst, char* (*Jsrc)(), ...);
 
 
 

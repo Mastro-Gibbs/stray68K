@@ -1,16 +1,9 @@
 #include "handler.h"
 
 #include <stdlib.h>
-#include <unistd.h>
 
 struct EmulationMachine  *emulation = NULL;
 struct __m68k__codemap__ *codemap   = NULL;
-
-
-// custom traps
-#define TRAP_PRINT 0xF
-#define TRAP_SCAN  0xE
-#define TRAP_SLEEP 0xD
 
 
 //handler return types
@@ -103,11 +96,11 @@ struct __m68k__codemap__ *codemap   = NULL;
                                                             case moveq:  \
                                                             case divu:  \
                                                             case divs:  \
-                                                            case or:  \
+                                                            case _or:  \
                                                             case eor:  \
                                                             case mulu:  \
                                                             case muls:  \
-                                                            case and:  \
+                                                            case _and:  \
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
                                                                 SET_OVERFLOW(0);  \
@@ -135,7 +128,7 @@ struct __m68k__codemap__ *codemap   = NULL;
                                                                 break;  \
                                                             case cmpi:  \
                                                             case cmpm:  \
-                                                            case cmp:  \
+                                                            case _cmp:  \
                                                             case cmpa:  \
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
@@ -156,9 +149,9 @@ struct __m68k__codemap__ *codemap   = NULL;
                                                                 SET_CARRY((res & mask) != 0);  \
                                                                 SET_EXTENDED(emulation->Machine.cpu->sr & CARRY);  \
                                                                 break;  \
-                                                            case not:  \
+                                                            case _not:  \
                                                             case ext:  \
-                                                            case swap:  \
+                                                            case _swap:  \
                                                             case tst:  \
                                                                 SET_NEGATIVE(resMSB);  \
                                                                 SET_ZERO((res & mask) == 0);  \
@@ -765,7 +758,7 @@ u32 NOT(void)
 
     WRITE_EFFECTIVE_ADDRESS(dst, (u32) result, size, mode);
 
-    SET_SRFLAGS(not, size, src_value, 0, (u32) result);
+    SET_SRFLAGS(_not, size, src_value, 0, (u32) result);
 
     return (RETURN_OK);
 }
@@ -838,7 +831,7 @@ u32 SWAP(void)
     val = (val >> 16) | ((val & 0x0000FFFF) << 16);
 
     write_datareg(code & reg_mask, val, NULL);
-    SET_SRFLAGS(swap, LONG, 0, 0, val);
+    SET_SRFLAGS(_swap, LONG, 0, 0, val);
 
     return (RETURN_OK);
 }
@@ -927,62 +920,25 @@ u32 TRAP(void)
     const opcode code = emulation->Machine.RuntimeData.operation_code; 
     u16 vector = (u16)(code & 0x0000000F);
 
-    emulation->Machine.IO.Type = IO_UNDEF;
+    if (vector == 0x0F)
+        emulation->Machine.IO.Type = OUTPUT;
+    else if (vector == 0x0E)
+        emulation->Machine.IO.Type = INPUT;
+    else
+        emulation->Machine.IO.Type = IO_UNDEF;
 
-    switch (vector)
+    if (emulation->Machine.IO.Type != IO_UNDEF)
     {
-        case TRAP_PRINT:
-        {
-            emulation->Machine.IO.Type = OUTPUT;
-            emulation->Machine.State   = IO_STATE;
-
-            iotask(emulation);
-
-            emulation->Machine.State   = EXECUTION_STATE;
-
-            return (RETURN_OK);
-        }
-
-        case TRAP_SCAN:
-        {
-            emulation->Machine.IO.Type = INPUT;
-            emulation->Machine.State   = IO_STATE;
-
-            iotask(emulation);
-
-            emulation->Machine.State   = EXECUTION_STATE;
-
-            return (RETURN_OK);
-        }
-
-        case TRAP_SLEEP:
-        {
-            u32 time, mult;
-
-            emulation->Machine.State = SLEEP_STATE;
-
-            time = read_datareg(0);
-            mult = read_datareg(1);
-
-            if (mult == 0) mult = 1;
-
-            if (time != 0)
-                while (mult--)
-                    usleep(time);
-
-            emulation->Machine.State = EXECUTION_STATE;
-
-            return (RETURN_OK);
-        }
-
-        default:
-        {
-            emulation->Machine.State   = TRAP_STATE;
-
-            sprintf(emulation->Machine.Exception.trap_cause,
-                    "Raised trap exception: Code: %d, Mnemonic: %s",
-                    0x20 + vector, trap_code_toString(0x20 + vector));
-        }
+        emulation->Machine.State = IO_STATE;
+        iotask(emulation);
+        return (RETURN_OK);
+    }
+    else
+    {
+        emulation->Machine.State = TRAP_STATE;
+        sprintf(emulation->Machine.Exception.trap_cause,
+                "Raised trap exception: Code: %d, Mnemonic: %s",
+                0x20 + vector, trap_code_toString(0x20 + vector));
     }
 
     return (RETURN_ERR);
@@ -1591,7 +1547,7 @@ u32 DIVU(void)
 
     int remainder = (int)(*dVal % *sVal) & 0xFFFF;
 
-    write_datareg(*dst, remainder << 16, NULL);
+    write_datareg(*dst, remainder, NULL);
     write_datareg(*dst, _val,      &size);
 
     SET_SRFLAGS(divu, LONG, 0, 0, _val);
@@ -1642,10 +1598,9 @@ u32 DIVS(void)
 
         return (RETURN_ERR);
     }
-
     int remainder = (int)(signed_dVal % signed_sVal) & 0xFFFF;
 
-    write_datareg(*dst, remainder << 16, NULL);
+    write_datareg(*dst, remainder, NULL);
     write_datareg(*dst, _val,      &size);
 
     SET_SRFLAGS(divs, LONG, 0, 0, _val);
@@ -1690,7 +1645,7 @@ u32 OR(void)
         if (*mode == ADDRESSPostIncr) incr_addr_reg(*dst, *size);
     }
 
-    SET_SRFLAGS(or, *size, 0, 0, _val);
+    SET_SRFLAGS(_or, *size, 0, 0, _val);
 
     SHOULD_INCR_PC(*size, *mode); // for IMMEDIATE mode
 
@@ -1716,39 +1671,19 @@ u32 SUBA(void)
     else
         size = WORD;
 
-    if ((code & ADDRMODE_MASK) == IMMEDIATE)
-    {
-        opsize tmpsize = size;
-        if (tmpsize == BYTE) tmpsize = WORD;
+    u32 src_val;
+    READ_EFFECTIVE_ADDRESS(src_val, src_reg, size, mode, NORMAL);
 
-        u32 ram_ptr = emulation->Machine.cpu->pc + WORD_SPAN;
+    u32 dst_val = read_addrreg(dst_reg);
 
-        u32 src_val = read_ram(&ram_ptr, &tmpsize);
-        u32 dst_val = read_addrreg(dst_reg);
+    if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
 
-        s32 signSRC;
-        SIGN_EXTENDED(signSRC, src_val, size);
+    s32 signSRC;
+    SIGN_EXTENDED(signSRC, src_val, size);
 
-        u32 result  = (u32)(dst_val - signSRC);
-        write_addrreg(dst_reg, result, NULL);
+    u32 result  = (u32)(dst_val - signSRC);
+    write_addrreg(dst_reg, result, NULL);
 
-        INCR_PC(size_to_span(tmpsize));
-    }
-    else
-    {
-        u32 src_val;
-        READ_EFFECTIVE_ADDRESS(src_val, src_reg, size, mode, NORMAL);
-
-        u32 dst_val = read_addrreg(dst_reg);
-
-        if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
-
-        s32 signSRC;
-        SIGN_EXTENDED(signSRC, src_val, size);
-
-        u32 result  = (u32)(dst_val - signSRC);
-        write_addrreg(dst_reg, result, NULL);
-    }
 
     return (RETURN_OK);
 }
@@ -1927,7 +1862,7 @@ u32 EOR(void)
 
     if (*mode == ADDRESSPostIncr) incr_addr_reg(*dst, *size);
 
-    SET_SRFLAGS(or, *size, 0, 0, _val);
+    SET_SRFLAGS(_or, *size, 0, 0, _val);
 
     SHOULD_INCR_PC(*size, *mode); // for IMMEDIATE mode
 
@@ -1976,7 +1911,7 @@ u32 CMP(void)
 
     s32 result  = (signDST - signSRC);
 
-    SET_SRFLAGS(cmp, size, (u32) signSRC, (u32) signDST, (u32) result);
+    SET_SRFLAGS(_cmp, size, (u32) signSRC, (u32) signDST, (u32) result);
 
     return (RETURN_OK);
 }
@@ -2119,7 +2054,7 @@ u32 AND(void)
         if (*mode == ADDRESSPostIncr) incr_addr_reg(*dst, *size);
     }
 
-    SET_SRFLAGS(or, *size, 0, 0, _val);
+    SET_SRFLAGS(_or, *size, 0, 0, _val);
 
     SHOULD_INCR_PC(*size, *mode); // for IMMEDIATE mode
 
@@ -2138,45 +2073,25 @@ u32 ADDA(void)
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
     ADDRMode   mode    = (code & 0b0000000000111000) >> 3;
-    opsize     size;
+    opsize         size;
 
     if (((code & 0b0000000100000000) >> 8) == 1)
         size = LONG;
     else
         size = WORD;
 
-    if ((code & ADDRMODE_MASK) == IMMEDIATE)
-    {
-        opsize tmpsize = size;
-        if (tmpsize == BYTE) tmpsize = WORD;
+    u32 src_val;
+    READ_EFFECTIVE_ADDRESS(src_val, src_reg, size, mode, NORMAL);
+    u32 dst_val = read_addrreg(dst_reg);
 
-        u32 ram_ptr = emulation->Machine.cpu->pc + WORD_SPAN;
+    if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
 
-        u32 src_val = read_ram(&ram_ptr, &tmpsize);
-        u32 dst_val = read_addrreg(dst_reg);
+    s32 signSRC;
+    SIGN_EXTENDED(signSRC, src_val, size);
 
-        s32 signSRC;
-        SIGN_EXTENDED(signSRC, src_val, size);
+    u32 result  = (u32)(dst_val + signSRC);
+    write_addrreg(dst_reg, result, NULL);
 
-        u32 result  = (u32)(dst_val + signSRC);
-        write_addrreg(dst_reg, result, NULL);
-
-        INCR_PC(size_to_span(tmpsize));
-    }
-    else
-    {
-        u32 src_val;
-        READ_EFFECTIVE_ADDRESS(src_val, src_reg, size, mode, NORMAL);
-        u32 dst_val = read_addrreg(dst_reg);
-
-        if (mode == ADDRESSPostIncr) incr_addr_reg(src_reg, size);
-
-        s32 signSRC;
-        SIGN_EXTENDED(signSRC, src_val, size);
-
-        u32 result  = (u32)(dst_val + signSRC);
-        write_addrreg(dst_reg, result, NULL);
-    }
 
     return (RETURN_OK);
 }
@@ -2745,7 +2660,7 @@ m68k_opcode* new_opcode_t(const opcode bitcode, const bitmask mask, char *mnemon
 
 }
 
-void init_opcodes(struct EmulationMachine* restrict em)
+void init_opcodes(struct EmulationMachine *em)
 {
     if (!codemap)
     {
@@ -3049,6 +2964,8 @@ void destroy_codes()
                     }
 
                     free(reference->instances);
+
+                    reference->instances = NULL;
                 }
 
             }
@@ -3056,6 +2973,7 @@ void destroy_codes()
         }
 
         free(codemap);
+
     }
 
     codemap = NULL;
@@ -3090,11 +3008,13 @@ m68k_opcode* get_opcode_t()
  * RUNNER
  *
  */
-void preset_hander(struct EmulationMachine* restrict em) { emulation = em; }
+void preset_hander(struct EmulationMachine *em) { emulation = em; }
 
 
 u32 run_opcode()
 {
+    emulation->Machine.State = EXECUTION_STATE;
+
     m68k_opcode* const tmp = get_opcode_t();
 
     if (tmp == NULL)
@@ -3104,12 +3024,12 @@ u32 run_opcode()
         return (RETURN_ERR);
     }
 
-    machine_waiter(emulation);
-
     const u32 res = tmp->handler();
 
     if (res != RETURN_OK_PC_NO_INCR)
         INCR_PC(WORD_SPAN);
+
+    emit_dump(emulation);
 
     return res;
 }

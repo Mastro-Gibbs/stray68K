@@ -145,13 +145,13 @@ char* Jchrono(u64 usec)
 
 }
 
-char* Jop(char* const restrict mnem, u32 code_promoted)
+char* Jop(char *mnem, u32 code_promoted)
 {
     char *res;
     char buf[100];
     u16 code = (u16) code_promoted;
 
-    sprintf(buf, "{\"OP\":{\"MENMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
+    sprintf(buf, "{\"OP\":{\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
 
     ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
@@ -164,7 +164,7 @@ char* Jop(char* const restrict mnem, u32 code_promoted)
 }
 
 
-char* Jexception(char* restrict cause, u32 type)
+char* Jexception(char* cause, u32 type)
 {
     char *res;
     char buf[300];
@@ -191,6 +191,10 @@ char* Jexception(char* restrict cause, u32 type)
     else if (type == MERR_EXC_TYPE)
     {
         sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CAUSE\":\"%s\"}}", "TYPE", "EMULATOR-ERROR", cause);
+    }
+    else if (type == 3)
+    {
+        sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CAUSE\":\"%s\"}}", "TYPE", "ASSEMBLER ERROR", cause);
     }
 
     size_t size = strlen(buf) + 1;
@@ -238,7 +242,7 @@ char* Jexception(char* restrict cause, u32 type)
                                                     iostr[j] = '\0'; \
                                                 } while(0);
 
-char* Jio(char* const restrict io, u32 type)
+char* Jio(char* io, u32 type)
 {
     char *res;
     ssize_t size = strlen(io) + 1;
@@ -268,7 +272,7 @@ char* Jio(char* const restrict io, u32 type)
     return res;
 }
 
-char* Jconcat(char* dst, char* const restrict src)
+char* Jconcat(char *dst, char *src)
 {
     const size_t dsts = strlen(dst);
     const size_t srcs = strlen(src);

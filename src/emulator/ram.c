@@ -6,16 +6,16 @@ void __show_ram__ (u32 _start, u32 _end, u32 _ptr, char *pcptr_color);
 void __show_ram_stack__ (u32 _top, u32 _bottom);
 
 
-struct EmulationMachine *emulator;
+struct EmulationMachine *emulatorm;
 m68k_ram *ram = NULL;
 
 
 
-m68k_ram* init_ram(struct EmulationMachine* restrict em)
+m68k_ram* init_ram(struct EmulationMachine *em)
 {
     if (!ram)
     {
-        emulator = em;
+        emulatorm = em;
 
         ram = malloc(sizeof (*ram));
 
@@ -68,8 +68,12 @@ void destroy_ram(void)
     {
         if (ram->ram)
             free(ram->ram);
+        ram->ram = NULL;
+
 
         free(ram);
+
+        ram = NULL;
     }
 }
 
@@ -82,9 +86,9 @@ void check_addr(u32 pointer, u32 iospan)
         sprintf(panic_str, "Seg-fault: illegal memory address, address: 0x%X, limit: 0x%X",
                  pointer + iospan, ram->size);
 
-        emulator->Machine.State = PANIC_STATE;
+        emulatorm->Machine.State = PANIC_STATE;
 
-        PANIC(panic_str);
+        PANIC(emulatorm, panic_str);
 
         char* buf = Jexception(panic_str, 2);
         printf("%s\n", buf);
@@ -117,6 +121,32 @@ u32 read_long(const u32 pointer)
     return (u32)((ram->ram[pointer] << 24) + (ram->ram[pointer + 1] << 16) + (ram->ram[pointer + 2] << 8) + ram->ram[pointer + 3]);
 }
 
+
+unsigned char* read_chunk(const unsigned int pointer, const unsigned int end)
+{
+    check_addr(pointer, end);
+
+    u8 *read = malloc(sizeof (u8) * end+1);
+
+    for (u32 iter = 0; iter < end; iter++)
+        read[iter] = ram->ram[pointer + iter];
+
+    read[end] = '\0';
+
+    return read;
+}
+
+unsigned char* read_stack(const unsigned int pointer)
+{
+    u8 *read = malloc(sizeof (u8) * 41);
+
+    for (u32 iter = 40; iter > 0; iter--)
+        read[40 - iter] = ram->ram[(pointer+4) - iter];
+
+    read[40] = '\0';
+
+    return read;
+}
 
 
 /* MEMORY WRITE */
@@ -345,7 +375,6 @@ void __show_ram_stack__ (u32 _top, u32 _bottom)
 
     printf("\n\n");
 }
-
 
 
 

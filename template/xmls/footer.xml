@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF8"?>
+<messages>
+
+    <message id="footer-msg">
+        <div class="footer">
+            <div class="footer-text">
+                <span>
+                    This project developed by 
+                    <a href="https://github.com/Mastro-Gibbs/stray68K" target="_blank" rel="noreferrer">
+                        Stefano Fattore
+                    </a>
+                    <br></br>
+                    deals with virtualizing and emulating a Motorola 68000 SoC.
+                    <br></br>
+                    <br></br>
+                    By programming in its assembly you will be able to emulate the behavior of the processor.
+                    <br></br>
+                    <br></br>
+                    Distributed by the 
+                    <a href="https://www.univaq.it/" target="_blank" rel="noreferrer">
+                        University of L'Aquila
+                    </a>
+                    .
+                </span>
+            </div>
+        </div>
+    </message>
+
+</messages>

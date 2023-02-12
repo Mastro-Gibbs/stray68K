@@ -4,13 +4,13 @@
 #include <string.h>
 
 
-u32 __exec__(struct EmulationMachine* restrict em);
+u32 __exec__(struct EmulationMachine *em);
 void __show__(void);
 
 
 m68k_cpu *cpu = NULL;
 
-m68k_cpu* init_cpu(struct EmulationMachine* restrict em)
+m68k_cpu* init_cpu(struct EmulationMachine *em)
 {
     if (!cpu)
     {
@@ -23,7 +23,7 @@ m68k_cpu* init_cpu(struct EmulationMachine* restrict em)
             return (NULL);
         }
 
-        reset_cpu(em);
+        reset_cpu();
     }
 
     return (cpu);
@@ -31,7 +31,7 @@ m68k_cpu* init_cpu(struct EmulationMachine* restrict em)
 
 m68k_cpu* get_cpu(void) { return (cpu); }
 
-void reset_cpu(struct EmulationMachine* restrict em)
+void reset_cpu(void)
 {
     if (cpu)
     {
@@ -43,8 +43,8 @@ void reset_cpu(struct EmulationMachine* restrict em)
             cpu->addr_r[iter] = 0x00000000;
 
         cpu->pc  = 0x00000000;
-        cpu->usp = 0x00000000;
-        cpu->ssp = em->Machine.RuntimeData.RAM_SIZE + 1;
+        cpu->usp = 0x00FF0000;
+        cpu->ssp = 0x01000000;
         cpu->sr  = 0x2000;
 
         cpu->exec = __exec__;
@@ -62,7 +62,7 @@ void destroy_cpu(void)
 }
 
 
-u32 __exec__(struct EmulationMachine* restrict em)
+u32 __exec__(struct EmulationMachine *em)
 {
     u32 istruction_ptr = em->Machine.cpu->pc;
 
@@ -263,7 +263,7 @@ u32 read_datareg(const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_datareg(const u32 reg, const u32 val, opsize* const restrict size)
+void  write_datareg(const u32 reg, const u32 val, opsize* const size)
 {
     opsize static_size;
 
@@ -312,7 +312,7 @@ u32 read_addrreg(const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_addrreg(const u32 reg, const u32 val, opsize* const restrict size)
+void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
 {
     if (reg > 7) return;
 

@@ -8,10 +8,10 @@
 #include "ram.h"
 
 
-void init_opcodes(struct EmulationMachine* restrict em);
+void init_opcodes(struct EmulationMachine *em);
 void destroy_codes(void);
 
-void preset_hander(struct EmulationMachine* restrict em);
+void preset_hander(struct EmulationMachine *em);
 u32  run_opcode(void);
 
 
@@ -179,11 +179,11 @@ u32 ROxx(void);
 #define moveq 73549472
 #define divu  2098692
 #define divs  2098690
-#define or    2531
+#define _or   2531
 #define eor   68840
 #define mulu  2378033
 #define muls  2378031
-#define and   64951
+#define _and  64951
 #define subi  2556457
 #define subq  2556465
 #define sub   82464
@@ -194,14 +194,14 @@ u32 ROxx(void);
 #define addx  2003959
 #define cmpi  2072547
 #define cmpm  2072551
-#define cmp   66854
+#define _cmp   66854
 #define clr   66825
 #define cmpa  2072539
 #define negx  2392296
 #define neg   77168
-#define not   77491
+#define _not  77491
 #define ext   69121
-#define swap  2558355
+#define _swap  2558355
 #define tst   83381
 #define asl   65114
 #define asr   65120

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF8"?>
+<messages>
+
+    <message id="memory-msg">
+        <div class="container2-col">
+            <div class="containeritem-widget offsets">
+                <div class="div-cnt-right">
+                    ${from}
+                    ${go}
+                </div>
+            </div>
+            <div class="">
+                ${addresses}
+            </div>
+            <div class="">
+                ${bitfield}
+            </div>
+        </div>
+    </message>
+
+</messages>

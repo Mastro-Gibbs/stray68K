@@ -49,7 +49,7 @@ int lastIndexOf(const char* s, char target)
 }
 
 
-int assemble(int argc, char **argv)
+int assemble(const char* filepath)
 {
 	int exit_code = EXIT_SUCCESS;
 
@@ -60,72 +60,16 @@ int assemble(int argc, char **argv)
 	cc_bool case_insensitive;
 	cc_bool debug;
 	cc_bool equ_set_descope_local_labels;
-    cc_bool allocated;
-	int i;
 
 	input_file_path = NULL;
 	output_file_path = NULL;
 	listing_file_path = NULL;
 	symbol_file_path = NULL;
-	case_insensitive = cc_false;
+	case_insensitive = cc_true;
 	debug = cc_false;
 	equ_set_descope_local_labels = cc_false;
-    allocated = cc_false;
 
-    input_file_path = argv[1];
-
-    for (i = 2; i < argc; ++i)
-	{
-		if (argv[i][0] == '-')
-		{
-			switch (argv[i][1])
-			{
-				case 'o':
-                    if ((i+1) < argc && argv[i + 1][0] != '-')
-					{
-						++i;
-						output_file_path = argv[i];
-					}
-                    else ASSEMBLER_ERROR("Pass file path for output file option.");
-
-					continue;
-
-				case 'l':
-                    if ((i+1) < argc && argv[i + 1][0] != '-')
-					{
-						++i;
-						listing_file_path = argv[i];
-                    }
-                    else ASSEMBLER_ERROR("Pass file path for listing file option.");
-
-					continue;
-
-				case 's':
-                    if ((i+1) < argc && argv[i + 1][0] != '-')
-					{
-						++i;
-						symbol_file_path = argv[i];
-					}
-                    else ASSEMBLER_ERROR("Pass file path for symbol file option.");
-
-					continue;
-
-				case 'c':
-					case_insensitive = cc_true;
-					continue;
-
-				case 'b':
-					debug = cc_true;
-					continue;
-
-				case 'd':
-					equ_set_descope_local_labels = cc_true;
-					continue;
-			}
-		}
-
-        FASSEMBLER_ERROR("Error: Unrecognised option '%s'.", argv[i]);
-	}
+    input_file_path = filepath;
 
     if (exit_code != EXIT_FAILURE)
 	{
@@ -137,7 +81,6 @@ int assemble(int argc, char **argv)
             int lio = lastIndexOf(input_file_path, '.');
             output_file_path[lio+1] = 'B';
 
-            allocated = cc_true;
         }
         else if (!check_file_format(output_file_path, "B68"))
             FASSEMBLER_ERROR("Invalid file format in output file %s.", output_file_path);
@@ -211,7 +154,7 @@ int assemble(int argc, char **argv)
                     {
                         char ch;
                         while(fread(&ch, 1, 1, output_file_tmp) != 0)
-                              fputc(ch, output_file);
+                                fputc(ch, output_file);
 
                         fclose(output_file);
                     }
@@ -230,10 +173,7 @@ int assemble(int argc, char **argv)
 
             fclose(input_file);
         }
-
-        if (allocated)
-            free(output_file_path);
     }
 
-	return exit_code;
+    return !exit_code;
 }
