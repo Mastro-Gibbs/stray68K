@@ -317,7 +317,7 @@ void _io_dumps(struct EmulationMachine* restrict em)
                                     } while(0);
 
 #define EVAL_SCAN_SEQUENCE(iostr)   do { \
-                                        u32 rptr, index, value, length; \
+                                        u32 rptr, index, value, length, d0; \
                                         char c; \
                                         \
                                         rptr = read_addrreg(0); \
@@ -334,6 +334,21 @@ void _io_dumps(struct EmulationMachine* restrict em)
                                                 u32 time = (u32) ((tv.tv_sec * (unsigned long)1000000 + tv.tv_usec) & 0x00000000FFFFFFFF); \
                                                 write_datareg(index, time, NULL); \
                                                 rptr += 2; \
+                                            }\
+                                            else if (read_byte(rptr) == 's' || read_byte(rptr) == 'S') {  \
+                                                index = read_byte(rptr+1); \
+                                                if (index == 0x00) return; \
+                                                index = index - 0x30;      \
+                                                if (index > 7) continue;   \
+                                                d0 = read_datareg(0);      \
+                                                char _string[d0-1];        \
+                                                s32 sf_r;                  \
+                                                sf_r = scanf(" %[^\n]", _string);     \
+                                                if (sf_r == 0 || sf_r == EOF)  continue; \
+                                                u32 rptr2 = read_addrreg(index); \
+                                                u32 i = 0;                 \
+                                                while (i < d0) { write_byte(rptr2++, _string[i]); i++; } \
+                                                write_byte(rptr2, 0x00);    \
                                             }\
                                             else { \
                                                 if (iostr == NULL) {\
