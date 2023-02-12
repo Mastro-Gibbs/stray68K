@@ -27,6 +27,8 @@ class Editor : public WTemplate
 
         WString text_();
 
+        void disable(bool status);
+
     private:
         WTextArea* editor_;
         WTextArea* line_counter;

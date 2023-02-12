@@ -15,6 +15,9 @@
 using namespace Wt;
 using namespace std;
 
+extern "C" {
+    unsigned char* read_chunk(const unsigned int pointer, const unsigned int end);
+}
 
 class MemoryView : public WTemplate
 {
@@ -23,6 +26,10 @@ class MemoryView : public WTemplate
 
         void setUpMemory();
 
+        void update();
+
+        void enableFetch(bool status);
+
     private:
         WLabel*      currOffSet;
         WLineEdit*   from;
@@ -30,6 +37,10 @@ class MemoryView : public WTemplate
 
         WTextArea* addresses;
         WTextArea* bitfield;
+
+        unsigned int offset_;
+
+        void fetchBlock();
 
 };
 

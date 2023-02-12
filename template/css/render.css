@@ -25,15 +25,15 @@
 }
 
 .button-box-item2 {
-    width: 100px;
-    height: 38px;
-    font-size: 18px;
+    width: 80px;
+    height: 30px;
+    font-size: medium;
     background-color: #5b5b5b;
     color: rgb(234, 224, 148);
     display: inline-block;
     border: none;
     border-radius: 10px;
-    margin-left: 15px;
+    margin-left: 5px;
 }
 
 .button-box-item2:hover {
@@ -44,15 +44,15 @@
 }
 
 .button-box-item2-selected {
+    font-size: medium;
     background-color: #171717;
-    width: 100px;
-    height: 38px;
-    font-size: 18px;
+    width: 80px;
+    height: 32px;
     color: rgb(234, 224, 148);
     display: inline-block;
     border: none;
     border-radius: 10px;
-    margin-left: 15px;
+    margin-left: 10px;
 }
 
 .button-box-item2:disabled {
@@ -86,7 +86,7 @@
 
 .float-left {
     float: left;
-    width: 50%;
+    width: 60%;
     margin-left: 40px;
 }
 
@@ -95,6 +95,6 @@
     justify-content: right;
     align-items: center;
     float: right;
-    width: 50%;
+    width: 40%;
     padding-right: 25px;
 }

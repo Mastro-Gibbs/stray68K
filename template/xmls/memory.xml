@@ -2,12 +2,18 @@
 <messages>
 
     <message id="memory-msg">
-        <div class="container2-col">
-            <div class="containeritem-widget offsets">
+        <div class="memory-container2-col">
+            <div class="containeritem-widget fetch">
                 <div class="div-cnt-right">
                     ${from}
                     ${go}
                 </div>
+            </div>
+            <div class="trick">
+                <span></span>
+            </div>
+            <div class="offsets">
+                <span>00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F</span>
             </div>
             <div class="">
                 ${addresses}

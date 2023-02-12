@@ -82,3 +82,8 @@ WString Editor::text_()
 {
     return editor_->text();
 }
+
+void Editor::disable(bool status)
+{
+    editor_->setDisabled(status);
+}

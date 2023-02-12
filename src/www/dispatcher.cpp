@@ -183,6 +183,7 @@ void Dispatcher::do_next()
     {
         reg_rend_->update(machine_status());
         console_->push_stdout(machine_status());
+        memory_->update();
     }
 }
 
@@ -195,10 +196,15 @@ void Dispatcher::do_stop()
     run->setDisabled(false);
     debug->setDisabled(false);
 
+    editor_->disable(false);
+
+    memory_->enableFetch(false);
+
     end_emulator();
 
     reg_rend_->update(machine_status());
     console_->push_stdout(machine_status());
+    memory_->update();
 }
 
 void Dispatcher::do_terminate()
@@ -227,14 +233,16 @@ void Dispatcher::doTerminate(WApplication *app)
         }
     } 
 
-    end_emulator();
-
     WApplication::UpdateLock uiLock(app);
     
     if (uiLock) 
     {
         reg_rend_->update(machine_status());
         console_->push_stdout(machine_status());
+        memory_->update();
+        memory_->enableFetch(false);
+
+        end_emulator();
 
         next_istr->setDisabled(true);
         terminate->setDisabled(true);
@@ -242,11 +250,16 @@ void Dispatcher::doTerminate(WApplication *app)
         run->setDisabled(false);
         debug->setDisabled(false);
 
+        editor_->disable(false);
+
         app->triggerUpdate();
 
         app->enableUpdates(false);
     } 
-    else return;
+    else{
+        end_emulator();
+        return;
+    } 
 }
 
 void Dispatcher::compile_src()
@@ -312,6 +325,8 @@ void Dispatcher::run_src()
     terminate->setDisabled(true);
     stop->setDisabled(true);
 
+    memory_->enableFetch(true);
+
     if (edata.valid())
     {      
         app->enableUpdates(true);
@@ -337,21 +352,29 @@ void Dispatcher::doRun(WApplication *app)
             app->triggerUpdate();
         }
     }   
-    end_emulator();
-
+    
     WApplication::UpdateLock uiLock(app);
     
     if (uiLock) 
     {
         reg_rend_->update(machine_status());
-
         console_->push_stdout(machine_status());
+        memory_->update();
+        memory_->enableFetch(false);
+
+        end_emulator();
+
+        editor_->disable(false);
 
         app->triggerUpdate();
 
         app->enableUpdates(false);
     } 
-    else return;
+    else 
+    {
+        end_emulator();
+        return;
+    }
 }
 
 void Dispatcher::debug_src()
@@ -359,9 +382,13 @@ void Dispatcher::debug_src()
     WApplication *app = WApplication::instance();
     reg_rend_->clear();
 
+    editor_->disable(true);
+
     next_istr->setDisabled(false);
     terminate->setDisabled(false);
     stop->setDisabled(false);
+
+    memory_->enableFetch(true);
 
     run->setDisabled(true);
     debug->setDisabled(true);

@@ -1,5 +1,6 @@
 #include "memory.hpp"
 
+#include <algorithm>
 
 MemoryView::MemoryView()
     : bitfield(nullptr),
@@ -7,6 +8,7 @@ MemoryView::MemoryView()
       go(nullptr),
       currOffSet(nullptr),
       from(nullptr),
+      offset_(0),
       WTemplate(tr("memory-msg"))
 {
 
@@ -41,8 +43,109 @@ void MemoryView::setUpMemory()
     addresses->setText("");
     addresses->setReadOnly(true);
 
-    go->clicked().connect(this, [=]{
-        string s = from->text().toUTF8();
-        addresses->setText(s);
-    });
+    go->clicked().connect(this, &MemoryView::fetchBlock);
+    enableFetch(false);
+}
+
+string format32BitReg(string s)
+{
+    int len = s.length();
+    int padding = 8 - len;
+    for (int i = 0; i <= padding; ++i) {
+        s.insert(0, "0");
+    }
+
+    return string(s);
+}
+
+string format1ByteReg(string s)
+{
+    if (s.length() < 2) 
+        s.insert(0, "0");
+
+    return string(s);
+}
+
+
+void MemoryView::fetchBlock()
+{
+    addresses->setText("");
+    bitfield->setText("");
+
+    string _s = from->text().toUTF8();
+    
+    offset_ = stoi(_s, nullptr, 16);
+
+    for (size_t i = 0, j = 0; i < 20; i++, j += 16)
+    {
+        stringstream ss;
+        ss << hex << (offset_ + j) << "\n";
+        addresses->setText(addresses->text() + format32BitReg(ss.str()));
+    }
+
+    const unsigned char* block = read_chunk(offset_, offset_ + (16*20));
+
+    for (size_t i = 0, j = 0; i < (16*20); i++, j++)
+    {
+        stringstream ss;
+        ss << hex << ((unsigned int) block[i]);
+
+        string s = ss.str();
+        transform(s.begin(), s.end(), s.begin(), ::toupper);
+        
+        if (j == 16) 
+        {
+            bitfield->setText(bitfield->text() + "\n");
+            j = 0;
+        }
+
+        bitfield->setText(bitfield->text() + format1ByteReg(s) + " ");
+    }
+}
+
+
+void MemoryView::update()
+{
+    if (offset_ != 0)
+    {
+        addresses->setText("");
+        bitfield->setText("");
+
+        for (size_t i = 0, j = 0; i < 20; i++, j += 16)
+        {
+            stringstream ss;
+            ss << hex << (offset_ + j) << "\n";
+            addresses->setText(addresses->text() + format32BitReg(ss.str()));
+        }
+
+        const unsigned char* block = read_chunk(offset_, offset_ + (16*20));
+
+        for (size_t i = 0, j = 0; i < (16*20); i++, j++)
+        {
+            stringstream ss;
+            ss << hex << ((unsigned int) block[i]);
+
+            string s = ss.str();
+            transform(s.begin(), s.end(), s.begin(), ::toupper);
+            
+            if (j == 16) 
+            {
+                bitfield->setText(bitfield->text() + "\n");
+                j = 0;
+            }
+
+            bitfield->setText(bitfield->text() + format1ByteReg(s) + " ");
+        }
+    }
+}
+
+
+void MemoryView::enableFetch(bool status)
+{
+    go->setDisabled(!status);
+    
+    if (status)
+        go->setStyleClass("fetch-btn");
+    else
+        go->setStyleClass("fetch-btn-disabled");
 }
