@@ -61,6 +61,14 @@ EXIT:
 	LEA		byebye,A0
 	TRAP	#15
 
+	LEA		scan_str,a0
+	LEA		entered,a1
+	MOVE.L	#50,d0
+	TRAP	#14
+
+	LEA		entered,a0
+	TRAP	#15
+
 	; HALT
 
 ; simple str for printer
@@ -69,6 +77,9 @@ welcome		DC.B	'Insert two integers\n',0
 ; ftms for scannner
 scan:		DC.B	'%LD2%LD3',0
 time:   	DC.B    '%T4',0
+scan_str:   DC.B	'%S1',0
+
+entered:	DS.B	50
 
 ; ftms for printer
 Sprint:     DC.B    '\nSigned values:\n-From SP -> %L1\n-First int entered -> %L2\n-Second int entered -> %L3\n',0
