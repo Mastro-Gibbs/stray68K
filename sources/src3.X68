@@ -14,19 +14,19 @@
     lea    cont,a0
 
     lea    arr,a1
-    move.b (a0)+,d0
+    move.b (a1)+,d0
     trap   #15
 
-    move.b (a0)+,d0
+    move.b (a1)+,d0
     trap   #15 
 
-    move.b (a0)+,d0
+    move.b (a1)+,d0
     trap   #15 
 
-    move.b (a0)+,d0
+    move.b (a1)+,d0
     trap   #15 
 
-    move.b (a0),d0
+    move.b (a1),d0
     trap   #15     
 
     lea    nl,a0
@@ -36,7 +36,7 @@ arr:     ds.b     5
 
 
 head:    dc.b     "array: ",0    
-cont:    dc.b     "%bd0 ",0
+cont:    dc.b     "%ld0 ",0
 nl:      dc.b     "\n",0
 
 

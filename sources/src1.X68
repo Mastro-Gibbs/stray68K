@@ -36,7 +36,7 @@ arr:     ds.b     5
 
 
 head:    dc.b     "array: ",0    
-cont:    dc.b     "%bd0 ",0
+cont:    dc.b     "%ld0",0
 nl:      dc.b     "\n",0
 
 

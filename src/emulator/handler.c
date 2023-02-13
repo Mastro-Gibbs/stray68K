@@ -546,16 +546,20 @@ u32 MOVE(void)
     if ((code & ADDRMODE_MASK) == IMMEDIATE) // move.s #<val>,Rd
     {
         opsize tmpsize = size;
-        if (tmpsize == BYTE) tmpsize = WORD; //byte can't be wrote in ram
+        opsize ramrsize = tmpsize == BYTE ? WORD : tmpsize;    
 
         u32 ram_ptr = emulation->Machine.cpu->pc + WORD_SPAN;
-        rVal = read_ram(&ram_ptr, &tmpsize);
+        rVal = read_ram(&ram_ptr, &ramrsize);
+
+        if (dst_mode == ADDRESSPreDecr)  decr_addr_reg(dst_reg, size);
 
         WRITE_EFFECTIVE_ADDRESS(dst_reg, rVal, tmpsize, dst_mode);
 
+        if (dst_mode == ADDRESSPostIncr) incr_addr_reg(dst_reg, size);
+
         SET_SRFLAGS(move_op, size, 0, 0, rVal);
 
-        INCR_PC(size_to_span(tmpsize));
+        INCR_PC(size_to_span(tmpsize == BYTE ? WORD : tmpsize));
     }
     else                                    // everything else
     {

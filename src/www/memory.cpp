@@ -95,12 +95,15 @@ void MemoryView::fetchBlock()
         
         if (j == 16) 
         {
-            bitfield->setText(bitfield->text() + "\n");
+            renderChunck(block, i-16);
+
             j = 0;
         }
 
         bitfield->setText(bitfield->text() + format1ByteReg(s) + " ");
     }
+
+    renderChunck(block, 15*20);
 }
 
 
@@ -130,12 +133,15 @@ void MemoryView::update()
             
             if (j == 16) 
             {
-                bitfield->setText(bitfield->text() + "\n");
+                renderChunck(block, i-16);
+
                 j = 0;
             }
 
             bitfield->setText(bitfield->text() + format1ByteReg(s) + " ");
         }
+
+        renderChunck(block, 15*20);
     }
 }
 
@@ -148,4 +154,22 @@ void MemoryView::enableFetch(bool status)
         go->setStyleClass("fetch-btn");
     else
         go->setStyleClass("fetch-btn-disabled");
+}
+
+
+void MemoryView::renderChunck(const unsigned char* block, unsigned int chunk_begin)
+{
+    bitfield->setText(bitfield->text() + "  ");
+
+    char c[17];
+
+    for (size_t _i = chunk_begin, _j = 0; _j < 16; ++_i, ++_j )
+        if (block[_i] < 0x20 || block[_i] > 0x7E)
+            c[_j] = '-';
+        else
+            c[_j] = (char) block[_i];
+    
+    c[16] = '\0';
+
+    bitfield->setText(bitfield->text() + string(c) + "\n");
 }

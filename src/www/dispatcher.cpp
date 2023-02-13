@@ -200,11 +200,12 @@ void Dispatcher::do_stop()
 
     memory_->enableFetch(false);
 
+    memory_->update();
+
     end_emulator();
 
     reg_rend_->update(machine_status());
     console_->push_stdout(machine_status());
-    memory_->update();
 }
 
 void Dispatcher::do_terminate()

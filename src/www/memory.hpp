@@ -42,6 +42,8 @@ class MemoryView : public WTemplate
 
         void fetchBlock();
 
+        void renderChunck(const unsigned char* block, unsigned int chunk_begin);
+
 };
 
 
