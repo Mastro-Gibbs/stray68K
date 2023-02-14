@@ -177,13 +177,35 @@ void Dispatcher::show_console()
 
 void Dispatcher::do_next()
 {
-    if (!emulate())
-        do_stop();
-    else
+    WApplication *app = WApplication::instance();
+
+    app->enableUpdates(true);
+        
+    if (nextThread_.joinable())
+        nextThread_.join();
+        
+    nextThread_ = std::thread(std::bind(&Dispatcher::doNext, this, app));
+}
+
+
+void Dispatcher::doNext(WApplication* app)
+{
+    WApplication::UpdateLock uiLock(app);
+    
+    if (uiLock) 
     {
-        reg_rend_->update(machine_status());
-        console_->push_stdout(machine_status());
-        memory_->update();
+        if (!emulate())
+            do_stop();
+        else
+        {
+            reg_rend_->update(machine_status());
+            console_->push_stdout(machine_status());
+            memory_->update();
+        }
+
+        app->triggerUpdate();
+
+        app->enableUpdates(false);
     }
 }
 
@@ -206,6 +228,7 @@ void Dispatcher::do_stop()
 
     reg_rend_->update(machine_status());
     console_->push_stdout(machine_status());
+    console_->disable(true);
 }
 
 void Dispatcher::do_terminate()
@@ -252,6 +275,7 @@ void Dispatcher::doTerminate(WApplication *app)
         debug->setDisabled(false);
 
         editor_->disable(false);
+        console_->disable(true);
 
         app->triggerUpdate();
 
@@ -283,7 +307,9 @@ void Dispatcher::compile_src()
             file << src;
             file.close();
 
-            string cmd = "> stray68k " + fname;
+            string bname = fname;
+            replace(bname.begin(), bname.end(), 'X', 'B');
+            string cmd = "> stray68k " + fname + " -o " + bname;
 
             console_->insert(cmd + "\n");
 
@@ -296,8 +322,6 @@ void Dispatcher::compile_src()
             }
             else
             {
-                string bname = fname;
-                replace(bname.begin(), bname.end(), 'X', 'B');
                 edata.setBin(bname);
                 edata.setValid(true);
 
@@ -325,8 +349,12 @@ void Dispatcher::run_src()
     next_istr->setDisabled(true);
     terminate->setDisabled(true);
     stop->setDisabled(true);
+    run->setDisabled(true);
+    debug->setDisabled(true);
 
     memory_->enableFetch(true);
+
+    console_->disable(false);
 
     if (edata.valid())
     {      
@@ -341,7 +369,12 @@ void Dispatcher::run_src()
 
 void Dispatcher::doRun(WApplication *app)
 {
+    cout << edata.bin() << endl;
+
     begin_emulator(edata.bin().c_str());
+
+    init_buffer();
+
     while (emulate())
     {
         WApplication::UpdateLock uiLock(app);
@@ -365,7 +398,11 @@ void Dispatcher::doRun(WApplication *app)
 
         end_emulator();
 
+        console_->disable(true);
+
         editor_->disable(false);
+        run->setDisabled(false);
+        debug->setDisabled(false);
 
         app->triggerUpdate();
 
@@ -397,6 +434,10 @@ void Dispatcher::debug_src()
     if (edata.valid())
     {
         begin_emulator(edata.bin().c_str());
+
+        init_buffer();
+
+        console_->disable(false);
     }
 
 }

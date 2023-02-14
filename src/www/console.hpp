@@ -13,6 +13,14 @@
 using namespace Wt;
 using namespace std;
 
+extern "C" {
+    void cwrite(char _c);
+
+    void flush_buffer();
+
+    void init_buffer();
+}
+
 
 class Console : public WTemplate
 {
@@ -27,8 +35,13 @@ class Console : public WTemplate
 
         void clear();
 
+        void disable(bool status);
+
     private:
         WTextArea* out;
+
+        string _map;
+        string _content;
 
 };
 

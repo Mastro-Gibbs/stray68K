@@ -1551,7 +1551,7 @@ u32 DIVU(void)
 
     int remainder = (int)(*dVal % *sVal) & 0xFFFF;
 
-    write_datareg(*dst, remainder, NULL);
+    write_datareg(*dst, remainder << 16, NULL);
     write_datareg(*dst, _val,      &size);
 
     SET_SRFLAGS(divu, LONG, 0, 0, _val);
@@ -1604,7 +1604,7 @@ u32 DIVS(void)
     }
     int remainder = (int)(signed_dVal % signed_sVal) & 0xFFFF;
 
-    write_datareg(*dst, remainder, NULL);
+    write_datareg(*dst, remainder << 16, NULL);
     write_datareg(*dst, _val,      &size);
 
     SET_SRFLAGS(divs, LONG, 0, 0, _val);

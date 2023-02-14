@@ -19,6 +19,8 @@ void Editor::setUpEditor()
     line_counter = bindWidget("row_counter", move(row_c));
     editor_      = bindWidget("editor",      move(editor));
 
+    editor_->setAttributeValue("wrap", "off");
+
     line_counter->setText("1");
     editor_->setText("");
 

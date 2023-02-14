@@ -9,6 +9,25 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+
+typedef struct __buffer__
+{
+    s8  _buffer[4096];
+    u32 _pos;
+    u8  _valid;
+
+} Buffer;
+
+void flush_buffer();
+void init_buffer();
+void cwrite(char _c);
+
+u32   read_int_buffer();
+char* read_str_buffer();
+
+
+
 /*
  * MACRO used to raise a critical trap code.
  *

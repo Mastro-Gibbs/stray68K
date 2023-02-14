@@ -243,6 +243,6 @@ $(OBJECTS_DIR)/register.o: $(WWW_DIR)/register.cpp $(WWW_DIR)/register.hpp
 	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/register.o -c $(WWW_DIR)/register.cpp $(LIBS)
 
 
-deploy:
+deploy: all
 	./$(TARGET) --docroot . --http-address $(HOST) --http-port $(PORT) --resources-dir=template/resources
 	

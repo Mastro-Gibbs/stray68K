@@ -35,6 +35,8 @@ extern "C" {
     const char* machine_status();
 
     int is_last_istr();
+
+    void init_buffer();
 }
 
 typedef struct __emulation_data__ 
@@ -45,9 +47,9 @@ typedef struct __emulation_data__
 
     void init() { _src = ""; _bin = ""; _can = false; }
 
-    string src()   { return _src; }
-    string bin()   { return _bin; }
-    bool   valid() { return _can; }
+    string src()    { return _src; }
+    string bin()    { return _bin; }
+    bool   valid()  { return _can; }
 
     void setSrc(string _src_) { _src = _src_; }
     void setBin(string _bin_) { _bin = _bin_; setValid(true); }
@@ -69,6 +71,10 @@ class Dispatcher : public WContainerWidget
             if (terminateThread_.get_id() != std::this_thread::get_id() &&
                 terminateThread_.joinable())
             terminateThread_.join();
+
+            if (nextThread_.get_id() != std::this_thread::get_id() &&
+                nextThread_.joinable())
+            nextThread_.join();
         }
 
     private:
@@ -113,9 +119,11 @@ class Dispatcher : public WContainerWidget
 
         thread runnerThread_;
         thread terminateThread_;
+        thread nextThread_;
 
         void doRun(WApplication *app);
         void doTerminate(WApplication *app);
+        void doNext(WApplication* app);
 };
 
 

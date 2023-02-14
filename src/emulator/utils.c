@@ -2,6 +2,44 @@
 
 #include <sys/time.h>
 
+#include <unistd.h>
+
+
+Buffer _buffer_;
+
+void flush_buffer() { _buffer_._valid = 1; }
+
+void init_buffer() { for(size_t i = 0; i < 4096; ++i) _buffer_._buffer[i] = 0;  _buffer_._pos = 0; _buffer_._valid = 0; }
+
+void cwrite(char _c) { _buffer_._buffer[_buffer_._pos++] = _c; }
+
+u32 read_int_buffer() 
+{
+    u32 res = 0;
+
+    sscanf(_buffer_._buffer, "%u", &res);
+
+    init_buffer();
+
+    return res;
+}
+
+char* read_str_buffer()
+{
+    char* str = malloc(4096);
+
+    if (str) 
+    {
+        sscanf(_buffer_._buffer, "%[^\n]", str);
+        str[_buffer_._pos] = '\0';
+    }
+
+    init_buffer();
+
+    return str;
+}
+
+
 u32 most_significant_byte(const opsize size)
 {
     switch (size)
@@ -339,14 +377,16 @@ void _io_dumps(struct EmulationMachine *em)
                                                 index = index - 0x30;      \
                                                 if (index > 7) continue;   \
                                                 d0 = read_datareg(0);      \
-                                                char _string[d0-1];        \
-                                                s32 sf_r;                  \
-                                                sf_r = scanf(" %[^\n]", _string);     \
-                                                if (sf_r == 0 || sf_r == EOF)  continue; \
-                                                u32 rptr2 = read_addrreg(index); \
-                                                u32 i = 0;                 \
-                                                while (i < d0) { write_byte(rptr2++, _string[i]); i++; } \
-                                                write_byte(rptr2, 0x00);    \
+                                                while (!_buffer_._valid) \
+                                                    usleep(25000); \
+                                                char* str = read_str_buffer(); \
+                                                if (str) { \
+                                                    u32 rptr2 = read_addrreg(index); \
+                                                    u32 i = 0;                 \
+                                                    while (i < d0) { write_byte(rptr2++, str[i]); i++; } \
+                                                    write_byte(rptr2, 0x00);    \
+                                                    free(str); \
+                                                } \
                                             }\
                                             else { \
                                                 if (iostr == NULL) {\
@@ -392,10 +432,9 @@ void _io_dumps(struct EmulationMachine *em)
                                                 if (cchar == 0x00) { free(iostr); iostr = NULL; break; }  \
                                                 index = cchar - 0x30;          \
                                                 if (index > 7) continue;       \
-                                                \
-                                                s32 sf_r;                      \
-                                                sf_r = scanf(" %u", &value);   \
-                                                if (sf_r == 0 || sf_r == EOF)  continue; \
+                                                while (!_buffer_._valid) \
+                                                    usleep(25000); \
+                                                value = read_int_buffer(); \
                                                 \
                                                 value &= mask_by_opsize(size); \
                                                 \
@@ -453,6 +492,7 @@ void iotask(struct EmulationMachine *em)
     }
     else if (em->Machine.IO.Type == INPUT)
     {
+       
         EVAL_SCAN_SEQUENCE(str)
 
         if (str != NULL)
@@ -463,7 +503,6 @@ void iotask(struct EmulationMachine *em)
 
 
 }
-
 
 
 
