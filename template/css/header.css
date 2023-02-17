@@ -6,7 +6,7 @@
     justify-content: center;
     align-items: center;
     min-width: 100%;
-    min-height: 5em;
+    min-height: 4em;
     background-color: chocolate;
 }
 
@@ -33,7 +33,7 @@
 }
 
 .header-title {
-    font-size: xx-large;
+    font-size: 40px;
     color: rgb(69, 69, 69);
     text-decoration: solid;
     border: none;

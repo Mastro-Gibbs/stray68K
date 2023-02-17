@@ -117,7 +117,7 @@ void MemoryView::update(unsigned int _from)
 {
     unsigned int address = (_from != 0) ? _from : offset_;
 
-    if (address != 0)
+    if (address != 0 && emulator != nullptr)
     {   
         offset_ = address;
 

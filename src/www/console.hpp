@@ -39,6 +39,7 @@ class Console : public WTemplate
 
         void begin_program();
         void end_program();
+        void stop_program();
 
         void begin_assembler();
         void end_assembler();

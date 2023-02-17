@@ -144,6 +144,11 @@ void Console::setEmulator(struct EmulationMachine* _emulator)
     emulator = _emulator;
 }
 
+void Console::stop_program()
+{
+    insert("\nProgram arrested\n");
+}
+
 void Console::end_program()
 {
     insert("\nProgram finished\n");
@@ -151,7 +156,7 @@ void Console::end_program()
 
 void Console::begin_program()
 {
-    insert("Program start\n");
+    insert("Program started\n");
 }
 
 void Console::end_assembler()

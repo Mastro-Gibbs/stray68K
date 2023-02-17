@@ -7,3 +7,4 @@ assembler/syntactic.c
 assembler/syntactic.h
 .idea/
 .vscode/
+sources/

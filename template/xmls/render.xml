@@ -18,8 +18,8 @@
             </div>
             <div class="button-box3 containeritem-navbar2">
                 ${next}
+                ${continue}
                 ${stop}
-                ${terminate}
                 ${clr}
             </div>
             <div class="containeritem-widget">

@@ -4,7 +4,7 @@
     grid-template-columns: 20% 25% 20% 25%;
     column-gap: 2%;
     border-radius: 5px;
-    row-gap: 1%;
+    row-gap: 2px;
 }
 
 .register-label-container {

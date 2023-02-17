@@ -127,7 +127,7 @@ class Dispatcher : public WContainerWidget
 
         void do_next();
         void do_stop();
-        void do_terminate();
+        void do_continue();
 
         void doRun_WorkerThreadBody(WApplication *app,  struct EmulationMachine* em, std::atomic<bool>& quit);
         void doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em, std::atomic<bool>& quit);

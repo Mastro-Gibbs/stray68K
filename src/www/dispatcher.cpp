@@ -48,49 +48,65 @@ Dispatcher::Dispatcher()
 
     XMLTemplate = this->addWidget(make_unique<WTemplate>(tr("render-msg")));
 
-    auto c_btn = make_unique<WPushButton>(tr("code"));
+    // creating all buttons
+    auto c_btn = make_unique<WPushButton>();
     c_btn->setText("Code");
-    c_btn->setStyleClass("button-box-item2");
+    c_btn->setStyleClass("button-box-item2-selected");
 
-    auto m_btn = make_unique<WPushButton>(tr("memory"));
+    auto m_btn = make_unique<WPushButton>();
     m_btn->setText("Memory");
     m_btn->setStyleClass("button-box-item2");
 
-    auto k_btn = make_unique<WPushButton>(tr("console"));
+    auto k_btn = make_unique<WPushButton>();
     k_btn->setText("Console");
     k_btn->setStyleClass("button-box-item2");
 
-    auto n_btn = make_unique<WPushButton>(tr("next"));
+    auto n_btn = make_unique<WPushButton>();
     n_btn->setText("Next");
     n_btn->setStyleClass("button-box-item2");
 
-    auto s_btn = make_unique<WPushButton>(tr("terminate"));
+    auto s_btn = make_unique<WPushButton>();
     s_btn->setText("Stop");
     s_btn->setStyleClass("button-box-item2");
 
-    auto t_btn = make_unique<WPushButton>(tr("terminate"));
-    t_btn->setText("Terminate");
+    auto t_btn = make_unique<WPushButton>();
+    t_btn->setText("Continue");
     t_btn->setStyleClass("button-box-item2");
 
-    auto clr_btn = make_unique<WPushButton>(tr("clr"));
+    auto clr_btn = make_unique<WPushButton>();
     clr_btn->setText("Clear");
     clr_btn->setStyleClass("button-box-item2");
 
-    auto comp_btn = make_unique<WPushButton>(tr("compile"));
+    auto comp_btn = make_unique<WPushButton>();
     comp_btn->setText("Compile");
     comp_btn->setStyleClass("button-box-item2");
 
-    auto r_btn = make_unique<WPushButton>(tr("run"));
+    auto r_btn = make_unique<WPushButton>();
     r_btn->setText("Run");
     r_btn->setStyleClass("button-box-item2");
 
-    auto d_btn = make_unique<WPushButton>(tr("debug"));
+    auto d_btn = make_unique<WPushButton>();
     d_btn->setText("Debug");
     d_btn->setStyleClass("button-box-item2");
 
     auto clear_c = make_unique<WPushButton>();
     clear_c->setStyleClass("button-box-item2");
     clear_c->setText("Clear");
+
+
+    // get instance of WStackedWidget
+    auto stack = make_unique<Wt::WStackedWidget>();
+
+
+    // get instance of RegisterRender
+    auto reg_rend = make_unique<RegisterRender>();
+
+
+    // binding all widgets
+    stackedWidget = XMLTemplate->bindWidget("widget", move(stack));
+    editorWidget = stackedWidget->addWidget(make_unique<Editor>());
+    memoryWidget = stackedWidget->addWidget(make_unique<MemoryView>());    
+    consoleWidget = stackedWidget->addWidget(make_unique<Console>());
 
     toogleEditorButton  = XMLTemplate->bindWidget("code",      move(c_btn));
     toogleMemoryButton  = XMLTemplate->bindWidget("memory",    move(m_btn));
@@ -101,36 +117,25 @@ Dispatcher::Dispatcher()
     runButton     = XMLTemplate->bindWidget("run",     move(r_btn));
     debugButton   = XMLTemplate->bindWidget("debug",   move(d_btn));
 
-    executeNextIstructionButton  = XMLTemplate->bindWidget("next",      move(n_btn));
-    stopExecutionButton          = XMLTemplate->bindWidget("stop",      move(s_btn));
-    continueExecutionButton      = XMLTemplate->bindWidget("terminate", move(t_btn));
-    clearRegistersButton         = XMLTemplate->bindWidget("clr",       move(clr_btn));
+    executeNextIstructionButton  = XMLTemplate->bindWidget("next",     move(n_btn));
+    stopExecutionButton          = XMLTemplate->bindWidget("stop",     move(s_btn));
+    continueExecutionButton      = XMLTemplate->bindWidget("continue", move(t_btn));
+    clearRegistersButton         = XMLTemplate->bindWidget("clr",      move(clr_btn));
 
-    executeNextIstructionButton->setDisabled(true);
-    continueExecutionButton->setDisabled(true);
-    stopExecutionButton->setDisabled(true);
-    runButton->setDisabled(true);
-    debugButton->setDisabled(true);
-    clearConsoleButton->hide();
-
-    auto stack = make_unique<Wt::WStackedWidget>();
-    stackedWidget = XMLTemplate->bindWidget("widget", move(stack));
-
-    auto reg_rend = make_unique<RegisterRender>();
     registerRenderWidget = XMLTemplate->bindWidget("register_render", move(reg_rend));
 
-    editorWidget = stackedWidget->addWidget(make_unique<Editor>());
-    editorWidget->setUpEditor();
 
-    memoryWidget = stackedWidget->addWidget(make_unique<MemoryView>());
-    memoryWidget->setUpMemory();
+    // button behaviour connection
+    executeNextIstructionButton->clicked().connect(this, &Dispatcher::do_next);
+    stopExecutionButton->clicked().connect(this,         &Dispatcher::do_stop);
+    continueExecutionButton->clicked().connect(this,     &Dispatcher::do_continue);
 
-    consoleWidget = stackedWidget->addWidget(make_unique<Console>());
-    consoleWidget->setUpConsole();
+    compileButton->clicked().connect(this, &Dispatcher::do_compile);
+    runButton->clicked().connect(this,     &Dispatcher::do_run);
+    debugButton->clicked().connect(this,   &Dispatcher::do_debug);
 
-    stackedWidget->setCurrentWidget(editorWidget);
-    toogleEditorButton->setStyleClass("button-box-item2-selected");
 
+    // lambda func connections
     toogleEditorButton->clicked().connect(this,      [=]{
         clearConsoleButton->hide();
         stackedWidget->setCurrentWidget(editorWidget);
@@ -155,27 +160,40 @@ Dispatcher::Dispatcher()
         toogleConsoleButton->setStyleClass("button-box-item2-selected");
     });
 
-
-    executeNextIstructionButton->clicked().connect(this, &Dispatcher::do_next);
-    stopExecutionButton->clicked().connect(this,      &Dispatcher::do_stop);
-    continueExecutionButton->clicked().connect(this, &Dispatcher::do_terminate);
-
-    compileButton->clicked().connect(this, &Dispatcher::do_compile);
-    runButton->clicked().connect(this,     &Dispatcher::do_run);
-    debugButton->clicked().connect(this,   &Dispatcher::do_debug);
-
     editorWidget->text_changed.connect(this, [=] { 
-                                                runButton->setDisabled(true);
-                                                debugButton->setDisabled(true);
-                                                compileButton->setDisabled(false);
-                                            } 
-                                        );
+        runButton->setDisabled(true);
+        debugButton->setDisabled(true);
+        compileButton->setDisabled(false);
+    });
 
-    clearConsoleButton->clicked().connect(this, [=] { consoleWidget->clear(); });
+    clearConsoleButton->clicked().connect(this, [=] { 
+        consoleWidget->clear(); 
+    });
 
-    clearRegistersButton->clicked().connect(this, [=] { registerRenderWidget->clear(); });
+    clearRegistersButton->clicked().connect(this, [=] { 
+        registerRenderWidget->clear(); 
+    });
 
+
+    // init struct
     emulationData.init();
+
+
+    // setting-up some buttons init state
+    executeNextIstructionButton->setDisabled(true);
+    continueExecutionButton->setDisabled(true);
+    stopExecutionButton->setDisabled(true);
+    runButton->setDisabled(true);
+    debugButton->setDisabled(true);
+    clearConsoleButton->hide();
+
+
+    // setting-up some widgets
+    editorWidget->setUpEditor();
+    memoryWidget->setUpMemory();
+    consoleWidget->setUpConsole();
+
+    stackedWidget->setCurrentWidget(editorWidget);
 }
 
 
@@ -252,22 +270,22 @@ void Dispatcher::do_compile()
  */
 void Dispatcher::do_run()
 {
-    WApplication *app = WApplication::instance();
-
-    registerRenderWidget->clear();
-
-    executeNextIstructionButton->setDisabled(true);
-    continueExecutionButton->setDisabled(true);
-    stopExecutionButton->setDisabled(false);
-    runButton->setDisabled(true);
-    debugButton->setDisabled(true);
-
-    memoryWidget->enableFetch(true);
-
-    consoleWidget->disable(false);
-
     if (emulationData.valid())
-    {      
+    { 
+        WApplication *app = WApplication::instance();
+
+        registerRenderWidget->clear();
+
+        executeNextIstructionButton->setDisabled(true);
+        continueExecutionButton->setDisabled(true);
+        stopExecutionButton->setDisabled(false);
+        runButton->setDisabled(true);
+        debugButton->setDisabled(true);
+
+        memoryWidget->enableFetch(true);
+
+        consoleWidget->disable(false);
+         
         emulatorInstance = obtain_emulation_machine(emulationData.bin().c_str());
         consoleWidget->setEmulator(emulatorInstance);
         memoryWidget->setEmulator(emulatorInstance);
@@ -288,7 +306,6 @@ void Dispatcher::do_run()
             runBinaryThread.join();
             
         runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_runBinaryThread)));     
-  
     }
 }
 
@@ -300,7 +317,7 @@ void Dispatcher::do_run()
  */
 void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachine* em, std::atomic<bool>& quit)
 {
-    while (emulate(em) && !quit)
+    while (!quit && emulate(em))
     {
         WApplication::UpdateLock uiLock(app);
     
@@ -328,7 +345,8 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
         em = nullptr;
 
         consoleWidget->disable(true);
-        consoleWidget->end_program();
+
+        quit ? consoleWidget->stop_program() : consoleWidget->end_program();
 
         editorWidget->disable(false);
         runButton->setDisabled(false);
@@ -362,22 +380,22 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
  */
 void Dispatcher::do_debug()
 {
-    WApplication *app = WApplication::instance();
-    registerRenderWidget->clear();
-
-    editorWidget->disable(true);
-
-    executeNextIstructionButton->setDisabled(false);
-    continueExecutionButton->setDisabled(false);
-    stopExecutionButton->setDisabled(false);
-
-    memoryWidget->enableFetch(true);
-
-    runButton->setDisabled(true);
-    debugButton->setDisabled(true);
-
     if (emulationData.valid())
     {
+        WApplication *app = WApplication::instance();
+        registerRenderWidget->clear();
+
+        editorWidget->disable(true);
+
+        executeNextIstructionButton->setDisabled(false);
+        continueExecutionButton->setDisabled(false);
+        stopExecutionButton->setDisabled(false);
+
+        memoryWidget->enableFetch(true);
+
+        runButton->setDisabled(true);
+        debugButton->setDisabled(true);
+    
         emulatorInstance = obtain_emulation_machine(emulationData.bin().c_str());
         consoleWidget->setEmulator(emulatorInstance);
         memoryWidget->setEmulator(emulatorInstance);
@@ -429,7 +447,7 @@ void Dispatcher::do_next()
  */
 void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em, std::atomic<bool>& quit)
 {
-    if (emulate(emulatorInstance) && !quit)
+    if (!quit && emulate(emulatorInstance))
     {
         WApplication::UpdateLock uiLock(app);
     
@@ -490,20 +508,23 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
 
 
 /**
- * ACTION terminate
+ * ACTION continue
  * 
  * execute in detatched mode the last part of .B68 file
  * include std::atomic<bool> to kill it 
  * 
  * use runBinaryThread to perform this task
  */
-void Dispatcher::do_terminate()
+void Dispatcher::do_continue()
 {
     WApplication *app = WApplication::instance();
 
     app->enableUpdates(true);
         
     quitThread_runBinaryThread = false;
+
+    executeNextIstructionButton->setDisabled(true);
+    continueExecutionButton->setDisabled(true);
     
     if (runBinaryThread.joinable())
         runBinaryThread.join();
@@ -524,6 +545,6 @@ void Dispatcher::do_stop()
     set_buffering_enabled(emulatorInstance, c_false);
 
     quitThread_runBinaryThread = true;
-    quitThread_nextIstructionThread   = true;
+    quitThread_nextIstructionThread = true;
 }
 

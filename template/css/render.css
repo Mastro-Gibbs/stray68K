@@ -4,8 +4,6 @@
     align-items: center;
     min-width: 100%;
     background-color: rgb(208, 139, 89);
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
     margin-left: -65px;
     margin-right: 15px;
     padding: 10px 20px;
@@ -17,87 +15,44 @@
     justify-content: left;
     align-items: center;
     background-color: rgb(208, 139, 89);
-    border-radius: 8px;
     margin-left: 15px;
     margin-right: 15px;
     padding: 10px 20px;
     transform: skew(-20deg);
 }
 
-@media (max-width: 1024px) {
-    .button-box-item2 {
-        width: 70px;
-        height: 30px;
-        font-size: small;
-        background-color: #5b5b5b;
-        color: rgb(234, 224, 148);
-        display: inline-block;
-        border: none;
-        border-radius: 10px;
-        margin-left: 5px;
-    }
-}
-
-@media (max-width: 1024px) {
-    .button-box-item2-selected {
-        font-size: small;
-        background-color: #171717;
-        width: 70px;
-        height: 32px;
-        color: rgb(234, 224, 148);
-        display: inline-block;
-        border: none;
-        border-radius: 10px;
-        margin-left: 10px;
-    }
-}
- 
-@media (max-width: 1024px) {
-    .button-box-item2:disabled {
-        background-color: #939393;
-        color: #5e5e5e;
-        border-radius: 10px;
-        cursor: default;
-        border: none;
-        font-size: small;
-    }
-}
-
 .button-box-item2 {
-    width: 80px;
-    height: 30px;
-    font-size: medium;
+    width: 70px;
+    height: 25px;
+    font-size: small;
     background-color: #5b5b5b;
     color: rgb(234, 224, 148);
     display: inline-block;
     border: none;
-    border-radius: 10px;
     margin-left: 5px;
 }
 
 .button-box-item2:hover {
     background-color: #282828;
-    border-radius: 12px;
+    border-radius: 1px;
     cursor: pointer;
     border: none;
 }
 
 .button-box-item2-selected {
-    font-size: medium;
+    font-size: small;
     background-color: #171717;
-    width: 80px;
-    height: 32px;
+    width: 70px;
+    height: 25px;
     color: rgb(234, 224, 148);
     display: inline-block;
     border: none;
-    border-radius: 10px;
-    margin-left: 10px;
+    margin-left: 5px;
 }
 
 .button-box-item2:disabled {
     background-color: #939393;
     color: #5e5e5e;
-    border-radius: 10px;
     cursor: default;
     border: none;
 }
@@ -126,7 +81,7 @@
 .float-left {
     float: left;
     width: 60%;
-    margin-left: 40px;
+    margin-left: 60px;
 }
 
 .float-right {

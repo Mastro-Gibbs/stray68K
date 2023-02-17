@@ -313,27 +313,31 @@ void RegisterRender::setHALT(string result)
 
 void RegisterRender::update(const char* map)
 {
-    string _json = string(map);
-
-    json_map json{ json_data{ _json } }; 
-
-    for (size_t i = 0; i < 8; i++)
+    if (map != NULL)
     {
-        setDataReg(i, string(json["CPU"]["D" + to_string(i)]));
-        setAddrReg(i, string(json["CPU"]["A" + to_string(i)]));
+        string _json = string(map);
+
+        json_map json{ json_data{ _json } }; 
+
+        for (size_t i = 0; i < 8; i++)
+        {
+            setDataReg(i, string(json["CPU"]["D" + to_string(i)]));
+            setAddrReg(i, string(json["CPU"]["A" + to_string(i)]));
+        }
+
+        setUSP(string(json["CPU"]["US"]));
+        setSSP(string(json["CPU"]["SS"]));
+        setPC (string(json["CPU"]["PC"]));
+        setCCR(stoi(string(json["CPU"]["SR"]), nullptr, 16));
+
+        setMnemonic(string(json["OP"]["MNEMONIC"]));
+        setHCode(string(json["OP"]["CODE"]));
+        setBCode(stoi(string(json["OP"]["CODE"]), nullptr, 16));
+        setTime((unsigned long) json["TIME"]);
+
+        setFWB(string(json["RAM"]["BEGIN"]));
+        setLWB(string(json["RAM"]["END"]));
+        setHALT(string(json["RAM"]["HALT"]));
     }
 
-    setUSP(string(json["CPU"]["US"]));
-    setSSP(string(json["CPU"]["SS"]));
-    setPC (string(json["CPU"]["PC"]));
-    setCCR(stoi(string(json["CPU"]["SR"]), nullptr, 16));
-
-    setMnemonic(string(json["OP"]["MNEMONIC"]));
-    setHCode(string(json["OP"]["CODE"]));
-    setBCode(stoi(string(json["OP"]["CODE"]), nullptr, 16));
-    setTime((unsigned long) json["TIME"]);
-
-    setFWB(string(json["RAM"]["BEGIN"]));
-    setLWB(string(json["RAM"]["END"]));
-    setHALT(string(json["RAM"]["HALT"]));
 }
