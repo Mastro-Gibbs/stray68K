@@ -5,36 +5,65 @@
 #include <unistd.h>
 
 
-Buffer _buffer_;
+void flush_buffer(struct EmulationMachine* emulator) 
+{ 
+    emulator->Machine.InputBuffer._valid = 1; 
+}
 
-void flush_buffer() { _buffer_._valid = 1; }
+void init_buffer(struct EmulationMachine* emulator) 
+{ 
+    for(size_t i = 0; i < 4096; ++i) 
+        emulator->Machine.InputBuffer.self[i] = 0;  
+    
+    emulator->Machine.InputBuffer._pos = 0; 
+    emulator->Machine.InputBuffer._valid = c_false; 
+    emulator->Machine.InputBuffer._able  = c_true; 
+}
 
-void init_buffer() { for(size_t i = 0; i < 4096; ++i) _buffer_._buffer[i] = 0;  _buffer_._pos = 0; _buffer_._valid = 0; }
+void cwrite(struct EmulationMachine* emulator, char _c) 
+{ 
+    emulator->Machine.InputBuffer.self[emulator->Machine.InputBuffer._pos] = _c;
+    emulator->Machine.InputBuffer._pos += 1; 
+}
 
-void cwrite(char _c) { _buffer_._buffer[_buffer_._pos++] = _c; }
+void set_buffering_enabled(struct EmulationMachine* emulator, c_bool _bool)
+{
+    emulator->Machine.InputBuffer._able  = _bool; 
+}
 
-u32 read_int_buffer() 
+c_bool is_buffer_valid(struct EmulationMachine* emulator)
+{
+    return emulator->Machine.InputBuffer._valid;
+}
+
+c_bool is_buffering_enabled(struct EmulationMachine* emulator)
+{
+    return emulator->Machine.InputBuffer._able;
+}
+
+u32 buffer_len(struct EmulationMachine* emulator)
+{
+    return emulator->Machine.InputBuffer._pos;
+}
+
+u32 read_int_buffer(struct EmulationMachine* emulator) 
 {
     u32 res = 0;
 
-    sscanf(_buffer_._buffer, "%u", &res);
-
-    init_buffer();
+    sscanf(emulator->Machine.InputBuffer.self, "%u", &res);
 
     return res;
 }
 
-char* read_str_buffer()
+char* read_str_buffer(struct EmulationMachine* emulator)
 {
     char* str = malloc(4096);
 
     if (str) 
     {
-        sscanf(_buffer_._buffer, "%[^\n]", str);
-        str[_buffer_._pos] = '\0';
+        sscanf(emulator->Machine.InputBuffer.self, "%[^\n]", str);
+        str[emulator->Machine.InputBuffer._pos] = '\0';
     }
-
-    init_buffer();
 
     return str;
 }
@@ -89,15 +118,15 @@ u32 hash (const char* word)
 
 
 /* IO EA */
-u32 read_ram(u32 *addr, opsize *size)
+u32 read_ram(struct EmulationMachine* emulator, u32 *addr, opsize *size)
 {
     switch (*size) {
         case BYTE:
-            return (u32) read_byte(*addr);
+            return (u32) read_byte(emulator, *addr);
         case WORD:
-            return (u32) read_word(*addr);
+            return (u32) read_word(emulator, *addr);
         default: //LONG
-            return read_long(*addr);
+            return read_long(emulator, *addr);
     }
 }
 
@@ -123,9 +152,9 @@ bit is_ram_op(ADDRMode* const mode)
         case ADDRESSPostIncr:
         case ADDRESSPreDecr:
         case IMMEDIATE:
-            return 1;
+            return c_true;
         default:
-            return 0;
+            return c_false;
     }
 }
 
@@ -135,9 +164,9 @@ bit is_addr_to_data_op(ADDRMode* const mode)
     switch (*mode)
     {
         case ADDRReg:
-            return 1;
+            return c_true;
         default:
-            return 0;
+            return c_false;
     }
 }
 
@@ -167,22 +196,13 @@ char* trap_code_toString(const u32 trapcode)
 }
 
 
-void _io_dumps(struct EmulationMachine *em)
-{
-    emit_jio(em);
-
-    em->Machine.IO.buffer  = NULL;
-    em->Machine.IO.Type    = IO_UNDEF;
-}
-
-
 #include <string.h>
 #define EVAL_ESCAPE_SEQUENCE(iostr, cchar, rptr)    do{ \
-                                                        cchar = read_byte(rptr++); \
+                                                        cchar = read_byte(emulator, rptr++); \
                                                         if (  /* ANSI ESCAPE SEQUENCE '\033'*/ \
                                                             cchar == '0' && \
-                                                            read_byte(rptr) == '3' && \
-                                                            read_byte(rptr + 1) == '3' \
+                                                            read_byte(emulator, rptr) == '3' && \
+                                                            read_byte(emulator, rptr + 1) == '3' \
                                                         ) { \
                                                             sprintf(iostr+strlen(iostr), "%c", '\033'); \
                                                             rptr += 2; \
@@ -192,7 +212,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                             switch (cchar) { \
                                                                 case '\\': \
                                                                     sprintf(iostr+strlen(iostr), "%c", '\\'); \
-                                                                    if (read_byte(rptr) == '%') /*Escape for placeholder*/\
+                                                                    if (read_byte(emulator, rptr) == '%') /*Escape for placeholder*/\
                                                                     { \
                                                                         iostr = realloc(iostr, strlen(iostr)+2); \
                                                                         sprintf(iostr+strlen(iostr), "%c", '%'); \
@@ -217,7 +237,7 @@ void _io_dumps(struct EmulationMachine *em)
 
 #define EVAL_PLACE_OLDER(iostr, cchar, rptr)    do { \
                                                     opsize size; \
-                                                    cchar = read_byte(rptr++); \
+                                                    cchar = read_byte(emulator, rptr++); \
                                                     \
                                                     switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
                                                         case 'b':    \
@@ -234,13 +254,13 @@ void _io_dumps(struct EmulationMachine *em)
                                                             break;   \
                                                         default:     \
                                                         { /*Needs a forward reading to clear placeholder escape chars*/ \
-                                                            char fw = read_byte(rptr); \
+                                                            char fw = read_byte(emulator, rptr); \
                                                             if (fw != 'x' && fw != 'X' && \
                                                                 fw != 'a' && fw != 'A' && \
                                                                 fw != 'd' && fw != 'D') \
                                                             { \
                                                                 rptr++; \
-                                                                fw = read_byte(rptr); \
+                                                                fw = read_byte(emulator, rptr); \
                                                                 if ((fw - 0x30) < 10) rptr++; \
                                                             } else if ((fw - 0x30) < 10) rptr++; \
                                                             \
@@ -248,7 +268,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                         } \
                                                     }                \
                                                     \
-                                                    char ccchar = read_byte(rptr); \
+                                                    char ccchar = read_byte(emulator, rptr); \
                                                     if (ccchar == 'x' || ccchar == 'X' || \
                                                         ccchar == 'a' || ccchar == 'A' || \
                                                         ccchar == 'd' || ccchar == 'D') \
@@ -261,10 +281,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                     { \
                                                         case 'x': \
                                                         { \
-                                                            cchar = read_byte(rptr++);          \
+                                                            cchar = read_byte(emulator, rptr++);          \
                                                             const u32 index  = cchar - 0x30;          \
                                                             if (index > 7) break; \
-                                                            const u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            const u32 value  = read_datareg(emulator, index) & mask_by_opsize(size);   \
                                                             const u32 length = snprintf(NULL, 0, "%x", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%x", value); \
@@ -272,10 +292,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         } \
                                                         case 'X': \
                                                         { \
-                                                            cchar = read_byte(rptr++);          \
+                                                            cchar = read_byte(emulator, rptr++);          \
                                                             const u32 index  = cchar - 0x30;          \
                                                             if (index > 7) break; \
-                                                            const u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            const u32 value  = read_datareg(emulator, index) & mask_by_opsize(size);   \
                                                             const u32 length = snprintf(NULL, 0, "%X", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%X", value); \
@@ -288,10 +308,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'l':  /*aka LONG sign extend*/ \
                                                         case 'L':  \
                                                         { \
-                                                            cchar = read_byte(rptr++);          \
+                                                            cchar = read_byte(emulator, rptr++);          \
                                                             const u32 index  = cchar - 0x30;          \
                                                             if (index > 7) break; \
-                                                            const u32 value  = read_datareg(index);   \
+                                                            const u32 value  = read_datareg(emulator, index);   \
                                                             s32 sval;                           \
                                                             SIGN_EXTENDED(sval, value, size);   \
                                                             const u32 length = snprintf(NULL, 0, "%d", sval); \
@@ -302,10 +322,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'a':  \
                                                         case 'A':  \
                                                         { \
-                                                            cchar = read_byte(rptr++);        \
+                                                            cchar = read_byte(emulator, rptr++);        \
                                                             const u32 index  = cchar - 0x30;        \
                                                             if (index > 7) break; \
-                                                            const u32 value  = read_addrreg(index) & mask_by_opsize(size);   \
+                                                            const u32 value  = read_addrreg(emulator, index) & mask_by_opsize(size);   \
                                                             const u32 length = snprintf(NULL, 0, "%X", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%X", value); \
@@ -314,10 +334,10 @@ void _io_dumps(struct EmulationMachine *em)
                                                         case 'd':  \
                                                         case 'D':  \
                                                         { \
-                                                            cchar = read_byte(rptr++);        \
+                                                            cchar = read_byte(emulator, rptr++);        \
                                                             const u32 index  = cchar - 0x30;        \
                                                             if (index > 7) break; \
-                                                            const u32 value  = read_datareg(index) & mask_by_opsize(size);   \
+                                                            const u32 value  = read_datareg(emulator, index) & mask_by_opsize(size);   \
                                                             const u32 length = snprintf(NULL, 0, "%u", value); \
                                                             iostr = realloc(iostr, strlen(iostr) + length + 1); \
                                                             snprintf(iostr+strlen(iostr), length + 1, "%u", value); \
@@ -332,13 +352,13 @@ void _io_dumps(struct EmulationMachine *em)
                                         u32 rptr; \
                                         s8  cchar; \
                                         \
-                                        rptr = read_addrreg(0);\
+                                        rptr = read_addrreg(emulator, 0);\
                                         \
                                         iostr = malloc(2 * sizeof (s8)); \
                                         iostr[0] = '\0'; \
                                         \
                                         do { \
-                                            cchar = read_byte(rptr++); \
+                                            cchar = read_byte(emulator, rptr++); \
                                             \
                                             if (cchar == '\\') \
                                                 EVAL_ESCAPE_SEQUENCE(iostr, cchar, rptr) \
@@ -356,48 +376,54 @@ void _io_dumps(struct EmulationMachine *em)
                                         u32 rptr, index, value, length, d0; \
                                         char c; \
                                         \
-                                        rptr = read_addrreg(0); \
+                                        rptr = read_addrreg(emulator, 0); \
                                         \
-                                        while ((c = read_byte(rptr++)) == '%' || (c & 0xFF) != 0x00) \
+                                        while ((c = read_byte(emulator, rptr++)) == '%' || (c & 0xFF) != 0x00) \
                                         { \
-                                            if (read_byte(rptr) == 't' || read_byte(rptr) == 'T') {  \
-                                                index = read_byte(rptr+1); \
-                                                if (index == 0x00) return; \
+                                            if (read_byte(emulator, rptr) == 't' || read_byte(emulator, rptr) == 'T') {  \
+                                                index = read_byte(emulator, rptr+1); \
+                                                if (index == 0x00) return c_false; \
                                                 index = index - 0x30;      \
                                                 if (index > 7) continue;   \
                                                 struct timeval tv;         \
                                                 gettimeofday(&tv,NULL);    \
                                                 u32 time = (u32) ((tv.tv_sec * (unsigned long)1000000 + tv.tv_usec) & 0x00000000FFFFFFFF); \
-                                                write_datareg(index, time, NULL); \
+                                                write_datareg(emulator, index, time, NULL); \
                                                 rptr += 2; \
                                             }\
-                                            else if (read_byte(rptr) == 's' || read_byte(rptr) == 'S') {  \
-                                                index = read_byte(rptr+1); \
-                                                if (index == 0x00) return; \
+                                            else if (read_byte(emulator, rptr) == 's' || read_byte(emulator, rptr) == 'S') {  \
+                                                index = read_byte(emulator, rptr+1); \
+                                                if (index == 0x00) return c_false; \
                                                 index = index - 0x30;      \
                                                 if (index > 7) continue;   \
-                                                d0 = read_datareg(0);      \
-                                                while (!_buffer_._valid) \
+                                                d0 = read_datareg(emulator, 0);      \
+                                                while (!is_buffer_valid(emulator) && is_buffering_enabled(emulator)) \
                                                     usleep(25000); \
-                                                char* str = read_str_buffer(); \
-                                                if (str) { \
-                                                    u32 rptr2 = read_addrreg(index); \
-                                                    u32 i = 0;                 \
-                                                    while (i < d0) { write_byte(rptr2++, str[i]); i++; } \
-                                                    write_byte(rptr2, 0x00);    \
-                                                    free(str); \
+                                                if (is_buffering_enabled(emulator)) { \
+                                                    char* str = read_str_buffer(emulator); \
+                                                    if (str) { \
+                                                        u32 rptr2 = read_addrreg(emulator, index); \
+                                                        u32 i = 0;                 \
+                                                        while (i < d0 && i < buffer_len(emulator)) { \
+                                                            write_byte(emulator, rptr2++, str[i]); \
+                                                            i++; \
+                                                        } \
+                                                        write_byte(emulator, rptr2, 0x00);    \
+                                                        free(str); \
+                                                    } \
+                                                    init_buffer(emulator); \
                                                 } \
+                                                break; \
                                             }\
                                             else { \
+                                                if (c != '%') continue; \
+                                                \
                                                 if (iostr == NULL) {\
                                                     iostr = malloc(2 * sizeof (s8)); \
                                                     iostr[0] = '{'; iostr[1] = '\0'; \
                                                 } \
-                                                \
-                                                if (c != '%') continue; \
-                                                \
                                                 opsize size; \
-                                                char cchar = read_byte(rptr++); \
+                                                char cchar = read_byte(emulator, rptr++); \
                                                 if (cchar == 0x00) { free(iostr); iostr = NULL; break; }  \
                                                 \
                                                 switch (cchar) { /*if it's a signed integer print, dectect it's size*/\
@@ -416,7 +442,7 @@ void _io_dumps(struct EmulationMachine *em)
                                                     default:     \
                                                         continue;   \
                                                 } \
-                                                char ccchar = read_byte(rptr); \
+                                                char ccchar = read_byte(emulator, rptr); \
                                                 if (cchar == 0x00) { free(iostr); iostr = NULL; break; }  \
                                                 if (ccchar == 'a' || ccchar == 'A' || \
                                                     ccchar == 'd' || ccchar == 'D') \
@@ -428,171 +454,116 @@ void _io_dumps(struct EmulationMachine *em)
                                                 \
                                                 char rtype = cchar; \
                                                 \
-                                                cchar = read_byte(rptr++);     \
+                                                cchar = read_byte(emulator, rptr++);     \
                                                 if (cchar == 0x00) { free(iostr); iostr = NULL; break; }  \
                                                 index = cchar - 0x30;          \
                                                 if (index > 7) continue;       \
-                                                while (!_buffer_._valid) \
+                                                while (!is_buffer_valid(emulator) && is_buffering_enabled(emulator)) \
                                                     usleep(25000); \
-                                                value = read_int_buffer(); \
-                                                \
-                                                value &= mask_by_opsize(size); \
-                                                \
-                                                switch (rtype) \
-                                                { \
-                                                    case 'a':  \
-                                                    case 'A':  \
+                                                if (is_buffering_enabled(emulator)) { \
+                                                    value = read_int_buffer(emulator); \
+                                                    \
+                                                    init_buffer(emulator);\
+                                                    \
+                                                    value &= mask_by_opsize(size); \
+                                                    \
+                                                    switch (rtype) \
                                                     { \
-                                                        write_addrreg(index, value, &size);   \
-                                                        break; \
+                                                        case 'a':  \
+                                                        case 'A':  \
+                                                        { \
+                                                            write_addrreg(emulator, index, value, &size);   \
+                                                            break; \
+                                                        } \
+                                                        case 'd':  \
+                                                        case 'D':  \
+                                                        { \
+                                                            write_datareg(emulator, index, value, &size);   \
+                                                            break; \
+                                                        } \
+                                                        default:   \
+                                                            break; \
                                                     } \
-                                                    case 'd':  \
-                                                    case 'D':  \
-                                                    { \
-                                                        write_datareg(index, value, &size);   \
-                                                        break; \
+                                                    length = snprintf(NULL, 0, "%d", value); \
+                                                    if (strlen(iostr) == 1) { \
+                                                        iostr  = realloc(iostr, strlen(iostr) + length + 8); \
+                                                        sprintf(iostr+strlen(iostr), "\"%c%d\":\"%d\"", rtype, index, value); \
+                                                    } else { \
+                                                        iostr  = realloc(iostr, strlen(iostr) + length + 9); \
+                                                        sprintf(iostr+strlen(iostr), ",\"%c%d\":\"%d\"", rtype, index, value); \
                                                     } \
-                                                    default:   \
-                                                        break; \
                                                 } \
-                                                length = snprintf(NULL, 0, "%d", value); \
-                                                if (strlen(iostr) == 1) { \
-                                                    iostr  = realloc(iostr, strlen(iostr) + length + 8); \
-                                                    sprintf(iostr+strlen(iostr), "\"%c%d\":\"%d\"", rtype, index, value); \
-                                                } else { \
-                                                    iostr  = realloc(iostr, strlen(iostr) + length + 9); \
-                                                    sprintf(iostr+strlen(iostr), ",\"%c%d\":\"%d\"", rtype, index, value); \
-                                                } \
+                                                free(iostr); iostr = NULL; \
                                             } \
                                         } \
-                                        if (iostr != NULL) { \
+                                        if (iostr != NULL && is_buffering_enabled(emulator)) { \
                                             u32 pos = strlen(iostr);       \
                                             iostr = realloc(str, pos + 2); \
                                             iostr[pos] = '}'; iostr[pos+1] = '\0'; \
                                         } \
                                     } while(0);
 
-void iotask(struct EmulationMachine *em)
+c_bool iotask(struct EmulationMachine *emulator)
 {
     char *str = NULL;
 
-    if (em->Machine.IO.buffer)
-        free(em->Machine.IO.buffer);
+    if (emulator->Machine.IO.buffer)
+        free(emulator->Machine.IO.buffer);
+    
+    emulator->Machine.IO.buffer = NULL;
 
-    if (em->Machine.IO.Type == OUTPUT)
+    if (emulator->Machine.IO.Type == OUTPUT)
     {
         EVAL_PRINT_SEQUENCE(str)
 
         if (str != NULL)
         {
-            em->Machine.IO.buffer  = str;
-
-            IO_TASK(em->ExecArgs.descriptive_mode, "%s", str)
+            emulator->Machine.IO.buffer  = str;
         }
     }
-    else if (em->Machine.IO.Type == INPUT)
+    else if (emulator->Machine.IO.Type == INPUT)
     {
-       
         EVAL_SCAN_SEQUENCE(str)
 
         if (str != NULL)
         {
-            em->Machine.IO.buffer  = str;
+            emulator->Machine.IO.buffer  = str;
         }
     }
 
-
+    return is_buffering_enabled(emulator);
 }
 
 
 
 #include "JSON.h"
 
-char* _dump = NULL;
-
-void emit_dump(struct EmulationMachine *em)
+void emit_dump(struct EmulationMachine *emulator)
 {
-    if (_dump != NULL) free(_dump);
-    _dump = NULL;
+    if (emulator->Machine.dump != NULL) 
+        free(emulator->Machine.dump);
+        
+    emulator->Machine.dump = NULL;
 
-    if (get_cpu() == NULL || get_ram() == NULL)
-    {
-        if (em->Machine.State == PANIC_STATE)
-            _dump = Jexception(em->Machine.Exception.panic_cause, PANIC_EXC_TYPE);
-        else if (em->Machine.State == MERR_STATE)
-            _dump = Jexception(em->Machine.Exception.merr_cause, MERR_EXC_TYPE);
-        else if (em->Machine.State == TRAP_STATE)
-            _dump = Jexception(em->Machine.Exception.merr_cause, TRAP_EXC_TYPE);
-    }
-    else
-    {
-        _dump = Jcpu();
-        _dump = Jconcat2(_dump, Jram,    em->Machine.RuntimeData.org_pointer, em->Machine.RuntimeData.last_loaded_byte_index, em->Machine.RuntimeData.simhalt);
+    emulator->Machine.dump = Jcpu(emulator);
+    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jram,    emulator->Machine.RuntimeData.org_pointer, emulator->Machine.RuntimeData.last_loaded_byte_index, emulator->Machine.RuntimeData.simhalt);
 
-        if (em->Machine.cpu->ssp != em->Machine.RuntimeData.STACK_BOTTOM_INDEX)
-            _dump = Jconcat2(_dump, Jstack, em->Machine.RuntimeData.STACK_BOTTOM_INDEX, em->Machine.cpu->ssp);
+    if (emulator->Machine.cpu.ssp != emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX)
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jstack, emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX, emulator->Machine.cpu.ssp);
 
-        _dump = Jconcat2(_dump, Jop,     em->Machine.RuntimeData.mnemonic, em->Machine.RuntimeData.operation_code);
-        _dump = Jconcat2(_dump, Jchrono, em->Machine.Chrono.dt);
+    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jop,     emulator->Machine.RuntimeData.mnemonic, emulator->Machine.RuntimeData.operation_code);
+    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jchrono, emulator->Machine.Chrono.dt);
 
-        if (em->Machine.State == IO_STATE)
-            _dump = Jconcat2(_dump, Jio, em->Machine.IO.buffer, em->Machine.IO.Type);
+    if (emulator->Machine.State == IO_STATE)
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jio, emulator->Machine.IO.buffer, emulator->Machine.IO.Type);
 
-        if (em->Machine.State == TRAP_STATE)
-            _dump = Jconcat2(_dump, Jexception, em->Machine.Exception.trap_cause, TRAP_EXC_TYPE);
-        else if (em->Machine.State == PANIC_STATE)
-            _dump = Jconcat2(_dump, Jexception, em->Machine.Exception.panic_cause, PANIC_EXC_TYPE);
-        else if (em->Machine.State == MERR_STATE)
-            _dump = Jconcat2(_dump, Jexception, em->Machine.Exception.merr_cause, MERR_EXC_TYPE);
-    }
-}
-
-const char* machine_status ()
-{
-    return _dump;
-}
-
-void emit_jio(struct EmulationMachine *em)
-{
-    if (em->ExecArgs.JSON.is_activated && em->ExecArgs.JSON.io)
-    {
-        char *buf = NULL;
-
-        buf = Jio(em->Machine.IO.buffer, em->Machine.IO.Type);
-
-        printf("%s\n", buf);
-        free(buf);
-    }
-}
-
-void emit_jconcat(struct EmulationMachine *em)
-{
-    char *buf = NULL;
-
-    if (em->ExecArgs.JSON.concat)
-    {
-        if (em->ExecArgs.JSON.cpu)
-            buf = Jcpu();
-
-        if (em->ExecArgs.JSON.ram)
-        {
-            u32 _start, _end, _ptr = em->Machine.cpu->pc;
-            _start = (_ptr & 0xFFFFFFF0) - 0x20;
-            _end   = (_ptr | 0x0000000F) + 0x31;
-
-            buf = Jconcat2(buf, Jram, _start, _end);
-        }
-
-        if (em->ExecArgs.JSON.op)
-            buf = Jconcat2(buf, Jop, em->Machine.RuntimeData.mnemonic, em->Machine.RuntimeData.operation_code);
-
-        if (em->Machine.State == FINAL_STATE && em->ExecArgs.JSON.chrono)
-            buf = Jconcat2(buf, Jchrono, em->Machine.Chrono.dt);
-
-        if (buf)
-        {
-            printf("%s\n", buf);
-            free(buf);
-        }
-    }
+    if (emulator->Machine.State == TRAP_STATE)
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.Exception.trap_cause, TRAP_EXC_TYPE);
+    else if (emulator->Machine.State == PANIC_STATE)
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.Exception.panic_cause, PANIC_EXC_TYPE);
+    else if (emulator->Machine.State == MERR_STATE)
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.Exception.merr_cause, MERR_EXC_TYPE);
+    else if (emulator->Machine.State == WARNING_STATE)
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jwarning, emulator->Machine.Warning.cause, emulator->Machine.Warning.mnem, emulator->Machine.Warning.code);
+    
 }

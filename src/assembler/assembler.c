@@ -22,18 +22,20 @@
 
 #include "assembler.h"
 
-
-
-int check_file_format(const char* name, const char* extension)
+void push_error(SemanticState* state, char* cause)
 {
-    const char* ldot = strrchr(name, '.');
-    if (ldot != NULL)
-    {
-        size_t length = strlen(extension);
-        return strncmp(ldot + 1, extension, length) == 0;
-    }
+    size_t len = strlen(cause);
 
-    return 0;
+    if (state->_asseble_error == NULL)
+    {
+        state->_asseble_error = (char *) malloc(sizeof(char) * (len + 1));
+        snprintf(state->_asseble_error, len+2, "\n%s", cause);
+    }
+    else
+    {
+        state->_asseble_error = (char *) realloc(state->_asseble_error, sizeof(char) * (strlen(state->_asseble_error) + len + 1));
+        snprintf(state->_asseble_error+strlen(state->_asseble_error), len+1, "%s", cause);
+    }
 }
 
 int lastIndexOf(const char* s, char target)
@@ -49,7 +51,7 @@ int lastIndexOf(const char* s, char target)
 }
 
 
-int assemble(const char* filepath)
+int assemble(SemanticState* state, const char* filepath)
 {
 	int exit_code = EXIT_SUCCESS;
 
@@ -82,8 +84,6 @@ int assemble(const char* filepath)
             output_file_path[lio+1] = 'B';
 
         }
-        else if (!check_file_format(output_file_path, "B68"))
-            FASSEMBLER_ERROR("Invalid file format in output file %s.", output_file_path);
 
         if (exit_code != EXIT_FAILURE)
         {
@@ -104,7 +104,8 @@ int assemble(const char* filepath)
 
             if (output_file_tmp == NULL)
             {
-                ASSEMBLER_ERROR("Could not open output file.");
+                push_error(state, "Could not open output file.");
+                exit_code = EXIT_FAILURE;
             }
             else
             {
@@ -120,7 +121,10 @@ int assemble(const char* filepath)
                     listing_file = fopen(listing_file_path, "w");
 
                     if (listing_file == NULL)
-                        ASSEMBLER_ERROR("Could not open listing file.");
+                    {
+                        push_error(state, "Could not open listing file.");
+                        exit_code = EXIT_FAILURE;
+                    }
                 }
 
                 if (symbol_file_path == NULL)
@@ -132,12 +136,16 @@ int assemble(const char* filepath)
                     symbol_file = fopen(symbol_file_path, "wb");
 
                     if (symbol_file == NULL)
-                        ASSEMBLER_ERROR("Could not open symbol file.");
+                    {
+                        push_error(state, "Could not open symbol file.");
+                        exit_code = EXIT_FAILURE;
+                    }
                 }
 
-                if (!ClownAssembler_Assemble(input_file, output_file_tmp, listing_file, symbol_file, input_file_path, debug, case_insensitive, equ_set_descope_local_labels))
+                if (!ClownAssembler_Assemble(state, input_file, output_file_tmp, listing_file, symbol_file, input_file_path, debug, case_insensitive, equ_set_descope_local_labels))
                 {
-                    ASSEMBLER_ERROR("Could not assemble.");
+                    push_error(state, "Could not assemble.");
+                    exit_code = EXIT_FAILURE;
                 }
                 else
                 {
@@ -148,7 +156,8 @@ int assemble(const char* filepath)
 
                     if (output_file == NULL || output_file_tmp == NULL)
                     {
-                        ASSEMBLER_ERROR("Could not open output file.");
+                        push_error(state, "Could not open output file.");
+                        exit_code = EXIT_FAILURE;
                     }
                     else
                     {

@@ -10,8 +10,30 @@
     background-color: chocolate;
 }
 
+@media (max-width: 1024px) {
+    .header {
+        margin-top: -8px;
+        margin-right: -8px;
+        margin-left: -8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-width: 100%;
+        min-height: 4em;
+        background-color: chocolate;
+    }
+
+    .header-title {
+        font-size: large;
+        color: rgb(69, 69, 69);
+        text-decoration: solid;
+        border: none;
+        background: transparent;
+    }
+}
+
 .header-title {
-    font-size: xxx-large;
+    font-size: xx-large;
     color: rgb(69, 69, 69);
     text-decoration: solid;
     border: none;

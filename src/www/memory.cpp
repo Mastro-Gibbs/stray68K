@@ -9,6 +9,7 @@ MemoryView::MemoryView()
       currOffSet(nullptr),
       from(nullptr),
       offset_(0),
+      emulator(nullptr),
       WTemplate(tr("memory-msg"))
 {
 
@@ -47,6 +48,11 @@ void MemoryView::setUpMemory()
     enableFetch(false);
 }
 
+void MemoryView::setEmulator(struct EmulationMachine* _emulator)
+{
+    emulator = _emulator;
+}
+
 string format32BitReg(string s)
 {
     int len = s.length();
@@ -83,7 +89,7 @@ void MemoryView::fetchBlock()
         addresses->setText(addresses->text() + format32BitReg(ss.str()));
     }
 
-    const unsigned char* block = read_chunk(offset_, offset_ + (16*20));
+    const unsigned char* block = read_chunk(emulator, offset_, offset_ + (16*20));
 
     for (size_t i = 0, j = 0; i < (16*20); i++, j++)
     {
@@ -107,21 +113,28 @@ void MemoryView::fetchBlock()
 }
 
 
-void MemoryView::update()
+void MemoryView::update(unsigned int _from)
 {
-    if (offset_ != 0)
-    {
+    unsigned int address = (_from != 0) ? _from : offset_;
+
+    if (address != 0)
+    {   
+        offset_ = address;
+
+        stringstream ss;
+        ss << hex << address;
+        from->setText(ss.str());
         addresses->setText("");
         bitfield->setText("");
 
         for (size_t i = 0, j = 0; i < 20; i++, j += 16)
         {
             stringstream ss;
-            ss << hex << (offset_ + j) << "\n";
+            ss << hex << (address + j) << "\n";
             addresses->setText(addresses->text() + format32BitReg(ss.str()));
         }
 
-        const unsigned char* block = read_chunk(offset_, offset_ + (16*20));
+        const unsigned char* block = read_chunk(emulator, address, address + (16*20));
 
         for (size_t i = 0, j = 0; i < (16*20); i++, j++)
         {

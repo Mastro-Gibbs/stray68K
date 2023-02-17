@@ -17,26 +17,37 @@
 #include "console.hpp"
 #include "register.hpp"
 
+#include "../emulator/motorolatypes.h"
+#include "../assembler/assemblertypes.h"
+
 using namespace Wt;
 using namespace std;
 
 extern "C" {
 
-    int assemble(const char* filepath);
+    SemanticState* obtain_semantic_state();
 
-    void begin_emulator(const char *path);
+    void free_SemanticState(SemanticState* state);
 
-    const char* assemble_status();
+    int assemble(SemanticState* astatus, const char* filepath);
 
-    void end_emulator();
+    struct EmulationMachine* obtain_emulation_machine(const char *path);
 
-    int emulate();
+    int is_last_istr(struct EmulationMachine* emulator);
 
-    const char* machine_status();
+    void begin_emulator(struct EmulationMachine* emulator);
 
-    int is_last_istr();
+    void end_emulator(struct EmulationMachine* emulator);
 
-    void init_buffer();
+    int emulate (struct EmulationMachine* emulator);
+
+    void flush_buffer(struct EmulationMachine* emulator);
+
+    void init_buffer(struct EmulationMachine* emulator);
+
+    void cwrite(struct EmulationMachine* emulator, char _c);
+
+    u32 peek_ORG_from_file(struct EmulationMachine *emulator);
 }
 
 typedef struct __emulation_data__ 
@@ -121,9 +132,13 @@ class Dispatcher : public WContainerWidget
         thread terminateThread_;
         thread nextThread_;
 
-        void doRun(WApplication *app);
+        void doRun(WApplication *app, struct EmulationMachine* em);
         void doTerminate(WApplication *app);
         void doNext(WApplication* app);
+
+
+        struct EmulationMachine* emulator;
+        SemanticState*           assembler;
 };
 
 

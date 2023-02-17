@@ -16,37 +16,35 @@
 
 #include <stdlib.h>
 
-m68k_cpu* init_cpu(struct EmulationMachine *em);
-m68k_cpu* get_cpu(void);
-void      reset_cpu(void);
-void      destroy_cpu(void);
+void init_cpu(struct EmulationMachine *emulator);
+void reset_cpu(struct EmulationMachine* emulator);
 
 
 /* REGS */
-u32  read_datareg(const u32 reg);
-void write_datareg(const u32 reg, const u32 val, opsize* const size);
+u32  read_datareg(struct EmulationMachine* emulator, const u32 reg);
+void write_datareg(struct EmulationMachine* emulator, const u32 reg, const u32 val, opsize* const size);
 
-u32  read_addrreg(const u32 reg);
-void write_addrreg(const u32 reg, const u32 val, opsize* const size);
+u32  read_addrreg(struct EmulationMachine* emulator, const u32 reg);
+void write_addrreg(struct EmulationMachine* emulator, const u32 reg, const u32 val, opsize* const size);
 
-void incr_addr_reg(const u32 reg, const opsize size);
-void decr_addr_reg(const u32 reg, const opsize size);
+void incr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsize size);
+void decr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsize size);
 
 
 /* STACKS */
-u16 pop_word(void);
-u32 pop_long(void);
+u16 pop_word(struct EmulationMachine* emulator);
+u32 pop_long(struct EmulationMachine* emulator);
 
-void push_word(const u16 word);
-void push_long(const u32 longword);
+void push_word(struct EmulationMachine* emulator, const u16 word);
+void push_long(struct EmulationMachine* emulator, const u32 longword);
 
 
 /* CONDITION CODES */
-bit eval_cc(const CCm cc);
+bit eval_cc(struct EmulationMachine* emulator, const CCm cc);
 
 
 /* PROGRAM COUNTER */
-void set_pc(const u32 pc);
-u32 get_pc(void);
+void set_pc(struct EmulationMachine* emulator, const u32 pc);
+u32 get_pc(struct EmulationMachine* emulator);
 
 #endif // __CPU_H__68000

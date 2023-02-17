@@ -12,6 +12,15 @@
     column-gap: 0px;
 }
 
+@media (max-width: 1024px) {
+    .container3-col {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 5% 55% 40%;
+        column-gap: 0px;
+    }
+}
+
 .containeritem-row-count-style {
     text-align: center;
     padding-left: 10px;

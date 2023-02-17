@@ -60,35 +60,8 @@ RegisterRender::RegisterRender()
     init_data_reg();
     init_addr_reg();
     init_other_regs();
-
-    auto mnem = make_unique<WTextArea>();
-    mnem->setText(INVALID_MNEMONIC);
-    mnem->setStyleClass("register-data-8bit");
-    mnem->setReadOnly(true);
-
-    mnemonic = template_->bindWidget("mnem", move(mnem));
-
-    auto hcode = make_unique<WTextArea>();
-    hcode->setText(REG_DEF_VAL_2byte);
-    hcode->setStyleClass("register-data-2byte");
-    hcode->setReadOnly(true);
-
-    code = template_->bindWidget("hcode", move(hcode));
-
-    auto bcode = make_unique<WTextArea>();
-    bcode->setText(REG_DEF_VAL_16BIT);
-    bcode->setStyleClass("register-data-16bit");
-    bcode->setReadOnly(true);
-
-    _16bit_code = template_->bindWidget("bcode", move(bcode));
-
-
-    auto time_ = make_unique<WTextArea>();
-    time_->setText(REG_DEF_VAL_16BIT);
-    time_->setStyleClass("register-data-16bit");
-    time_->setReadOnly(true);
-
-    time = template_->bindWidget("time", move(time_));
+    init_others();
+    
 }
 
 
@@ -110,6 +83,10 @@ void RegisterRender::clear()
     setBCode(0, false);
 
     setTime(0, false);
+
+    setFWB(REG_DEF_VAL_4byte);
+    setLWB(REG_DEF_VAL_4byte);
+    setHALT(REG_DEF_VAL_4byte);
 }
 
 
@@ -170,6 +147,59 @@ void RegisterRender::init_other_regs()
     ccr->setReadOnly(true);
 
     CCR = template_->bindWidget("ccr", move(ccr));
+}
+
+void RegisterRender::init_others()
+{
+    auto mnem = make_unique<WTextArea>();
+    mnem->setText(INVALID_MNEMONIC);
+    mnem->setStyleClass("register-data-8bit");
+    mnem->setReadOnly(true);
+
+    mnemonic = template_->bindWidget("mnem", move(mnem));
+
+    auto hcode = make_unique<WTextArea>();
+    hcode->setText(REG_DEF_VAL_2byte);
+    hcode->setStyleClass("register-data-2byte");
+    hcode->setReadOnly(true);
+
+    code = template_->bindWidget("hcode", move(hcode));
+
+    auto bcode = make_unique<WTextArea>();
+    bcode->setText(REG_DEF_VAL_16BIT);
+    bcode->setStyleClass("register-data-16bit");
+    bcode->setReadOnly(true);
+
+    _16bit_code = template_->bindWidget("bcode", move(bcode));
+
+
+    auto time_ = make_unique<WTextArea>();
+    time_->setText(REG_DEF_VAL_16BIT);
+    time_->setStyleClass("register-data-16bit");
+    time_->setReadOnly(true);
+
+    time = template_->bindWidget("time", move(time_));
+
+    auto fwb = make_unique<WTextArea>();
+    fwb->setText(REG_DEF_VAL_4byte);
+    fwb->setStyleClass("register-data-8bit");
+    fwb->setReadOnly(true);
+
+    FWB = template_->bindWidget("fwb", move(fwb));
+
+    auto lwb = make_unique<WTextArea>();
+    lwb->setText(REG_DEF_VAL_4byte);
+    lwb->setStyleClass("register-data-8bit");
+    lwb->setReadOnly(true);
+
+    LWB = template_->bindWidget("lwb", move(lwb));
+
+    auto halt = make_unique<WTextArea>();
+    halt->setText(REG_DEF_VAL_4byte);
+    halt->setStyleClass("register-data-8bit");
+    halt->setReadOnly(true);
+
+    HALT = template_->bindWidget("halt", move(halt));
 }
 
 #include <algorithm>
@@ -265,6 +295,21 @@ void RegisterRender::setAddrReg(unsigned int index, string result)
     reg->setText(format32BitReg(&result));
 }
 
+void RegisterRender::setFWB(string result)
+{
+    FWB->setText(format32BitReg(&result));
+}
+
+void RegisterRender::setLWB(string result)
+{
+    LWB->setText(format32BitReg(&result));
+}
+
+void RegisterRender::setHALT(string result)
+{
+    HALT->setText(format32BitReg(&result));
+}
+
 
 void RegisterRender::update(const char* map)
 {
@@ -286,5 +331,9 @@ void RegisterRender::update(const char* map)
     setMnemonic(string(json["OP"]["MNEMONIC"]));
     setHCode(string(json["OP"]["CODE"]));
     setBCode(stoi(string(json["OP"]["CODE"]), nullptr, 16));
-    setTime((unsigned int) json["TIME"]);
+    setTime((unsigned long) json["TIME"]);
+
+    setFWB(string(json["RAM"]["BEGIN"]));
+    setLWB(string(json["RAM"]["END"]));
+    setHALT(string(json["RAM"]["HALT"]));
 }

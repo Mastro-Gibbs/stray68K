@@ -4,13 +4,13 @@
 #include <regex.h>
 #include <termios.h>
 
+#define RAM_MAX_SIZE    0x00FFFFFF
+
+
 //handler return types
 #define RETURN_OK_PC_NO_INCR 2
 #define RETURN_OK            1
 #define RETURN_ERR           0
-
-#define TRUE        1
-#define FALSE       0
 
 typedef unsigned short int opcode;
 
@@ -39,6 +39,15 @@ typedef char               s8;
 typedef unsigned short int bitmask;
 
 
+typedef unsigned char c_bool;
+
+enum
+{
+	c_false = 0,
+	c_true  = 1
+};
+
+
 //FORWARDING EMULATOR MACHINE COMPLEX STRUCT
 struct EmulationMachine;
 
@@ -57,21 +66,14 @@ typedef struct __m68k__cpu__
 
     srflags sr;        // status register flags
 
-    u32 (*exec) (struct EmulationMachine *em); // runner
-
-    void (*show)(void);
-
 } m68k_cpu;
 
 
 //RAM STRUCT
 typedef struct __m68k__ram__
 {
-    u8 *ram;
+    u8  self[0x01000000];
     u32 size;
-
-    void (*show)  (u32 _start, u32 _end, u32 _ptr, char *pcptr_color);
-    void (*stack) (u32 _top, u32 _bottom);
 
 } m68k_ram;
 
@@ -83,7 +85,7 @@ typedef struct __m68k__opcode__
     opcode mask;
     char*  mnemonic;
 
-    u32 (*handler) (void);
+    u32 (*handler) (struct EmulationMachine* emulator);
 
 } m68k_opcode;
 
@@ -101,34 +103,15 @@ typedef struct __m68k__codemap__
 //EMULATOR MACHINE COMPLEX STRUCT
 struct EmulationMachine
 {
-    enum { EMULATE_STD = 0, EMULATE_SBS = 1 } EmuType;
-
     struct
     {
-        struct
-        {
-            bit is_activated;
-
-            bit cpu;
-            bit ram;
-            bit chrono;
-            bit op;
-            bit io;
-
-            bit concat;
-            bit dump;
-        } JSON;
-
-        bit  descriptive_mode;
-        bit  quiet_mode;
-        bit  chrono_mode;
-        char *executable_path;
+        char* executable_path;
     } ExecArgs;
 
     struct
     {
-        m68k_cpu *cpu;
-        m68k_ram *ram;
+        m68k_cpu cpu;
+        m68k_ram ram;
 
         enum
         {
@@ -139,7 +122,8 @@ struct EmulationMachine
             WARNING_STATE   = 4,
             TRAP_STATE      = 5,
             MERR_STATE      = 6,
-            IO_STATE        = 7
+            IO_STATE        = 7,
+            SLEEP_STATE     = 8
         } State;
 
         struct
@@ -147,13 +131,11 @@ struct EmulationMachine
             u16  operation_code;
             char *mnemonic;
 
-            bit sbs_printer_enabler;
             u32 simhalt;
             u32 org_pointer;
             u32 last_loaded_byte_index;
 
             u32 JSR_CALL_COUNTER;
-            u32 RAM_SIZE;
             u32 STACK_BOTTOM_INDEX;
 
             struct termios oldt;
@@ -176,14 +158,31 @@ struct EmulationMachine
             enum { PANIC_EXC_TYPE = 0, TRAP_EXC_TYPE  = 1, MERR_EXC_TYPE  = 2 } Type;
         } Exception;
 
+        struct 
+        {
+            char mnem[10];
+            u32  code;
+            char cause[250];
+        } Warning;
+
         struct
         {
             char *buffer;
             enum { INPUT = 0,    OUTPUT = 1,  IO_UNDEF = 2 } Type;
         } IO;
 
-        void (*init)    (struct EmulationMachine *_this);
-        void (*turnoff) ();
+        struct
+        {
+            s8  self[4096];
+            u32 _pos;
+            c_bool _valid;
+            c_bool _able;
+
+        } InputBuffer;
+
+        char* dump;
+
+        struct __m68k__codemap__ *codemap;
 
     } Machine;
 

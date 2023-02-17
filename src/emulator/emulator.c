@@ -15,52 +15,23 @@
 #define ORG_SYMBOL      'o'
 #define ORG_DEFAULT     0x00000000
 
-#define RAM_MAX_SIZE    0x00FFFFFF
-
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-bit halt_compare(u8 *s1)
+c_bool halt_compare(u8 *s1)
 {
     u8 halt[8] = {0xAC, 0xAC, 0xFF, 0xFF, 0xFF, 0xFF, 0xAC, 0xAC};
 
     for (u16 i = 0; i < 8; i++)
-        if (s1[i] != halt[i]) return FALSE;
+        if (s1[i] != halt[i]) return c_false;
 
-    return TRUE;
+    return c_true;
 }
 
 
 /* LOADER */
-bit _is_valid_file(struct EmulationMachine *em)
-{
-    FILE    *fp;
-
-    const char* ldot = strrchr(em->ExecArgs.executable_path, '.');
-    if (ldot != NULL)
-    {
-        size_t length = strlen("B68");
-        if (strncmp(ldot + 1, "B68", length) != 0)
-        {
-            EMULATOR_ERROR("File extension not valid, be sure to pass '.B68' format.")
-        }
-    }
-
-    fp = fopen(em->ExecArgs.executable_path, "r");
-
-    if (fp == NULL)
-        EMULATOR_ERROR("File not found, be sure to pass correct path.")
-
-    fseek(fp, 0L, SEEK_END);
-    if (ftell(fp) == 0L)
-        EMULATOR_ERROR("Empty bin file.")
-
-    fclose(fp);
-
-    return 1;
-}
 
 
-u32 peek_ORG_from_file(struct EmulationMachine *em)
+u32 peek_ORG_from_file(struct EmulationMachine *emulator)
 {
     FILE *fp;
 
@@ -68,7 +39,7 @@ u32 peek_ORG_from_file(struct EmulationMachine *em)
     u8  org[4];
     u32 value = ORG_DEFAULT;
 
-    fp = fopen(em->ExecArgs.executable_path, "rb");
+    fp = fopen(emulator->ExecArgs.executable_path, "rb");
 
     if (fread(&is_org, 1, 1, fp) == 0)
         EMULATOR_ERROR("Error incomes while loading invalid binary");
@@ -87,7 +58,7 @@ u32 peek_ORG_from_file(struct EmulationMachine *em)
 }
 
 
-FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
+FILE* open_file_and_extract_ORG(struct EmulationMachine *emulator)
 {
     FILE *fp;
 
@@ -95,7 +66,7 @@ FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
     u8  org[4];
     u32 value = ORG_DEFAULT;
 
-    fp = fopen(em->ExecArgs.executable_path, "rb");
+    fp = fopen(emulator->ExecArgs.executable_path, "rb");
 
     if (fread(&is_org, 1, 1, fp) == 0)
         EMULATOR_ERROR("Error incomes while loading invalid binary");
@@ -110,56 +81,20 @@ FILE* open_file_and_extract_ORG(struct EmulationMachine *em)
     else
         fseek(fp, 0, SEEK_SET);
 
-    em->Machine.RuntimeData.org_pointer = value;
-    em->Machine.cpu->pc                 = value;
+    emulator->Machine.RuntimeData.org_pointer = value;
+    emulator->Machine.cpu.pc                 = value;
 
     return fp;
 }
 
-
-u32 obtain_heap_size(char *st)
-{
-    u32 base;
-    u32 multiplier;
-
-    size_t len;
-
-    len = strlen(st);
-
-    for (size_t p = 0; p < len - 1; p++)
-        if (!isdigit(st[p])) return FALSE;
-
-    char st_cpy[len];
-    snprintf(st_cpy, len, "%s", st);
-
-    base = strtoul(st_cpy, 0L, 10);
-
-    switch (st[len-1])
-    {
-        case 'K':
-        case 'k':
-            multiplier = 1024;
-            break;
-        case 'M':
-        case 'm':
-            multiplier = 1048576;
-            break;
-        default:
-            return FALSE;
-    }
-
-    return (base * multiplier);
-}
-
-
-void load_bytecode(struct EmulationMachine *em)
+void load_bytecode(struct EmulationMachine *emulator)
 {
     FILE  *fp;
 
     u8  byte;
     u32 span = 0;
 
-    fp = open_file_and_extract_ORG(em);
+    fp = open_file_and_extract_ORG(emulator);
 
     while (fread(&byte, 1, 1, fp) != 0)
     {
@@ -173,90 +108,39 @@ void load_bytecode(struct EmulationMachine *em)
             for (; i < 8 && len != 0; i++)
                 len = fread(&sh[i], 1, 1, fp);
 
-            if (halt_compare(sh) && em->Machine.RuntimeData.simhalt == 0)
+            if (halt_compare(sh) && emulator->Machine.RuntimeData.simhalt == 0)
             {
-                em->Machine.RuntimeData.simhalt = em->Machine.cpu->pc + span;
+                emulator->Machine.RuntimeData.simhalt = emulator->Machine.cpu.pc + span;
                 continue;
             }
             else fseek(fp, ftell(fp) - ((!len) ? (i-2) : (i-1)),  SEEK_SET);
         }
 
-        write_byte(em->Machine.cpu->pc + span, byte);
+        write_byte(emulator, emulator->Machine.cpu.pc + span, byte);
         span += BYTE_SPAN;
     }
 
 
     fclose(fp);
 
-    em->Machine.RuntimeData.last_loaded_byte_index = em->Machine.cpu->pc + span;
+    emulator->Machine.RuntimeData.last_loaded_byte_index = emulator->Machine.cpu.pc + span;
 
-    if (em->Machine.RuntimeData.simhalt == 0)
-        em->Machine.RuntimeData.simhalt = em->Machine.RuntimeData.last_loaded_byte_index;
+    if (emulator->Machine.RuntimeData.simhalt == 0)
+        emulator->Machine.RuntimeData.simhalt = emulator->Machine.RuntimeData.last_loaded_byte_index;
 
 }
 
 
 
-/* EMULATOR UTILS*/
-void parse_args(struct EmulationMachine *em, char *path)
+struct EmulationMachine*
+obtain_emulation_machine(const char *path)
 {
-    em->ExecArgs.executable_path  = path;
+    struct EmulationMachine *emulator = NULL;
 
-    em->Machine.RuntimeData.RAM_SIZE = RAM_MAX_SIZE;
-
-    _is_valid_file(em);
-}
-
-
-void __init(struct EmulationMachine *this)
-{
-    this->Machine.cpu = init_cpu(this);
-
-    if (this->Machine.State == PANIC_STATE)
-    {
-        PANIC(this, this->Machine.Exception.panic_cause);
-
-        exit(EXIT_FAILURE);
-    }
-
-    init_opcodes(this);
-
-    if (this->Machine.State == PANIC_STATE)
-    {
-        PANIC(this, this->Machine.Exception.panic_cause);
-
-        exit(EXIT_FAILURE);
-    }
-
-    this->Machine.ram = init_ram(this);
-
-    if (this->Machine.State == PANIC_STATE)
-    {
-        PANIC(this, this->Machine.Exception.panic_cause);
-
-        exit(EXIT_FAILURE);
-    }
-}
-
-
-
-
-struct EmulationMachine *emulator = NULL;
-
-void __turnoff()
-{
-    if (emulator->Machine.IO.buffer)
-        free(emulator->Machine.IO.buffer);
-    destroy_cpu();
-    destroy_ram();
-    destroy_codes();
-}
-
-void obtain_emulation_machine(char *path)
-{
     emulator = malloc(sizeof(* emulator));
 
     emulator->Machine.State = BEGIN_STATE;
+    emulator->Machine.dump  = NULL;
 
     emulator->Machine.RuntimeData.operation_code = 0;
     emulator->Machine.RuntimeData.mnemonic       = NULL;
@@ -264,7 +148,6 @@ void obtain_emulation_machine(char *path)
     emulator->Machine.RuntimeData.org_pointer = ORG_DEFAULT;
     emulator->Machine.RuntimeData.simhalt     = 0;
     emulator->Machine.RuntimeData.last_loaded_byte_index = 0;
-    emulator->Machine.RuntimeData.sbs_printer_enabler    = FALSE;
 
     emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX = 0x01000000;
     emulator->Machine.RuntimeData.JSR_CALL_COUNTER   = 0;
@@ -274,26 +157,23 @@ void obtain_emulation_machine(char *path)
     emulator->Machine.IO.buffer  = NULL;
     emulator->Machine.IO.Type    = IO_UNDEF;
 
-    emulator->Machine.RuntimeData.sbs_printer_enabler = TRUE;
-    emulator->EmuType = EMULATE_SBS;
+    emulator->ExecArgs.executable_path = malloc(strlen(path) + 1);
+    strcpy(emulator->ExecArgs.executable_path, path);
 
-    parse_args(emulator, path);
+    init_cpu(emulator);
 
-    emulator->Machine.init    = __init;
-    emulator->Machine.turnoff = __turnoff;
+    init_opcodes(emulator);
 
+    init_ram(emulator);
+
+    return emulator;
 }
 
 
 
 
-void begin_emulator(char *path)
+void begin_emulator(struct EmulationMachine* emulator)
 {
-    obtain_emulation_machine(path);
-    emulator->Machine.init(emulator);
-
-    preset_hander(emulator);
-
     load_bytecode(emulator);
 
     emulator->Machine.State = EXECUTION_STATE;
@@ -303,7 +183,7 @@ void begin_emulator(char *path)
     clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_begin);
 }
 
-void end_emulator()
+void end_emulator(struct EmulationMachine* emulator)
 {
     clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
 
@@ -313,54 +193,54 @@ void end_emulator()
     emulator->Machine.IO.Type = IO_UNDEF;
     emulator->Machine.State = FINAL_STATE;
 
-    emit_dump(emulator);
+    if (emulator->Machine.IO.buffer)
+        free(emulator->Machine.IO.buffer);
 
-    emulator->Machine.turnoff();
+    if (emulator->Machine.dump)
+        free(emulator->Machine.dump);
+
+    if (emulator->ExecArgs.executable_path)
+        free(emulator->ExecArgs.executable_path);
+    
+    destroy_codes(emulator);
 
     free(emulator);
-    emulator = NULL;
 }
 
 
-int is_last_istr()
+int is_last_istr(struct EmulationMachine* emulator)
 {
-    return (emulator->Machine.cpu->pc + WORD_SPAN) < emulator->Machine.RuntimeData.simhalt ? 0 : 1;
+    return (emulator->Machine.cpu.pc + WORD_SPAN) < emulator->Machine.RuntimeData.simhalt ? 0 : 1;
 }
 
 
 /* EMULATOR */
-int emulate()
+int emulate(struct EmulationMachine* emulator)
 {
-    if (emulator->Machine.cpu->pc < emulator->Machine.RuntimeData.simhalt)
+    if (emulator->Machine.cpu.pc < emulator->Machine.RuntimeData.simhalt)
     {
-        if (emulator->Machine.cpu->exec(emulator) == RETURN_ERR)
+        if (execute_istr(emulator) == RETURN_ERR)
         {
             clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
 
             emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
                                    (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
 
-            switch (emulator->Machine.State) {
-                case PANIC_STATE:
-                {
-                    PANIC(emulator, emulator->Machine.Exception.panic_cause)
-                    break;
-                }
-                case TRAP_STATE:
-                {
-                    TRAPEXC(emulator, emulator->Machine.Exception.trap_cause)
-                    break;
-                }
-                default:
-                    break;
-            }
-
+            
+            emit_dump(emulator);
 
             return (RETURN_ERR);
         }
 
         return (RETURN_OK);
     }
+
+    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
+
+    emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
+                                   (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
+
+    emit_dump(emulator);
 
     return (RETURN_ERR);
 }

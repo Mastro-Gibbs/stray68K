@@ -24,6 +24,8 @@ Dispatcher::Dispatcher()
     compile(nullptr),
     run(nullptr),
     debug(nullptr),
+    emulator(nullptr),
+    assembler(nullptr),
     WContainerWidget()
 {
     WApplication* instance = WApplication::instance();
@@ -194,12 +196,12 @@ void Dispatcher::doNext(WApplication* app)
     
     if (uiLock) 
     {
-        if (!emulate())
+        if (!emulate(emulator))
             do_stop();
         else
         {
-            reg_rend_->update(machine_status());
-            console_->push_stdout(machine_status());
+            reg_rend_->update(emulator->Machine.dump);
+            console_->push_stdout(emulator->Machine.dump);
             memory_->update();
         }
 
@@ -212,23 +214,27 @@ void Dispatcher::doNext(WApplication* app)
 
 void Dispatcher::do_stop()
 {
-    next_istr->setDisabled(true);
-    terminate->setDisabled(true);
-    stop->setDisabled(true);
+    console_->push_stdout(emulator->Machine.dump);
+    reg_rend_->update(emulator->Machine.dump);
+    memory_->update();
+    memory_->enableFetch(false);
+
+    console_->disable(true);
+    console_->end_program();
+
+    editor_->disable(false);
     run->setDisabled(false);
     debug->setDisabled(false);
 
-    editor_->disable(false);
+    next_istr->setDisabled(true);
+    terminate->setDisabled(true);
+    stop->setDisabled(true);
 
-    memory_->enableFetch(false);
+    console_->setEmulator(nullptr);
+    memory_->setEmulator(nullptr);
 
-    memory_->update();
-
-    end_emulator();
-
-    reg_rend_->update(machine_status());
-    console_->push_stdout(machine_status());
-    console_->disable(true);
+    end_emulator(emulator);
+    emulator = nullptr;
 }
 
 void Dispatcher::do_terminate()
@@ -245,13 +251,13 @@ void Dispatcher::do_terminate()
 
 void Dispatcher::doTerminate(WApplication *app)
 {
-    while (emulate())
+    while (emulate(emulator))
     {
         WApplication::UpdateLock uiLock(app);
     
         if (uiLock) 
         {
-            console_->push_stdout(machine_status());
+            console_->push_stdout(emulator->Machine.dump);
 
             app->triggerUpdate();
         }
@@ -261,12 +267,13 @@ void Dispatcher::doTerminate(WApplication *app)
     
     if (uiLock) 
     {
-        reg_rend_->update(machine_status());
-        console_->push_stdout(machine_status());
+        reg_rend_->update(emulator->Machine.dump);
+        console_->push_stdout(emulator->Machine.dump);
         memory_->update();
         memory_->enableFetch(false);
 
-        end_emulator();
+        end_emulator(emulator);
+        emulator = nullptr;
 
         next_istr->setDisabled(true);
         terminate->setDisabled(true);
@@ -276,13 +283,15 @@ void Dispatcher::doTerminate(WApplication *app)
 
         editor_->disable(false);
         console_->disable(true);
+        console_->end_program();
 
         app->triggerUpdate();
 
         app->enableUpdates(false);
     } 
     else{
-        end_emulator();
+        end_emulator(emulator);
+        emulator = nullptr;
         return;
     } 
 }
@@ -293,7 +302,7 @@ void Dispatcher::compile_src()
 
     WString src = editor_->text_();
 
-    console_->insert("Compiling source code.\n");
+    console_->begin_assembler();
 
     if (!src.empty())
     {
@@ -309,33 +318,37 @@ void Dispatcher::compile_src()
 
             string bname = fname;
             replace(bname.begin(), bname.end(), 'X', 'B');
-            string cmd = "> stray68k " + fname + " -o " + bname;
 
-            console_->insert(cmd + "\n");
+            assembler = obtain_semantic_state();
 
-            if (!assemble(fname.c_str()))
+            if (assembler)
             {
-                WString err = WString(assemble_status());
-                console_->insert(err + "\n");
-                console_->insert("Could not assemble.\n");
-                edata.setValid(false);
+                if (!assemble(assembler, fname.c_str()))
+                {
+                    console_->push_simple_stdout(string(assembler->_asseble_error));
+                    edata.setValid(false);
+                }
+                else
+                {
+                    edata.setBin(bname);
+                    edata.setValid(true);
+
+                    console_->end_assembler();
+                    run->setDisabled(false);
+                    debug->setDisabled(false);
+                    compile->setDisabled(true);
+                }
+
+                free_SemanticState(assembler);
             }
             else
-            {
-                edata.setBin(bname);
-                edata.setValid(true);
-
-                console_->insert("Success.\n");
-                run->setDisabled(false);
-                debug->setDisabled(false);
-                compile->setDisabled(true);
-            }
+            { console_->assembler_error(); edata.setValid(false); }  
         }
         else
-        {   console_->insert("Error.\n"); edata.setValid(false); }
+        {   console_->assembler_error(); edata.setValid(false); }
     }
     else
-    {   console_->insert("Empty source file.\n"); edata.setValid(false); }
+    {   console_->push_simple_stdout("Empty source file.\n"); edata.setValid(false); }
 }
 
 
@@ -358,30 +371,39 @@ void Dispatcher::run_src()
 
     if (edata.valid())
     {      
+        emulator = obtain_emulation_machine(edata.bin().c_str());
+        console_->setEmulator(emulator);
+        memory_->setEmulator(emulator);
+
+        begin_emulator(emulator);
+
+        init_buffer(emulator);
+
+        memory_->update(peek_ORG_from_file(emulator));
+
+        console_->begin_program();
+
         app->enableUpdates(true);
         
         if (runnerThread_.joinable())
             runnerThread_.join();
             
-        runnerThread_ = std::thread(std::bind(&Dispatcher::doRun, this, app));       
+        runnerThread_ = std::thread(std::bind(&Dispatcher::doRun, this, app, emulator));     
+  
     }
 }
 
-void Dispatcher::doRun(WApplication *app)
+void Dispatcher::doRun(WApplication *app, struct EmulationMachine* em)
 {
-    cout << edata.bin() << endl;
-
-    begin_emulator(edata.bin().c_str());
-
-    init_buffer();
-
-    while (emulate())
+    while (emulate(em))
     {
         WApplication::UpdateLock uiLock(app);
     
         if (uiLock) 
         {
-            console_->push_stdout(machine_status());
+            console_->push_stdout(em->Machine.dump);
+            reg_rend_->update(em->Machine.dump);
+            memory_->update();
 
             app->triggerUpdate();
         }
@@ -391,18 +413,22 @@ void Dispatcher::doRun(WApplication *app)
     
     if (uiLock) 
     {
-        reg_rend_->update(machine_status());
-        console_->push_stdout(machine_status());
+        reg_rend_->update(em->Machine.dump);
         memory_->update();
         memory_->enableFetch(false);
 
-        end_emulator();
+        end_emulator(em);
+        em = nullptr;
 
         console_->disable(true);
+        console_->end_program();
 
         editor_->disable(false);
         run->setDisabled(false);
         debug->setDisabled(false);
+
+        console_->setEmulator(nullptr);
+        memory_->setEmulator(nullptr);
 
         app->triggerUpdate();
 
@@ -410,7 +436,8 @@ void Dispatcher::doRun(WApplication *app)
     } 
     else 
     {
-        end_emulator();
+        end_emulator(em);
+        em = nullptr;
         return;
     }
 }
@@ -433,9 +460,14 @@ void Dispatcher::debug_src()
 
     if (edata.valid())
     {
-        begin_emulator(edata.bin().c_str());
+        emulator = obtain_emulation_machine(edata.bin().c_str());
+        console_->setEmulator(emulator);
 
-        init_buffer();
+        console_->begin_program();
+
+        begin_emulator(emulator);
+
+        init_buffer(emulator);
 
         console_->disable(false);
     }

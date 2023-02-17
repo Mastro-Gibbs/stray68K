@@ -23,130 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "clowncommon.h"
-
-#include "dictionary.h"
-#include "strcmpci.h"
-#include "syntactic.h"
-#define YY_NO_UNISTD_H
-#include "lexical.h"
-
-#define PROGRAM_COUNTER_OF_STATEMENT ",PROGRAM_COUNTER_OF_STATEMENT"
-#define PROGRAM_COUNTER_OF_EXPRESSION ",PROGRAM_COUNTER_OF_EXPRESSION"
-
-#define bprintf(x)                                               \
-  do {                                                           \
-    unsigned long long a__ = (x);                                \
-    size_t bits__ = sizeof(x) * 8;                               \
-    printf(#x ": ");                                             \
-    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
-    putchar('\n');                                               \
-  } while (0)
-
-typedef enum SymbolType
-{
-	SYMBOL_CONSTANT,
-	SYMBOL_VARIABLE,
-	SYMBOL_MACRO,
-	SYMBOL_LABEL
-} SymbolType;
-
-typedef struct Location
-{
-	struct Location *previous;
-
-	char *file_path;
-	unsigned long line_number;
-} Location;
-
-typedef struct FixUp
-{
-	struct FixUp *next;
-
-	Statement statement;
-	unsigned long program_counter;
-	long output_position;
-	char *last_global_label;
-	char *source_line;
-	Location location;
-	char *label;
-} FixUp;
-
-typedef struct SourceLineListNode
-{
-	struct SourceLineListNode *next;
-
-	char *source_line;
-} SourceLineListNode;
-
-typedef struct SourceLineList
-{
-	SourceLineListNode *head;
-	SourceLineListNode *tail;
-} SourceLineList;
-
-typedef struct SemanticState
-{
-	cc_bool success;
-	FILE *output_file;
-	FILE *listing_file;
-    char *root_path;
-	cc_bool equ_set_descope_local_labels;
-	unsigned long program_counter;
-	FixUp *fix_up_list_head;
-	FixUp *fix_up_list_tail;
-	cc_bool fix_up_needed;
-	cc_bool doing_fix_up;
-	cc_bool doing_final_pass;
-	Dictionary_State dictionary;
-	char *last_global_label;
-	Location *location;
-	yyscan_t flex_state;
-	char line_buffer[1024];
-	const char *source_line;
-	unsigned int current_if_level;
-	unsigned int false_if_level;
-    char* _asseble_error;
-	cc_bool end;
-	enum
-	{
-		MODE_NORMAL,
-		MODE_REPT,
-		MODE_MACRO,
-		MODE_WHILE
-	} mode;
-	union
-	{
-		struct
-		{
-			unsigned long repetitions;
-			unsigned long line_number;
-			SourceLineList source_line_list;
-		} rept;
-		struct
-		{
-			char *name;
-			unsigned long line_number;
-			IdentifierListNode *parameter_names;
-			SourceLineList source_line_list;
-			cc_bool is_short;
-		} macro;
-		struct
-		{
-			Expression expression;
-			char *source_line;
-			unsigned long line_number;
-			SourceLineList source_line_list;
-		} while_statement;
-	} shared;
-} SemanticState;
-
-typedef struct Macro
-{
-	char *name;
-	IdentifierListNode *parameter_names;
-	SourceLineListNode *source_line_list_head;
-} Macro;
 
 /* Some forward declarations that are needed because some functions recurse into each other. */
 static void AssembleFile(SemanticState *state, FILE *input_file);
@@ -160,13 +36,10 @@ static void AssembleLine(SemanticState *state, const char *source_line);
 #define ATTRIBUTE_PRINTF(a, b)
 #endif
 
-int can_write_simhalt = 1;
-
-
 void write_simhalt(SemanticState *state)
 {
     int i;
-    if (can_write_simhalt)
+    if (state->can_write_simhalt)
     {
         for(i = 0; i < 2; i++)
             fputc(0xAC, state->output_file);
@@ -177,33 +50,23 @@ void write_simhalt(SemanticState *state)
         for(i = 0; i < 2; i++)
             fputc(0xAC, state->output_file);
 
-        can_write_simhalt = 0;
+        state->can_write_simhalt = cc_false;
     }
 }
-
-char *as = NULL;
 
 void asseble_error(SemanticState *state, const char *cause, size_t len)
 {
     if (state->_asseble_error == NULL)
     {
         state->_asseble_error = (char *) malloc(sizeof(char) * (len + 1));
-        snprintf(state->_asseble_error, len+1, "%s", cause);
+        snprintf(state->_asseble_error, len+3, "\n%s\n", cause);
     }
     else
     {
         state->_asseble_error = (char *) realloc(state->_asseble_error, sizeof(char) * (strlen(state->_asseble_error) + len + 1));
-        snprintf(state->_asseble_error+strlen(state->_asseble_error), len+1, "%s", cause);
+        snprintf(state->_asseble_error+strlen(state->_asseble_error), len+2, "%s\n", cause);
     }
 
-    as = state->_asseble_error;
-}
-
-
-const char* assemble_status()
-{
-    char *src = as;
-    return (src);
 }
 
 
@@ -213,59 +76,45 @@ static void ErrorMessageCommon(SemanticState *state)
 
 	for (location = state->location; location != NULL; location = location->previous)
     {
-        fprintf(stderr, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
-
-        int size = snprintf(NULL, 0, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+        int size = snprintf(NULL, 0, "On line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
 
         char *str = (char *)malloc(sizeof(char) * (size+1));
-        snprintf(str, size, "\nOn line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+        snprintf(str, size, "On line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
 
         asseble_error(state, str, size);
         free(str);
     }
-    fprintf(stderr, "\n\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
-
-    int size = snprintf(NULL, 0, "\n\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+    
+	int size = snprintf(NULL, 0, "\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
 
     char *str = (char *)malloc(sizeof(char) * (size+1));
-    snprintf(str, size, "\n\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
+    snprintf(str, size, "\t%s\n\n", state->source_line != NULL ? state->source_line : "[No source line]");
     asseble_error(state, str, size);
     free(str);
 }
 
-static void SimpleSemanticWarning(const char *fmt, ...)
-{
-    va_list args;
-
-    fputs("[\033[93mWARNING\033[0m] ", stderr);
-
-    va_start(args, fmt);
-    vfprintf(stderr, fmt, args);
-    va_end(args);
-}
-
-ATTRIBUTE_PRINTF(2, 3) static void SemanticWarning(SemanticState *state, const char *fmt, ...)
+static void SemanticWarning(SemanticState *state, const char *fmt, ...)
 {
 	va_list args;
 
-    fputs("[\033[93mWARNING\033[0m] ", stderr);
+    va_start(args, fmt);
+    int size = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+    va_start(args, fmt);
+    char *str = (char *)malloc(sizeof(char) * (size+1));
+    vsnprintf(str, size, fmt, args);
+    va_end(args);
 
-	va_start(args, fmt);
-	vfprintf(stderr, fmt, args);
-	va_end(args);
+	asseble_error(state, str, size);
+	free(str);
 
 	ErrorMessageCommon(state);
 }
 
-ATTRIBUTE_PRINTF(2, 3) static void SemanticError(SemanticState *state, const char *fmt, ...)
+static void SemanticError(SemanticState *state, const char *fmt, ...)
 {
 	va_list args;
 
-    fputs("[\033[91mERROR\033[0m] ", stderr);
-
-	va_start(args, fmt);
-	vfprintf(stderr, fmt, args);
-    va_end(args);
     va_start(args, fmt);
     int size = vsnprintf(NULL, 0, fmt, args);
     va_end(args);
@@ -282,16 +131,21 @@ ATTRIBUTE_PRINTF(2, 3) static void SemanticError(SemanticState *state, const cha
 	state->success = cc_false;
 }
 
-ATTRIBUTE_PRINTF(2, 3) static void InternalError(SemanticState *state, const char *fmt, ...)
+static void InternalError(SemanticState *state, const char *fmt, ...)
 {
 	va_list args;
 
-    fputs("[\033[91mINTERNAL ERROR\033[0m] ", stderr);
+    va_start(args, fmt);
+    int size = vsnprintf(NULL, 0, fmt, args);
+    va_end(args);
+    va_start(args, fmt);
+    char *str = (char *)malloc(sizeof(char) * (size+1));
+    vsnprintf(str, size, fmt, args);
+    va_end(args);
 
-	va_start(args, fmt);
-	vfprintf(stderr, fmt, args);
-	va_end(args);
-
+	asseble_error(state, str, size);
+	free(str);
+	
 	ErrorMessageCommon(state);
 
 	state->success = cc_false;
@@ -299,8 +153,6 @@ ATTRIBUTE_PRINTF(2, 3) static void InternalError(SemanticState *state, const cha
 
 static void OutOfMemoryError(SemanticState *state)
 {
-	fputs("Out-of-memory error.", stderr);
-
 	ErrorMessageCommon(state);
 
 	state->success = cc_false;
@@ -311,8 +163,6 @@ void m68kasm_warning(void *scanner, Statement *statement, const char *message)
 	SemanticState *state = m68kasm_get_extra(scanner);
 
 	(void)statement;
-
-    fprintf(stderr, "[\033[93mASM WARNING\033[0m] %s", message);
 
     int size = snprintf(NULL, 0, "%s", message);
 
@@ -326,8 +176,6 @@ void m68kasm_error(void *scanner, Statement *statement, const char *message)
 	SemanticState *state = m68kasm_get_extra(scanner);
 
 	(void)statement;
-
-    fprintf(stderr, "[\033[91mASM ERROR\033[0m] %s", message);
 
     int size = snprintf(NULL, 0, "%s", message);
 
@@ -2311,7 +2159,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 
 	/* Instructions on odd addresses cause exceptions on the 68k, so warn the user if they are produced. */
 	if (state->program_counter & 1)
-		SemanticWarning(state, "Instruction is at an odd address.");
+		SemanticWarning(state, "Syntax warning, instruction is at an odd address.");
 
 	state->program_counter += 2;
 
@@ -2386,7 +2234,7 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 			else if (instruction->operands[1].type == OPERAND_ADDRESS_REGISTER)
 			{
 				instruction->opcode.type = OPCODE_MOVEA; /* MOVEA mistyped as MOVE */
-				SemanticWarning(state, "MOVE should be MOVEA.");
+				SemanticWarning(state, "Syntax warning, MOVE should be MOVEA.");
 			}
 
 			break;
@@ -2799,12 +2647,12 @@ static void ProcessInstruction(SemanticState *state, StatementInstruction *instr
 								if (instruction->operands[1].type == OPERAND_DATA_REGISTER)
 								{
 									if (value >= 32)
-										SemanticWarning(state, "The bit index will be modulo 32.");
+										SemanticWarning(state, "Syntax warning, the bit index will be modulo 32.");
 								}
 								else
 								{
 									if (value >= 8)
-										SemanticWarning(state, "The bit index will be modulo 8.");
+										SemanticWarning(state, "Syntax warning, the bit index will be modulo 8.");
 								}
 
 								machine_code = 0x0800;
@@ -3959,7 +3807,7 @@ static void ProcessOrg(SemanticState *state, StatementOrg *org)
 
     if (state->location->previous != NULL)
     {
-        SimpleSemanticWarning("ORG should be written only in the main file, found in file %s. Ignoring istruction.\n\n", state->location->file_path);
+        SemanticWarning(state, "Syntax warning\nORG should be written only in the main file, found in file %s. Ignoring istruction.\n\n", state->location->file_path);
     }
     else
     {
@@ -4031,7 +3879,7 @@ static void ProcessDs(SemanticState *state, StatementDs *ds)
     }
     else if (value == 0)
     {
-        SemanticWarning(state, "%s", "Allocating 0 block of memory");
+        SemanticWarning(state, "Syntax warning, allocating 0 block of memory");
     }
     else
     {
@@ -4568,7 +4416,7 @@ static void ProcessStatement(SemanticState *state, Statement *statement, const c
 
 		case STATEMENT_TYPE_INFORM:
 			/* TODO - Everything... */
-			SemanticWarning(state, "INFORM: '%s'", statement->shared.inform.message);
+			SemanticWarning(state, "Syntax warning, INFORM: '%s'", statement->shared.inform.message);
 			break;
 
 		case STATEMENT_TYPE_END:
@@ -4688,7 +4536,7 @@ static void ParseLine(SemanticState *state, const char *source_line, const char 
 					/* Backup the statement. */
 					fix_up->statement = statement;
 
-					/* Backup some state. */
+					/* Backup some state-> */
 					fix_up->program_counter = starting_program_counter;
 					fix_up->output_position = starting_output_position;
 					fix_up->last_global_label = DuplicateStringAndHandleError(state, state->last_global_label);
@@ -5347,10 +5195,9 @@ static cc_bool DictionaryFilterProduceSymbolFile(Dictionary_Entry *entry, const 
 	return cc_true;
 }
 
-cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listing_file, FILE *symbol_file, const char *input_file_path, cc_bool debug, cc_bool case_insensitive, cc_bool equ_set_descope_local_labels)
+cc_bool ClownAssembler_Assemble(SemanticState* state, FILE *input_file, FILE *output_file, FILE *listing_file, FILE *symbol_file, const char *input_file_path, cc_bool debug, cc_bool case_insensitive, cc_bool equ_set_descope_local_labels)
 {
 	Location location;
-	SemanticState state;
 	Dictionary_Entry *symbol;
 
 	/* Initialise the base location. */
@@ -5358,52 +5205,53 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
 	location.file_path = NULL;
 	location.line_number = 0;
 
-	/* Initialise the state. */
-	state.success = cc_true;
-	state.output_file = output_file;
-	state.listing_file = listing_file;
-	state.equ_set_descope_local_labels = equ_set_descope_local_labels;
-	state.program_counter = 0;
-	state.fix_up_list_head = NULL;
-	state.fix_up_list_tail = NULL;
-	state.doing_fix_up = cc_false;
-	state.doing_final_pass = cc_false;
-	state.last_global_label = NULL;
-	state.location = &location;
-	state.source_line = NULL;
-	state.current_if_level = 0;
-	state.false_if_level = 0;
-	state.mode = MODE_NORMAL;
-	state.end = cc_false;
-    state.root_path = ExtractPathRoot(input_file_path);
-    state._asseble_error = NULL;
+	/* Initialise the state-> */
+	state->success = cc_true;
+	state->output_file = output_file;
+	state->listing_file = listing_file;
+	state->equ_set_descope_local_labels = equ_set_descope_local_labels;
+	state->program_counter = 0;
+	state->fix_up_list_head = NULL;
+	state->fix_up_list_tail = NULL;
+	state->doing_fix_up = cc_false;
+	state->doing_final_pass = cc_false;
+	state->last_global_label = NULL;
+	state->location = &location;
+	state->source_line = NULL;
+	state->current_if_level = 0;
+	state->false_if_level = 0;
+	state->mode = MODE_NORMAL;
+	state->end = cc_false;
+    state->root_path = ExtractPathRoot(input_file_path);
+    state->_asseble_error = NULL;
+	state->can_write_simhalt = cc_true;
 
 	/* Set the location path (note that we're taking care to not do this before the state is fully initialised). */
-	location.file_path = DuplicateStringAndHandleError(&state, input_file_path);
+	location.file_path = DuplicateStringAndHandleError(state, input_file_path);
 
-	if (!Dictionary_Init(&state.dictionary, case_insensitive))
+	if (!Dictionary_Init(&state->dictionary, case_insensitive))
 	{
-		OutOfMemoryError(&state);
+		OutOfMemoryError(state);
 	}
 	else
 	{
-		symbol = CreateSymbol(&state, PROGRAM_COUNTER_OF_STATEMENT);
+		symbol = CreateSymbol(state, PROGRAM_COUNTER_OF_STATEMENT);
 
 		/* Create the dictionary entry for the program counter ahead of time. */
 		if (symbol != NULL)
 		{
 			symbol->type = SYMBOL_VARIABLE;
 
-			symbol = CreateSymbol(&state, PROGRAM_COUNTER_OF_EXPRESSION);
+			symbol = CreateSymbol(state, PROGRAM_COUNTER_OF_EXPRESSION);
 
 			/* Create the dictionary entry for the program counter ahead of time. */
 			if (symbol != NULL)
 			{
 				symbol->type = SYMBOL_VARIABLE;
 
-				if (m68kasm_lex_init_extra(&state, &state.flex_state) != 0)
+				if (m68kasm_lex_init_extra(state, &state->flex_state) != 0)
 				{
-					InternalError(&state, "m68kasm_lex_init failed.");
+					InternalError(state, "m68kasm_lex_init failed.");
 				}
 				else
 				{
@@ -5415,21 +5263,21 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
 				#endif
 
 					/* Perform first pass, and create a list of fix-ups if needed. */
-					AssembleFile(&state, input_file);
+					AssembleFile(state, input_file);
 
-                    if (state.success)
+                    if (state->success)
                     {
-                        if (state.current_if_level != 0)
-                            SemanticError(&state, "An IF statement somewhere is missing its ENDC/ENDIF.");
+                        if (state->current_if_level != 0)
+                            SemanticError(state, "An IF statement somewhere is missing its ENDC/ENDIF.");
 
-                        if (m68kasm_lex_destroy(state.flex_state) != 0)
-                            InternalError(&state, "m68kasm_lex_destroy failed.");
+                        if (m68kasm_lex_destroy(state->flex_state) != 0)
+                            InternalError(state, "m68kasm_lex_destroy failed.");
 
                         /* Filter variables out from the symbol table, (variables cannot be used before they are declared, since their values are position-dependent). */
-                        Dictionary_Filter(&state.dictionary, DictionaryFilterDeleteVariables, NULL);
+                        Dictionary_Filter(&state->dictionary, DictionaryFilterDeleteVariables, NULL);
 
                         /* Process the fix-ups, reassembling instructions and reprocessing directives that could not be done in the first pass. */
-                        state.doing_fix_up = cc_true;
+                        state->doing_fix_up = cc_true;
 
                         for (;;)
                         {
@@ -5438,27 +5286,27 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
 
                             a_fix_up_has_been_fixed = cc_false;
 
-                            fix_up_pointer = &state.fix_up_list_head;
+                            fix_up_pointer = &state->fix_up_list_head;
 
                             while (*fix_up_pointer != NULL)
                             {
                                 FixUp *fix_up = *fix_up_pointer;
 
                                 /* Reset some state to how it was at the time the statement was first processed. */
-                                state.program_counter = fix_up->program_counter;
-                                fseek(state.output_file, fix_up->output_position, SEEK_SET);
-                                state.last_global_label = DuplicateStringAndHandleError(&state, fix_up->last_global_label);
-                                state.source_line = fix_up->source_line;
-                                state.location = &fix_up->location;
+                                state->program_counter = fix_up->program_counter;
+                                fseek(state->output_file, fix_up->output_position, SEEK_SET);
+                                state->last_global_label = DuplicateStringAndHandleError(state, fix_up->last_global_label);
+                                state->source_line = fix_up->source_line;
+                                state->location = &fix_up->location;
 
-                                state.fix_up_needed = cc_false;
+                                state->fix_up_needed = cc_false;
 
                                 /* Re-process statement. */
-                                ProcessStatement(&state, &fix_up->statement, fix_up->label);
+                                ProcessStatement(state, &fix_up->statement, fix_up->label);
 
                                 /* If this fix-up has been fixed, we're done with it, so we can delete it. */
                                 /* Alternatively, just delete the fix-ups if this is the final pass, since they won't be needed anymore. */
-                                if (!state.fix_up_needed || state.doing_final_pass)
+                                if (!state->fix_up_needed || state->doing_final_pass)
                                 {
                                     Location *location;
 
@@ -5491,15 +5339,15 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
                             }
 
                             /* Once the final pass has ended, we can exit this infinite loop. */
-                            if (state.doing_final_pass)
+                            if (state->doing_final_pass)
                                 break;
 
                             /* If no more fix-ups can be fixed, then do one final pass to print errors. */
                             if (!a_fix_up_has_been_fixed)
-                                state.doing_final_pass = cc_true;
+                                state->doing_final_pass = cc_true;
                         }
 
-                        free(state.last_global_label);
+                        free(state->last_global_label);
 
                         /* Produce asm68k symbol file, if requested. */
                         if (symbol_file != NULL)
@@ -5514,18 +5362,38 @@ cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listi
                             fputc(0, symbol_file);
                             fputc(0, symbol_file);
 
-                            Dictionary_Filter(&state.dictionary, DictionaryFilterProduceSymbolFile, symbol_file);
+                            Dictionary_Filter(&state->dictionary, DictionaryFilterProduceSymbolFile, symbol_file);
                         }
                     }
 				}
 			}
 		}
 
-		Dictionary_Deinit(&state.dictionary);
+		Dictionary_Deinit(&state->dictionary);
 	}
 
 	free(location.file_path);
-    free(state.root_path);
+    free(state->root_path);
 
-	return state.success;
+	return state->success;
+}
+
+
+SemanticState* obtain_semantic_state()
+{
+    SemanticState* state = NULL;
+    state = malloc(sizeof(*state));    
+
+	return (state);
+}
+
+void free_SemanticState(SemanticState* state)
+{
+	if (state)
+	{
+		if (state->_asseble_error)
+			free(state->_asseble_error);
+		
+		free(state);
+	}	
 }

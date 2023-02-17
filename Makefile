@@ -5,7 +5,7 @@
 ####### Compiler, tools and options
 
 CC            = gcc
-CFLAGS        = -pipe -g -Wall -Wextra -fPIC -O3
+CFLAGS        = -pipe -g -Wall -Wextra -fPIC
 DEL_FILE      = rm -f
 MKDIR         = mkdir -p
 DEL_DIR       = rmdir
@@ -246,3 +246,8 @@ $(OBJECTS_DIR)/register.o: $(WWW_DIR)/register.cpp $(WWW_DIR)/register.hpp
 deploy: all
 	./$(TARGET) --docroot . --http-address $(HOST) --http-port $(PORT) --resources-dir=template/resources
 	
+
+rebuild: clean all
+
+
+.PHONY: clean cleanall cleanassembler deepclean create deploy

@@ -10,159 +10,31 @@
 #include <stdio.h>
 
 
+void flush_buffer(struct EmulationMachine* emulator);
+void init_buffer(struct EmulationMachine* emulator);
+void cwrite(struct EmulationMachine* emulator, char _c);
+void set_buffering_enabled(struct EmulationMachine* emulator, c_bool _bool);
 
-typedef struct __buffer__
-{
-    s8  _buffer[4096];
-    u32 _pos;
-    u8  _valid;
-
-} Buffer;
-
-void flush_buffer();
-void init_buffer();
-void cwrite(char _c);
-
-u32   read_int_buffer();
-char* read_str_buffer();
-
+u32   read_int_buffer(struct EmulationMachine* emulator);
+char* read_str_buffer(struct EmulationMachine* emulator);
 
 
 /*
- * MACRO used to raise a critical trap code.
- *
- */
-#define TRAPEXC(mc,cause)  do {                                         \
-                            emit_dump(mc);                           \
-                            printf("[\033[01m\033[35mTRAP\033[0m] ");\
-                            printf("%s\n", cause);                   \
-                            fflush(stdout);                          \
-                        } while (0);
-
-
-/*
- * MACRO used to turn system into PANIC mode aka something that the sys don't know how to handle it.
- *
- */
-#define PANIC(mc,cause) do {                                          \
-                        emit_dump(mc);                              \
-                        printf("[\033[01m\033[91mPANIC\033[0m] "); \
-                        printf("%s\n", cause);                     \
-                        fflush(stdout);                            \
-                    } while (0);
-
-
-/*
- * MACRO emit WARNING message like an operation that may present bugs or unmenaged operation.
- *
- */
-#define WARNING(fmt, ...) do {                                        \
-                            printf("[\033[01m\033[93mWARN\033[0m] "); \
-                            printf (fmt, ##__VA_ARGS__);              \
-                            printf("\n");                             \
-                            fflush(stdout);                           \
-                        } while (0);
-
-
-/*
- * MACRO used to raise a condition that blocks normal emulation flow,
+ * MACRO used to raise a condition that blocks normal emulator flow,
  * like a ByteCode mistake loading.
  *
  * This will call exit()
  *
  */
 #define EMULATOR_ERROR(fmt, ...) do {                                    \
-                            em->Machine.State = MERR_STATE;                      \
+                            emulator->Machine.State = MERR_STATE;                      \
                             printf("[\033[01m\033[91mEMULATOR ERROR\033[0m] ");            \
-                            sprintf(em->Machine.Exception.merr_cause, fmt, ##__VA_ARGS__); \
-                            printf ("%s\n", em->Machine.Exception.merr_cause);             \
+                            sprintf(emulator->Machine.Exception.merr_cause, fmt, ##__VA_ARGS__); \
+                            printf ("%s\n", emulator->Machine.Exception.merr_cause);             \
                             fflush(stdout);                              \
-                            if (em->ExecArgs.JSON.is_activated) emit_dump(em); \
-                            destroy_cpu();                               \
-                            destroy_ram();                               \
-                            exit(-1);                                    \
+                            emit_dump(emulator); \
+                            destroy_codes(emulator);                             \
                         } while (0);
-
-
-/*
- * MACRO used to prepend a tag to IO emulator.
- *
- */
-#define IO_TASK(descr, fmt, ...) do {                            \
-                                    IO_TASK_TAG(descr)           \
-                                    printf (fmt, ##__VA_ARGS__); \
-                                    fflush(stdout);              \
-                                } while (0);
-
-
-
-/*
- * MACRO used to prepend a tag to IO emulator loop.
- * It's different from the previous macro because this one allows to print sequences of chars (strings).
- *
- */
-#define IO_TASK_TAG(descr)  do {                                            \
-                                if (descr)                                  \
-                                    printf("[\033[01m\033[95mIO\033[0m] "); \
-                                fflush(stdout);                             \
-                            } while (0);
-
-
-/*
- * MACRO used to prepend a tag to step-by-step mode.
- *
- */
-#define SBS_DEBUGGER(fmt, ...)do {                                \
-                        printf("[\033[01m\033[94mDEBUGGER\033[0m] "); \
-                        printf (fmt, ##__VA_ARGS__);              \
-                        fflush(stdout);                           \
-                    } while (0);
-
-
-/*
- * MACRO used to print bits of number.
- *
- */
-#define bprintf(x)                                               \
-  do {                                                           \
-    unsigned long long a__ = (x);                                \
-    size_t bits__ = sizeof(x) * 8;                               \
-    printf(#x ": ");                                             \
-    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
-    putchar('\n');                                               \
-  } while (0);
-
-
-/*
- * MACRO used to print bits of number with bit's highlight.
- *
- */
-#define bprintf_ht(x)                                            \
-  do {                                                           \
-    unsigned long long a__ = (x);                                \
-    size_t bits__ = sizeof(x) * 8;                               \
-    printf("\033[01m\033[37m");                                  \
-    printf(#x);                                                  \
-    printf("\033[0m: ");                                         \
-    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
-    putchar('\n');                                               \
-  } while (0);
-
-
-/*
- * MACRO used to print bits of number with bit's highlight and 4 space tab.
- *
- */
-#define bprintf_ht_4s(x)                                         \
-  do {                                                           \
-    unsigned long long a__ = (x);                                \
-    size_t bits__ = sizeof(x) * 8;                               \
-    printf("\033[01m\033[37m");                                  \
-    printf(#x);                                                  \
-    printf("\033[0m:     ");                                     \
-    while (bits__--) putchar(a__ &(1ULL << bits__) ? '1' : '0'); \
-  } while (0);
-
 
 
 #define SIGN_EXTENDED(dst, val, size) do{ \
@@ -199,28 +71,28 @@ char* read_str_buffer();
                                                                         case ADDRESS: \
                                                                         case ADDRESSPostIncr: \
                                                                         case ADDRESSPreDecr: \
-                                                                            dst = read_datareg(addr); \
+                                                                            dst = read_datareg(emulator, addr); \
                                                                             break; \
                                                                         \
                                                                         default: \
                                                                         {\
-                                                                            emulation->Machine.State = PANIC_STATE; \
-                                                                            sprintf(emulation->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
+                                                                            emulator->Machine.State = PANIC_STATE; \
+                                                                            sprintf(emulator->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
                                                                             return (RETURN_ERR); \
                                                                         }\
                                                                     } \
                                                                 else switch (mode) { \
                                                                     case IMMEDIATE: \
                                                                         if (tmpsize == BYTE) tmpsize = WORD; /*byte can't read byte in ram*/ \
-                                                                        dst = read_ram(&addr, &tmpsize); \
+                                                                        dst = read_ram(emulator, &addr, &tmpsize); \
                                                                         break; \
                                                                     \
                                                                     case DATAReg: \
-                                                                        dst = read_datareg(addr); \
+                                                                        dst = read_datareg(emulator, addr); \
                                                                         break; \
                                                                     \
                                                                     case ADDRReg: \
-                                                                        dst = read_addrreg(addr); \
+                                                                        dst = read_addrreg(emulator, addr); \
                                                                         break; \
                                                                     \
                                                                     case ADDRESS: \
@@ -228,18 +100,18 @@ char* read_str_buffer();
                                                                             switch (size) { \
                                                                                 case BYTE: \
                                                                                 case WORD: \
-                                                                                    dst = pop_word(); \
+                                                                                    dst = pop_word(emulator); \
                                                                                     break; \
                                                                                 case LONG: \
-                                                                                    dst = pop_long(); \
+                                                                                    dst = pop_long(emulator); \
                                                                                     break; \
                                                                                 default: \
                                                                                     return (RETURN_ERR); \
                                                                             } \
                                                                         } \
                                                                         else { \
-                                                                            ptr = read_addrreg(addr); \
-                                                                            dst = read_ram(&ptr, &size); \
+                                                                            ptr = read_addrreg(emulator, addr); \
+                                                                            dst = read_ram(emulator, &ptr, &size); \
                                                                         } \
                                                                         break; \
                                                                     \
@@ -248,63 +120,63 @@ char* read_str_buffer();
                                                                             switch (size) { \
                                                                                 case BYTE: \
                                                                                 case WORD: \
-                                                                                    dst = pop_word(); \
+                                                                                    dst = pop_word(emulator); \
                                                                                     break; \
                                                                                 case LONG: \
-                                                                                    dst = pop_long(); \
+                                                                                    dst = pop_long(emulator); \
                                                                                     break; \
                                                                                 default: \
                                                                                     return (RETURN_ERR); \
                                                                             } \
                                                                         } \
                                                                         else { \
-                                                                            ptr = read_addrreg(addr); \
-                                                                            dst = read_ram(&ptr, &size); \
+                                                                            ptr = read_addrreg(emulator, addr); \
+                                                                            dst = read_ram(emulator, &ptr, &size); \
                                                                         } \
                                                                         break; \
-                                                                        /* incr_addr_reg(*addr, *size); */ \
+                                                                        /* incr_addr_reg(emulator, *addr, *size); */ \
                                                                         /*/ incr must be done after memory read! */ \
                                                                     \
                                                                     case ADDRESSPreDecr: \
-                                                                        decr_addr_reg(addr, size); \
+                                                                        decr_addr_reg(emulator, addr, size); \
                                                                         if (addr == 7) { \
                                                                             switch (size) { \
                                                                                 case BYTE: \
                                                                                 case WORD: \
-                                                                                    dst = pop_word(); \
+                                                                                    dst = pop_word(emulator); \
                                                                                     break; \
                                                                                 case LONG: \
-                                                                                    dst = pop_long(); \
+                                                                                    dst = pop_long(emulator); \
                                                                                     break; \
                                                                                 default: \
                                                                                     return (RETURN_ERR); \
                                                                             } \
                                                                         } \
                                                                         else { \
-                                                                            ptr = read_addrreg(addr); \
-                                                                            dst = read_ram(&ptr, &size); \
+                                                                            ptr = read_addrreg(emulator, addr); \
+                                                                            dst = read_ram(emulator, &ptr, &size); \
                                                                         } \
                                                                         break; \
                                                                     \
                                                                     case ADDRESSDisp: \
                                                                     { \
-                                                                        u32 ramptr  = get_pc() + WORD_SPAN; \
+                                                                        u32 ramptr  = get_pc(emulator) + WORD_SPAN; \
                                                                         opsize tmpsize = WORD; \
                                                                         \
-                                                                        u32 disp = read_ram(&ramptr, &tmpsize); \
+                                                                        u32 disp = read_ram(emulator, &ramptr, &tmpsize); \
                                                                         \
-                                                                        ptr = read_addrreg(addr) + disp; \
-                                                                        dst = read_ram(&ptr, &size); \
+                                                                        ptr = read_addrreg(emulator, addr) + disp; \
+                                                                        dst = read_ram(emulator, &ptr, &size); \
                                                                         \
-                                                                        set_pc(get_pc() + size_to_span(tmpsize)); \
+                                                                        set_pc(emulator, get_pc(emulator) + size_to_span(tmpsize)); \
                                                                         \
                                                                         break; \
                                                                     } \
                                                                     \
                                                                     default: \
                                                                     { \
-                                                                        emulation->Machine.State = PANIC_STATE; \
-                                                                        sprintf(emulation->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
+                                                                        emulator->Machine.State = PANIC_STATE; \
+                                                                        sprintf(emulator->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
                                                                         return (RETURN_ERR); \
                                                                     } \
                                                                 } \
@@ -316,24 +188,24 @@ char* read_str_buffer();
                                                             \
                                                             switch (mode) { \
                                                                 case DATAReg: \
-                                                                    write_datareg(addr, val, &size); \
+                                                                    write_datareg(emulator, addr, val, &size); \
                                                                     break; \
                                                                 case ADDRReg: \
                                                                 case IMMEDIATE: \
-                                                                    write_addrreg(addr, val, &size); \
+                                                                    write_addrreg(emulator, addr, val, &size); \
                                                                     break; \
                                                                 case ADDRESS: \
                                                                 case ADDRESSPostIncr: \
                                                                 case ADDRESSPreDecr: \
-                                                                    ptr = read_addrreg(addr); \
+                                                                    ptr = read_addrreg(emulator, addr); \
                                                                     if (addr == 7) {\
                                                                         switch (size) { \
                                                                             case BYTE: \
                                                                             case WORD: \
-                                                                                push_word(val); \
+                                                                                push_word(emulator, val); \
                                                                                 break; \
                                                                             case LONG: \
-                                                                                push_long(val); \
+                                                                                push_long(emulator, val); \
                                                                                 break; \
                                                                             default: \
                                                                                 return (RETURN_ERR); \
@@ -342,13 +214,13 @@ char* read_str_buffer();
                                                                     else { \
                                                                         switch (size) { \
                                                                             case BYTE: \
-                                                                                write_byte(ptr, val); \
+                                                                                write_byte(emulator, ptr, val); \
                                                                                 break; \
                                                                             case WORD: \
-                                                                                write_word(ptr, val); \
+                                                                                write_word(emulator, ptr, val); \
                                                                                 break; \
                                                                             case LONG: \
-                                                                                write_long(ptr, val); \
+                                                                                write_long(emulator, ptr, val); \
                                                                                 break; \
                                                                             default: \
                                                                                 return (RETURN_ERR); \
@@ -358,35 +230,35 @@ char* read_str_buffer();
                                                                     \
                                                                 case ADDRESSDisp: \
                                                                 { \
-                                                                    u32 ramptr  = get_pc() + WORD_SPAN; \
+                                                                    u32 ramptr  = get_pc(emulator) + WORD_SPAN; \
                                                                     opsize tmpsize = WORD; \
                                                                     \
-                                                                    u32 disp = read_ram(&ramptr, &tmpsize); \
+                                                                    u32 disp = read_ram(emulator, &ramptr, &tmpsize); \
                                                                     \
-                                                                    ptr = read_addrreg(addr) + disp; \
+                                                                    ptr = read_addrreg(emulator, addr) + disp; \
                                                                     \
                                                                     switch (size) { \
                                                                         case BYTE: \
-                                                                            write_byte(ptr, val); \
+                                                                            write_byte(emulator, ptr, val); \
                                                                             break; \
                                                                         case WORD: \
-                                                                            write_word(ptr, val); \
+                                                                            write_word(emulator, ptr, val); \
                                                                             break; \
                                                                         case LONG: \
-                                                                            write_long(ptr, val); \
+                                                                            write_long(emulator, ptr, val); \
                                                                             break; \
                                                                         default: \
                                                                             return (RETURN_ERR); \
                                                                     } \
-                                                                    set_pc(get_pc() + size_to_span(tmpsize)); \
+                                                                    set_pc(emulator, get_pc(emulator) + size_to_span(tmpsize)); \
                                                                     \
                                                                     break; \
                                                                 } \
                                                                 \
                                                                 default: \
                                                                 { \
-                                                                    emulation->Machine.State = PANIC_STATE; \
-                                                                    sprintf(emulation->Machine.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
+                                                                    emulator->Machine.State = PANIC_STATE; \
+                                                                    sprintf(emulator->Machine.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
                                                                     return (RETURN_ERR); \
                                                                 } \
                                                             } \
@@ -460,7 +332,7 @@ char* read_str_buffer();
                                                                                 *direction = NORMAL; \
                                                                             } \
                                                                             \
-                                                                            __src__ = (src_reg) ? *src_reg : (u32) (get_pc() + WORD_SPAN); \
+                                                                            __src__ = (src_reg) ? *src_reg : (u32) (get_pc(emulator) + WORD_SPAN); \
                                                                             __dst__ = ((u32) *dst_reg); \
                                                                             \
                                                                             READ_EFFECTIVE_ADDRESS(*sVal, __src__, *size, *addr_mode, *direction); \
@@ -516,13 +388,13 @@ char* read_str_buffer();
                                             case IMMEDIATE: \
                                             { \
                                                 if (tmpsize == BYTE) tmpsize = WORD; \
-                                                set_pc(get_pc() + size_to_span(tmpsize)); \
+                                                set_pc(emulator, get_pc(emulator) + size_to_span(tmpsize)); \
                                                 break; \
                                             } \
                                             case ADDRESSPostIncr: \
                                             case ADDRESSPreDecr: \
                                             {\
-                                                set_pc(get_pc() + size_to_span(size)); \
+                                                set_pc(emulator, get_pc(emulator) + size_to_span(size)); \
                                                 break; \
                                             } \
                                             default: \
@@ -540,24 +412,20 @@ u32 hash (const char* word);
 
 
 /* IO EA */
-u32 read_ram(u32 *addr, opsize *size);
+u32 read_ram(struct EmulationMachine* emulator, u32 *addr, opsize *size);
 
 /* MISC */
 sspan size_to_span(opsize size);
-bit   is_ram_op(ADDRMode *mode);
-bit   is_addr_to_data_op(ADDRMode *mode);
+c_bool is_ram_op(ADDRMode *mode);
+c_bool is_addr_to_data_op(ADDRMode *mode);
 
 
 /* TRAP */
 char* trap_code_toString(u32 trapcode);
-void  iotask(struct EmulationMachine *em);
+c_bool iotask(struct EmulationMachine *emulator);
 
 
 /* EMULATION MACHINE */
-void machine_waiter (struct EmulationMachine *em);
-void emit_dump      (struct EmulationMachine *em);
-const char* machine_status ();
-void emit_jio       (struct EmulationMachine *em);
-void emit_jconcat   (struct EmulationMachine *em);
+void emit_dump      (struct EmulationMachine *emulator);
 
 #endif // __UTILS_H__68000

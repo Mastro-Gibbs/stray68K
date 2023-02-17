@@ -4,258 +4,34 @@
 #include <string.h>
 
 
-u32 __exec__(struct EmulationMachine *em);
-void __show__(void);
-
-
-m68k_cpu *cpu = NULL;
-
-m68k_cpu* init_cpu(struct EmulationMachine *em)
+void init_cpu(struct EmulationMachine *emulator)
 {
-    if (!cpu)
-    {
-        cpu = malloc(sizeof (*cpu));
-
-        if (!cpu)
-        {
-            em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Cannot init cpu, aborting.");
-            return (NULL);
-        }
-
-        reset_cpu();
-    }
-
-    return (cpu);
-}
-
-m68k_cpu* get_cpu(void) { return (cpu); }
-
-void reset_cpu(void)
-{
-    if (cpu)
-    {
-        unsigned char iter;
-        for(iter = 0; iter < 8; iter++)
-            cpu->data_r[iter] = 0x00000000;
-
-        for(iter = 0; iter < 7; iter++)
-            cpu->addr_r[iter] = 0x00000000;
-
-        cpu->pc  = 0x00000000;
-        cpu->usp = 0x00FF0000;
-        cpu->ssp = 0x01000000;
-        cpu->sr  = 0x2000;
-
-        cpu->exec = __exec__;
-        cpu->show = __show__;
-    }
+    reset_cpu(emulator);
 }
 
 
-void destroy_cpu(void)
+void reset_cpu(struct EmulationMachine* emulator)
 {
-    if (cpu)
-        free(cpu);
+    unsigned char iter;
+    for(iter = 0; iter < 8; iter++)
+        emulator->Machine.cpu.data_r[iter] = 0x00000000;
 
-    cpu = NULL;
+    for(iter = 0; iter < 7; iter++)
+        emulator->Machine.cpu.addr_r[iter] = 0x00000000;
+
+    emulator->Machine.cpu.pc  = 0x00000000;
+    emulator->Machine.cpu.usp = 0x00FF0000;
+    emulator->Machine.cpu.ssp = 0x01000000;
+    emulator->Machine.cpu.sr  = 0x2000;
+    
 }
-
-
-u32 __exec__(struct EmulationMachine *em)
-{
-    u32 istruction_ptr = em->Machine.cpu->pc;
-
-    if ((istruction_ptr % 2) != 0)
-    {
-        em->Machine.State = PANIC_STATE;
-        sprintf(em->Machine.Exception.panic_cause, "Segmentation fault while reading next istruction on odd address");
-        return (RETURN_ERR);
-    }
-
-    em->Machine.RuntimeData.operation_code = read_word(istruction_ptr);;
-
-    return run_opcode();
-}
-
-
-void __show__(void)
-{
-    char d = 0x30, a = 0x30;
-    char id[3];
-
-    printf("\n                                                      [\033[01m\033[37mCPU STATUS\033[0m]\n\n");
-
-    id[2] = '\0';
-
-    id[0] = 'D';
-    for (u8 i = 1; i <= 4; i++) // data regs
-    {
-        id[1] = d++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->data_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    printf("| ");
-
-    id[0] = 'A';
-    for (u8 i = 1; i <= 4; i++) // addr regs
-    {
-        id[1] = a++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    printf("\n");
-    id[0] = 'D';
-    for (u8 i = 5; i <= 8; i++) // data regs
-    {
-        id[1] = d++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->data_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    printf("| ");
-
-    id[0] = 'A';
-    for (u8 i = 4; i <= 6; i++) // addr regs
-    {
-        id[1] = a++;
-        printf("\033[01m\033[37m%s\033[0m: 0x", id);
-
-        u8 iter = 4;
-        do
-        {
-            u8 inner = cpu->addr_r[i-1] >> (8 * (iter - 1));
-
-            if (!inner || inner <= 0xF) printf("0");
-
-            printf("%X", inner);
-
-            iter -= 1;
-        } while (iter);
-
-        printf(" ");
-    }
-
-    u8 iter = 4;
-    printf("\033[01m\033[37mA7\033[0m: 0x");
-
-    u32 *curr = ((cpu->sr & SUPERVISOR) ? 1 : 0) ? &cpu->ssp : &cpu->usp;
-
-    do
-    {
-        u8 inner = *curr >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    printf("\n");
-
-    printf("-------------------------------------------------------------------------------------------------------------------------\n");
-
-    iter = 4;
-    printf("\033[01m\033[37mUS\033[0m: 0x");
-    do
-    {
-        u8 inner = cpu->usp >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    printf("\n");
-
-    iter = 4;
-    printf("\033[01m\033[37mSS\033[0m: 0x");
-    do
-    {
-        u8 inner = cpu->ssp >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    iter = 4;
-    printf("\n\033[01m\033[37mPC\033[0m: 0x");
-    do
-    {
-        u8 inner = cpu->pc >> (8 * (iter - 1));
-
-        if (!inner || inner <= 0xF) printf("0");
-
-        printf("%X", inner);
-
-        iter -= 1;
-    } while (iter);
-
-    srflags SR = cpu->sr;
-
-    printf("\n");
-
-    bprintf_ht(SR);
-
-    printf("\033[01m\033[37m    t s        xnzvc\033[0m\n");
-
-}
-
-
 
 
 // DATA REGS GETTER & SETTER
-u32 read_datareg(const u32 reg)
+u32 read_datareg(struct EmulationMachine* emulator, const u32 reg)
 {
     if (reg < 8)
-        return cpu->data_r[reg];
+        return emulator->Machine.cpu.data_r[reg];
 
     return (0);
 }
@@ -263,7 +39,7 @@ u32 read_datareg(const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_datareg(const u32 reg, const u32 val, opsize* const size)
+void  write_datareg(struct EmulationMachine* emulator, const u32 reg, const u32 val, opsize* const size)
 {
     opsize static_size;
 
@@ -277,15 +53,15 @@ void  write_datareg(const u32 reg, const u32 val, opsize* const size)
         switch (static_size)
         {
             case BYTE:
-                cpu->data_r[reg] = (cpu->data_r[reg] & 0xFFFFFF00) | (val & 0x000000FF);
+                emulator->Machine.cpu.data_r[reg] = (emulator->Machine.cpu.data_r[reg] & 0xFFFFFF00) | (val & 0x000000FF);
             break;
 
             case WORD:
-                cpu->data_r[reg] = (cpu->data_r[reg] & 0xFFFF0000) | (val & 0x0000FFFF);
+                emulator->Machine.cpu.data_r[reg] = (emulator->Machine.cpu.data_r[reg] & 0xFFFF0000) | (val & 0x0000FFFF);
             break;
 
             case LONG:
-                cpu->data_r[reg] = val;
+                emulator->Machine.cpu.data_r[reg] = val;
             break;
             default: //dummy, cant flow here
             break;
@@ -294,16 +70,16 @@ void  write_datareg(const u32 reg, const u32 val, opsize* const size)
     }
 }
 
-u32 read_addrreg(const u32 reg)
+u32 read_addrreg(struct EmulationMachine* emulator, const u32 reg)
 {
     if (reg < 8)
     {
         if (reg < 7)
-            return cpu->addr_r[reg];
+            return emulator->Machine.cpu.addr_r[reg];
 
         else if (reg == 7)
 
-            return ((cpu->sr & SUPERVISOR) ? 1 : 0) ? cpu->ssp : cpu->usp;
+            return ((emulator->Machine.cpu.sr & SUPERVISOR) ? 1 : 0) ? emulator->Machine.cpu.ssp : emulator->Machine.cpu.usp;
     }
 
     return (0);
@@ -312,7 +88,7 @@ u32 read_addrreg(const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
+void  write_addrreg(struct EmulationMachine* emulator, const u32 reg, const u32 val, opsize* const size)
 {
     if (reg > 7) return;
 
@@ -328,15 +104,15 @@ void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
         switch (static_size)
         {
             case BYTE:
-                cpu->addr_r[reg] = (cpu->addr_r[reg] & 0xFFFFFF00) | (val & 0x000000FF);
+                emulator->Machine.cpu.addr_r[reg] = (emulator->Machine.cpu.addr_r[reg] & 0xFFFFFF00) | (val & 0x000000FF);
             break;
 
             case WORD:
-                cpu->addr_r[reg] = (cpu->addr_r[reg] & 0xFFFF0000) | (val & 0x0000FFFF);
+                emulator->Machine.cpu.addr_r[reg] = (emulator->Machine.cpu.addr_r[reg] & 0xFFFF0000) | (val & 0x0000FFFF);
             break;
 
             case LONG:
-                cpu->addr_r[reg] = val;
+                emulator->Machine.cpu.addr_r[reg] = val;
             break;
             default:
             break;
@@ -345,20 +121,20 @@ void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
     }
     else if (reg == 7)
     {
-        if ((cpu->sr & SUPERVISOR) ? 1 : 0)
+        if ((emulator->Machine.cpu.sr & SUPERVISOR) ? 1 : 0)
         {
             switch (static_size)
             {
                 case BYTE:
-                    cpu->ssp = (cpu->ssp & 0xFFFFFF00) | (val & 0x000000FF);
+                    emulator->Machine.cpu.ssp = (emulator->Machine.cpu.ssp & 0xFFFFFF00) | (val & 0x000000FF);
                 break;
 
                 case WORD:
-                    cpu->ssp = (cpu->ssp & 0xFFFF0000) | (val & 0x0000FFFF);
+                    emulator->Machine.cpu.ssp = (emulator->Machine.cpu.ssp & 0xFFFF0000) | (val & 0x0000FFFF);
                 break;
 
                 case LONG:
-                    cpu->ssp = val;
+                    emulator->Machine.cpu.ssp = val;
                 break;
                 default: //dummy, cant flow here
                 break;
@@ -370,15 +146,15 @@ void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
             switch (static_size)
             {
                 case BYTE:
-                    cpu->usp = (cpu->usp & 0xFFFFFF00) | (val & 0x000000FF);
+                    emulator->Machine.cpu.usp = (emulator->Machine.cpu.usp & 0xFFFFFF00) | (val & 0x000000FF);
                 break;
 
                 case WORD:
-                    cpu->usp = (cpu->usp & 0xFFFF0000) | (val & 0x0000FFFF);
+                    emulator->Machine.cpu.usp = (emulator->Machine.cpu.usp & 0xFFFF0000) | (val & 0x0000FFFF);
                 break;
 
                 case LONG:
-                    cpu->usp = val;
+                    emulator->Machine.cpu.usp = val;
                 break;
                 default: //dummy, cant flow here
                 break;
@@ -388,9 +164,9 @@ void  write_addrreg(const u32 reg, const u32 val, opsize* const size)
     }
 }
 
-void incr_addr_reg(const u32 reg, const opsize size)
+void incr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsize size)
 {
-    u32 tmp = read_addrreg(reg);
+    u32 tmp = read_addrreg(emulator, reg);
 
     if (size == LONG)
         tmp += 4; //LONG
@@ -399,12 +175,12 @@ void incr_addr_reg(const u32 reg, const opsize size)
     else
         tmp += 1; //BYTE
 
-    write_addrreg(reg, tmp, NULL);
+    write_addrreg(emulator, reg, tmp, NULL);
 }
 
-void decr_addr_reg(const u32 reg, const opsize size)
+void decr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsize size)
 {
-    u32 tmp = read_addrreg(reg);
+    u32 tmp = read_addrreg(emulator, reg);
 
     if (size == LONG)
         tmp -= 4; //LONG
@@ -413,52 +189,52 @@ void decr_addr_reg(const u32 reg, const opsize size)
     else
         tmp -= 1; //BYTE
 
-    write_addrreg(reg, tmp, NULL);
+    write_addrreg(emulator, reg, tmp, NULL);
 }
 
 
 
 /* STACKS */
-u16 pop_word(void)
+u16 pop_word(struct EmulationMachine* emulator)
 {
-    u32 stack = read_addrreg(7);
-    u16 value = read_word(stack);
+    u32 stack = read_addrreg(emulator, 7);
+    u16 value = read_word(emulator, stack);
     stack += WORD_SPAN;
-    write_addrreg(7, stack, NULL);
+    write_addrreg(emulator, 7, stack, NULL);
 
     return (value);
 }
 
-u32 pop_long(void)
+u32 pop_long(struct EmulationMachine* emulator)
 {
-    u32 stack = read_addrreg(7);
-    u32 value = read_long(stack);
+    u32 stack = read_addrreg(emulator, 7);
+    u32 value = read_long(emulator, stack);
     stack += LONG_SPAN;
-    write_addrreg(7, stack, NULL);
+    write_addrreg(emulator, 7, stack, NULL);
 
     return (value);
 }
 
-void push_word(const u16 word)
+void push_word(struct EmulationMachine* emulator, const u16 word)
 {
-    u32 stack = read_addrreg(7);
+    u32 stack = read_addrreg(emulator, 7);
     stack -= WORD_SPAN;
-    write_addrreg(7, stack, NULL);
-    write_word(stack, word);
+    write_addrreg(emulator, 7, stack, NULL);
+    write_word(emulator, stack, word);
 }
 
-void push_long(const u32 longword)
+void push_long(struct EmulationMachine* emulator, const u32 longword)
 {
-    u32 stack = read_addrreg(7);
+    u32 stack = read_addrreg(emulator, 7);
     stack -= LONG_SPAN;
-    write_addrreg(7, stack, NULL);
-    write_long(stack, longword);
+    write_addrreg(emulator, 7, stack, NULL);
+    write_long(emulator, stack, longword);
 }
 
 
 
 /* CONDITION CODES */
-bit eval_cc(const CCm cc)
+bit eval_cc(struct EmulationMachine* emulator, const CCm cc)
 {
     switch (cc) {
         case T:
@@ -466,33 +242,33 @@ bit eval_cc(const CCm cc)
         case F:
             return 0;
         case HI:
-            return !(cpu->sr & ZERO) && !(cpu->sr & CARRY);
+            return !(emulator->Machine.cpu.sr & ZERO) && !(emulator->Machine.cpu.sr & CARRY);
         case LS:
-            return (cpu->sr & ZERO) || (cpu->sr & CARRY);
+            return (emulator->Machine.cpu.sr & ZERO) || (emulator->Machine.cpu.sr & CARRY);
         case CC:
-            return !(cpu->sr & CARRY);
+            return !(emulator->Machine.cpu.sr & CARRY);
         case CS:
-            return (cpu->sr & CARRY);
+            return (emulator->Machine.cpu.sr & CARRY);
         case NE:
-            return !(cpu->sr & ZERO);
+            return !(emulator->Machine.cpu.sr & ZERO);
         case EQ:
-            return (cpu->sr & ZERO);
+            return (emulator->Machine.cpu.sr & ZERO);
         case VC:
-            return !(cpu->sr & OVERFLOW);
+            return !(emulator->Machine.cpu.sr & OVERFLOW);
         case VS:
-            return (cpu->sr & OVERFLOW);
+            return (emulator->Machine.cpu.sr & OVERFLOW);
         case PL:
-            return !(cpu->sr & NEGATIVE);
+            return !(emulator->Machine.cpu.sr & NEGATIVE);
         case MI:
-            return (cpu->sr & NEGATIVE);
+            return (emulator->Machine.cpu.sr & NEGATIVE);
         case GE:
-            return (cpu->sr & NEGATIVE) == (cpu->sr & OVERFLOW);
+            return (emulator->Machine.cpu.sr & NEGATIVE) == (emulator->Machine.cpu.sr & OVERFLOW);
         case LT:
-            return (cpu->sr & NEGATIVE) != (cpu->sr & OVERFLOW);
+            return (emulator->Machine.cpu.sr & NEGATIVE) != (emulator->Machine.cpu.sr & OVERFLOW);
         case GT:
-            return !(cpu->sr & ZERO) && ((cpu->sr & NEGATIVE) == (cpu->sr & OVERFLOW));
+            return !(emulator->Machine.cpu.sr & ZERO) && ((emulator->Machine.cpu.sr & NEGATIVE) == (emulator->Machine.cpu.sr & OVERFLOW));
         case LE:
-            return (cpu->sr & ZERO) || ((cpu->sr & NEGATIVE) != (cpu->sr & OVERFLOW));
+            return (emulator->Machine.cpu.sr & ZERO) || ((emulator->Machine.cpu.sr & NEGATIVE) != (emulator->Machine.cpu.sr & OVERFLOW));
         default:
             return 0;
     }
@@ -501,8 +277,8 @@ bit eval_cc(const CCm cc)
 
 
 /* PROGRAM COUNTER */
-void set_pc(const u32 pc) { cpu->pc = pc; }
+void set_pc(struct EmulationMachine* emulator, const u32 pc) { emulator->Machine.cpu.pc = pc; }
 
-u32 get_pc(void) { return (cpu->pc); }
+u32 get_pc(struct EmulationMachine* emulator) { return (emulator->Machine.cpu.pc); }
 
 

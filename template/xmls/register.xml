@@ -193,7 +193,7 @@
 
             <div class="register-label-container xx-large">
                 <span class="register-label">
-                    Mnemonic code
+                    Mnemonic Code
                 </span>
             </div>
             <div class="register-data">
@@ -225,6 +225,37 @@
             </div>
             <div class="one-row-reg register-data">
                 ${time}
+            </div>
+
+            <div class="">
+                ${break}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    First Writter Byte
+                </span>
+            </div>
+            <div class="register-data">
+                ${fwb}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Last Writter Byte
+                </span>
+            </div>
+            <div class="register-data">
+                ${lwb}
+            </div>
+
+            <div class="register-label-container xx-large">
+                <span class="register-label">
+                    Halt
+                </span>
+            </div>
+            <div class="register-data">
+                ${halt}
             </div>
             
         </div>

@@ -24,11 +24,19 @@
 
 #include "syntactic.h"
 
-#include "../emulator/JSON.h"
+#include "assemblertypes.h"
+
+#define YY_NO_UNISTD_H
+
+#define PROGRAM_COUNTER_OF_STATEMENT ",PROGRAM_COUNTER_OF_STATEMENT"
+#define PROGRAM_COUNTER_OF_EXPRESSION ",PROGRAM_COUNTER_OF_EXPRESSION"
 
 
-const char* assemble_status();
+SemanticState* obtain_semantic_state();
 
-cc_bool ClownAssembler_Assemble(FILE *input_file, FILE *output_file, FILE *listing_file, FILE *symbol_file, const char *input_file_path, cc_bool debug, cc_bool case_insensitive, cc_bool equ_set_descope_local_labels);
+void free_SemanticState(SemanticState* state);
+
+
+cc_bool ClownAssembler_Assemble(SemanticState* state, FILE *input_file, FILE *output_file, FILE *listing_file, FILE *symbol_file, const char *input_file_path, cc_bool debug, cc_bool case_insensitive, cc_bool equ_set_descope_local_labels);
 
 #endif /* SEMANTIC_H */

@@ -9,16 +9,17 @@
 #include <Wt/WTemplate.h>
 #include <Wt/WTextArea.h>
 
+#include "../emulator/motorolatypes.h"
 
 using namespace Wt;
 using namespace std;
 
 extern "C" {
-    void cwrite(char _c);
+    void flush_buffer(struct EmulationMachine* emulator);
 
-    void flush_buffer();
+    void init_buffer(struct EmulationMachine* emulator);
 
-    void init_buffer();
+    void cwrite(struct EmulationMachine* emulator, char _c);
 }
 
 
@@ -29,19 +30,31 @@ class Console : public WTemplate
 
         void setUpConsole();
 
-        void insert(const WString& str);
-
-        void push_stdout(const char* map);
-
-        void clear();
+        void setEmulator(struct EmulationMachine* _emulator);
 
         void disable(bool status);
+
+        void push_stdout(const char* map);
+        void push_simple_stdout(const string& out);
+
+        void begin_program();
+        void end_program();
+
+        void begin_assembler();
+        void end_assembler();
+        void assembler_error();
+
+        void clear();
 
     private:
         WTextArea* out;
 
         string _map;
         string _content;
+
+        struct EmulationMachine* emulator;
+
+        void insert(const string& str);
 
 };
 

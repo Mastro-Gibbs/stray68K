@@ -9,121 +9,100 @@
 #include "ram.h"
 
 
-char* Jcpu(void)
+char* Jcpu(struct EmulationMachine* emulator)
 {
-    m68k_cpu *cpu = get_cpu();
+    char *res = NULL;
+    char buf[410];
 
-    if (cpu != NULL)
+    sprintf(buf, "%s", "{\"CPU\":{");
+
+    for (u16 i = 0; i < 8; i++)
     {
-        char *res = NULL;
-        char buf[410];
-
-        sprintf(buf, "%s", "{\"CPU\":{");
-
-        for (u16 i = 0; i < 8; i++)
-        {
-            sprintf(buf+strlen(buf), "\"D%d\":\"%X\",", i, cpu->data_r[i]);
-        }
-
-        for (u16 i = 0; i < 7; i++)
-        {
-            sprintf(buf+strlen(buf), "\"A%d\":\"%X\",", i, cpu->addr_r[i]);
-        }
-
-        sprintf(buf+strlen(buf), "\"A7\":\"%X\",", read_addrreg(7));
-        sprintf(buf+strlen(buf), "\"US\":\"%X\",", cpu->usp);
-        sprintf(buf+strlen(buf), "\"SS\":\"%X\",", cpu->ssp);
-        sprintf(buf+strlen(buf), "\"PC\":\"%X\",", cpu->pc);
-        sprintf(buf+strlen(buf), "\"SR\":\"%X\"", cpu->sr);
-        strncat(buf+strlen(buf), "}}\0", 3);
-
-        ssize_t size = strlen(buf) + 1;
-        res = malloc(sizeof (* res) * size);
-
-        strncpy(res, buf, size-1);
-
-        res[size-1] = '\0';
-
-        return res;
+        sprintf(buf+strlen(buf), "\"D%d\":\"%X\",", i, emulator->Machine.cpu.data_r[i]);
     }
 
-    return (NULL);
+    for (u16 i = 0; i < 7; i++)
+    {
+        sprintf(buf+strlen(buf), "\"A%d\":\"%X\",", i, emulator->Machine.cpu.addr_r[i]);
+    }
+
+    sprintf(buf+strlen(buf), "\"A7\":\"%X\",", read_addrreg(emulator, 7));
+    sprintf(buf+strlen(buf), "\"US\":\"%X\",", emulator->Machine.cpu.usp);
+    sprintf(buf+strlen(buf), "\"SS\":\"%X\",", emulator->Machine.cpu.ssp);
+    sprintf(buf+strlen(buf), "\"PC\":\"%X\",", emulator->Machine.cpu.pc);
+    sprintf(buf+strlen(buf), "\"SR\":\"%X\"", emulator->Machine.cpu.sr);
+    strncat(buf+strlen(buf), "}}\0", 3);
+
+    ssize_t size = strlen(buf) + 1;
+    res = malloc(sizeof (* res) * size);
+
+    strncpy(res, buf, size-1);
+
+    res[size-1] = '\0';
+
+    return res;
 }
 
 
-char* Jram(u32 from, u32 to, u32 sh)
+char* Jram(struct EmulationMachine* emulator, u32 from, u32 to, u32 sh)
 {
-    m68k_ram *ram = get_ram();
+    char *res = NULL;
 
-    if (ram != NULL)
+    const char *base = "{\"RAM\":{\"BEGIN\":\"%X\",\"END\":\"%X\",\"HALT\":\"%X\",\"DUMP\":\"";
+    const ssize_t base_size = strlen(base);
+
+    char buf[((to - from) + base_size + 10) * 2];
+
+    sprintf(buf, base, from, to, sh);
+
+    for (u32 curr = from; curr <= to; curr++)
     {
-        char *res = NULL;
+        u8 byte = emulator->Machine.ram.self[curr];
 
-        const char *base = "{\"RAM\":{\"BEGIN\":\"%X\",\"END\":\"%X\",\"HALT\":\"%X\",\"DUMP\":\"";
-        const ssize_t base_size = strlen(base);
-
-        char buf[((to - from) + base_size + 10) * 2];
-
-        sprintf(buf, base, from, to, sh);
-
-        for (u32 curr = from; curr <= to; curr++)
-        {
-            u8 byte = ram->ram[curr];
-
-            (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
-        }
-
-        strncat(buf+strlen(buf), "\"}}\0", 4);
-
-        ssize_t size = strlen(buf) + 1;
-        res = malloc(sizeof (* res) * size);
-
-        strncpy(res, buf, size-1);
-
-        res[size-1] = '\0';
-
-        return res;
+        (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
     }
 
-    return (NULL);
+    strncat(buf+strlen(buf), "\"}}\0", 4);
+
+    ssize_t size = strlen(buf) + 1;
+    res = malloc(sizeof (* res) * size);
+
+    strncpy(res, buf, size-1);
+
+    res[size-1] = '\0';
+
+    return res;
 }
 
 
-char* Jstack(u32 bottom, u32 top)
+char* Jstack(struct EmulationMachine* emulator, u32 bottom, u32 top)
 {
-    m68k_ram *ram = get_ram();
+    char *res = NULL;
 
-    if (ram != NULL)
+    const char *base = "{\"STACK\":{\"BOTTOM\":\"%X\",\"TOP\":\"%X\",\"DUMP\":\"";
+    const ssize_t base_size = strlen(base);
+
+    char buf[((bottom - top) + base_size + 10) * 2];
+
+    sprintf(buf, base, bottom, top);
+
+    for (u32 curr = top; curr < bottom; curr++)
     {
-        char *res = NULL;
+        u8 byte = emulator->Machine.ram.self[curr];
 
-        const char *base = "{\"STACK\":{\"BOTTOM\":\"%X\",\"TOP\":\"%X\",\"DUMP\":\"";
-        const ssize_t base_size = strlen(base);
-
-        char buf[((bottom - top) + base_size + 10) * 2];
-
-        sprintf(buf, base, bottom, top);
-
-        for (u32 curr = top; curr < bottom; curr++)
-        {
-            u8 byte = ram->ram[curr];
-
-            (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
-        }
-
-        strncat(buf+strlen(buf), "\"}}\0", 4);
-
-        ssize_t size = strlen(buf) + 1;
-        res = malloc(sizeof (* res) * size);
-
-        strncpy(res, buf, size-1);
-
-        res[size-1] = '\0';
-
-        return res;
+        (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
     }
 
-    return (NULL);
+    strncat(buf+strlen(buf), "\"}}\0", 4);
+
+    ssize_t size = strlen(buf) + 1;
+    res = malloc(sizeof (* res) * size);
+
+    strncpy(res, buf, size-1);
+
+    res[size-1] = '\0';
+
+    return res;
 }
 
 
@@ -198,6 +177,26 @@ char* Jexception(char* cause, u32 type)
     }
 
     size_t size = strlen(buf) + 1;
+    res = malloc(sizeof (* res) * size);
+
+    strncpy(res, buf, size);
+
+    res[size-1] = '\0';
+
+    return res;
+}
+
+
+char* Jwarning(char *cause, char* mnem, u32 code_promoted)
+{
+    char *res;
+    char buf[350];
+
+    u16 code = (u16) code_promoted;
+
+    sprintf(buf, "{\"WARNING\":{\"CAUSE\":\"%s\",\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", cause, mnem, code);
+
+    ssize_t size = strlen(buf) + 1;
     res = malloc(sizeof (* res) * size);
 
     strncpy(res, buf, size);
@@ -286,7 +285,7 @@ char* Jconcat(char *dst, char *src)
 }
 
 
-char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
+char* Jconcat2(struct EmulationMachine* emulator, char *dst, char* (*Jsrc)(), ...)
 {
     va_list va_ptr;
 
@@ -295,7 +294,7 @@ char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
     char *src = NULL;
 
     if (Jsrc == Jcpu)
-        src = Jcpu();
+        src = Jcpu(emulator);
     else if (Jsrc == Jram)
     {
         u32 _start, _end, _sh;
@@ -303,7 +302,7 @@ char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
         _end   = va_arg(va_ptr, u32);
         _sh   = va_arg(va_ptr, u32);
 
-        src = Jram(_start, _end, _sh);
+        src = Jram(emulator, _start, _end, _sh);
     }
     else if (Jsrc == Jstack)
     {
@@ -311,7 +310,7 @@ char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
         _bottom = va_arg(va_ptr, u32);
         _top    = va_arg(va_ptr, u32);
 
-        src = Jstack(_bottom, _top);
+        src = Jstack(emulator, _bottom, _top);
     }
     else if (Jsrc == Jchrono)
         src = Jchrono(va_arg(va_ptr, u64));
@@ -335,6 +334,14 @@ char* Jconcat2(char *dst, char* (*Jsrc)(), ...)
         u32   type = va_arg(va_ptr, u32);
 
         src = Jio(buff, type);
+    }
+    else if (Jsrc == Jwarning)
+    {
+        char* cause = va_arg(va_ptr, char *);
+        char* mnem  = va_arg(va_ptr, char *);
+        u32   code  = va_arg(va_ptr, u32);
+
+        src = Jwarning(cause, mnem, code);
     }
 
     va_end(va_ptr);

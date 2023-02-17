@@ -9,10 +9,9 @@
 
 
 void init_opcodes(struct EmulationMachine *em);
-void destroy_codes(void);
+void destroy_codes(struct EmulationMachine *em);
 
-void preset_hander(struct EmulationMachine *em);
-u32  run_opcode(void);
+u32 execute_istr(struct EmulationMachine *emulator);
 
 
 
@@ -23,142 +22,142 @@ u32  run_opcode(void);
  *
  */
 // GROUP 0x00
-u32 ORItoCCR(void);  //ok
-u32 ORItoSR(void);   //ok
-u32 ORI(void);       //ok
-u32 ANDItoCCR(void); //ok
-u32 ANDItoSR(void);  //ok
-u32 ANDI(void);      //ok
-u32 SUBI(void);      //ok
-u32 ADDI(void);      //ok
-u32 EORItoCCR(void); //ok
-u32 EORItoSR(void);  //ok
-u32 EORI(void);      //ok
-u32 CMPI(void);      //ok
-u32 MOVEP(void);     // maybe next -warn
-u32 BTST(void);      //ok
-u32 BCHG(void);      //ok
-u32 BCLR(void);      //ok
-u32 BSET(void);      //ok
+u32 ORItoCCR(struct EmulationMachine* emulator);  //ok
+u32 ORItoSR(struct EmulationMachine* emulator);   //ok
+u32 ORI(struct EmulationMachine* emulator);       //ok
+u32 ANDItoCCR(struct EmulationMachine* emulator); //ok
+u32 ANDItoSR(struct EmulationMachine* emulator);  //ok
+u32 ANDI(struct EmulationMachine* emulator);      //ok
+u32 SUBI(struct EmulationMachine* emulator);      //ok
+u32 ADDI(struct EmulationMachine* emulator);      //ok
+u32 EORItoCCR(struct EmulationMachine* emulator); //ok
+u32 EORItoSR(struct EmulationMachine* emulator);  //ok
+u32 EORI(struct EmulationMachine* emulator);      //ok
+u32 CMPI(struct EmulationMachine* emulator);      //ok
+u32 MOVEP(struct EmulationMachine* emulator);     // maybe next -warn
+u32 BTST(struct EmulationMachine* emulator);      //ok
+u32 BCHG(struct EmulationMachine* emulator);      //ok
+u32 BCLR(struct EmulationMachine* emulator);      //ok
+u32 BSET(struct EmulationMachine* emulator);      //ok
 
 
 // GROUP 0x01
-u32 MOVE(void);   //ok
+u32 MOVE(struct EmulationMachine* emulator);   //ok
 
 
 // GROUP 0x02-0x03
-u32 MOVEA(void);  //ok
+u32 MOVEA(struct EmulationMachine* emulator);  //ok
 
 
 // group 0X04
-u32 MOVEfromSR(void); //ok
-u32 MOVEtoCCR(void);  //ok
-u32 MOVEtoSR(void);   //ok
-u32 NEGX(void);       //ok
-u32 CLR(void);        //ok
-u32 NEG(void);        //ok
-u32 NOT(void);        //ok
-u32 EXT(void);        //ok
-u32 NBCD(void);       //ok
-u32 SWAP(void);       //ok
-u32 PEA(void);        //ok
-u32 ILLEGAL(void);    //ok
-u32 TAS(void);        // ?? -warn
-u32 TST(void);        //ok
-u32 TRAP(void);       //ok
-u32 LINK(void);       //ok
-u32 UNLK(void);       //ok
-u32 MOVEUSP(void);    //ok
-u32 RESET(void);      // ?? -warn
-u32 NOP(void);        //ok
-u32 STOP(void);       // ?? -warn
-u32 RTE(void);        //ok
-u32 RTS(void);        //ok
-u32 TRAPV(void);      //ok
-u32 RTR(void);        //ok
-u32 JSR(void);        //ok
-u32 JMP(void);        //ok
-u32 MOVEM(void);      // wtf -warn
-u32 CHK(void);        // ok -warn
-u32 LEA(void);        //ok
+u32 MOVEfromSR(struct EmulationMachine* emulator); //ok
+u32 MOVEtoCCR(struct EmulationMachine* emulator);  //ok
+u32 MOVEtoSR(struct EmulationMachine* emulator);   //ok
+u32 NEGX(struct EmulationMachine* emulator);       //ok
+u32 CLR(struct EmulationMachine* emulator);        //ok
+u32 NEG(struct EmulationMachine* emulator);        //ok
+u32 NOT(struct EmulationMachine* emulator);        //ok
+u32 EXT(struct EmulationMachine* emulator);        //ok
+u32 NBCD(struct EmulationMachine* emulator);       //ok
+u32 SWAP(struct EmulationMachine* emulator);       //ok
+u32 PEA(struct EmulationMachine* emulator);        //ok
+u32 ILLEGAL(struct EmulationMachine* emulator);    //ok
+u32 TAS(struct EmulationMachine* emulator);        // ?? -warn
+u32 TST(struct EmulationMachine* emulator);        //ok
+u32 TRAP(struct EmulationMachine* emulator);       //ok
+u32 LINK(struct EmulationMachine* emulator);       //ok
+u32 UNLK(struct EmulationMachine* emulator);       //ok
+u32 MOVEUSP(struct EmulationMachine* emulator);    //ok
+u32 RESET(struct EmulationMachine* emulator);      // ?? -warn
+u32 NOP(struct EmulationMachine* emulator);        //ok
+u32 STOP(struct EmulationMachine* emulator);       // ?? -warn
+u32 RTE(struct EmulationMachine* emulator);        //ok
+u32 RTS(struct EmulationMachine* emulator);        //ok
+u32 TRAPV(struct EmulationMachine* emulator);      //ok
+u32 RTR(struct EmulationMachine* emulator);        //ok
+u32 JSR(struct EmulationMachine* emulator);        //ok
+u32 JMP(struct EmulationMachine* emulator);        //ok
+u32 MOVEM(struct EmulationMachine* emulator);      // wtf -warn
+u32 CHK(struct EmulationMachine* emulator);        // ok -warn
+u32 LEA(struct EmulationMachine* emulator);        //ok
 
 
 // GROUP 0x05
-u32 DBcc(void);      //ok
-u32 Scc(void);       //ok
-u32 ADDQ(void);      //ok
-u32 SUBQ(void);      //ok
+u32 DBcc(struct EmulationMachine* emulator);      //ok
+u32 Scc(struct EmulationMachine* emulator);       //ok
+u32 ADDQ(struct EmulationMachine* emulator);      //ok
+u32 SUBQ(struct EmulationMachine* emulator);      //ok
 
 
 // GROUP 0x06
-u32 BRA(void);      //ok
-u32 BSR(void);      //ok
-u32 Bcc(void);      //ok
+u32 BRA(struct EmulationMachine* emulator);      //ok
+u32 BSR(struct EmulationMachine* emulator);      //ok
+u32 Bcc(struct EmulationMachine* emulator);      //ok
 
 
 // GROUP 0x07
-u32 MOVEQ(void);     //ok
+u32 MOVEQ(struct EmulationMachine* emulator);     //ok
 
 
 // GROUP 0x08
-u32 DIVU(void);   //ok
-u32 DIVS(void);   //ok
-u32 SBCD(void);   //ok
-u32 OR(void);     //ok
+u32 DIVU(struct EmulationMachine* emulator);   //ok
+u32 DIVS(struct EmulationMachine* emulator);   //ok
+u32 SBCD(struct EmulationMachine* emulator);   //ok
+u32 OR(struct EmulationMachine* emulator);     //ok
 
 
 // GROUP 0x09
-u32 SUBA(void);  //ok
-u32 SUBX(void);  //ok
-u32 SUB(void);   //ok
+u32 SUBA(struct EmulationMachine* emulator);  //ok
+u32 SUBX(struct EmulationMachine* emulator);  //ok
+u32 SUB(struct EmulationMachine* emulator);   //ok
 
 
 // GROUP 0x0B
-u32 CMPA(void);  //ok
-u32 CMPM(void);  //ok
-u32 EOR(void);   //ok
-u32 CMP(void);   //ok
+u32 CMPA(struct EmulationMachine* emulator);  //ok
+u32 CMPM(struct EmulationMachine* emulator);  //ok
+u32 EOR(struct EmulationMachine* emulator);   //ok
+u32 CMP(struct EmulationMachine* emulator);   //ok
 
 
 // GROUP 0x0C
-u32 MULU(void);  //ok
-u32 MULS(void);  //ok
-u32 ABCD(void);  //ok
-u32 EXG(void);   //ok
-u32 AND(void);   //ok
+u32 MULU(struct EmulationMachine* emulator);  //ok
+u32 MULS(struct EmulationMachine* emulator);  //ok
+u32 ABCD(struct EmulationMachine* emulator);  //ok
+u32 EXG(struct EmulationMachine* emulator);   //ok
+u32 AND(struct EmulationMachine* emulator);   //ok
 
 
 // GROUP 0x0D
-u32 ADDA(void);  //ok
-u32 ADDX(void);  //ok
-u32 ADD(void);   //ok
+u32 ADDA(struct EmulationMachine* emulator);  //ok
+u32 ADDX(struct EmulationMachine* emulator);  //ok
+u32 ADD(struct EmulationMachine* emulator);   //ok
 
 
 // GROUP 0x0E
-u32 ASR(void);   //ok
-u32 ASL(void);   //ok
-u32 LSR(void);   //ok
-u32 LSL(void);   //ok
-u32 ROXR(void);  //ok
-u32 ROXL(void);  //ok
-u32 ROR(void);   //ok
-u32 ROL(void);   //ok
+u32 ASR(struct EmulationMachine* emulator);   //ok
+u32 ASL(struct EmulationMachine* emulator);   //ok
+u32 LSR(struct EmulationMachine* emulator);   //ok
+u32 LSL(struct EmulationMachine* emulator);   //ok
+u32 ROXR(struct EmulationMachine* emulator);  //ok
+u32 ROXL(struct EmulationMachine* emulator);  //ok
+u32 ROR(struct EmulationMachine* emulator);   //ok
+u32 ROL(struct EmulationMachine* emulator);   //ok
 
 
 //Bxxx
-u32 Bxxx(void);
+u32 Bxxx(struct EmulationMachine* emulator);
 
 
 //abcd-sbcd
-u32 xBCD(BCD_type type);
-u32 perform_BCD(BCD_type type, u32 src, u32 dest);
+u32 xBCD(struct EmulationMachine* emulator, BCD_type type);
+u32 perform_BCD(struct EmulationMachine* emulator, BCD_type type, u32 src, u32 dest);
 
 
 //A-Lxx
-u32 ALxx(void);
+u32 ALxx(struct EmulationMachine* emulator);
 
 //Roxx
-u32 ROxx(void);
+u32 ROxx(struct EmulationMachine* emulator);
 
 /*
  * END DUMBS PROTOS

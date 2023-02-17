@@ -28,8 +28,9 @@ class RegisterRender : public WContainerWidget
         void init_data_reg();
         void init_addr_reg();
         void init_other_regs();
+        void init_others();
 
-    public:
+    private:
         void setDataReg(unsigned int index, string result);
         void setAddrReg(unsigned int index, string result);
 
@@ -44,7 +45,10 @@ class RegisterRender : public WContainerWidget
 
         void setTime(unsigned int val, bool valid = true);
 
-    private:
+        void setFWB(string result);
+        void setLWB(string result);
+        void setHALT(string result);
+
         WTemplate* template_;
 
         WTextArea* data_reg[8];
@@ -60,6 +64,10 @@ class RegisterRender : public WContainerWidget
         WTextArea* _16bit_code;
 
         WTextArea* time;
+
+        WTextArea* FWB;
+        WTextArea* LWB;
+        WTextArea* HALT;
 };
 
 
