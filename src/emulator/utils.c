@@ -382,7 +382,7 @@ char* trap_code_toString(const u32 trapcode)
                                         { \
                                             if (read_byte(emulator, rptr) == 't' || read_byte(emulator, rptr) == 'T') {  \
                                                 index = read_byte(emulator, rptr+1); \
-                                                if (index == 0x00) return c_false; \
+                                                if (index == 0x00) return is_buffering_enabled(emulator); \
                                                 index = index - 0x30;      \
                                                 if (index > 7) continue;   \
                                                 struct timeval tv;         \
@@ -393,7 +393,7 @@ char* trap_code_toString(const u32 trapcode)
                                             }\
                                             else if (read_byte(emulator, rptr) == 's' || read_byte(emulator, rptr) == 'S') {  \
                                                 index = read_byte(emulator, rptr+1); \
-                                                if (index == 0x00) return c_false; \
+                                                if (index == 0x00) return is_buffering_enabled(emulator); \
                                                 index = index - 0x30;      \
                                                 if (index > 7) continue;   \
                                                 d0 = read_datareg(emulator, 0);      \
@@ -530,7 +530,7 @@ c_bool iotask(struct EmulationMachine *emulator)
             emulator->Machine.IO.buffer  = str;
         }
     }
-
+    
     return is_buffering_enabled(emulator);
 }
 

@@ -7,25 +7,29 @@
 #include <Wt/WServer.h>
 
 
-
-
 unsigned long long FILE_COUNTER = 0;
 
-
+/**
+ * Class constructor
+ * 
+ * init all widget and set their behaviours
+ */
 Dispatcher::Dispatcher()
-    : stack_(nullptr),
-    code(nullptr),
-    memory(nullptr), 
-    editor_(nullptr),
-    console(nullptr),
-    reg_rend_(nullptr),
-    next_istr(nullptr),
-    terminate(nullptr),
-    compile(nullptr),
-    run(nullptr),
-    debug(nullptr),
-    emulator(nullptr),
-    assembler(nullptr),
+    : stackedWidget(nullptr),
+    toogleEditorButton(nullptr),
+    toogleMemoryButton(nullptr), 
+    editorWidget(nullptr),
+    toogleConsoleButton(nullptr),
+    registerRenderWidget(nullptr),
+    executeNextIstructionButton(nullptr),
+    continueExecutionButton(nullptr),
+    compileButton(nullptr),
+    runButton(nullptr),
+    debugButton(nullptr),
+    emulatorInstance(nullptr),
+    assemblerState(nullptr),
+    quitThread_runBinaryThread(false),
+    quitThread_nextIstructionThread(false),
     WContainerWidget()
 {
     WApplication* instance = WApplication::instance();
@@ -42,7 +46,7 @@ Dispatcher::Dispatcher()
     instance->messageResourceBundle().use("template/xmls/render");
     instance->useStyleSheet("template/css/render.css");
 
-    template_ = this->addWidget(make_unique<WTemplate>(tr("render-msg")));
+    XMLTemplate = this->addWidget(make_unique<WTemplate>(tr("render-msg")));
 
     auto c_btn = make_unique<WPushButton>(tr("code"));
     c_btn->setText("Code");
@@ -88,227 +92,115 @@ Dispatcher::Dispatcher()
     clear_c->setStyleClass("button-box-item2");
     clear_c->setText("Clear");
 
-    code      = template_->bindWidget("code",      move(c_btn));
-    memory    = template_->bindWidget("memory",    move(m_btn));
-    console   = template_->bindWidget("console",   move(k_btn));
+    toogleEditorButton  = XMLTemplate->bindWidget("code",      move(c_btn));
+    toogleMemoryButton  = XMLTemplate->bindWidget("memory",    move(m_btn));
+    toogleConsoleButton = XMLTemplate->bindWidget("console",   move(k_btn));
+    clearConsoleButton  = XMLTemplate->bindWidget("clear-btn", move(clear_c));
 
-    clear_  = template_->bindWidget("clear-btn", move(clear_c));
+    compileButton = XMLTemplate->bindWidget("compile", move(comp_btn));
+    runButton     = XMLTemplate->bindWidget("run",     move(r_btn));
+    debugButton   = XMLTemplate->bindWidget("debug",   move(d_btn));
 
-    compile = template_->bindWidget("compile", move(comp_btn));
-    run     = template_->bindWidget("run",     move(r_btn));
-    debug   = template_->bindWidget("debug",   move(d_btn));
+    executeNextIstructionButton  = XMLTemplate->bindWidget("next",      move(n_btn));
+    stopExecutionButton          = XMLTemplate->bindWidget("stop",      move(s_btn));
+    continueExecutionButton      = XMLTemplate->bindWidget("terminate", move(t_btn));
+    clearRegistersButton         = XMLTemplate->bindWidget("clr",       move(clr_btn));
 
-    next_istr  = template_->bindWidget("next",      move(n_btn));
-    stop       = template_->bindWidget("stop",      move(s_btn));
-    terminate  = template_->bindWidget("terminate", move(t_btn));
-    clear_regs = template_->bindWidget("clr",       move(clr_btn));
-
-    next_istr->setDisabled(true);
-    terminate->setDisabled(true);
-    stop->setDisabled(true);
-    run->setDisabled(true);
-    debug->setDisabled(true);
-    clear_->hide();
+    executeNextIstructionButton->setDisabled(true);
+    continueExecutionButton->setDisabled(true);
+    stopExecutionButton->setDisabled(true);
+    runButton->setDisabled(true);
+    debugButton->setDisabled(true);
+    clearConsoleButton->hide();
 
     auto stack = make_unique<Wt::WStackedWidget>();
-    stack_ = template_->bindWidget("widget", move(stack));
+    stackedWidget = XMLTemplate->bindWidget("widget", move(stack));
 
     auto reg_rend = make_unique<RegisterRender>();
-    reg_rend_ = template_->bindWidget("register_render", move(reg_rend));
+    registerRenderWidget = XMLTemplate->bindWidget("register_render", move(reg_rend));
 
-    editor_ = stack_->addWidget(make_unique<Editor>());
-    editor_->setUpEditor();
+    editorWidget = stackedWidget->addWidget(make_unique<Editor>());
+    editorWidget->setUpEditor();
 
-    memory_ = stack_->addWidget(make_unique<MemoryView>());
-    memory_->setUpMemory();
+    memoryWidget = stackedWidget->addWidget(make_unique<MemoryView>());
+    memoryWidget->setUpMemory();
 
-    console_ = stack_->addWidget(make_unique<Console>());
-    console_->setUpConsole();
+    consoleWidget = stackedWidget->addWidget(make_unique<Console>());
+    consoleWidget->setUpConsole();
 
-    stack_->setCurrentWidget(editor_);
-    code->setStyleClass("button-box-item2-selected");
+    stackedWidget->setCurrentWidget(editorWidget);
+    toogleEditorButton->setStyleClass("button-box-item2-selected");
 
-    code->clicked().connect(this,      &Dispatcher::show_editor);
-    memory->clicked().connect(this,    &Dispatcher::show_memory);
-    console->clicked().connect(this,   &Dispatcher::show_console);
-    next_istr->clicked().connect(this, &Dispatcher::do_next);
-    stop->clicked().connect(this,      &Dispatcher::do_stop);
-    terminate->clicked().connect(this, &Dispatcher::do_terminate);
+    toogleEditorButton->clicked().connect(this,      [=]{
+        clearConsoleButton->hide();
+        stackedWidget->setCurrentWidget(editorWidget);
+        toogleEditorButton->setStyleClass("button-box-item2-selected");
+        toogleMemoryButton->setStyleClass("button-box-item2");
+        toogleConsoleButton->setStyleClass("button-box-item2");
+    });
 
-    compile->clicked().connect(this, &Dispatcher::compile_src);
-    run->clicked().connect(this,     &Dispatcher::run_src);
-    debug->clicked().connect(this,   &Dispatcher::debug_src);
+    toogleMemoryButton->clicked().connect(this,    [=]{
+        clearConsoleButton->hide();
+        stackedWidget->setCurrentWidget(memoryWidget);
+        toogleEditorButton->setStyleClass("button-box-item2");
+        toogleMemoryButton->setStyleClass("button-box-item2-selected");
+        toogleConsoleButton->setStyleClass("button-box-item2");
+    });
 
-    editor_->text_changed.connect(this, &Dispatcher::lock_btns);
+    toogleConsoleButton->clicked().connect(this,   [=]{
+        clearConsoleButton->show();
+        stackedWidget->setCurrentWidget(consoleWidget);
+        toogleEditorButton->setStyleClass("button-box-item2");
+        toogleMemoryButton->setStyleClass("button-box-item2");
+        toogleConsoleButton->setStyleClass("button-box-item2-selected");
+    });
 
-    clear_->clicked().connect(this, [=] { console_->clear(); });
 
-    clear_regs->clicked().connect(this, [=] { reg_rend_->clear(); });
+    executeNextIstructionButton->clicked().connect(this, &Dispatcher::do_next);
+    stopExecutionButton->clicked().connect(this,      &Dispatcher::do_stop);
+    continueExecutionButton->clicked().connect(this, &Dispatcher::do_terminate);
 
-    edata.init();
+    compileButton->clicked().connect(this, &Dispatcher::do_compile);
+    runButton->clicked().connect(this,     &Dispatcher::do_run);
+    debugButton->clicked().connect(this,   &Dispatcher::do_debug);
+
+    editorWidget->text_changed.connect(this, [=] { 
+                                                runButton->setDisabled(true);
+                                                debugButton->setDisabled(true);
+                                                compileButton->setDisabled(false);
+                                            } 
+                                        );
+
+    clearConsoleButton->clicked().connect(this, [=] { consoleWidget->clear(); });
+
+    clearRegistersButton->clicked().connect(this, [=] { registerRenderWidget->clear(); });
+
+    emulationData.init();
 }
 
 
-void Dispatcher::show_editor()
-{   
-    clear_->hide();
-    stack_->setCurrentWidget(editor_);
-    code->setStyleClass("button-box-item2-selected");
-    memory->setStyleClass("button-box-item2");
-    console->setStyleClass("button-box-item2");
-}
-
-void Dispatcher::show_memory()
+/**
+ * ACTION compile 
+ * 
+ * no thread needed
+ */
+void Dispatcher::do_compile()
 {
-    clear_->hide();
-    stack_->setCurrentWidget(memory_);
-    code->setStyleClass("button-box-item2");
-    memory->setStyleClass("button-box-item2-selected");
-    console->setStyleClass("button-box-item2");
-}
+    clearConsoleButton->show();
+    stackedWidget->setCurrentWidget(consoleWidget);
+    toogleEditorButton->setStyleClass("button-box-item2");
+    toogleMemoryButton->setStyleClass("button-box-item2");
+    toogleConsoleButton->setStyleClass("button-box-item2-selected");
 
-void Dispatcher::show_console()
-{
-    clear_->show();
-    stack_->setCurrentWidget(console_);
-    code->setStyleClass("button-box-item2");
-    memory->setStyleClass("button-box-item2");
-    console->setStyleClass("button-box-item2-selected");
-}
+    WString src = editorWidget->text_();
 
-
-void Dispatcher::do_next()
-{
-    WApplication *app = WApplication::instance();
-
-    app->enableUpdates(true);
-        
-    if (nextThread_.joinable())
-        nextThread_.join();
-        
-    nextThread_ = std::thread(std::bind(&Dispatcher::doNext, this, app));
-}
-
-
-void Dispatcher::doNext(WApplication* app)
-{
-    WApplication::UpdateLock uiLock(app);
-    
-    if (uiLock) 
-    {
-        if (!emulate(emulator))
-            do_stop();
-        else
-        {
-            reg_rend_->update(emulator->Machine.dump);
-            console_->push_stdout(emulator->Machine.dump);
-            memory_->update();
-        }
-
-        app->triggerUpdate();
-
-        app->enableUpdates(false);
-    }
-}
-
-
-void Dispatcher::do_stop()
-{
-    console_->push_stdout(emulator->Machine.dump);
-    reg_rend_->update(emulator->Machine.dump);
-    memory_->update();
-    memory_->enableFetch(false);
-
-    console_->disable(true);
-    console_->end_program();
-
-    editor_->disable(false);
-    run->setDisabled(false);
-    debug->setDisabled(false);
-
-    next_istr->setDisabled(true);
-    terminate->setDisabled(true);
-    stop->setDisabled(true);
-
-    console_->setEmulator(nullptr);
-    memory_->setEmulator(nullptr);
-
-    end_emulator(emulator);
-    emulator = nullptr;
-}
-
-void Dispatcher::do_terminate()
-{
-    WApplication *app = WApplication::instance();
-
-    app->enableUpdates(true);
-        
-    if (terminateThread_.joinable())
-        terminateThread_.join();
-        
-    terminateThread_ = std::thread(std::bind(&Dispatcher::doTerminate, this, app));
-}
-
-void Dispatcher::doTerminate(WApplication *app)
-{
-    while (emulate(emulator))
-    {
-        WApplication::UpdateLock uiLock(app);
-    
-        if (uiLock) 
-        {
-            console_->push_stdout(emulator->Machine.dump);
-
-            app->triggerUpdate();
-        }
-    } 
-
-    WApplication::UpdateLock uiLock(app);
-    
-    if (uiLock) 
-    {
-        reg_rend_->update(emulator->Machine.dump);
-        console_->push_stdout(emulator->Machine.dump);
-        memory_->update();
-        memory_->enableFetch(false);
-
-        end_emulator(emulator);
-        emulator = nullptr;
-
-        next_istr->setDisabled(true);
-        terminate->setDisabled(true);
-        stop->setDisabled(true);
-        run->setDisabled(false);
-        debug->setDisabled(false);
-
-        editor_->disable(false);
-        console_->disable(true);
-        console_->end_program();
-
-        app->triggerUpdate();
-
-        app->enableUpdates(false);
-    } 
-    else{
-        end_emulator(emulator);
-        emulator = nullptr;
-        return;
-    } 
-}
-
-void Dispatcher::compile_src()
-{
-    show_console();
-
-    WString src = editor_->text_();
-
-    console_->begin_assembler();
+    consoleWidget->begin_assembler();
 
     if (!src.empty())
     {
         string fname = "sources/src" + to_string(FILE_COUNTER++) + ".X68";
 
-        edata.setSrc(fname);
+        emulationData.setSrc(fname);
 
         std::ofstream file(fname);
         if (file.is_open()) 
@@ -319,91 +211,104 @@ void Dispatcher::compile_src()
             string bname = fname;
             replace(bname.begin(), bname.end(), 'X', 'B');
 
-            assembler = obtain_semantic_state();
+            assemblerState = obtain_semantic_state();
 
-            if (assembler)
+            if (assemblerState)
             {
-                if (!assemble(assembler, fname.c_str()))
+                if (!assemble(assemblerState, fname.c_str()))
                 {
-                    console_->push_simple_stdout(string(assembler->_asseble_error));
-                    edata.setValid(false);
+                    consoleWidget->push_simple_stdout(string(assemblerState->_asseble_error));
+                    emulationData.setValid(false);
                 }
                 else
                 {
-                    edata.setBin(bname);
-                    edata.setValid(true);
+                    emulationData.setBin(bname);
+                    emulationData.setValid(true);
 
-                    console_->end_assembler();
-                    run->setDisabled(false);
-                    debug->setDisabled(false);
-                    compile->setDisabled(true);
+                    consoleWidget->end_assembler();
+                    runButton->setDisabled(false);
+                    debugButton->setDisabled(false);
+                    compileButton->setDisabled(true);
                 }
 
-                free_SemanticState(assembler);
+                free_SemanticState(assemblerState);
             }
             else
-            { console_->assembler_error(); edata.setValid(false); }  
+            { consoleWidget->assembler_error(); emulationData.setValid(false); }  
         }
         else
-        {   console_->assembler_error(); edata.setValid(false); }
+        {   consoleWidget->assembler_error(); emulationData.setValid(false); }
     }
     else
-    {   console_->push_simple_stdout("Empty source file.\n"); edata.setValid(false); }
+    {   consoleWidget->push_simple_stdout("Empty source file.\n"); emulationData.setValid(false); }
 }
 
 
-
-void Dispatcher::run_src()
+/**
+ * ACTION run source
+ * 
+ * detatching a thread to executing run task
+ * enabling stop button that toggle a std::atomic<bool> to quit it
+ */
+void Dispatcher::do_run()
 {
     WApplication *app = WApplication::instance();
 
-    reg_rend_->clear();
+    registerRenderWidget->clear();
 
-    next_istr->setDisabled(true);
-    terminate->setDisabled(true);
-    stop->setDisabled(true);
-    run->setDisabled(true);
-    debug->setDisabled(true);
+    executeNextIstructionButton->setDisabled(true);
+    continueExecutionButton->setDisabled(true);
+    stopExecutionButton->setDisabled(false);
+    runButton->setDisabled(true);
+    debugButton->setDisabled(true);
 
-    memory_->enableFetch(true);
+    memoryWidget->enableFetch(true);
 
-    console_->disable(false);
+    consoleWidget->disable(false);
 
-    if (edata.valid())
+    if (emulationData.valid())
     {      
-        emulator = obtain_emulation_machine(edata.bin().c_str());
-        console_->setEmulator(emulator);
-        memory_->setEmulator(emulator);
+        emulatorInstance = obtain_emulation_machine(emulationData.bin().c_str());
+        consoleWidget->setEmulator(emulatorInstance);
+        memoryWidget->setEmulator(emulatorInstance);
 
-        begin_emulator(emulator);
+        begin_emulator(emulatorInstance);
 
-        init_buffer(emulator);
+        init_buffer(emulatorInstance);
 
-        memory_->update(peek_ORG_from_file(emulator));
+        memoryWidget->update(peek_ORG_from_file(emulatorInstance));
 
-        console_->begin_program();
+        consoleWidget->begin_program();
 
         app->enableUpdates(true);
+
+        quitThread_runBinaryThread = false;
         
-        if (runnerThread_.joinable())
-            runnerThread_.join();
+        if (runBinaryThread.joinable())
+            runBinaryThread.join();
             
-        runnerThread_ = std::thread(std::bind(&Dispatcher::doRun, this, app, emulator));     
+        runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_runBinaryThread)));     
   
     }
 }
 
-void Dispatcher::doRun(WApplication *app, struct EmulationMachine* em)
+
+/**
+ * THREAD runBinaryThread
+ * 
+ * execute a .B68 file
+ */
+void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachine* em, std::atomic<bool>& quit)
 {
-    while (emulate(em))
+    while (emulate(em) && !quit)
     {
         WApplication::UpdateLock uiLock(app);
     
         if (uiLock) 
         {
-            console_->push_stdout(em->Machine.dump);
-            reg_rend_->update(em->Machine.dump);
-            memory_->update();
+            consoleWidget->push_stdout(em->Machine.dump);
+            registerRenderWidget->update(em->Machine.dump);
+            memoryWidget->update();
 
             app->triggerUpdate();
         }
@@ -413,22 +318,28 @@ void Dispatcher::doRun(WApplication *app, struct EmulationMachine* em)
     
     if (uiLock) 
     {
-        reg_rend_->update(em->Machine.dump);
-        memory_->update();
-        memory_->enableFetch(false);
+        registerRenderWidget->update(em->Machine.dump);
+        consoleWidget->push_stdout(emulatorInstance->Machine.dump);
+
+        memoryWidget->update();
+        memoryWidget->enableFetch(false);
 
         end_emulator(em);
         em = nullptr;
 
-        console_->disable(true);
-        console_->end_program();
+        consoleWidget->disable(true);
+        consoleWidget->end_program();
 
-        editor_->disable(false);
-        run->setDisabled(false);
-        debug->setDisabled(false);
+        editorWidget->disable(false);
+        runButton->setDisabled(false);
+        debugButton->setDisabled(false);
 
-        console_->setEmulator(nullptr);
-        memory_->setEmulator(nullptr);
+        executeNextIstructionButton->setDisabled(true);
+        continueExecutionButton->setDisabled(true);
+        stopExecutionButton->setDisabled(true);
+
+        consoleWidget->setEmulator(nullptr);
+        memoryWidget->setEmulator(nullptr);
 
         app->triggerUpdate();
 
@@ -442,41 +353,177 @@ void Dispatcher::doRun(WApplication *app, struct EmulationMachine* em)
     }
 }
 
-void Dispatcher::debug_src()
+
+/**
+ * ACTION debug
+ * 
+ * init emulatorInstance and pseudo-stdin
+ * just it
+ */
+void Dispatcher::do_debug()
 {
     WApplication *app = WApplication::instance();
-    reg_rend_->clear();
+    registerRenderWidget->clear();
 
-    editor_->disable(true);
+    editorWidget->disable(true);
 
-    next_istr->setDisabled(false);
-    terminate->setDisabled(false);
-    stop->setDisabled(false);
+    executeNextIstructionButton->setDisabled(false);
+    continueExecutionButton->setDisabled(false);
+    stopExecutionButton->setDisabled(false);
 
-    memory_->enableFetch(true);
+    memoryWidget->enableFetch(true);
 
-    run->setDisabled(true);
-    debug->setDisabled(true);
+    runButton->setDisabled(true);
+    debugButton->setDisabled(true);
 
-    if (edata.valid())
+    if (emulationData.valid())
     {
-        emulator = obtain_emulation_machine(edata.bin().c_str());
-        console_->setEmulator(emulator);
+        emulatorInstance = obtain_emulation_machine(emulationData.bin().c_str());
+        consoleWidget->setEmulator(emulatorInstance);
+        memoryWidget->setEmulator(emulatorInstance);
 
-        console_->begin_program();
+        begin_emulator(emulatorInstance);
 
-        begin_emulator(emulator);
+        init_buffer(emulatorInstance);
 
-        init_buffer(emulator);
+        memoryWidget->update(peek_ORG_from_file(emulatorInstance));
 
-        console_->disable(false);
+        consoleWidget->begin_program();
+
+        consoleWidget->disable(false);
     }
 
 }
 
-void Dispatcher::lock_btns()
+
+/**
+ * ACTION next
+ * 
+ * execute in detatched mode a single instruction
+ * include std::atomic<bool> to kill it 
+ */
+void Dispatcher::do_next()
 {
-    run->setDisabled(true);
-    debug->setDisabled(true);
-    compile->setDisabled(false);
+    WApplication *app = WApplication::instance();
+
+    app->enableUpdates(true);
+
+    quitThread_nextIstructionThread = false;
+
+    executeNextIstructionButton->setDisabled(true);
+        
+    if (nextIstructionThread.joinable())
+        nextIstructionThread.join();
+        
+    nextIstructionThread = std::thread(std::bind(&Dispatcher::doNext_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_nextIstructionThread)));
 }
+
+
+/**
+ * THREAD nextIstructionThread
+ * 
+ * execute a single istruction, if ACTION stop will be triggered
+ * or the emulation end, it will terminate the emulation and 
+ * 'fetch and push' last data to widgets 
+ * 
+ */
+void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em, std::atomic<bool>& quit)
+{
+    if (emulate(emulatorInstance) && !quit)
+    {
+        WApplication::UpdateLock uiLock(app);
+    
+        if (uiLock) 
+        {
+            consoleWidget->push_stdout(em->Machine.dump);
+            registerRenderWidget->update(em->Machine.dump);
+            memoryWidget->update();
+
+            executeNextIstructionButton->setDisabled(false); 
+
+            app->triggerUpdate();
+
+            app->enableUpdates(false);
+        }
+    }    
+    else
+    {
+        WApplication::UpdateLock uiLock(app);
+        
+        if (uiLock) 
+        {
+            registerRenderWidget->update(em->Machine.dump);
+            consoleWidget->push_stdout(emulatorInstance->Machine.dump);
+
+            memoryWidget->update();
+            memoryWidget->enableFetch(false);
+
+            end_emulator(em);
+            em = nullptr;
+
+            consoleWidget->disable(true);
+            consoleWidget->end_program();
+
+            editorWidget->disable(false);
+            runButton->setDisabled(false);
+            debugButton->setDisabled(false);
+
+            executeNextIstructionButton->setDisabled(true);
+            continueExecutionButton->setDisabled(true);
+            stopExecutionButton->setDisabled(true);
+
+            consoleWidget->setEmulator(nullptr);
+            memoryWidget->setEmulator(nullptr);
+
+            app->triggerUpdate();
+
+            app->enableUpdates(false);
+        } 
+        else 
+        {
+            end_emulator(em);
+            em = nullptr;
+            return;
+        }       
+    }
+}
+
+
+/**
+ * ACTION terminate
+ * 
+ * execute in detatched mode the last part of .B68 file
+ * include std::atomic<bool> to kill it 
+ * 
+ * use runBinaryThread to perform this task
+ */
+void Dispatcher::do_terminate()
+{
+    WApplication *app = WApplication::instance();
+
+    app->enableUpdates(true);
+        
+    quitThread_runBinaryThread = false;
+    
+    if (runBinaryThread.joinable())
+        runBinaryThread.join();
+        
+    runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_runBinaryThread)));     
+}
+
+
+
+/**
+ * ACTION stop
+ * 
+ * force to terminate all active threads,
+ * also disable pseudo-stdin 
+ */
+void Dispatcher::do_stop()
+{
+    set_buffering_enabled(emulatorInstance, c_false);
+
+    quitThread_runBinaryThread = true;
+    quitThread_nextIstructionThread   = true;
+}
+

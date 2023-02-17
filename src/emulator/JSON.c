@@ -243,32 +243,37 @@ char* Jwarning(char *cause, char* mnem, u32 code_promoted)
 
 char* Jio(char* io, u32 type)
 {
-    char *res;
-    ssize_t size = strlen(io) + 1;
-    char buf[(size + 30) * 2];
+    if (io)
+    {   
+        char *res;
+        ssize_t size = strlen(io) + 1;
+        char buf[(size + 30) * 2];
 
-    if (type == INPUT)
-        sprintf(buf, "{\"IO\":{\"TYPE\":\"I\",\"VAL\":%s}}", io);
-    else
-    {
-        char *str = malloc(sizeof(s8) * strlen(io) + 1);
-        SANIFICATE_ESCAPE_SEQUENCE(str, io);
-        sprintf(buf, "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\"}}", str);
-        free(str);
+        if (type == INPUT)
+            sprintf(buf, "{\"IO\":{\"TYPE\":\"I\",\"VAL\":%s}}", io);
+        else
+        {
+            char *str = malloc(sizeof(s8) * strlen(io) + 1);
+            SANIFICATE_ESCAPE_SEQUENCE(str, io);
+            sprintf(buf, "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\"}}", str);
+            free(str);
+        }
+
+        res = malloc(sizeof (* res) * size);
+
+        res[size-1] = '\0';
+
+        size = strlen(buf) + 1;
+        res = malloc(sizeof (* res) * size);
+
+        strncpy(res, buf, size);
+
+        res[size-1] = '\0';
+
+        return res;
     }
-
-    res = malloc(sizeof (* res) * size);
-
-    res[size-1] = '\0';
-
-    size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size);
-
-    res[size-1] = '\0';
-
-    return res;
+    
+    return NULL;
 }
 
 char* Jconcat(char *dst, char *src)
@@ -348,8 +353,7 @@ char* Jconcat2(struct EmulationMachine* emulator, char *dst, char* (*Jsrc)(), ..
 
     if (src == NULL)
     {
-        free(dst);
-        return NULL;
+        return dst;
     }
 
     const size_t dsts = strlen(dst);

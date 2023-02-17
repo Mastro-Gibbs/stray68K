@@ -33,21 +33,23 @@ extern "C" {
 
     struct EmulationMachine* obtain_emulation_machine(const char *path);
 
-    int is_last_istr(struct EmulationMachine* emulator);
+    int is_last_istr(struct EmulationMachine* emulatorInstance);
 
-    void begin_emulator(struct EmulationMachine* emulator);
+    void begin_emulator(struct EmulationMachine* emulatorInstance);
 
-    void end_emulator(struct EmulationMachine* emulator);
+    void end_emulator(struct EmulationMachine* emulatorInstance);
 
-    int emulate (struct EmulationMachine* emulator);
+    int emulate (struct EmulationMachine* emulatorInstance);
 
-    void flush_buffer(struct EmulationMachine* emulator);
+    void flush_buffer(struct EmulationMachine* emulatorInstance);
 
-    void init_buffer(struct EmulationMachine* emulator);
+    void init_buffer(struct EmulationMachine* emulatorInstance);
 
-    void cwrite(struct EmulationMachine* emulator, char _c);
+    void cwrite(struct EmulationMachine* emulatorInstance, char _c);
 
-    u32 peek_ORG_from_file(struct EmulationMachine *emulator);
+    void set_buffering_enabled(struct EmulationMachine* emulatorInstance, c_bool _bool);
+
+    u32 peek_ORG_from_file(struct EmulationMachine *emulatorInstance);
 }
 
 typedef struct __emulation_data__ 
@@ -75,70 +77,60 @@ class Dispatcher : public WContainerWidget
         Dispatcher();
 
         virtual ~Dispatcher() {
-            if (runnerThread_.get_id() != std::this_thread::get_id() &&
-                runnerThread_.joinable())
-            runnerThread_.join();
+            if (runBinaryThread.get_id() != std::this_thread::get_id() &&
+                runBinaryThread.joinable())
+            runBinaryThread.join();
 
-            if (terminateThread_.get_id() != std::this_thread::get_id() &&
-                terminateThread_.joinable())
-            terminateThread_.join();
-
-            if (nextThread_.get_id() != std::this_thread::get_id() &&
-                nextThread_.joinable())
-            nextThread_.join();
+            if (nextIstructionThread.get_id() != std::this_thread::get_id() &&
+                nextIstructionThread.joinable())
+            nextIstructionThread.join();
         }
 
     private:
-        EmulationData edata;
+        struct EmulationMachine* emulatorInstance;
+        SemanticState*           assemblerState;
 
-        WTemplate*      template_;
-        WStackedWidget* stack_;
+        EmulationData emulationData;
 
-        WPushButton* code;
-        WPushButton* memory;
-        WPushButton* console;
+        WTemplate*      XMLTemplate;
+        WStackedWidget* stackedWidget;
 
-        WPushButton* clear_;
+        WPushButton* toogleEditorButton;
+        WPushButton* toogleMemoryButton;
+        WPushButton* toogleConsoleButton;
 
-        WPushButton* compile;
-        WPushButton* run;
-        WPushButton* debug;
+        WPushButton* clearConsoleButton;
 
-        WPushButton* next_istr;
-        WPushButton* terminate;
-        WPushButton* stop;
-        WPushButton* clear_regs;
+        WPushButton* compileButton;
+        WPushButton* runButton;
+        WPushButton* debugButton;
 
-        Editor*         editor_;
-        MemoryView*     memory_;
-        Console*        console_;
-        RegisterRender* reg_rend_;
-        
-        void show_editor();
-        void show_console();
-        void show_memory();
+        WPushButton* executeNextIstructionButton;
+        WPushButton* continueExecutionButton;
+        WPushButton* stopExecutionButton;
+        WPushButton* clearRegistersButton;
 
-        void compile_src();
-        void run_src();
-        void debug_src();
+        Editor*         editorWidget;
+        MemoryView*     memoryWidget;
+        Console*        consoleWidget;
+        RegisterRender* registerRenderWidget;
+    
+        thread runBinaryThread;
+        thread nextIstructionThread;
+
+        std::atomic<bool> quitThread_runBinaryThread;
+        std::atomic<bool> quitThread_nextIstructionThread;
+
+        void do_compile();
+        void do_run();
+        void do_debug();
 
         void do_next();
         void do_stop();
         void do_terminate();
 
-        void lock_btns();
-
-        thread runnerThread_;
-        thread terminateThread_;
-        thread nextThread_;
-
-        void doRun(WApplication *app, struct EmulationMachine* em);
-        void doTerminate(WApplication *app);
-        void doNext(WApplication* app);
-
-
-        struct EmulationMachine* emulator;
-        SemanticState*           assembler;
+        void doRun_WorkerThreadBody(WApplication *app,  struct EmulationMachine* em, std::atomic<bool>& quit);
+        void doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em, std::atomic<bool>& quit);
 };
 
 
