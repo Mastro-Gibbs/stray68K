@@ -8,8 +8,11 @@
                     Reg D0
                 </span>
             </div>
-            <div class="register-data">
-                ${d0}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d0}
+                </div>
+                <div class="popup" id="div-d0"></div>
             </div>
             
             <div class="register-label-container">
@@ -17,8 +20,11 @@
                     Reg A0
                 </span>
             </div>
-            <div class="register-data">
-                ${a0}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a0}
+                </div>
+                <div class="popup" id="div-a0"></div>
             </div>
 
             <div class="register-label-container">
@@ -26,8 +32,11 @@
                     Reg D1
                 </span>
             </div>
-            <div class="register-data">
-                ${d1}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d1}
+                </div>
+                <div class="popup" id="div-d1"></div>
             </div>
 
             <div class="register-label-container">
@@ -35,8 +44,11 @@
                     Reg A1
                 </span>
             </div>
-            <div class="register-data">
-                ${a1}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a1}
+                </div>
+                <div class="popup" id="div-a1"></div>
             </div>
 
             <div class="register-label-container">
@@ -44,8 +56,11 @@
                     Reg D2
                 </span>
             </div>
-            <div class="register-data">
-                ${d2}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d2}
+                </div>
+                <div class="popup" id="div-d2"></div>
             </div>
             
             <div class="register-label-container">
@@ -53,8 +68,11 @@
                     Reg A2
                 </span>
             </div>
-            <div class="register-data">
-                ${a2}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a2}
+                </div>
+                <div class="popup" id="div-a2"></div>
             </div>
 
             <div class="register-label-container">
@@ -62,8 +80,11 @@
                     Reg D3
                 </span>
             </div>
-            <div class="register-data">
-                ${d3}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d3}
+                </div>
+                <div class="popup" id="div-d3"></div>
             </div>
 
             <div class="register-label-container">
@@ -71,8 +92,11 @@
                     Reg A3
                 </span>
             </div>
-            <div class="register-data">
-                ${a3}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a3}
+                </div>
+                <div class="popup" id="div-a3"></div>
             </div>
 
             <div class="register-label-container">
@@ -80,8 +104,11 @@
                     Reg D4
                 </span>
             </div>
-            <div class="register-data">
-                ${d4}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d4}
+                </div>
+                <div class="popup" id="div-d4"></div>
             </div>
             
             <div class="register-label-container">
@@ -89,8 +116,11 @@
                     Reg A4
                 </span>
             </div>
-            <div class="register-data">
-                ${a4}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a4}
+                </div>
+                <div class="popup" id="div-a4"></div>
             </div>
 
             <div class="register-label-container">
@@ -98,8 +128,11 @@
                     Reg D5
                 </span>
             </div>
-            <div class="register-data">
-                ${d5}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d5}
+                </div>
+                <div class="popup" id="div-d5"></div>
             </div>
 
             <div class="register-label-container">
@@ -107,8 +140,11 @@
                     Reg A5
                 </span>
             </div>
-            <div class="register-data">
-                ${a5}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a5}
+                </div>
+                <div class="popup" id="div-a5"></div>
             </div>
 
             <div class="register-label-container">
@@ -116,8 +152,11 @@
                     Reg D6
                 </span>
             </div>
-            <div class="register-data">
-                ${d6}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d6}
+                </div>
+                <div class="popup" id="div-d6"></div>
             </div>
             
             <div class="register-label-container">
@@ -125,8 +164,11 @@
                     Reg A6
                 </span>
             </div>
-            <div class="register-data">
-                ${a6}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a6}
+                </div>
+                <div class="popup" id="div-a6"></div>
             </div>
 
             <div class="register-label-container">
@@ -134,8 +176,11 @@
                     Reg D7
                 </span>
             </div>
-            <div class="register-data">
-                ${d7}
+            <div class="container-data">
+                <div class="register-data">
+                    ${d7}
+                </div>
+                <div class="popup" id="div-d7"></div>
             </div>
 
             <div class="register-label-container">
@@ -143,8 +188,11 @@
                     Reg A7
                 </span>
             </div>
-            <div class="register-data">
-                ${a7}
+            <div class="container-data">
+                <div class="register-data">
+                    ${a7}
+                </div>
+                <div class="popup" id="div-a7"></div>
             </div>
 
             <div class="">
@@ -183,8 +231,11 @@
                     Condition Code Reg 
                 </span>
             </div>
-            <div class="one-row-reg register-data">
-                ${ccr}
+            <div class="container-data one-row-reg">
+                <div class="one-row-reg register-data">
+                    ${ccr}
+                </div>
+                <div class="popup" id="div-ccr"></div>
             </div>
 
             <div class="">

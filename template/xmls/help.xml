@@ -1,0 +1,410 @@
+<style>
+    code {
+        font-size: 16px;
+        color: #303030;
+        background-color: #cacaca;
+        border-radius: 4px;
+    }
+
+    a {
+        font-size: 18px;
+        text-decoration: none;
+    }
+
+    a:link {
+        color: rgb(1, 1, 171);
+    }
+
+    a:visited {
+        color: rgb(1, 1, 171);
+    }
+
+    .margin-li {
+        margin-bottom: 15px;
+    }
+</style>
+
+<div>
+    <h2>
+        Welcome to Stray68K help section
+    </h2>
+    <ul>
+        <li>
+            <a href="#wcid" onclick="showDiv('wcid')">What can it do</a>
+        </li>
+        <li>
+            <a href="#ss" onclick="showDiv('ss')">Specific syntax</a>
+        </li>
+        <li>
+            <a href="#ct" onclick="showDiv('ct')">Custom traps</a>
+        </li>
+    </ul>
+
+    <div id="wcid" hidden>
+        <h3>What can it do</h3>
+        <span>
+            In this emulator you can program a motorola68000 assembly dialect.
+            <br>
+            You have
+            <ul>
+                <li>a editor</li>
+                <li>an memory section</li>
+                <li>a console on which to do I/O and view compilation and execution messages</li>
+            </ul>
+            After writing programs, after assembling them, they can be executed in
+            <ul>
+                <li>
+                    Run Mode: you will run the program continuously.
+                </li>
+                <li>
+                    Debug Mode: it is possible to execute one statement at a time and check its effect
+                    <br>
+                    on memory, console and registers.
+                </li>
+            </ul>
+        </span>
+    </div>
+
+    <div id="ss" hidden>
+        <h3>Specific Syntax</h3>
+        <span>
+            This emulator has a slightly different syntax:
+            <ul>
+                <li class="margin-li">
+                    Machine language is mandatory, for example,
+                    <br>
+                    <code>
+                        addi.&lt;size&gt; #&lt;num&gt;,&lt;datareg&gt;
+                    </code>
+                    <br>
+                    instead of
+                    <br>
+                    <code>
+                        add.&lt;size&gt; #&lt;num&gt;,&lt;datareg&gt;
+                    </code>
+                </li>
+                <li class="margin-li">
+                    You don't need to specify
+                    <code>END</code> instruction in the script,
+                    nor separate the executable part
+                    <br>
+                    of the code from labels that point to constants or data in memory.
+                    <br>
+                    The compiler will autonomously understand the difference between the two sections.
+                </li>
+                <li class="margin-li">
+                    It is not mandatory to specify the <code>ORG</code> instruction, but if specified, it must be done
+                    at the beginning
+                    <br>
+                    of the file and it is not possible to repeat it, otherwise a compilation error will occur.
+                </li>
+            </ul>
+        </span>
+    </div>
+
+    <div id="ct" hidden>
+        <h3>Custom Traps</h3>
+        <span>
+            This emulator implements high-level functions to be able to:
+            <ul>
+                <li class="margin-li">
+                    <a href="#print" onclick="showDiv2('print')">print</a> on screen register's values and strings.
+                </li>
+                <li class="margin-li">
+                    <a href="#scan" onclick="showDiv2('scan')">scan</a> interger into registers, strings into memory and
+                    time.
+                </li>
+                <li class="margin-li">
+                    <a href="#sleep" onclick="showDiv2('sleep')">sleep</a> the program.
+                </li>
+            </ul>
+            Invoking <code>TRAP    #15</code> for printouts, <code>TRAP    #14</code> for scans and
+            <code>TRAP    #13</code> for sleeps.
+        </span>
+    </div>
+
+    <div id="print" hidden>
+        <h4>High-level print</h4>
+        <span>
+            To print you need two things:
+            <ul>
+                <li class="margin-li">
+                    a label like <code>label: dc.b  "&lt;text&gt;",0</code>
+                    <br>
+                    where for <code>&lt;text&gt;</code> means a string to be printed or a string
+                    <br>
+                    combined with <a href="#placeholders" onclick="showDiv3()">placeholders and/or escapes</a>.
+                </li>
+                <li class="margin-li">
+                    the address register <code>A0</code> available.
+                </li>
+            </ul>
+            To print on screen just run
+            <br>
+            <code>LEA      &lt;label that contains formatted text and/or characters&gt;,A0</code>
+            <br>
+            <code>TRAP     #15</code>
+            <br>
+            <br>
+            You can also print a previously scanned string in the same way.
+        </span>
+    </div>
+
+    <div id="scan" hidden>
+        <h4>High-level scan</h4>
+        <span>
+            To scan you need two things:
+            <ul>
+                <li class="margin-li">
+                    a label like <code>label: dc.b  "&lt;text&gt;",0</code>
+                    <br>
+                    where for <code>&lt;text&gt;</code> means the target into store the scanned value
+                    combined with <a href="#placeholders" onclick="showDiv3()">placeholders</a>.
+                </li>
+                <li class="margin-li">
+                    the address register <code>A0</code> available.
+                </li>
+            </ul>
+            <br>
+            Importantly, any characters beyond the placeholders will be ignored.
+            <br>
+            <br>
+            To scan an integer or time just run
+            <br>
+            <code>LEA      &lt;label that contains formatted text&gt;,A0</code>
+            <br>
+            <code>TRAP     #14</code>
+            <br>
+            <br>
+            To scan string just run
+            <br>
+            <code>LEA                    &lt;label that contains formatted text&gt;,A0</code>
+            <br>
+            <code>LEA                    &lt;label that represent the pointer to the target memory area&gt;,A1</code>
+            <br>
+            <code>MOVE.&lt;size&gt;      #&lt;value&gt;,D0</code>
+            <br>
+            <code>TRAP                   #14</code>
+            <br>
+            <br>
+            In D0 it is necessary to enter the maximum number of characters to be scanned.
+            <br>
+        </span>
+    </div>
+
+    <div id="sleep" hidden>
+        <h4>High-level sleep</h4>
+        <span>
+            To invoke sleep you need two values:
+            <ul>
+                <li class="margin-li">
+                    a number in D0 representing sleep time
+                </li>
+                <li class="margin-li">
+                    a number in D1 that represents the sleep multiplier
+                </li>
+            </ul>
+            <br>
+            It is important to remember not to load a number into D0 greater than 999999, 
+            <br>
+            otherwise undefined behavior will occur, since sleep is based on the usleep system call. 
+            <br>
+            That's why there are multiplier.
+            <br>
+            <br>
+            If the value 0 is present in D1, a sleep will be performed for the value in D0.
+            <br>
+            <br>
+            An example of sleep is:
+            <br>
+            <code>MOVE.&lt;size&gt;    #&lt;value&gt;,D0</code>
+            <br>
+            <code>MOVE.&lt;size&gt;    #&lt;value&gt;,D1</code>
+            <br>
+            <code>TRAP                 #13</code>
+
+
+        </span>
+    </div>
+
+    <div id="placeholders" hidden>
+        <h4>Placeholders and escapes</h4>
+
+        <ul>
+            <li class="margin-li">
+                <span>
+                    Placeholders consist of a sensitive character and other characters for specifying what to
+                    print/scan:
+                    <ul>
+                        <li class="margin-li">
+                            For print:
+                            <ul>
+                                <li class="margin-li">
+                                    character '%', is sensitive character
+                                </li>
+                                <li class="margin-li">
+                                    the size of the target register: &lt;l, w, b&gt;
+                                    <br>
+                                    it's case-insentive.
+                                </li>
+                                <li class="margin-li">
+                                    the register type: &lt;d, a, x&gt;
+                                    <br>
+                                    it's case-insentive.
+                                    <br>
+                                    'd' means data registers.
+                                    <br>
+                                    'a' means address registers.
+                                    <br>
+                                    'x' means data register in hexadecimal format.
+                                </li>
+                                <li class="margin-li">
+                                    the index of the target register: [0-7]
+                                </li>
+                            </ul>
+                            You have to choose a symbol from all the sets.
+                            <br>
+                            Omitting the character that refers to the register type will print
+                            <br>
+                            the value of the target data register in <code>unsigned</code> mode.
+                            <br>
+                            <br>
+                            An example of a string containing placeholders is:
+                            <br>
+                            <code>str:   dc.b   "%ld0",0</code>
+                            <br>
+                            <br>
+                            An example of a string containing placeholders and characters is:
+                            <br>
+                            <code>str:   dc.b   "value stored in DO is: %ld0",0</code>
+                        </li>
+                        
+                        <li class="margin-li">
+                            For scan:
+                            <ul>
+                                <li class="margin-li">
+                                    character '%', is sensitive character
+                                </li>
+                                <li class="margin-li">
+                                    the size of the target register for registers scanning: &lt;l, w, b&gt;
+                                    <br>
+                                    it's case-insentive.
+                                </li>
+                                <li class="margin-li">
+                                    the target type: &lt;d, t, s&gt;
+                                    <br>
+                                    it's case-insentive.
+                                    <br>
+                                    'd' means data registers scan
+                                    <br>
+                                    't' means time registers scan
+                                    <br>
+                                    's' means string scan into address register.
+                                </li>
+                                <li class="margin-li">
+                                    the index of the target register for registers or time scanning: [0-7]
+                                </li>
+                            </ul>
+                            You have to choose a symbol from all the sets if you are doing registers scanning.
+                            <br>
+                            <br>
+                            An example of a string containing placeholders for register scanning is:
+                            <br>
+                            <code>input:   dc.b   "%ld0",0</code>
+                            <br>
+                            <br>
+                            An example of a string containing placeholders for time scanning is:
+                            <br>
+                            <code>input:   dc.b   "%t0",0</code>
+                            <br>
+                            <br>
+                            An example of a string containing placeholders for string scanning is:
+                            <br>
+                            <code>input:   dc.b   "%s1",0</code>
+                            <br>
+                            's1' means that in register A1 there is the pointer to the memory cell in which to insert the string.
+                            <br>
+                            So you'll need a label like <code>str:    ds.b    &lt;size&gt;</code> to load in A1 via <code>LEA</code>.
+                            <br>
+                            Also you will need a maximum number of scan characters to save in D0, which must be maximum equal to the memory area - 1.
+                        </li>
+                    </ul>
+
+                </span>
+            </li>
+
+            <li class="margin-li">
+                Escapes are text formatting characters: '\n', '\t' and '\\'
+                <br>
+                <br>
+                An example of a string containing placeholders and characters is:
+                <br>
+                <code>str:   dc.b   "value stored in DO is: %ld0\n",0</code>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<script>
+    function showDiv(target) {
+        if(target != 'wcid')
+            document.getElementById("wcid").hidden = true;
+
+        if(target != 'ss')
+            document.getElementById("ss").hidden = true;
+
+        if(target != 'ct')
+            document.getElementById("ct").hidden = true;
+
+        if(target != 'print')
+            document.getElementById("print").hidden = true;
+
+        if(target != 'scan')
+            document.getElementById("scan").hidden = true;
+
+        if(target != 'sleep')
+            document.getElementById("sleep").hidden = true;
+
+        if(target != 'placeholders')
+            document.getElementById("placeholders").hidden = true;
+
+        var _div = document.getElementById(target);
+        if(_div.hidden)
+            _div.hidden = false;
+        else
+            _div.hidden = true;
+    }
+
+    function showDiv2(target) {
+        if(target != 'print')
+            document.getElementById("print").hidden = true;
+        
+        if(target != 'scan')
+            document.getElementById("scan").hidden = true;
+        
+        if(target != 'sleep')
+            document.getElementById("sleep").hidden = true;
+
+        var _div = document.getElementById(target);
+        if(_div.hidden)
+            _div.hidden = false;
+        else
+            _div.hidden = true;
+    }
+
+    function showDiv3() {
+        var placeholders = document.getElementById("placeholders");
+
+        if (placeholders.hidden)
+            placeholders.hidden = false;
+        else
+            placeholders.hidden = true;
+    }
+</script>

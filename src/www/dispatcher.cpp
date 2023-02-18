@@ -30,6 +30,9 @@ Dispatcher::Dispatcher()
     assemblerState(nullptr),
     quitThread_runBinaryThread(false),
     quitThread_nextIstructionThread(false),
+    isDebugMode(false),
+    isRunningOnRunThread(false),
+    isDebugStarted(false),
     WContainerWidget()
 {
     WApplication* instance = WApplication::instance();
@@ -125,7 +128,7 @@ Dispatcher::Dispatcher()
     registerRenderWidget = XMLTemplate->bindWidget("register_render", move(reg_rend));
 
 
-    // button behaviour connection
+    // button behavior connection
     executeNextIstructionButton->clicked().connect(this, &Dispatcher::do_next);
     stopExecutionButton->clicked().connect(this,         &Dispatcher::do_stop);
     continueExecutionButton->clicked().connect(this,     &Dispatcher::do_continue);
@@ -194,6 +197,8 @@ Dispatcher::Dispatcher()
     consoleWidget->setUpConsole();
 
     stackedWidget->setCurrentWidget(editorWidget);
+
+    editorWidget->setReady();
 }
 
 
@@ -301,6 +306,10 @@ void Dispatcher::do_run()
         app->enableUpdates(true);
 
         quitThread_runBinaryThread = false;
+
+        isDebugMode = false;
+        isRunningOnRunThread = false;
+        isDebugStarted = false;
         
         if (runBinaryThread.joinable())
             runBinaryThread.join();
@@ -409,6 +418,9 @@ void Dispatcher::do_debug()
         consoleWidget->begin_program();
 
         consoleWidget->disable(false);
+
+        isDebugMode = true;
+        isDebugStarted = false;
     }
 
 }
@@ -429,6 +441,8 @@ void Dispatcher::do_next()
     quitThread_nextIstructionThread = false;
 
     executeNextIstructionButton->setDisabled(true);
+
+    isDebugStarted = true;
         
     if (nextIstructionThread.joinable())
         nextIstructionThread.join();
@@ -471,7 +485,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
         if (uiLock) 
         {
             registerRenderWidget->update(em->Machine.dump);
-            consoleWidget->push_stdout(emulatorInstance->Machine.dump);
+            consoleWidget->push_stdout(em->Machine.dump);
 
             memoryWidget->update();
             memoryWidget->enableFetch(false);
@@ -525,6 +539,8 @@ void Dispatcher::do_continue()
 
     executeNextIstructionButton->setDisabled(true);
     continueExecutionButton->setDisabled(true);
+
+    isRunningOnRunThread = true;
     
     if (runBinaryThread.joinable())
         runBinaryThread.join();
@@ -546,5 +562,31 @@ void Dispatcher::do_stop()
 
     quitThread_runBinaryThread = true;
     quitThread_nextIstructionThread = true;
+
+    if (isDebugMode && (!isRunningOnRunThread || !isDebugStarted))
+    {
+        registerRenderWidget->update(emulatorInstance->Machine.dump);
+        consoleWidget->push_stdout(emulatorInstance->Machine.dump);
+
+        memoryWidget->update();
+        memoryWidget->enableFetch(false);
+
+        end_emulator(emulatorInstance);
+        emulatorInstance = nullptr;
+
+        consoleWidget->disable(true);
+        consoleWidget->end_program();
+
+        editorWidget->disable(false);
+        runButton->setDisabled(false);
+        debugButton->setDisabled(false);
+
+        executeNextIstructionButton->setDisabled(true);
+        continueExecutionButton->setDisabled(true);
+        stopExecutionButton->setDisabled(true);
+
+        consoleWidget->setEmulator(nullptr);
+        memoryWidget->setEmulator(nullptr);      
+    }
 }
 

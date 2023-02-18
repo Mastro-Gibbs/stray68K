@@ -99,7 +99,25 @@ void RegisterRender::init_data_reg()
         reg->setStyleClass("register-data-8bit");
         reg->setReadOnly(true);
 
-        data_reg[i] = template_->bindWidget("d" + to_string(i), move(reg));
+        string _id = "d" + to_string(i);
+
+        data_reg[i] = template_->bindWidget(_id, move(reg));
+
+        data_reg[i]->setId(_id);
+
+        data_reg[i]->doJavaScript("\
+            const textarea" + _id + " = document.getElementById('" + _id + "'); \
+            const popup" + _id + " = document.getElementById('div-" + _id + "'); \
+            \
+            textarea" + _id + ".addEventListener('mouseover', function() { \
+                popup" + _id + ".style.display = 'block'; \
+                popup" + _id + ".innerHTML = parseInt(this.value, 16); \
+            }); \
+            \
+            textarea" + _id + ".addEventListener('mouseout', function() { \
+                popup" + _id + ".style.display = 'none'; \
+            });\
+        ");
     }
 }
 
@@ -113,7 +131,25 @@ void RegisterRender::init_addr_reg()
         reg->setStyleClass("register-data-8bit");
         reg->setReadOnly(true);
 
-        addr_reg[i] = template_->bindWidget("a" + to_string(i), move(reg));
+        string _id = "a" + to_string(i);
+
+        addr_reg[i] = template_->bindWidget(_id, move(reg));
+
+        addr_reg[i]->setId(_id);
+
+        addr_reg[i]->doJavaScript("\
+            const textarea" + _id + " = document.getElementById('" + _id + "'); \
+            const popup" + _id + " = document.getElementById('div-" + _id + "'); \
+            \
+            textarea" + _id + ".addEventListener('mouseover', function() { \
+                popup" + _id + ".style.display = 'block'; \
+                popup" + _id + ".innerHTML = parseInt(this.value, 16); \
+            }); \
+            \
+            textarea" + _id + ".addEventListener('mouseout', function() { \
+                popup" + _id + ".style.display = 'none'; \
+            });\
+        ");
     }
 }
 
@@ -146,7 +182,25 @@ void RegisterRender::init_other_regs()
     ccr->setStyleClass("register-data-16bit");
     ccr->setReadOnly(true);
 
-    CCR = template_->bindWidget("ccr", move(ccr));
+    string _id = "ccr";
+
+    CCR = template_->bindWidget(_id, move(ccr));
+
+    CCR->setId(_id);
+
+    CCR->doJavaScript("\
+        const textarea" + _id + " = document.getElementById('" + _id + "'); \
+        const popup" + _id + " = document.getElementById('div-" + _id + "'); \
+        \
+        textarea" + _id + ".addEventListener('mouseover', function() { \
+            popup" + _id + ".style.display = 'block'; \
+            popup" + _id + ".innerHTML = 'X:' + this.value.charAt(11) + ' N:' + this.value.charAt(12) + ' Z:' + this.value.charAt(13) + ' V:' + this.value.charAt(14) + ' C:' + this.value.charAt(15);\
+        }); \
+        \
+        textarea" + _id + ".addEventListener('mouseout', function() { \
+            popup" + _id + ".style.display = 'none'; \
+        });\
+    ");
 }
 
 void RegisterRender::init_others()
@@ -244,6 +298,13 @@ void RegisterRender::setCCR(unsigned int val)
     string bits = bitset<16>(val).to_string();
 
     CCR->setText(format16BitReg(&bits));
+
+    CCR->doJavaScript(" \
+        const textarea" + CCR->id() + " = document.getElementById('" + CCR->id() + "'); \
+        const popup" + CCR->id() + " = document.getElementById('div-" + CCR->id() + "'); \
+        \
+        popup" + CCR->id() + ".innerHTML = 'X:' + textarea" + CCR->id() + ".value.charAt(11) + ' N:' + textarea" + CCR->id() + ".value.charAt(12) + ' Z:' + textarea" + CCR->id() + ".value.charAt(13) + ' V:' + textarea" + CCR->id() + ".value.charAt(14) + ' C:' + textarea" + CCR->id() + ".value.charAt(15);\
+    ");
 }
 
 
@@ -286,6 +347,13 @@ void RegisterRender::setDataReg(unsigned int index, string result)
     auto reg = data_reg[index];
 
     reg->setText(format32BitReg(&result));
+
+    reg->doJavaScript(" \
+        const textarea" + reg->id() + " = document.getElementById('" + reg->id() + "'); \
+        const popup" + reg->id() + " = document.getElementById('div-" + reg->id() + "'); \
+        \
+        popup" + reg->id() + ".innerHTML = parseInt(textarea" + reg->id() + ".value, 16); \
+    ");
 }
 
 void RegisterRender::setAddrReg(unsigned int index, string result)
@@ -293,6 +361,13 @@ void RegisterRender::setAddrReg(unsigned int index, string result)
     auto reg = addr_reg[index];
 
     reg->setText(format32BitReg(&result));
+
+    reg->doJavaScript(" \
+        const textarea" + reg->id() + " = document.getElementById('" + reg->id() + "'); \
+        const popup" + reg->id() + " = document.getElementById('div-" + reg->id() + "'); \
+        \
+        popup" + reg->id() + ".innerHTML = parseInt(textarea" + reg->id() + ".value, 16); \
+    ");
 }
 
 void RegisterRender::setFWB(string result)

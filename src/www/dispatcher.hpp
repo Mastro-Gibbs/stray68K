@@ -121,6 +121,10 @@ class Dispatcher : public WContainerWidget
         std::atomic<bool> quitThread_runBinaryThread;
         std::atomic<bool> quitThread_nextIstructionThread;
 
+        std::atomic<bool> isDebugMode;
+        std::atomic<bool> isRunningOnRunThread;
+        std::atomic<bool> isDebugStarted;
+
         void do_compile();
         void do_run();
         void do_debug();

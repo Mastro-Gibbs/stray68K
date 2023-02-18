@@ -3,7 +3,7 @@
 #include "www/header.hpp"
 #include "www/dispatcher.hpp"
 #include "www/footer.hpp"
-
+#include "www/help.hpp"
 
 #include <Wt/WServer.h>
 
@@ -41,6 +41,7 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
     return std::make_unique<App>(env);
 }
 
+
 int main(int argc, char **argv)
 {
     scheduledTask();
@@ -49,8 +50,12 @@ int main(int argc, char **argv)
     {
         WServer server(argc, argv, WTHTTP_CONFIGURATION);
 
-        server.addEntryPoint(EntryPointType::Application, &createApplication, "/stray68K", "/template/imgs/favicon.png");
+        HelpSection helpSection;
 
+        server.addResource(&helpSection, "/stray68K/help");
+
+        server.addEntryPoint(EntryPointType::Application,    &createApplication, "/stray68K", "/template/imgs/favicon.png");
+        
         server.run();
 
     } 

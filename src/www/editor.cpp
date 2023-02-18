@@ -2,6 +2,9 @@
 
 #include <algorithm>
 
+#define EDITOR_TEXT_TEMPLATE "\tORG\t$1000\n\n\t; write code here\n\t; no END instuction needed\n\t; you can write declarations after executable code\n"
+
+
 Editor::Editor()
     : editor_(nullptr),
       line_counter(nullptr),
@@ -22,7 +25,8 @@ void Editor::setUpEditor()
     editor_->setAttributeValue("wrap", "off");
 
     line_counter->setText("1");
-    editor_->setText("");
+    editor_->setText(EDITOR_TEXT_TEMPLATE);
+    updateLines();
 
     editor_->setId("editor-id");
     line_counter->setId("row-c-id");
@@ -43,8 +47,8 @@ void Editor::enableTabEvent()
                                         event.preventDefault(); \
                                         let start = this.selectionStart; \
                                         let end = this.selectionEnd; \
-                                        this.value = this.value.substring(0, start) + \"    \" + this.value.substring(end); \
-                                        this.selectionStart = this.selectionEnd = start + 4; \
+                                        this.value = this.value.substring(0, start) + '\\t' + this.value.substring(end); \
+                                        this.selectionStart = this.selectionEnd = start + 8; \
                                         } \
                                     });");
 }
@@ -78,6 +82,11 @@ void Editor::scroll()
                             textarea2.addEventListener('scroll', function() { \
                                 textarea1.scrollTop = textarea2.scrollTop; \
                             });");
+}
+
+void Editor::setReady()
+{
+    editor_->setFocus();
 }
 
 WString Editor::text_()

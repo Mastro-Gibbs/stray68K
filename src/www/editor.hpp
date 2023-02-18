@@ -27,6 +27,8 @@ class Editor : public WTemplate
 
         WString text_();
 
+        void setReady();
+
         void disable(bool status);
 
     private:

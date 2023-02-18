@@ -28,6 +28,10 @@
     overflow: hidden;
 }
 
+.register-data:hover {
+    cursor: crosshair;
+}
+
 .register-data-2byte {
     text-align: center;
     overflow: hidden;
@@ -40,6 +44,11 @@
     resize: none;
     border: none;
 }
+
+.register-data-2byte:hover {
+    cursor: crosshair;
+}
+
 
 .register-data-8bit {
     text-align: center;
@@ -54,6 +63,11 @@
     border: none;
 }
 
+.register-data-8bit:hover {
+    cursor: crosshair;
+}
+
+
 .register-data-16bit {
     text-align: center;
     overflow: hidden;
@@ -65,6 +79,10 @@
     color: beige;
     resize: none;
     border: none;
+}
+
+.register-data-16bit:hover {
+    cursor: crosshair;
 }
 
 .register-data-8bit:focus .register-data-2byte:focus .register-data-16bit:focus {
@@ -80,3 +98,23 @@
     grid-column-start: 3;
     grid-column-end: 5;
 }
+
+.container-data {
+    position: relative;
+}
+  
+.popup {
+    font-size: large;
+    font-family: monospace;
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px;
+    background-color: rgb(255, 231, 213);
+    color: #000000;
+    border-radius: 2px;
+    white-space: nowrap;
+    z-index: 999;
+  }

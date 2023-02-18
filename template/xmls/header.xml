@@ -3,7 +3,9 @@
 
     <message id="header-msg">
         <div class="header">
-            ${title}
+            <div class="popup-div">
+                ${title}
+            </div>
         </div>
     </message>
 

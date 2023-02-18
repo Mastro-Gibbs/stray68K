@@ -14,7 +14,7 @@ Header::Header()
 
     auto btn = make_unique<WPushButton>(tr("title"));
     btn->setText("Stray68K");
-    btn->clicked().connect(this, &Header::redirectToGH);
+    btn->clicked().connect(this, &Header::openHelp);
     btn->setStyleClass("header-title");
 
     title = template_->bindWidget("title", move(btn));
@@ -22,7 +22,9 @@ Header::Header()
 }
 
 
-void Header::redirectToGH() 
+void Header::openHelp() 
 {
-    title->doJavaScript("window.open('https://github.com/Mastro-Gibbs/stray68K', '_blank');");
+    title->doJavaScript("var currentUrl = window.location.href; \
+                         var newUrl = currentUrl + '/help'; \
+                         window.open(newUrl, '_blank');");
 }

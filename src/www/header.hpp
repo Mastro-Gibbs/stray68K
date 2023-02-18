@@ -24,7 +24,7 @@ class Header : public WContainerWidget
         WTemplate*   template_;
         WPushButton* title;
 
-        void redirectToGH();
+        void openHelp();
 }; 
 
 

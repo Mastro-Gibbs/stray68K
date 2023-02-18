@@ -51,7 +51,8 @@ SOURCES       = $(EMULATOR_DIR)/emulator.c \
 		$(WWW_DIR)/dispatcher.cpp \
 		$(WWW_DIR)/memory.cpp \
 		$(WWW_DIR)/console.cpp \
-		$(WWW_DIR)/register.cpp
+		$(WWW_DIR)/register.cpp \
+		$(OBJECTS_DIR)/help.cpp
 
 OBJECTS       = $(OBJECTS_DIR)/emulator.o \
 		$(OBJECTS_DIR)/assembler.o \
@@ -72,7 +73,8 @@ OBJECTS       = $(OBJECTS_DIR)/emulator.o \
 		$(OBJECTS_DIR)/dispatcher.o \
 		$(OBJECTS_DIR)/memory.o \
 		$(OBJECTS_DIR)/console.o \
-		$(OBJECTS_DIR)/register.o
+		$(OBJECTS_DIR)/register.o \
+		$(OBJECTS_DIR)/help.o
 
 TARGET        = $(BUILD_DIR)/stray68K-Web
 
@@ -241,6 +243,9 @@ $(OBJECTS_DIR)/console.o: $(WWW_DIR)/console.cpp $(WWW_DIR)/console.hpp
 
 $(OBJECTS_DIR)/register.o: $(WWW_DIR)/register.cpp $(WWW_DIR)/register.hpp
 	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/register.o -c $(WWW_DIR)/register.cpp $(LIBS)
+
+$(OBJECTS_DIR)/help.o: $(WWW_DIR)/help.cpp $(WWW_DIR)/help.hpp
+	$(CXX) $(CXXFLAGS) -o $(OBJECTS_DIR)/help.o -c $(WWW_DIR)/help.cpp $(LIBS)
 
 
 deploy: all

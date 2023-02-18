@@ -16,11 +16,17 @@
                     By programming in its assembly you will be able to emulate the behavior of the processor.
                     <br></br>
                     <br></br>
+                    <!--
                     Distributed by the 
                     <a href="https://www.univaq.it/" target="_blank" rel="noreferrer">
                         University of L'Aquila
                     </a>
                     .
+                    -->
+                    For more see
+                    <a href="/stray68K/help" target="_blank" rel="noreferrer">
+                        help section
+                    </a>
                 </span>
             </div>
         </div>
