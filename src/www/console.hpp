@@ -35,7 +35,7 @@ class Console : public WTemplate
         void disable(bool status);
 
         void pushStdout(const char* map);
-        void pushText(const string& out);
+        void pushText(const string& out, bool nl = true);
 
         void writeProgramStarted();
         void writeProgramFinished();

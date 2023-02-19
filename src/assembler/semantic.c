@@ -58,12 +58,12 @@ void asseble_error(SemanticState *state, const char *cause, size_t len)
 {
     if (state->_asseble_error == NULL)
     {
-        state->_asseble_error = (char *) malloc(sizeof(char) * (len + 1));
+        state->_asseble_error = (char *) malloc(sizeof(char) * (len + 4));
         snprintf(state->_asseble_error, len+3, "\n%s\n", cause);
     }
     else
     {
-        state->_asseble_error = (char *) realloc(state->_asseble_error, sizeof(char) * (strlen(state->_asseble_error) + len + 1));
+        state->_asseble_error = (char *) realloc(state->_asseble_error, sizeof(char) * (strlen(state->_asseble_error) + len + 3));
         snprintf(state->_asseble_error+strlen(state->_asseble_error), len+2, "%s\n", cause);
     }
 

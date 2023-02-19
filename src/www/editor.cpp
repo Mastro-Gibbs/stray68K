@@ -34,7 +34,7 @@ void Editor::setUpEditor()
     enableTabEvent();
     scroll();
 
-    self->keyWentDown().connect(this, &Editor::updateLines);
+    self->textInput().connect(this, &Editor::updateLines);
 
     line_counter->setReadOnly(true);
 }
@@ -44,11 +44,11 @@ void Editor::enableTabEvent()
     self->doJavaScript("const textArea = document.getElementById(\"editor-id\"); \
                                     textArea.addEventListener(\"keydown\", function(event) { \
                                         if (event.code === \"Tab\") { \
-                                        event.preventDefault(); \
-                                        let start = this.selectionStart; \
-                                        let end = this.selectionEnd; \
-                                        this.value = this.value.substring(0, start) + '\\t' + this.value.substring(end); \
-                                        this.selectionStart = this.selectionEnd = start + 8; \
+                                            event.preventDefault(); \
+                                            let start = this.selectionStart; \
+                                            let end = this.selectionEnd; \
+                                            this.value = this.value.substring(0, start) + '\\t' + this.value.substring(end); \
+                                            this.selectionStart = this.selectionEnd = start + 1; \
                                         } \
                                     });");
 }

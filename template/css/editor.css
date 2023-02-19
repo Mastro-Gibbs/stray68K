@@ -52,6 +52,11 @@
     overflow-x: scroll;
 }
 
+.containeritem-editor-style::selection {
+    background-color: chocolate;
+    color: beige;
+}
+
 .containeritem-editor-style:focus {
     outline: none;
 }

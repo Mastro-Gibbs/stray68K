@@ -47,7 +47,7 @@
 
 .popup-div {
     position: relative;
-  }
+}
   
 .popup-div:hover::before {
     font-size: medium;

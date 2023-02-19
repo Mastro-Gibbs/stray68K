@@ -8,6 +8,8 @@
 #include "syntactic.h"
 #include "lexical.h"
 
+#define EXIT_WARNING 2
+
 typedef enum SymbolType
 {
 	SYMBOL_CONSTANT,

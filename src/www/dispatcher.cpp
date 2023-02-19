@@ -66,7 +66,7 @@ Dispatcher::Dispatcher()
 
     auto k_btn = make_unique<WPushButton>();
     k_btn->setText("Console");
-    k_btn->setStyleClass("button-box-item2");
+    k_btn->setStyleClass("button-box-item2-2");
 
     auto n_btn = make_unique<WPushButton>();
     n_btn->setText("Next");
@@ -153,7 +153,7 @@ Dispatcher::Dispatcher()
         stackedWidget->setCurrentWidget(editorWidget);
         toogleEditorButton->setStyleClass("button-box-item2-selected");
         toogleMemoryButton->setStyleClass("button-box-item2");
-        toogleConsoleButton->setStyleClass("button-box-item2");
+        toogleConsoleButton->setStyleClass("button-box-item2-2");
     });
 
     toogleMemoryButton->clicked().connect(this,    [=]{
@@ -161,7 +161,7 @@ Dispatcher::Dispatcher()
         stackedWidget->setCurrentWidget(memoryWidget);
         toogleEditorButton->setStyleClass("button-box-item2");
         toogleMemoryButton->setStyleClass("button-box-item2-selected");
-        toogleConsoleButton->setStyleClass("button-box-item2");
+        toogleConsoleButton->setStyleClass("button-box-item2-2");
     });
 
     toogleConsoleButton->clicked().connect(this,   [=]{
@@ -169,7 +169,7 @@ Dispatcher::Dispatcher()
         stackedWidget->setCurrentWidget(consoleWidget);
         toogleEditorButton->setStyleClass("button-box-item2");
         toogleMemoryButton->setStyleClass("button-box-item2");
-        toogleConsoleButton->setStyleClass("button-box-item2-selected");
+        toogleConsoleButton->setStyleClass("button-box-item2-2-selected");
     });
 
     editorWidget->text_changed.connect(this, [=] { 
@@ -233,6 +233,13 @@ Dispatcher::Dispatcher()
     stackedWidget->setCurrentWidget(editorWidget);
 
     editorWidget->setReady();
+
+
+    doJavaScript("\
+        {\
+            const popupconsole = document.getElementById('console-popup'); \
+            popupconsole.style.display = 'none'; \
+        }");
 }
 
 
@@ -247,7 +254,7 @@ void Dispatcher::do_compile()
     stackedWidget->setCurrentWidget(consoleWidget);
     toogleEditorButton->setStyleClass("button-box-item2");
     toogleMemoryButton->setStyleClass("button-box-item2");
-    toogleConsoleButton->setStyleClass("button-box-item2-selected");
+    toogleConsoleButton->setStyleClass("button-box-item2-2-selected");
 
     WString src = editorWidget->text_();
 
@@ -272,23 +279,31 @@ void Dispatcher::do_compile()
 
             if (assemblerState)
             {
-                if (!assemble(assemblerState, fname.c_str()))
-                {
-                    consoleWidget->pushText(string(assemblerState->_asseble_error));
-                    emulationData.setValid(false);
-                }
-                else
-                {
-                    emulationData.setBin(bname);
-                    emulationData.setValid(true);
+                int status = EXIT_FAILURE;
+                status = assemble(assemblerState, fname.c_str());
 
-                    consoleWidget->writeAssemblingDone();
-                    runButton->setDisabled(false);
-                    debugButton->setDisabled(false);
-                    assembleButton->setDisabled(true);
+                switch (status)
+                {
+                    case EXIT_FAILURE:
+                        consoleWidget->pushText(string(assemblerState->_asseble_error));
+                        emulationData.setValid(false);
+                        break;
+
+                    case EXIT_WARNING:
+                        consoleWidget->pushText(string(assemblerState->_asseble_error), false);
+
+                    case EXIT_SUCCESS:
+                        emulationData.setBin(bname);
+                        emulationData.setValid(true);
+                        consoleWidget->writeAssemblingDone();
+                        runButton->setDisabled(false);
+                        debugButton->setDisabled(false);
+                        assembleButton->setDisabled(true);
+                        break;
                 }
 
                 free_SemanticState(assemblerState);
+
             }
             else
             { consoleWidget->writeAssemblingFail(); emulationData.setValid(false); }  
@@ -297,7 +312,7 @@ void Dispatcher::do_compile()
         {   consoleWidget->writeAssemblingFail(); emulationData.setValid(false); }
     }
     else
-    {   consoleWidget->pushText("Empty source file.\n"); emulationData.setValid(false); }
+    {   consoleWidget->pushText("Empty source file."); emulationData.setValid(false); }
 }
 
 
@@ -314,6 +329,7 @@ void Dispatcher::do_run()
         WApplication *app = WApplication::instance();
 
         registerRenderWidget->clear();
+        editorWidget->disable(true);
 
         executeNextIstructionButton->setDisabled(true);
         continueExecutionButton->setDisabled(true);
@@ -366,7 +382,7 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
     
         if (uiLock) 
         {
-            (is_next_inst_scan(em) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
+            (is_next_inst_scan(em) == c_true) ? consoleWidget->disable(false): consoleWidget->disable(true);
 
             consoleWidget->pushStdout(em->Machine.dump);
             registerRenderWidget->update(em->Machine.dump);
@@ -456,7 +472,6 @@ void Dispatcher::do_debug()
         isDebugMode = true;
         isDebugStarted = false;
     }
-
 }
 
 

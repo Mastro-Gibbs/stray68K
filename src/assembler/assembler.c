@@ -28,13 +28,13 @@ void push_error(SemanticState* state, char* cause)
 
     if (state->_asseble_error == NULL)
     {
-        state->_asseble_error = (char *) malloc(sizeof(char) * (len + 1));
-        snprintf(state->_asseble_error, len+2, "\n%s", cause);
+        state->_asseble_error = (char *) malloc(sizeof(char) * (len + 3));
+        snprintf(state->_asseble_error, len+2, "%s\n", cause);
     }
     else
     {
-        state->_asseble_error = (char *) realloc(state->_asseble_error, sizeof(char) * (strlen(state->_asseble_error) + len + 1));
-        snprintf(state->_asseble_error+strlen(state->_asseble_error), len+1, "%s", cause);
+        state->_asseble_error = (char *) realloc(state->_asseble_error, sizeof(char) * (strlen(state->_asseble_error) + len + 3));
+        snprintf(state->_asseble_error+strlen(state->_asseble_error), len+2, "%s\n", cause);
     }
 }
 
@@ -161,18 +161,26 @@ int assemble(SemanticState* state, const char* filepath)
                     }
                     else
                     {
+                        fseek(output_file_tmp, 0L, SEEK_END);
+                        if (ftell(output_file_tmp) == 0) 
+                        {
+                            push_error(state, "[Warning] Assembler produced an empty binary file.");
+                            exit_code = EXIT_WARNING;
+                        }
+                        
+                        fseek(output_file_tmp, 0L, SEEK_SET);
+
                         char ch;
                         while(fread(&ch, 1, 1, output_file_tmp) != 0)
                                 fputc(ch, output_file);
 
+                        fclose(output_file_tmp);
                         fclose(output_file);
                     }
                 }
 
                 if (listing_file != NULL)
                     fclose(listing_file);
-
-                fclose(output_file_tmp);
 
                 remove(output_file_tmp_path);
             }
@@ -184,5 +192,5 @@ int assemble(SemanticState* state, const char* filepath)
         }
     }
 
-    return !exit_code;
+    return exit_code;
 }

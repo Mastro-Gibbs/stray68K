@@ -50,6 +50,33 @@
     margin-left: 5px;
 }
 
+.button-box-item2-2 {
+    width: 70px;
+    height: 25px;
+    font-size: small;
+    background-color: #5b5b5b;
+    color: rgb(234, 224, 148);
+    display: inline-block;
+    border: none;
+}
+
+.button-box-item2-2:hover {
+    background-color: #282828;
+    border-radius: 1px;
+    cursor: pointer;
+    border: none;
+}
+
+.button-box-item2-2-selected {
+    font-size: small;
+    background-color: #171717;
+    width: 70px;
+    height: 25px;
+    color: rgb(234, 224, 148);
+    display: inline-block;
+    border: none;
+}
+
 .button-box-item2:disabled {
     background-color: #939393;
     color: #5e5e5e;
@@ -91,4 +118,16 @@
     float: right;
     width: 40%;
     padding-right: 25px;
+}
+
+.popup-div-console {
+    font-size: small;
+    font-family: monospace;
+    position: absolute;
+    top: -25%;
+    padding: 3px;
+    background-color: rgb(255, 235, 196);
+    color: black;
+    border-radius: 2px;
+    white-space: nowrap;
 }

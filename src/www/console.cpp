@@ -22,19 +22,6 @@ void Console::setUpConsole()
     self->setId("f_console");
     self->setDisabled(true);
 
-/*
-    out->doJavaScript("const textarea = document.getElementById('f_console'); \
-                        \
-                        let rowCount = textarea.value.split('\\n').length; \
-                        \
-                        textarea.addEventListener('keydown', (event) => { \
-                        const cursorPos = textarea.value.substr(0, textarea.selectionStart).split('\\n').length; \
-                        if (event.key === 'Backspace' && (cursorPos - 1) > rowCount) \
-                            event.preventDefault(); \
-                        });"
-                        
-    );*/
-
     self->keyWentUp().connect([&](const WKeyEvent &event) {
         if (event.key() == Key::Enter)
         {
@@ -45,16 +32,37 @@ void Console::setUpConsole()
             size_t pos = textUtf8.find(_content);
             
             if (pos != std::string::npos)
-                textUtf8.erase(pos, _content.length());
-            
-            for (size_t i = 0; i < textUtf8.length() - 1; ++i)
             {
-                char c = textUtf8[i];
-                cwrite(emulatorInstance, c);
-            }
+                textUtf8.erase(pos, _content.length());
 
-            flush_buffer(emulatorInstance);
+                size_t inputLen = textUtf8.length() - 1; // cut-off '\n' char
+            
+                if (inputLen)
+                {
+                    for (size_t i = 0; i < inputLen; ++i)
+                    {
+                        char c = textUtf8[i];
+                        cwrite(emulatorInstance, c);
+                    }
+
+                    flush_buffer(emulatorInstance);
+                }
+                else
+                {
+                    _content = self->text().toUTF8();
+                }
+            }
         }
+    });
+
+    self->keyWentDown().connect(this, [=](const WKeyEvent &event){
+        if (event.key() == Key::Backspace && _content.length() > self->text().toUTF8().length())
+            self->setText(_content);
+    });
+
+    self->keyWentUp().connect(this, [=](const WKeyEvent &event){
+        if (event.key() == Key::Backspace && _content.length() > self->text().toUTF8().length())
+            self->setText(_content);
     });
 }
 
@@ -124,19 +132,38 @@ void Console::pushStdout(const char* map)
     }
 }
 
-void Console::pushText(const string& out)
+void Console::pushText(const string& out, bool nl)
 {
-    insert(out + "\n");
+    nl ? insert(out + "\n") : insert(out);
 }
 
 void Console::clear()
 {
     self->setText("");
+    _content = "";
 }
 
 void Console::disable(bool status)
 {
     self->setDisabled(status);
+
+    if (!status)
+    {
+        doJavaScript(" \
+                {\
+                    const popupconsole = document.getElementById('console-popup'); \
+                    popupconsole.style.display = 'block'; \
+                }");
+        self->setFocus();
+    }
+    else
+    {
+        doJavaScript(" \
+                {\
+                    const popupconsole = document.getElementById('console-popup'); \
+                    popupconsole.style.display = 'none'; \
+                }");
+    }
 }
 
 void Console::setEmulator(struct EmulationMachine* _emulator)
