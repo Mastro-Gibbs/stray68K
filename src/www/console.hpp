@@ -34,26 +34,26 @@ class Console : public WTemplate
 
         void disable(bool status);
 
-        void push_stdout(const char* map);
-        void push_simple_stdout(const string& out);
+        void pushStdout(const char* map);
+        void pushText(const string& out);
 
-        void begin_program();
-        void end_program();
-        void stop_program();
+        void writeProgramStarted();
+        void writeProgramFinished();
+        void writeProgramStopped();
 
-        void begin_assembler();
-        void end_assembler();
-        void assembler_error();
+        void writeAssemblingStarted();
+        void writeAssemblingDone();
+        void writeAssemblingFail();
 
         void clear();
 
     private:
-        WTextArea* out;
+        WTextArea* self;
 
         string _map;
         string _content;
 
-        struct EmulationMachine* emulator;
+        struct EmulationMachine* emulatorInstance;
 
         void insert(const string& str);
 

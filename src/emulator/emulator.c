@@ -219,14 +219,13 @@ int emulate(struct EmulationMachine* emulator)
 {
     if (emulator->Machine.cpu.pc < emulator->Machine.RuntimeData.simhalt)
     {
-        if (execute_istr(emulator) == RETURN_ERR)
+        if (execute_instruction(emulator) == RETURN_ERR)
         {
             clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
 
             emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
                                    (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
 
-            
             emit_dump(emulator);
 
             return (RETURN_ERR);
@@ -240,9 +239,11 @@ int emulate(struct EmulationMachine* emulator)
     emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
                                    (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
 
+    emulator->Machine.State = FINAL_STATE;
+
     emit_dump(emulator);
 
-    return (RETURN_ERR);
+    return (RETURN_FINISH);
 }
 
 

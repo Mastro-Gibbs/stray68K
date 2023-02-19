@@ -108,12 +108,12 @@
     font-family: monospace;
     display: none;
     position: absolute;
-    top: 100%;
+    top: -75%;
     left: 50%;
     transform: translateX(-50%);
     padding: 5px;
-    background-color: rgb(255, 231, 213);
-    color: #000000;
+    background-color: rgb(208, 139, 89);
+    color: #1a1a1a;
     border-radius: 2px;
     white-space: nowrap;
     z-index: 999;

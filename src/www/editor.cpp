@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-#define EDITOR_TEXT_TEMPLATE "\tORG\t$1000\n\n\t; write code here\n\t; no END instuction needed\n\t; you can write declarations after executable code\n"
+#define EDITOR_TEXT_TEMPLATE "\tORG\t$1000\n\n\t; write code here\n\t; no END instuction needed\n\t; you can write declarations after executable code\n\n\t"
 
 
 Editor::Editor()
-    : editor_(nullptr),
+    : self(nullptr),
       line_counter(nullptr),
       WTemplate(tr("editor-msg"))
 {}
@@ -20,28 +20,28 @@ void Editor::setUpEditor()
     editor->setStyleClass("containeritem-editor-style");
 
     line_counter = bindWidget("row_counter", move(row_c));
-    editor_      = bindWidget("editor",      move(editor));
+    self      = bindWidget("editor",      move(editor));
 
-    editor_->setAttributeValue("wrap", "off");
+    self->setAttributeValue("wrap", "off");
 
     line_counter->setText("1");
-    editor_->setText(EDITOR_TEXT_TEMPLATE);
+    self->setText(EDITOR_TEXT_TEMPLATE);
     updateLines();
 
-    editor_->setId("editor-id");
+    self->setId("editor-id");
     line_counter->setId("row-c-id");
 
     enableTabEvent();
     scroll();
 
-    editor_->keyWentDown().connect(this, &Editor::updateLines);
+    self->keyWentDown().connect(this, &Editor::updateLines);
 
     line_counter->setReadOnly(true);
 }
 
 void Editor::enableTabEvent()
 {
-    editor_->doJavaScript("const textArea = document.getElementById(\"editor-id\"); \
+    self->doJavaScript("const textArea = document.getElementById(\"editor-id\"); \
                                     textArea.addEventListener(\"keydown\", function(event) { \
                                         if (event.code === \"Tab\") { \
                                         event.preventDefault(); \
@@ -59,7 +59,7 @@ void Editor::enableTabEvent()
 void Editor::updateLines()
 {
     
-    editor_->doJavaScript("editor = document.getElementById('editor-id'); \
+    self->doJavaScript("editor = document.getElementById('editor-id'); \
                            lc =     document.getElementById('row-c-id'); \
                            let lines = editor.value.split(\"\\n\"); \
                            let lineNumbersHTML = \"\"; \
@@ -74,7 +74,7 @@ void Editor::updateLines()
 
 void Editor::scroll()
 {
-    editor_->doJavaScript("var textarea1 = document.getElementById('editor-id'); \
+    self->doJavaScript("var textarea1 = document.getElementById('editor-id'); \
                             var textarea2 = document.getElementById('row-c-id'); \
                             textarea1.addEventListener('scroll', function() { \
                                 textarea2.scrollTop = textarea1.scrollTop; \
@@ -86,15 +86,20 @@ void Editor::scroll()
 
 void Editor::setReady()
 {
-    editor_->setFocus();
+    self->setFocus();
+    self->doJavaScript("\
+        const myTextarea = document.getElementById('editor-id'); \
+        const length = myTextarea.value.length; \
+        myTextarea.setSelectionRange(length, length);"
+    );
 }
 
 WString Editor::text_()
 {
-    return editor_->text();
+    return self->text();
 }
 
 void Editor::disable(bool status)
 {
-    editor_->setDisabled(status);
+    self->setDisabled(status);
 }

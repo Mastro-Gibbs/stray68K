@@ -3082,7 +3082,7 @@ u32 run_opcode(struct EmulationMachine* emulator)
 }
 
 
-u32 execute_istr(struct EmulationMachine *emulator)
+u32 execute_instruction(struct EmulationMachine *emulator)
 {
     u32 istruction_ptr = emulator->Machine.cpu.pc;
 
@@ -3093,7 +3093,28 @@ u32 execute_istr(struct EmulationMachine *emulator)
         return (RETURN_ERR);
     }
 
-    emulator->Machine.RuntimeData.operation_code = read_word(emulator, istruction_ptr);;
+    emulator->Machine.RuntimeData.operation_code = read_word(emulator, istruction_ptr);
 
     return run_opcode(emulator);
+}
+
+
+c_bool is_next_inst_scan(struct EmulationMachine *emulator)
+{
+    if (emulator->Machine.cpu.pc < emulator->Machine.RuntimeData.simhalt)
+    {
+        u32 istruction_ptr = emulator->Machine.cpu.pc;
+        u16 code = read_word(emulator, istruction_ptr);
+
+        if ((code & 0b1111111111110000) == 0b0100111001000000) // detect TRAP
+        {
+            u16 vector = (u16)(code & 0x0000000F);
+
+            return (vector == TRAP_SCAN) ? c_true : c_false;
+        }
+
+        return c_false;
+    }
+
+    return c_false;
 }

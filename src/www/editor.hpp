@@ -32,7 +32,7 @@ class Editor : public WTemplate
         void disable(bool status);
 
     private:
-        WTextArea* editor_;
+        WTextArea* self;
         WTextArea* line_counter;
 
         void enableTabEvent();

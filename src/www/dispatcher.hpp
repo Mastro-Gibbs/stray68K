@@ -50,6 +50,8 @@ extern "C" {
     void set_buffering_enabled(struct EmulationMachine* emulatorInstance, c_bool _bool);
 
     u32 peek_ORG_from_file(struct EmulationMachine *emulatorInstance);
+
+    c_bool is_next_inst_scan(struct EmulationMachine *emulator);
 }
 
 typedef struct __emulation_data__ 
@@ -100,8 +102,9 @@ class Dispatcher : public WContainerWidget
         WPushButton* toogleConsoleButton;
 
         WPushButton* clearConsoleButton;
+        WPushButton* downloadSourceCode;
 
-        WPushButton* compileButton;
+        WPushButton* assembleButton;
         WPushButton* runButton;
         WPushButton* debugButton;
 

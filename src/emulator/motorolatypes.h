@@ -11,6 +11,7 @@
 #define RETURN_OK_PC_NO_INCR 2
 #define RETURN_OK            1
 #define RETURN_ERR           0
+#define RETURN_FINISH        0
 
 typedef unsigned short int opcode;
 

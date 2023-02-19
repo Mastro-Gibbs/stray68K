@@ -1,10 +1,12 @@
 #include "dispatcher.hpp"
 
+#include <ctime>
 #include <fstream>
 #include <algorithm>
 #include <jeayeson/jeayeson.hpp>
 
 #include <Wt/WServer.h>
+#include <Wt/WFileResource.h>
 
 
 unsigned long long FILE_COUNTER = 0;
@@ -21,9 +23,11 @@ Dispatcher::Dispatcher()
     editorWidget(nullptr),
     toogleConsoleButton(nullptr),
     registerRenderWidget(nullptr),
+    clearConsoleButton(nullptr),
+    downloadSourceCode(nullptr),
     executeNextIstructionButton(nullptr),
     continueExecutionButton(nullptr),
-    compileButton(nullptr),
+    assembleButton(nullptr),
     runButton(nullptr),
     debugButton(nullptr),
     emulatorInstance(nullptr),
@@ -81,7 +85,7 @@ Dispatcher::Dispatcher()
     clr_btn->setStyleClass("button-box-item2");
 
     auto comp_btn = make_unique<WPushButton>();
-    comp_btn->setText("Compile");
+    comp_btn->setText("Assemble");
     comp_btn->setStyleClass("button-box-item2");
 
     auto r_btn = make_unique<WPushButton>();
@@ -95,6 +99,10 @@ Dispatcher::Dispatcher()
     auto clear_c = make_unique<WPushButton>();
     clear_c->setStyleClass("button-box-item2");
     clear_c->setText("Clear");
+
+    auto dload = make_unique<WPushButton>();
+    dload->setStyleClass("button-box-item2");
+    dload->setText("Download");
 
 
     // get instance of WStackedWidget
@@ -115,10 +123,11 @@ Dispatcher::Dispatcher()
     toogleMemoryButton  = XMLTemplate->bindWidget("memory",    move(m_btn));
     toogleConsoleButton = XMLTemplate->bindWidget("console",   move(k_btn));
     clearConsoleButton  = XMLTemplate->bindWidget("clear-btn", move(clear_c));
+    downloadSourceCode  = XMLTemplate->bindWidget("download",  move(dload));
 
-    compileButton = XMLTemplate->bindWidget("compile", move(comp_btn));
-    runButton     = XMLTemplate->bindWidget("run",     move(r_btn));
-    debugButton   = XMLTemplate->bindWidget("debug",   move(d_btn));
+    assembleButton = XMLTemplate->bindWidget("compile", move(comp_btn));
+    runButton      = XMLTemplate->bindWidget("run",     move(r_btn));
+    debugButton    = XMLTemplate->bindWidget("debug",   move(d_btn));
 
     executeNextIstructionButton  = XMLTemplate->bindWidget("next",     move(n_btn));
     stopExecutionButton          = XMLTemplate->bindWidget("stop",     move(s_btn));
@@ -133,9 +142,9 @@ Dispatcher::Dispatcher()
     stopExecutionButton->clicked().connect(this,         &Dispatcher::do_stop);
     continueExecutionButton->clicked().connect(this,     &Dispatcher::do_continue);
 
-    compileButton->clicked().connect(this, &Dispatcher::do_compile);
-    runButton->clicked().connect(this,     &Dispatcher::do_run);
-    debugButton->clicked().connect(this,   &Dispatcher::do_debug);
+    assembleButton->clicked().connect(this, &Dispatcher::do_compile);
+    runButton->clicked().connect(this,      &Dispatcher::do_run);
+    debugButton->clicked().connect(this,    &Dispatcher::do_debug);
 
 
     // lambda func connections
@@ -166,7 +175,7 @@ Dispatcher::Dispatcher()
     editorWidget->text_changed.connect(this, [=] { 
         runButton->setDisabled(true);
         debugButton->setDisabled(true);
-        compileButton->setDisabled(false);
+        assembleButton->setDisabled(false);
     });
 
     clearConsoleButton->clicked().connect(this, [=] { 
@@ -175,6 +184,31 @@ Dispatcher::Dispatcher()
 
     clearRegistersButton->clicked().connect(this, [=] { 
         registerRenderWidget->clear(); 
+    });
+
+    downloadSourceCode->clicked().connect(this, [=]{
+        string content = escapeText(editorWidget->text_()).toUTF8();
+
+        time_t now = std::time(nullptr);
+        char buf[150];
+        strftime(buf, sizeof(buf), "%Y_%m_%d_%H_%M_%S", localtime(&now));
+        string dateTimeStr(buf);
+        string filename = "source" + dateTimeStr + ".X68";
+
+        downloadSourceCode->disable();
+
+        downloadSourceCode->doJavaScript(" \
+            var content = document.getElementById('editor-id').value; \
+            var fileBlob = new Blob([content], {type: 'text/plain'}); \
+            var downloadLink = document.createElement('a'); \
+            downloadLink.href = URL.createObjectURL(fileBlob); \
+            downloadLink.download = '" + filename + "'; \
+            document.body.appendChild(downloadLink); \
+            downloadLink.click(); \
+            downloadLink.remove(); \
+        ");
+
+        downloadSourceCode->enable();
     });
 
 
@@ -217,7 +251,7 @@ void Dispatcher::do_compile()
 
     WString src = editorWidget->text_();
 
-    consoleWidget->begin_assembler();
+    consoleWidget->writeAssemblingStarted();
 
     if (!src.empty())
     {
@@ -240,7 +274,7 @@ void Dispatcher::do_compile()
             {
                 if (!assemble(assemblerState, fname.c_str()))
                 {
-                    consoleWidget->push_simple_stdout(string(assemblerState->_asseble_error));
+                    consoleWidget->pushText(string(assemblerState->_asseble_error));
                     emulationData.setValid(false);
                 }
                 else
@@ -248,22 +282,22 @@ void Dispatcher::do_compile()
                     emulationData.setBin(bname);
                     emulationData.setValid(true);
 
-                    consoleWidget->end_assembler();
+                    consoleWidget->writeAssemblingDone();
                     runButton->setDisabled(false);
                     debugButton->setDisabled(false);
-                    compileButton->setDisabled(true);
+                    assembleButton->setDisabled(true);
                 }
 
                 free_SemanticState(assemblerState);
             }
             else
-            { consoleWidget->assembler_error(); emulationData.setValid(false); }  
+            { consoleWidget->writeAssemblingFail(); emulationData.setValid(false); }  
         }
         else
-        {   consoleWidget->assembler_error(); emulationData.setValid(false); }
+        {   consoleWidget->writeAssemblingFail(); emulationData.setValid(false); }
     }
     else
-    {   consoleWidget->push_simple_stdout("Empty source file.\n"); emulationData.setValid(false); }
+    {   consoleWidget->pushText("Empty source file.\n"); emulationData.setValid(false); }
 }
 
 
@@ -288,8 +322,6 @@ void Dispatcher::do_run()
         debugButton->setDisabled(true);
 
         memoryWidget->enableFetch(true);
-
-        consoleWidget->disable(false);
          
         emulatorInstance = obtain_emulation_machine(emulationData.bin().c_str());
         consoleWidget->setEmulator(emulatorInstance);
@@ -301,7 +333,7 @@ void Dispatcher::do_run()
 
         memoryWidget->update(peek_ORG_from_file(emulatorInstance));
 
-        consoleWidget->begin_program();
+        consoleWidget->writeProgramStarted();
 
         app->enableUpdates(true);
 
@@ -310,6 +342,8 @@ void Dispatcher::do_run()
         isDebugMode = false;
         isRunningOnRunThread = false;
         isDebugStarted = false;
+
+        (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
         
         if (runBinaryThread.joinable())
             runBinaryThread.join();
@@ -332,7 +366,9 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
     
         if (uiLock) 
         {
-            consoleWidget->push_stdout(em->Machine.dump);
+            (is_next_inst_scan(em) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
+
+            consoleWidget->pushStdout(em->Machine.dump);
             registerRenderWidget->update(em->Machine.dump);
             memoryWidget->update();
 
@@ -345,7 +381,7 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
     if (uiLock) 
     {
         registerRenderWidget->update(em->Machine.dump);
-        consoleWidget->push_stdout(emulatorInstance->Machine.dump);
+        consoleWidget->pushStdout(emulatorInstance->Machine.dump);
 
         memoryWidget->update();
         memoryWidget->enableFetch(false);
@@ -355,7 +391,7 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
 
         consoleWidget->disable(true);
 
-        quit ? consoleWidget->stop_program() : consoleWidget->end_program();
+        quit ? consoleWidget->writeProgramStopped() : consoleWidget->writeProgramFinished();
 
         editorWidget->disable(false);
         runButton->setDisabled(false);
@@ -415,9 +451,7 @@ void Dispatcher::do_debug()
 
         memoryWidget->update(peek_ORG_from_file(emulatorInstance));
 
-        consoleWidget->begin_program();
-
-        consoleWidget->disable(false);
+        consoleWidget->writeProgramStarted();
 
         isDebugMode = true;
         isDebugStarted = false;
@@ -443,6 +477,8 @@ void Dispatcher::do_next()
     executeNextIstructionButton->setDisabled(true);
 
     isDebugStarted = true;
+
+    (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
         
     if (nextIstructionThread.joinable())
         nextIstructionThread.join();
@@ -467,14 +503,13 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
     
         if (uiLock) 
         {
-            consoleWidget->push_stdout(em->Machine.dump);
+            consoleWidget->pushStdout(em->Machine.dump);
             registerRenderWidget->update(em->Machine.dump);
             memoryWidget->update();
 
             executeNextIstructionButton->setDisabled(false); 
 
             app->triggerUpdate();
-
             app->enableUpdates(false);
         }
     }    
@@ -485,7 +520,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
         if (uiLock) 
         {
             registerRenderWidget->update(em->Machine.dump);
-            consoleWidget->push_stdout(em->Machine.dump);
+            consoleWidget->pushStdout(em->Machine.dump);
 
             memoryWidget->update();
             memoryWidget->enableFetch(false);
@@ -494,7 +529,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
             em = nullptr;
 
             consoleWidget->disable(true);
-            consoleWidget->end_program();
+            consoleWidget->writeProgramFinished();
 
             editorWidget->disable(false);
             runButton->setDisabled(false);
@@ -566,7 +601,7 @@ void Dispatcher::do_stop()
     if (isDebugMode && (!isRunningOnRunThread || !isDebugStarted))
     {
         registerRenderWidget->update(emulatorInstance->Machine.dump);
-        consoleWidget->push_stdout(emulatorInstance->Machine.dump);
+        consoleWidget->pushStdout(emulatorInstance->Machine.dump);
 
         memoryWidget->update();
         memoryWidget->enableFetch(false);
@@ -575,7 +610,7 @@ void Dispatcher::do_stop()
         emulatorInstance = nullptr;
 
         consoleWidget->disable(true);
-        consoleWidget->end_program();
+        consoleWidget->writeProgramFinished();
 
         editorWidget->disable(false);
         runButton->setDisabled(false);

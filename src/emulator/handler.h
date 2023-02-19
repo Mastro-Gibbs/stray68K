@@ -11,9 +11,9 @@
 void init_opcodes(struct EmulationMachine *em);
 void destroy_codes(struct EmulationMachine *em);
 
-u32 execute_istr(struct EmulationMachine *emulator);
+u32 execute_instruction(struct EmulationMachine *emulator);
 
-
+c_bool is_next_inst_scan(struct EmulationMachine *emulator);
 
 
 

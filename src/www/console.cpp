@@ -4,9 +4,9 @@
 #include <jeayeson/jeayeson.hpp>
 
 Console::Console()
-    : out(nullptr),
+    : self(nullptr),
       _map(""),
-      emulator(nullptr),
+      emulatorInstance(nullptr),
       WTemplate(tr("console-msg"))
 {
 
@@ -17,10 +17,10 @@ void Console::setUpConsole()
     auto out_ = make_unique<WTextArea>(tr("console"));
     out_->setStyleClass("console");
 
-    out = bindWidget("console", move(out_));
-    out->setText("");
-    out->setId("f_console");
-    out->setDisabled(true);
+    self = bindWidget("console", move(out_));
+    self->setText("");
+    self->setId("f_console");
+    self->setDisabled(true);
 
 /*
     out->doJavaScript("const textarea = document.getElementById('f_console'); \
@@ -35,12 +35,12 @@ void Console::setUpConsole()
                         
     );*/
 
-    out->keyWentUp().connect([&](const WKeyEvent &event) {
+    self->keyWentUp().connect([&](const WKeyEvent &event) {
         if (event.key() == Key::Enter)
         {
-            init_buffer(emulator);
+            init_buffer(emulatorInstance);
 
-            std::string textUtf8 = out->text().toUTF8();
+            std::string textUtf8 = self->text().toUTF8();
 
             size_t pos = textUtf8.find(_content);
             
@@ -50,10 +50,10 @@ void Console::setUpConsole()
             for (size_t i = 0; i < textUtf8.length() - 1; ++i)
             {
                 char c = textUtf8[i];
-                cwrite(emulator, c);
+                cwrite(emulatorInstance, c);
             }
 
-            flush_buffer(emulator);
+            flush_buffer(emulatorInstance);
         }
     });
 }
@@ -61,15 +61,15 @@ void Console::setUpConsole()
 
 void Console::insert(const string& str)
 {
-    if (out->text().empty())
-        out->setText(str);
+    if (self->text().empty())
+        self->setText(str);
     else
-        out->setText(out->text() + str);
+        self->setText(self->text() + str);
 
-    _content = out->text().toUTF8();
+    _content = self->text().toUTF8();
 }
 
-void Console::push_stdout(const char* map)
+void Console::pushStdout(const char* map)
 {
     if (map != NULL)
     {
@@ -124,52 +124,52 @@ void Console::push_stdout(const char* map)
     }
 }
 
-void Console::push_simple_stdout(const string& out)
+void Console::pushText(const string& out)
 {
     insert(out + "\n");
 }
 
 void Console::clear()
 {
-    out->setText("");
+    self->setText("");
 }
 
 void Console::disable(bool status)
 {
-    out->setDisabled(status);
+    self->setDisabled(status);
 }
 
 void Console::setEmulator(struct EmulationMachine* _emulator)
 {
-    emulator = _emulator;
+    emulatorInstance = _emulator;
 }
 
-void Console::stop_program()
+void Console::writeProgramStopped()
 {
     insert("\nProgram arrested\n");
 }
 
-void Console::end_program()
+void Console::writeProgramFinished()
 {
     insert("\nProgram finished\n");
 }
 
-void Console::begin_program()
+void Console::writeProgramStarted()
 {
     insert("Program started\n");
 }
 
-void Console::end_assembler()
+void Console::writeAssemblingDone()
 {
     insert("Assembling done.\n");
 }
 
-void Console::begin_assembler()
+void Console::writeAssemblingStarted()
 {
     insert("Assembling source code.\n");
 }
 
-void Console::assembler_error()
+void Console::writeAssemblingFail()
 {
     insert("Error.\n");
 }
