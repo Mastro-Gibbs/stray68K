@@ -42,11 +42,11 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
 
     std::string editor_template  = "\\t; Stray68K Motorola68000-ASM Emulator\\n\\n\\n\\tORG\\t\\t$1000\\n\\n\\n\\t; place code here\\n\\n\\n\\tEND"; 
 
-    app->require("template/js/ace.js");
-    app->require("template/js/theme-tomorrow_night.js");
-    app->require("template/js/ext-language_tools.min.js");
-    app->require("template/highlight/motorola68000.js");
-    app->require("template/js/editor-common.js");
+    app->require("template/js/ace-editor/ace.js");
+    app->require("template/js/ace-editor/theme-tomorrow_night.js");
+    app->require("template/js/ace-editor/ext-language_tools.min.js");
+    app->require("template/js/ace-editor/highlight/motorola68000.js");
+    app->require("template/js/ace-editor/editor-common.js");
 
     app->doJavaScript(" var editor = ace.edit('editor');  \
                         editor.setTheme('ace/theme/tomorrow_night');  \
@@ -55,6 +55,12 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
                         \
                         editor.setValue('" + editor_template + "');  \
                         editor.addEventListener('input', function(){  \
+                            let prevMarkers = editor.session.getMarkers(); \
+                            if (prevMarkers) { \
+                                let prevMarkersArr = Object.keys(prevMarkers); \
+                                for (let item of prevMarkersArr) \
+                                    editor.session.removeMarker(prevMarkers[item].id); \
+                            } \
                             Wt.emit('EditorCpp', 'onEditorInput_Signal');  \
                         });  \
                         \
@@ -64,6 +70,7 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
                         \
                         editor.setOptions({ \
                             enableBasicAutocompletion: true, \
+                            enableSnippets: true, \
                             enableLiveAutocompletion: true \
                         });"
     );

@@ -62,3 +62,9 @@
 #editor {
     height: 800px;
 }
+
+.marker {
+    position: absolute;
+    background:rgba(49, 97, 96, 0.7);
+    z-index: 20
+  }

@@ -149,20 +149,12 @@ void Console::disable(bool status)
 
     if (!status)
     {
-        doJavaScript(" \
-                {\
-                    const popupconsole = document.getElementById('console-popup'); \
-                    popupconsole.style.display = 'block'; \
-                }");
+        doJavaScript("showPopupConsoleDiv();");
         self->setFocus();
     }
     else
     {
-        doJavaScript(" \
-                {\
-                    const popupconsole = document.getElementById('console-popup'); \
-                    popupconsole.style.display = 'none'; \
-                }");
+        doJavaScript("hidePopupConsoleDiv();");
     }
 }
 

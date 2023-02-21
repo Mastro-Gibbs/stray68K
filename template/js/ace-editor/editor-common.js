@@ -168,8 +168,7 @@ var completions = [
 
     { value: 'B',  score: 6, meta: 'Instruction size' },
     { value: 'W',  score: 6, meta: 'Instruction size' },
-    { value: 'L',  score: 6, meta: 'Instruction size' },
-
+    { value: 'L',  score: 6, meta: 'Instruction size' }
 
 ]  
 

@@ -37,9 +37,13 @@ Dispatcher::Dispatcher()
     isDebugMode(false),
     isRunningOnRunThread(false),
     isDebugStarted(false),
+    lineHighLighterIndex(0),
+    previousProgramCounter(0),
     WContainerWidget()
 {
     WApplication* instance = WApplication::instance();
+
+    instance->require("template/js/utils.js");
     
     instance->messageResourceBundle().use("template/xmls/editor");
     instance->useStyleSheet("template/css/editor.css"); 
@@ -197,16 +201,7 @@ Dispatcher::Dispatcher()
 
         downloadSourceCode->disable();
 
-        downloadSourceCode->doJavaScript(" \
-            var content = ace.edit('editor').getValue(); \
-            var fileBlob = new Blob([content], {type: 'text/plain'}); \
-            var downloadLink = document.createElement('a'); \
-            downloadLink.href = URL.createObjectURL(fileBlob); \
-            downloadLink.download = '" + filename + "'; \
-            document.body.appendChild(downloadLink); \
-            downloadLink.click(); \
-            downloadLink.remove(); \
-        ");
+        downloadSourceCode->doJavaScript("downloadSourceFile('" + filename + "');");
 
         downloadSourceCode->enable();
     });
@@ -234,12 +229,7 @@ Dispatcher::Dispatcher()
 
     stackedWidget->setCurrentWidget(editorWidget);
 
-
-    doJavaScript("\
-        {\
-            const popupconsole = document.getElementById('console-popup'); \
-            popupconsole.style.display = 'none'; \
-        }");
+    doJavaScript("hidePopupConsoleDiv();");
 }
 
 
@@ -250,7 +240,8 @@ Dispatcher::Dispatcher()
  */
 void Dispatcher::do_compile()
 {
-    doJavaScript("Wt.emit('EditorCpp', 'onContentRequest_Signal', ace.edit('editor').getValue());");
+    WApplication::instance()->require("template/js/ace-editor/ace_signal.js");
+    doJavaScript("getACEEditorText();");
 }
 
 void Dispatcher::__compile()
@@ -332,6 +323,7 @@ void Dispatcher::do_run()
     if (emulationData.valid())
     { 
         WApplication *app = WApplication::instance();
+        app->require("template/js/ace-editor/line-highlighter.js");
 
         registerRenderWidget->clear();
         editorWidget->disable(true);
@@ -363,6 +355,8 @@ void Dispatcher::do_run()
         isDebugMode = false;
         isRunningOnRunThread = false;
         isDebugStarted = false;
+
+        doJavaScript("removeAllMarkers();");
 
         (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
         
@@ -450,6 +444,7 @@ void Dispatcher::do_debug()
     {
         WApplication *app = WApplication::instance();
         registerRenderWidget->clear();
+        app->require("template/js/ace-editor/line-highlighter.js");
 
         editorWidget->disable(true);
 
@@ -476,6 +471,12 @@ void Dispatcher::do_debug()
 
         isDebugMode = true;
         isDebugStarted = false;
+
+        doJavaScript("removeAllMarkers();");
+        doJavaScript("getLines();");
+
+        lineHighLighterIndex = 0;
+        previousProgramCounter = 0;
     }
 }
 
@@ -489,8 +490,17 @@ void Dispatcher::do_debug()
 void Dispatcher::do_next()
 {
     WApplication *app = WApplication::instance();
+    app->require("template/js/ace-editor/line-highlighter.js");
 
     app->enableUpdates(true);
+
+    doJavaScript("doLineHighLight(" + to_string(lineHighLighterIndex) +", " + to_string(emulatorInstance->Machine.cpu.pc) + ")");
+
+    if (previousProgramCounter < emulatorInstance->Machine.cpu.pc)
+    {
+        lineHighLighterIndex++;
+        previousProgramCounter = emulatorInstance->Machine.cpu.pc;
+    }
 
     quitThread_nextIstructionThread = false;
 
@@ -587,6 +597,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
 void Dispatcher::do_continue()
 {
     WApplication *app = WApplication::instance();
+    app->require("template/js/ace-editor/line-highlighter.js");
 
     app->enableUpdates(true);
         
@@ -596,6 +607,8 @@ void Dispatcher::do_continue()
     continueExecutionButton->setDisabled(true);
 
     isRunningOnRunThread = true;
+
+    doJavaScript("removeAllMarkers();");
     
     if (runBinaryThread.joinable())
         runBinaryThread.join();
