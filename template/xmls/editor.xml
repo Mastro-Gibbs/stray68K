@@ -2,13 +2,8 @@
 <messages>
 
     <message id="editor-msg">
-        <div class="container2-col">
-            <div class="">
-                ${row_counter}
-            </div>
-            <div class="">
-                ${editor}
-            </div>
+        <div class="containeritem-editor-style">
+            <div contenteditable='true' id="editor"></div>
         </div>
     </message>
 

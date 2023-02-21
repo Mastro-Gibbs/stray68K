@@ -172,7 +172,7 @@ Dispatcher::Dispatcher()
         toogleConsoleButton->setStyleClass("button-box-item2-2-selected");
     });
 
-    editorWidget->text_changed.connect(this, [=] { 
+    editorWidget->onTextChange.connect(this, [=] { 
         runButton->setDisabled(true);
         debugButton->setDisabled(true);
         assembleButton->setDisabled(false);
@@ -187,7 +187,7 @@ Dispatcher::Dispatcher()
     });
 
     downloadSourceCode->clicked().connect(this, [=]{
-        string content = escapeText(editorWidget->text_()).toUTF8();
+        string content = escapeText(editorWidget->getText()).toUTF8();
 
         time_t now = std::time(nullptr);
         char buf[150];
@@ -198,7 +198,7 @@ Dispatcher::Dispatcher()
         downloadSourceCode->disable();
 
         downloadSourceCode->doJavaScript(" \
-            var content = document.getElementById('editor-id').value; \
+            var content = ace.edit('editor').getValue(); \
             var fileBlob = new Blob([content], {type: 'text/plain'}); \
             var downloadLink = document.createElement('a'); \
             downloadLink.href = URL.createObjectURL(fileBlob); \
@@ -210,6 +210,9 @@ Dispatcher::Dispatcher()
 
         downloadSourceCode->enable();
     });
+
+
+    editorWidget->onTextCome.connect(this, &Dispatcher::__compile);
 
 
     // init struct
@@ -226,13 +229,10 @@ Dispatcher::Dispatcher()
 
 
     // setting-up some widgets
-    editorWidget->setUpEditor();
     memoryWidget->setUpMemory();
     consoleWidget->setUpConsole();
 
     stackedWidget->setCurrentWidget(editorWidget);
-
-    editorWidget->setReady();
 
 
     doJavaScript("\
@@ -250,18 +250,23 @@ Dispatcher::Dispatcher()
  */
 void Dispatcher::do_compile()
 {
+    doJavaScript("Wt.emit('EditorCpp', 'onContentRequest_Signal', ace.edit('editor').getValue());");
+}
+
+void Dispatcher::__compile()
+{
     clearConsoleButton->show();
     stackedWidget->setCurrentWidget(consoleWidget);
     toogleEditorButton->setStyleClass("button-box-item2");
     toogleMemoryButton->setStyleClass("button-box-item2");
     toogleConsoleButton->setStyleClass("button-box-item2-2-selected");
 
-    WString src = editorWidget->text_();
-
-    consoleWidget->writeAssemblingStarted();
+    std::string src = editorWidget->getText();
 
     if (!src.empty())
     {
+        consoleWidget->writeAssemblingStarted();
+        
         string fname = "sources/src" + to_string(FILE_COUNTER++) + ".X68";
 
         emulationData.setSrc(fname);

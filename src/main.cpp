@@ -38,7 +38,37 @@ class App : public Wt::WApplication
 
 std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
 {
-    return std::make_unique<App>(env);
+    auto app = std::make_unique<App>(env);
+
+    std::string editor_template  = "\\t; Stray68K Motorola68000-ASM Emulator\\n\\n\\n\\tORG\\t\\t$1000\\n\\n\\n\\t; place code here\\n\\n\\n\\tEND"; 
+
+    app->require("template/js/ace.js");
+    app->require("template/js/theme-tomorrow_night.js");
+    app->require("template/js/ext-language_tools.min.js");
+    app->require("template/highlight/motorola68000.js");
+    app->require("template/js/editor-common.js");
+
+    app->doJavaScript(" var editor = ace.edit('editor');  \
+                        editor.setTheme('ace/theme/tomorrow_night');  \
+                        editor.setFontSize(16);  \
+                        editor.session.setMode('ace/mode/motorola68000');  \
+                        \
+                        editor.setValue('" + editor_template + "');  \
+                        editor.addEventListener('input', function(){  \
+                            Wt.emit('EditorCpp', 'onEditorInput_Signal');  \
+                        });  \
+                        \
+                        var langTools = ace.require('ace/ext/language_tools');  \
+                        \
+                        langTools.setCompleters([myCompleter]); \
+                        \
+                        editor.setOptions({ \
+                            enableBasicAutocompletion: true, \
+                            enableLiveAutocompletion: true \
+                        });"
+    );
+
+    return app;
 }
 
 

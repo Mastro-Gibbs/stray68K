@@ -204,7 +204,7 @@
                     User Stack Pointer
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${usp}
             </div>
 
@@ -213,7 +213,7 @@
                     System Stack Pointer
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${ssp}
             </div>
 
@@ -222,7 +222,7 @@
                     Program Counter
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${pc}
             </div>
 
@@ -247,22 +247,22 @@
                     Mnemonic Code
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${mnem}
             </div>
 
             <div class="register-label-container xx-large">
                 <span class="register-label">
-                    Hex Code
+                    Hexadecimal Code
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${hcode}
             </div>
 
             <div class="register-label-container xx-large">
                 <span class="register-label">
-                    Bit Code 
+                    Binary Code 
                 </span>
             </div>
             <div class="one-row-reg register-data">
@@ -271,7 +271,7 @@
 
             <div class="register-label-container xx-large">
                 <span class="register-label">
-                    Time&nbsp;(ms)
+                    Execution Time&nbsp;(ms)
                 </span>
             </div>
             <div class="one-row-reg register-data">
@@ -284,28 +284,28 @@
 
             <div class="register-label-container xx-large">
                 <span class="register-label">
-                    First Writter Byte
+                    Ram Start Address
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${fwb}
             </div>
 
             <div class="register-label-container xx-large">
                 <span class="register-label">
-                    Last Writter Byte
+                    Ram End Address
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${lwb}
             </div>
 
             <div class="register-label-container xx-large">
                 <span class="register-label">
-                    Halt
+                    Emulator Halt
                 </span>
             </div>
-            <div class="register-data">
+            <div class="one-row-reg register-data">
                 ${halt}
             </div>
             

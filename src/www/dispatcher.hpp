@@ -129,6 +129,8 @@ class Dispatcher : public WContainerWidget
         std::atomic<bool> isDebugStarted;
 
         void do_compile();
+        void __compile();
+
         void do_run();
         void do_debug();
 

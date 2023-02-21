@@ -21,25 +21,20 @@ class Editor : public WTemplate
     public:
         Editor();
 
-        Signal<> text_changed;
-
-        void setUpEditor();
-
-        WString text_();
-
-        void setReady();
+        std::string getText();
 
         void disable(bool status);
 
+        JSignal<std::string>  jsEditorContentRequestSignal;
+        void                  onContentRequest(std::string result);
+
+        JSignal<std::string>  jsEditorInputSignal;
+
+        Signal<> onTextChange;
+        Signal<> onTextCome;
+
     private:
-        WTextArea* self;
-        WTextArea* line_counter;
-
-        void enableTabEvent();
-
-        void updateLines();
-
-        void scroll();
+        std::string self;
 };
 
 

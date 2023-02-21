@@ -19,6 +19,66 @@
     padding-left: 3px;
 }
 
+@media (max-width: 1024px) {
+    .memory-header-box {
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        background-color: rgb(41, 41, 41);
+        font-family: monospace;
+        font-size: small;
+        color: beige;
+        height: 2em;
+        width: 97%;
+        padding-left: 3px;
+    }
+
+    .offsets {
+        display: flex;
+        justify-content: left;
+        align-items: left;
+        background-color: rgb(41, 41, 41);
+        border: 0px;
+        width: 97%;
+        height: 30px;
+        font-size: small;
+        font-family: monospace;
+        color: azure;
+        grid-column-start: 2;
+        grid-column-end: 2;
+        padding-left: 3px;
+    }
+
+    .addresses {
+        text-align: center;
+        padding-left: 10px;
+        padding-top: 10px;
+        background-color: rgb(41, 41, 41);
+        color: azure;
+        font-size: small;
+        font-family: monospace;
+        border: 0px;
+        width: 97%;
+        height: 480px;
+        resize: none;
+    
+    }
+
+    .bitfield {
+        padding-top: 10px;
+        color: beige;
+        font-size: small;
+        font-family: monospace;
+        background-color: #454545;
+        border: 0px;
+        width: 97%;
+        height: 480px;
+        resize: none;
+        padding-right: 0px;
+        padding-left: 3px;
+    }
+}
+
 .float-left2 {
     display: flex;
     justify-content: left;

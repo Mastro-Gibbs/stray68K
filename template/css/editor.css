@@ -40,8 +40,6 @@
 }
 
 .containeritem-editor-style {
-    padding-top: 10px;
-    color: beige;
     font-size: large;
     font-family: monospace;
     background-color: #454545;
@@ -49,7 +47,7 @@
     width: 97%;
     height: 800px;
     resize: none;
-    overflow-x: scroll;
+    margin-top: 20px;
 }
 
 .containeritem-editor-style::selection {
@@ -59,4 +57,8 @@
 
 .containeritem-editor-style:focus {
     outline: none;
+}
+
+#editor {
+    height: 800px;
 }
