@@ -86,7 +86,9 @@ void MemoryView::fetchBlock()
     {
         stringstream ss;
         ss << hex << (offset_ + j) << "\n";
-        addresses->setText(addresses->text() + format32BitReg(ss.str()));
+        string s = ss.str();
+        transform(s.begin(), s.end(), s.begin(), ::toupper);
+        addresses->setText(addresses->text() + format32BitReg(s));
     }
 
     const unsigned char* block = read_chunk(emulator, offset_, offset_ + (16*20));
@@ -131,7 +133,9 @@ void MemoryView::update(unsigned int _from)
         {
             stringstream ss;
             ss << hex << (address + j) << "\n";
-            addresses->setText(addresses->text() + format32BitReg(ss.str()));
+            string s = ss.str();
+            transform(s.begin(), s.end(), s.begin(), ::toupper);
+            addresses->setText(addresses->text() + format32BitReg(s));
         }
 
         const unsigned char* block = read_chunk(emulator, address, address + (16*20));
@@ -174,15 +178,21 @@ void MemoryView::renderChunck(const unsigned char* block, unsigned int chunk_beg
 {
     bitfield->setText(bitfield->text() + "  ");
 
-    char c[17];
+    char c[33];
 
-    for (size_t _i = chunk_begin, _j = 0; _j < 16; ++_i, ++_j )
+    for (size_t _i = chunk_begin, _j = 0; _j < 32; ++_i, ++_j )
         if (block[_i] < 0x20 || block[_i] > 0x7E)
-            c[_j] = '-';
-        else
-            c[_j] = (char) block[_i];
+        {
+            c[_j++] = '-';
+            c[_j]   = ' ';
+        }    
+        else 
+        {
+            c[_j++] = (char) block[_i];
+            c[_j]   = ' ';   
+        }
     
-    c[16] = '\0';
+    c[32] = '\0';
 
     bitfield->setText(bitfield->text() + string(c) + "\n");
 }

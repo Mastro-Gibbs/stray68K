@@ -18,6 +18,7 @@
     height: 20px;
     font-size: large;
     font-family: monospace;
+    color: #d1d5db;
 }
 
 .register-data {
@@ -26,10 +27,11 @@
     font-size: large;
     font-family: monospace;
     overflow: hidden;
+    color: #eae094;
 }
 
 .register-data:hover {
-    cursor: crosshair;
+    cursor: pointer;
 }
 
 .register-data-2byte {
@@ -39,14 +41,14 @@
     height: 26px;
     font-size: large;
     font-family: monospace;
-    background-color: #383838;
-    color: beige;
+    background-color: #40414f;
+    color: #eae094;
     resize: none;
     border: none;
 }
 
 .register-data-2byte:hover {
-    cursor: crosshair;
+    cursor: pointer;
 }
 
 
@@ -57,14 +59,14 @@
     height: 26px;
     font-size: large;
     font-family: monospace;
-    background-color: #383838;
-    color: beige;
+    background-color: #40414f;
+    color: #eae094;
     resize: none;
     border: none;
 }
 
 .register-data-8bit:hover {
-    cursor: crosshair;
+    cursor: pointer;
 }
 
 
@@ -75,14 +77,14 @@
     height: 26px;
     font-size: large;
     font-family: monospace;
-    background-color: #383838;
-    color: beige;
+    background-color: #40414f;
+    color: #eae094;
     resize: none;
     border: none;
 }
 
 .register-data-16bit:hover {
-    cursor: crosshair;
+    cursor: pointer;
 }
 
 .register-data-8bit:focus .register-data-2byte:focus .register-data-16bit:focus {
@@ -112,9 +114,21 @@
     left: 50%;
     transform: translateX(-50%);
     padding: 5px;
-    background-color: rgb(208, 139, 89);
-    color: #1a1a1a;
+    background-color: #e37424;
+    color: #eae094;
     border-radius: 2px;
     white-space: nowrap;
     z-index: 999;
-  }
+    font-weight: 600;
+    animation: fade-in .5s forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

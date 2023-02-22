@@ -7,7 +7,7 @@
                 <div class="float-left">
                     ${code}
                     ${memory}
-                    <div class="button-box-item2">
+                    <div class="button-box-item2-2-box">
                         ${console}
                         <div class="popup-div-console" id="console-popup">Need Input</div>
                     </div>

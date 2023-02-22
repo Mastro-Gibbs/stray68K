@@ -37,8 +37,6 @@ Dispatcher::Dispatcher()
     isDebugMode(false),
     isRunningOnRunThread(false),
     isDebugStarted(false),
-    lineHighLighterIndex(0),
-    previousProgramCounter(0),
     WContainerWidget()
 {
     WApplication* instance = WApplication::instance();
@@ -474,9 +472,6 @@ void Dispatcher::do_debug()
 
         doJavaScript("removeAllMarkers();");
         doJavaScript("getLines();");
-
-        lineHighLighterIndex = 0;
-        previousProgramCounter = 0;
     }
 }
 
@@ -494,13 +489,7 @@ void Dispatcher::do_next()
 
     app->enableUpdates(true);
 
-    doJavaScript("doLineHighLight(" + to_string(lineHighLighterIndex) +", " + to_string(emulatorInstance->Machine.cpu.pc) + ")");
-
-    if (previousProgramCounter < emulatorInstance->Machine.cpu.pc)
-    {
-        lineHighLighterIndex++;
-        previousProgramCounter = emulatorInstance->Machine.cpu.pc;
-    }
+    doJavaScript("doLineHighLight();");
 
     quitThread_nextIstructionThread = false;
 
@@ -557,6 +546,8 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
 
             end_emulator(em);
             em = nullptr;
+
+            doJavaScript("resetHighlightingIndex();");
 
             consoleWidget->disable(true);
             consoleWidget->writeProgramFinished();
@@ -630,6 +621,8 @@ void Dispatcher::do_stop()
 
     quitThread_runBinaryThread = true;
     quitThread_nextIstructionThread = true;
+
+    doJavaScript("resetHighlightingIndex();");
 
     if (isDebugMode && (!isRunningOnRunThread || !isDebugStarted))
     {

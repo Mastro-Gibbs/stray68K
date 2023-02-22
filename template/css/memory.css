@@ -1,7 +1,7 @@
 .memory-container2-col {
     margin-top: 20px;
     display: grid;
-    grid-template-columns: 15% 85%;
+    grid-template-columns: 9% 91%;
     column-gap: 0px;
 }
 
@@ -10,74 +10,15 @@
     display: flex;
     justify-content: left;
     align-items: center;
-    background-color: rgb(41, 41, 41);
+    background-color: #25282c;
     font-family: monospace;
-    font-size: x-large;
-    color: beige;
+    font-size: 16px;
+    color: #d1d5db;
     height: 2em;
     width: 97%;
     padding-left: 3px;
 }
 
-@media (max-width: 1024px) {
-    .memory-header-box {
-        display: flex;
-        justify-content: left;
-        align-items: center;
-        background-color: rgb(41, 41, 41);
-        font-family: monospace;
-        font-size: small;
-        color: beige;
-        height: 2em;
-        width: 97%;
-        padding-left: 3px;
-    }
-
-    .offsets {
-        display: flex;
-        justify-content: left;
-        align-items: left;
-        background-color: rgb(41, 41, 41);
-        border: 0px;
-        width: 97%;
-        height: 30px;
-        font-size: small;
-        font-family: monospace;
-        color: azure;
-        grid-column-start: 2;
-        grid-column-end: 2;
-        padding-left: 3px;
-    }
-
-    .addresses {
-        text-align: center;
-        padding-left: 10px;
-        padding-top: 10px;
-        background-color: rgb(41, 41, 41);
-        color: azure;
-        font-size: small;
-        font-family: monospace;
-        border: 0px;
-        width: 97%;
-        height: 480px;
-        resize: none;
-    
-    }
-
-    .bitfield {
-        padding-top: 10px;
-        color: beige;
-        font-size: small;
-        font-family: monospace;
-        background-color: #454545;
-        border: 0px;
-        width: 97%;
-        height: 480px;
-        resize: none;
-        padding-right: 0px;
-        padding-left: 3px;
-    }
-}
 
 .float-left2 {
     display: flex;
@@ -101,7 +42,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgb(41, 41, 41);
+    background-color: #25282c;
     border: 0px;
     width: 97%;
     height: 50px;
@@ -115,13 +56,13 @@
     display: flex;
     justify-content: left;
     align-items: left;
-    background-color: rgb(41, 41, 41);
+    background-color: #25282c;
     border: 0px;
     width: 97%;
     height: 30px;
-    font-size: x-large;
+    font-size: 16px;
     font-family: monospace;
-    color: azure;
+    color: #d1d5db;
     grid-column-start: 2;
     grid-column-end: 2;
     padding-left: 3px;
@@ -133,16 +74,16 @@
 
 .addresses {
     text-align: center;
-    padding-left: 10px;
     padding-top: 10px;
-    background-color: rgb(41, 41, 41);
-    color: azure;
-    font-size: x-large;
+    background-color: #25282c;
+    color: #d1d5db;
+    font-size: 16px;
     font-family: monospace;
     border: 0px;
     width: 97%;
-    height: 480px;
+    height: 500px;
     resize: none;
+    line-height: 23px;
 
 }
 
@@ -152,16 +93,17 @@
 
 .bitfield {
     padding-top: 10px;
-    color: beige;
-    font-size: x-large;
+    color: #eae094;
+    font-size: 16px;
     font-family: monospace;
-    background-color: #454545;
+    background-color: #1d1f21;
     border: 0px;
     width: 97%;
-    height: 480px;
+    height: 500px;
     resize: none;
     padding-right: 0px;
     padding-left: 3px;
+    line-height: 23px;
 }
 
 .bitfield:focus {
@@ -169,8 +111,17 @@
 }
 
 .from {
-    font-size: large;
+    font-size: 16px;
     font-family: monospace;
+    background-color: transparent;
+    max-width: 8ch;
+    color: #d1d5db;
+    border-width: 1px;
+    border-radius: 4px;
+}
+
+.from::selection {
+    background-color: transparent;
 }
 
 .from:focus {
@@ -181,25 +132,26 @@
     width: 70px;
     height: 25px;
     font-size: small;
-    background-color: burlywood;
-    color: #2f2f2f;
+    background-color: transparent;
+    color: #eae094;
     border: none;
     margin-left: 15px;
+    transition-duration: .3s;
 }
 
 .fetch-btn:hover {
     cursor: pointer;
-    background-color: #d08b59;
+    background-color: #484747;
     border-radius: 1px;
 }
 
 .fetch-btn-disabled {
-    cursor: default;
-    background-color: #5f5f5f;
+    cursor: not-allowed;
+    background-color: transparent;
     width: 70px;
     height: 25px;
     font-size: small;
-    color: #2f2f2f;
+    color: #5e5e5e;
     border: none;
     margin-left: 15px;
 }

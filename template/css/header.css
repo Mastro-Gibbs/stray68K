@@ -7,7 +7,7 @@
     align-items: center;
     min-width: 100%;
     min-height: 4em;
-    background-color: chocolate;
+    background-color: #e37424;
 }
 
 @media (max-width: 1024px) {
@@ -20,7 +20,7 @@
         align-items: center;
         min-width: 100%;
         min-height: 4em;
-        background-color: chocolate;
+        background-color: #e37424;
     }
 
     .header-title {
@@ -34,14 +34,16 @@
 
 .header-title {
     font-size: 40px;
-    color: rgb(69, 69, 69);
+    color: #eae094;
     text-decoration: solid;
     border: none;
     background: transparent;
+    transition-duration: .3s;
 }
 
 .header-title:hover {
-    color: rgb(36, 36, 36);
+    font-size: 42px;
+    color: #eae094;
     cursor: pointer;
 }
 
@@ -52,14 +54,26 @@
 .popup-div:hover::before {
     font-size: medium;
     font-family: monospace;
-    content: "Open help";
+    content: "Open Help";
     position: absolute;
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
     padding: 5px;
-    background-color: rgb(208, 139, 89);
-    color: beige;
+    background-color: #292731;
+    color: #eae094;
     border-radius: 2px;
     white-space: nowrap;
-  }
+    font-weight: 600;
+    animation: fade-in 1.5s forwards;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}

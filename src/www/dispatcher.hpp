@@ -128,9 +128,6 @@ class Dispatcher : public WContainerWidget
         std::atomic<bool> isRunningOnRunThread;
         std::atomic<bool> isDebugStarted;
 
-        size_t lineHighLighterIndex;
-        size_t previousProgramCounter;
-
         void do_compile();
         void __compile();
 

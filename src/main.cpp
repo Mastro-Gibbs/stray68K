@@ -40,7 +40,7 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
 {
     auto app = std::make_unique<App>(env);
 
-    std::string editor_template  = "\\t; Stray68K Motorola68000-ASM Emulator\\n\\n\\n\\tORG\\t\\t$1000\\n\\n\\n\\t; place code here\\n\\n\\n\\tEND"; 
+    std::string editor_template  = "\\t; Stray68K Motorola68000-ASM Emulator\\n\\n\\n\\tORG\\t\\t$1000\\n\\n\\t\\n\\t; place code here\\n\\n\\n\\tEND"; 
 
     app->require("template/js/ace-editor/ace.js");
     app->require("template/js/ace-editor/theme-tomorrow_night.js");
@@ -54,6 +54,8 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
                         editor.session.setMode('ace/mode/motorola68000');  \
                         \
                         editor.setValue('" + editor_template + "');  \
+                        editor.focus(); \
+                        editor.gotoLine(6, 1, true); \
                         editor.addEventListener('input', function(){  \
                             let prevMarkers = editor.session.getMarkers(); \
                             if (prevMarkers) { \
@@ -64,6 +66,26 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
                             Wt.emit('EditorCpp', 'onEditorInput_Signal');  \
                         });  \
                         \
+                        editor.commands.addCommands( \
+                            [ \
+                                { \
+                                    name: 'zoomin',  \
+                                    bindKey: {win: 'Ctrl-Alt-I'}, \
+                                    exec: function(editor) { \
+                                        editor.setFontSize(editor.getFontSize() + 2); \
+                                    }, \
+                                    readOnly: false, \
+                                },  \
+                                { \
+                                    name: 'zoomout', \
+                                    bindKey: {win: 'Ctrl-Alt-D'}, \
+                                    exec: function(editor) { \
+                                        editor.setFontSize(editor.getFontSize() - 2); \
+                                    }, \
+                                    readOnly: false, \
+                                } \
+                            ] \
+                        ); \
                         var langTools = ace.require('ace/ext/language_tools');  \
                         \
                         langTools.setCompleters([myCompleter]); \

@@ -38,6 +38,9 @@
         <li>
             <a href="#ct" onclick="showDiv('ct')">Custom traps</a>
         </li>
+        <li>
+            <a href="#web" onclick="showDiv('web')">Web page</a>
+        </li>
     </ul>
 
     <div id="wcid" hidden>
@@ -120,6 +123,103 @@
             </ul>
             Invoking <code>TRAP    #15</code> for printouts, <code>TRAP    #14</code> for scans and
             <code>TRAP    #13</code> for sleeps.
+        </span>
+    </div>
+
+    <div id="web" hidden>
+        <h3>Web Page</h3>
+        <span>
+            In this web page you can use the Stray68K emulator. There are some components like:
+            <ul>
+                <li class="margin-li">
+                    <strong>Code</strong>, a component that features syntax highlighting and text prediction with autocompleter.
+                    <br>
+                    <h5>Commands & Shortcuts</h5>
+                    <ul>
+                        <li class="margin-li">
+                            Classic text editor shortcuts like 'Ctrl-Z', 'Tab', ...
+                        </li>
+                        <li class="margin-li">
+                            Call to completer: 'Ctrl + Space'
+                        </li>
+                        <li class="margin-li">
+                            Zoom-in and zoom-out text with 'Ctrl+Alt+I' and 'Ctrl+Alt+D'
+                        </li>
+                    </ul>
+                    <h5>Debug session</h5>
+                    <span>
+                        When a debug session is active, the currently executed line will be displayed in cyan on the code editor.
+                    </span>
+                </li>
+                <br>
+                <li class="margin-li">
+                    <strong>Memory</strong>, a component that allows memory viewing and filtering via a line of text and a 'Fetch' button. 
+                    <br>
+                    It is available only when a program is running.
+                </li>
+                <li class="margin-li">
+                    <strong>Console</strong>, a component that allows visualization of the compilation status: Warnings and Errors, 
+                    <br>
+                    program status: Execution and Stops, Inputs and Outputs.
+                </li>
+                <li class="margin-li">
+                    <strong>Download</strong>, allows you to download an .X68 source code locally.
+                </li>
+                <li class="margin-li">
+                    <strong>Assemble</strong>, allows you to assmeble an .X68 source code.
+                </li>
+                <li class="margin-li">
+                    <strong>Run</strong>, allows you to run an .B68 source code, previously assmebled.
+                </li>
+                <li class="margin-li">
+                    <strong>Debug</strong>, allows you to start a debug session for an .B68 source code, previously assmebled.
+                </li>
+                <li class="margin-li">
+                    <strong>Next</strong>, allows you execute next instruction in a debug session.
+                </li>
+                <li class="margin-li">
+                    <strong>Continue</strong>, allows you cuntinue program's instructions discarding the debug session.
+                </li>
+                <li class="margin-li">
+                    <strong>Stop</strong>, allows you to gracefully terminate the current program.
+                </li>
+                <li class="margin-li">
+                    <strong>Registers</strong>, hey contain all the information of the processor and not only. 
+                    <br class="margin-li">
+                    There are the values of:
+                    <br class="margin-li">
+                    <ul>
+                        <li class="margin-li">
+                            data and address registers
+                        </li>
+                        <li class="margin-li">
+                            program counter
+                        </li>
+                        <li class="margin-li">
+                            status register
+                        </li>
+                        <li class="margin-li">
+                            stack pointers
+                        </li>
+                        <li class="margin-li">
+                            code just executed
+                        </li>
+                        <li class="margin-li">
+                            address of the first byte written to memory
+                        </li>
+                        <li class="margin-li">
+                            address of the last byte written to memory
+                        </li>
+                        <li class="margin-li">
+                            halt point
+                        </li>
+                        <li class="margin-li">
+                            execution time
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <strong class="margin-li">Most importantly, enjoy Stray68K!</strong>
         </span>
     </div>
 
@@ -362,6 +462,9 @@
 
         if(target != 'ct')
             document.getElementById("ct").hidden = true;
+
+        if(target != 'web')
+            document.getElementById("web").hidden = true;
 
         if(target != 'print')
             document.getElementById("print").hidden = true;
