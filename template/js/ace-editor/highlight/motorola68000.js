@@ -8,7 +8,7 @@ define("ace/mode/motorola68000_highlight_rules", ["require", "exports", "module"
                     [
                         {
                             token: 'keyword.control.assembly',
-                            regex: '\\b(?:ABCD|ADD|ADDA|ADDI|ADDQ|ADDX|AND|ANDI|ASL|ASR|BCHG|BCLR|BRA|BSET|BSR|BTST|CHK|CLR|CMP|CMPI|CMPM|DIVS|DIVU|EOR|EORI|EXG|EXT|ILLEGAL|JMP|JSR|LEA|LINK|LSL|LSR|MOVE|MOVEA|MOVEM|MOVEP|MOVEQ|MOVEfromSR|MOVEtoCCR|MOVEtoSR|MOVEUSP|MULS|MULU|NBCD|NEG|NEGX|NOP|NOT|OR|ORI|PEA|RESET|ROXL|ROXR|RTE|RTM|RTR|RTS|SBCD|STOP|SUB|SUBA|SUBI|SUBQ|SUBX|SWAP|TAS|TRAP|TRAPV|TST|UNLK|BCC|BHS|BHI|BLS|BLO|BNE|BEQ|BVC|BVS|BPL|BMI|BGE|BLT|BGT|BLE|BF|BT|SCC|SHS|SHI|SLS|SLO|SNE|SEQ|SVC|SVS|SPL|SMI|SGE|SLT|SGT|SLE|SF|ST)(.B|.W|.L)?\\b',
+                            regex: '\\b(?:ABCD|ADD|ADDA|ADDI|ADDQ|ADDX|AND|ANDI|ASL|ASR|BCHG|BCLR|BRA|BSET|BSR|BTST|CHK|CLR|CMP|CMPI|CMPM|DIVS|DIVU|EOR|EORI|EXG|EXT|ILLEGAL|JMP|JSR|LEA|LINK|LSL|LSR|MOVE|MOVEA|MOVEM|MOVEP|MOVEQ|MOVEUSP|MULS|MULU|NBCD|NEG|NEGX|NOP|NOT|OR|ORI|PEA|RESET|ROXL|ROXR|RTE|RTM|RTR|RTS|SBCD|STOP|SUB|SUBA|SUBI|SUBQ|SUBX|SWAP|TAS|TRAP|TRAPV|TST|UNLK|BCC|BHS|BHI|BLS|BLO|BNE|BEQ|BVC|BVS|BPL|BMI|BGE|BLT|BGT|BLE|BF|BT|SCC|SHS|SHI|SLS|SLO|SNE|SEQ|SVC|SVS|SPL|SMI|SGE|SLT|SGT|SLE|SF|ST)(.B|.W|.L)?\\b',
                             caseInsensitive: !0
                         },
                         {
@@ -23,11 +23,11 @@ define("ace/mode/motorola68000_highlight_rules", ["require", "exports", "module"
                         },
                         {
                             token: 'support.class',
-                            regex: '\\b[0-9]+\\b'
+                            regex: /(#|@)[0-9]+/
                         },
                         {
                             token: 'support.class',
-                            regex: '[A-F0-9]+',
+                            regex: /\$[A-F0-9]+/,
                             caseInsensitive: !0
                         },
                         {
@@ -45,12 +45,13 @@ define("ace/mode/motorola68000_highlight_rules", ["require", "exports", "module"
                         },
                         {
                             token: 'variable.other',
-                            regex: '.*:',
+                            regex: /^[a-zA-Z][a-zA-Z0-9_]*:?(\s*)$/,
                             caseInsensitive: !0
-                        },
+                        }
+                        ,
                         {
-                            token: 'keyword.operator',
-                            regex: '#|[$]|@',
+                            token: 'variable.other',
+                            regex: /[a-zA-Z][a-zA-Z0-9_]*$/,
                             caseInsensitive: !0
                         }
                     ]
