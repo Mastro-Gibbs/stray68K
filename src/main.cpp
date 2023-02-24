@@ -42,13 +42,15 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
 
     std::string editor_template  = "\\t; Stray68K Motorola68000-ASM Emulator\\n\\n\\n\\tORG\\t\\t$1000\\n\\n\\t\\n\\t; place code here\\n\\n\\n\\tEND"; 
 
+    app->require("template/js/utils.js");
     app->require("template/js/ace-editor/ace.js");
     app->require("template/js/ace-editor/theme-tomorrow_night.js");
     app->require("template/js/ace-editor/ext-language_tools.min.js");
     app->require("template/js/ace-editor/highlight/motorola68000.js");
     app->require("template/js/ace-editor/editor-common.js");
 
-    app->doJavaScript(" var editor = ace.edit('editor');  \
+    app->doJavaScript(" \
+                        var editor = ace.edit('editor');  \
                         editor.setTheme('ace/theme/tomorrow_night');  \
                         editor.setFontSize(16);  \
                         editor.session.setMode('ace/mode/motorola68000');  \
@@ -86,6 +88,18 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
                                 } \
                             ] \
                         ); \
+                        \
+                        editor.on('gutterclick', function(e) { \
+                            var target = e.domEvent.target; \
+                            var row = e.getDocumentPosition().row; \
+                            \
+                            if (editor.getValue().match(/TRAP\\s*#14/)) \
+                                showEditorError(editor, 'You can\\'t use breakpoints on source code with TRAP #14 instruction for now.'); \
+                            else if (isValidInstruction(editor.session.getLine(row)) && !editor.getReadOnly()) \
+                                (target.className.indexOf('ace_breakpoint') != -1) ? \
+                                    editor.session.clearBreakpoint(row) : \
+                                    editor.session.setBreakpoint(row); \
+                        }); \
                         var langTools = ace.require('ace/ext/language_tools');  \
                         \
                         langTools.setCompleters([myCompleter]); \

@@ -165,3 +165,30 @@
         opacity: 1;
     }
 }
+
+.popup-div-editor {
+    font-size: medium;
+    font-family: monospace;
+    position: absolute;
+    top: 30%;
+    padding: 4px;
+    border-radius: 2px;
+    white-space: nowrap;
+    background-color: #40414f;
+    color: #ec7f7f;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    overflow: hidden;
+    margin-left: 50px;
+}
+
+.popup-div-editor:hover {
+    cursor: pointer;
+}
+
+
+.popup-div-editor-animation-in
+{
+    animation: fade-in .5s forwards;
+}

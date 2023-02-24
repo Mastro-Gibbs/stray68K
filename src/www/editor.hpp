@@ -22,19 +22,25 @@ class Editor : public WTemplate
         Editor();
 
         std::string getText();
+        const std::vector<int>& getBreakpointList(); 
 
         void disable(bool status);
 
         JSignal<std::string>  jsEditorContentRequestSignal;
         void                  onContentRequest(std::string result);
 
+        JSignal<std::string>  jsBreakpointsRequestSignal;
+        void                  onBreakpointsRequest(std::string result);
+
         JSignal<std::string>  jsEditorInputSignal;
 
         Signal<> onTextChange;
-        Signal<> onTextCome;
+        Signal<> onTextAvailable;
+        Signal<> onBreakpointsAvavilable;
 
     private:
         std::string self;
+        std::vector<int> breakpoints;
 };
 
 

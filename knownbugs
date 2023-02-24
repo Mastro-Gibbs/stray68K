@@ -1,0 +1,12 @@
+
+[WEB]
+	linehighlight is very buggy in loops!
+	
+	Trap #14 and linehighlighting with breakspoints work so bad!
+	
+	next-continue buttons in debug mode with breakpoints are strange!
+	
+[EMULATOR]
+	trap #15 with string[0] == '\n' cause 'realloc(): corrupted size'!
+
+

@@ -46,6 +46,8 @@ function doLineHighLight()
 		editor.session.addMarker(new Range(lineData[0], 0, lineData[0], 1), 'marker', 'fullLine');
 
 		linesIndex = extractLinesIndex(lineData[2]);
+
+		Wt.emit('DispatcherCpp', 'onEditorLineIndex_Signal', (lineData[0]).toString());
 		
 	} catch (error) {}
 	
