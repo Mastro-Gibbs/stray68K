@@ -90,15 +90,7 @@ std::unique_ptr<Wt::WApplication> createApplication(const Wt::WEnvironment& env)
                         ); \
                         \
                         editor.on('gutterclick', function(e) { \
-                            var target = e.domEvent.target; \
-                            var row = e.getDocumentPosition().row; \
-                            \
-                            if (editor.getValue().match(/TRAP\\s*#14/)) \
-                                showEditorError(editor, 'You can\\'t use breakpoints on source code with TRAP #14 instruction for now.'); \
-                            else if (isValidInstruction(editor.session.getLine(row)) && !editor.getReadOnly()) \
-                                (target.className.indexOf('ace_breakpoint') != -1) ? \
-                                    editor.session.clearBreakpoint(row) : \
-                                    editor.session.setBreakpoint(row); \
+                            showEditorError(editor, 'Breakpoints are not available for now.'); \
                         }); \
                         var langTools = ace.require('ace/ext/language_tools');  \
                         \

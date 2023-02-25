@@ -46,6 +46,8 @@ void Console::setUpConsole()
                     }
 
                     flush_buffer(emulatorInstance);
+
+                    disable(true);
                 }
                 else
                 {

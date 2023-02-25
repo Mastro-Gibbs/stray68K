@@ -35,6 +35,8 @@ var completions = [
     { value: 'DIVS', score: 4, meta: 'Instruction' },
     { value: 'DIVU', score: 4, meta: 'Instruction' },
 
+    { value: 'CLR', score: 4, meta: 'Instruction' },
+
     { value: 'BT',   score: 1, meta: 'Instruction' },
     { value: 'BF',   score: 1, meta: 'Instruction' },
     { value: 'BHI',  score: 3, meta: 'Instruction' },
@@ -144,7 +146,8 @@ var completions = [
     { value: 'SET',  score: 2, meta: 'Directive' },
     { value: 'END',  score: 1, meta: 'Directive' },
     { value: 'ORG',  score: 4, meta: 'Directive' },
-
+    { value: 'INCLUDE',  score: 1, meta: 'Directive' },
+    { value: 'INCBIN',  score: 1, meta: 'Directive' },
 
     { value: 'D0',  score: 3, meta: 'Register' },
     { value: 'D1',  score: 3, meta: 'Register' },

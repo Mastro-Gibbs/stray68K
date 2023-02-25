@@ -22,9 +22,9 @@ function getLines()
 			var label = extractLabel(item);
 
 			if (label !== -1)
-				lines.set(i, [index, label, findAheadInstruction(array, label)]);
+				lines.set(i, [index, label, findAheadInstruction(array, label), -1]);
 			else
-				lines.set(i, [index, label, findNextStatementIndex(array, index)]);
+				lines.set(i, [index, label, findNextStatementIndex(array, index), -1]);
 
 			i+=1;
 		}
@@ -35,24 +35,40 @@ function getLines()
 
 
 linesIndex = 0;
-function doLineHighLight()
+function doLineHighLight(programcounter)
 {
 	removeAllMarkers(); 
 
 	try
 	{
-		var lineData = lines.get(linesIndex);
+		var lineData;
+
+		lineData = testPC(programcounter);
+
+		if (lineData === -1)
+		{
+			lineData = lines.get(linesIndex);
+			lineData[3] = programcounter;
+		}
 		
 		editor.session.addMarker(new Range(lineData[0], 0, lineData[0], 1), 'marker', 'fullLine');
 
 		linesIndex = extractLinesIndex(lineData[2]);
-
-		Wt.emit('DispatcherCpp', 'onEditorLineIndex_Signal', (lineData[0]).toString());
 		
 	} catch (error) {}
 	
 }
 
+function testPC(pc)
+{
+	for (const [key, value] of lines)
+	{
+		if (value[3] === pc)
+			return value;
+	}
+
+	return -1;
+}
 
 function resetHighlightingIndex()
 {

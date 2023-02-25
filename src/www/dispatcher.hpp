@@ -128,15 +128,7 @@ class Dispatcher : public WContainerWidget
         std::atomic<bool> isDebugMode;
         std::atomic<bool> isRunningOnRunThread;
         std::atomic<bool> isDebugStarted;
-        std::atomic<bool> isNextButtonClicked;
 
-        std::vector<int>  breakpointList;
-        std::atomic<int>  breakpointLine;
-
-        JSignal<std::string>  jsBreakpointRequest;
-        void                  onBreakpointRequest(std::string result);
-
-        Signal<> doNextHighlightInContinueMode;
 
         void do_compile();
         void __compile();

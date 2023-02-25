@@ -8,7 +8,7 @@ define("ace/mode/motorola68000_highlight_rules", ["require", "exports", "module"
                     [
                         {
                             token: 'keyword.control.assembly',
-                            regex: '\\b(?:ABCD|ADD|ADDA|ADDI|ADDQ|ADDX|AND|ANDI|ASL|ASR|BCHG|BCLR|BRA|BSET|BSR|BTST|CHK|CLR|CMP|CMPI|CMPM|DIVS|DIVU|EOR|EORI|EXG|EXT|ILLEGAL|JMP|JSR|LEA|LINK|LSL|LSR|MOVE|MOVEA|MOVEM|MOVEP|MOVEQ|MOVEUSP|MULS|MULU|NBCD|NEG|NEGX|NOP|NOT|OR|ORI|PEA|RESET|ROXL|ROXR|RTE|RTM|RTR|RTS|SBCD|STOP|SUB|SUBA|SUBI|SUBQ|SUBX|SWAP|TAS|TRAP|TRAPV|TST|UNLK|BCC|BHS|BHI|BLS|BLO|BNE|BEQ|BVC|BVS|BPL|BMI|BGE|BLT|BGT|BLE|BF|BT|SCC|SHS|SHI|SLS|SLO|SNE|SEQ|SVC|SVS|SPL|SMI|SGE|SLT|SGT|SLE|SF|ST)(.B|.W|.L)?\\b',
+                            regex: '\\b(?:ADD|ADDI|ADDQ|ADDX|ADDA|SUB|SUBI|SUBQ|SUBX|SUBA|AND|ANDI|OR|EOR|ORI|EORI|ASL|ASR|LSL|LSR|ROXL|ROXR|ROL|ROR|MULS|MULU|DIVS|DIVU|CLR|BT|BF|BHI|BLS|BCC|BCS|BNE|BEQ|BVC|BVS|BPL|BMI|BGE|BLT|BGT|BLE|DBT|DBF|DBHI|DBLS|DBCC|DBCS|DBNE|DBEQ|DBVC|DBVS|DBPL|DBMI|DBGE|DBLT|DBGT|DBLE|ST|SF|SHI|SLS|SCC|SCS|SNE|SEQ|SVC|SVS|SPL|SMI|SGE|SLT|SGT|SLE|CMPI|CMP|CMPM|CMPA|BCLR|BTST|BCHG|BSET|MOVE|MOVEM|MOVEP|MOVEQ|MOVEA|NEG|NEGX|NOT|NOP|EXT|NBCD|ABCD|SBCD|SWAP|ILLEGAL|TAS|TRAP|TRAPV|LINK|UNLK|RESET|RTE|RTS|RTR|JSR|JMP|LEA|PEA|CHK|EXG|BRA|BSR)(.B|.W|.L)?\\b',
                             caseInsensitive: !0
                         },
                         {
@@ -17,41 +17,30 @@ define("ace/mode/motorola68000_highlight_rules", ["require", "exports", "module"
                             caseInsensitive: !0
                         },
                         {
-                            token: 'support.function.directive.assembly',
+                            token: 'variable.other',
                             regex: '\\b(?:equ|incbin|dc\.[b|w|l]|ds\.[b|w|l]|set|include|org|end)\\b',
                             caseInsensitive: !0
                         },
                         {
-                            token: 'support.class',
+                            token: 'string.assembly',
                             regex: /(#|@)[0-9]+/
                         },
                         {
-                            token: 'support.class',
+                            token: 'string.assembly',
                             regex: /\$[A-F0-9]+/,
                             caseInsensitive: !0
                         },
                         {
-                            token: 'string.assembly',
+                            token: 'support.class',
                             regex: /'([^\\']|\\.)*'/
                         },
                         {
-                            token: 'string.assembly',
+                            token: 'support.class',
                             regex: /"([^\\"]|\\.)*"/
                         },
                         {
                             token: 'comment.assembly',
                             regex: ';.*$',
-                            caseInsensitive: !0
-                        },
-                        {
-                            token: 'variable.other',
-                            regex: /^[a-zA-Z][a-zA-Z0-9_]*:?(\s*)$/,
-                            caseInsensitive: !0
-                        }
-                        ,
-                        {
-                            token: 'variable.other',
-                            regex: /[a-zA-Z][a-zA-Z0-9_]*$/,
                             caseInsensitive: !0
                         }
                     ]

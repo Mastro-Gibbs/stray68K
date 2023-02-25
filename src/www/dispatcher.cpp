@@ -37,9 +37,6 @@ Dispatcher::Dispatcher()
     isDebugMode(false),
     isRunningOnRunThread(false),
     isDebugStarted(false),
-    isNextButtonClicked(false),
-    jsBreakpointRequest(this, "onEditorLineIndex_Signal"),
-    breakpointLine(-1),
     WContainerWidget()
 {
     setId("DispatcherCpp");
@@ -219,17 +216,6 @@ Dispatcher::Dispatcher()
 
     editorWidget->onTextAvailable.connect(this, &Dispatcher::__compile);
 
-    editorWidget->onBreakpointsAvavilable.connect(this, [=]{
-        breakpointList = editorWidget->getBreakpointList();
-    });
-
-    jsBreakpointRequest.connect(std::bind(&Dispatcher::onBreakpointRequest, this, std::placeholders::_1));
-
-
-    doNextHighlightInContinueMode.connect(this, [=]{
-        doJavaScript("doLineHighLight();");
-    });
-
 
     // init struct
     emulationData.init();
@@ -266,7 +252,7 @@ void Dispatcher::do_compile()
 }
 
 /**
- * PRIVATE method
+ * PRIVATE inner method
  * 
  * callback, exetends do_compile()
  */
@@ -501,7 +487,6 @@ void Dispatcher::do_debug()
 
         doJavaScript("removeAllMarkers();");
         doJavaScript("getLines();");
-        doJavaScript("getBreakPoints();");
     }
 }
 
@@ -519,14 +504,13 @@ void Dispatcher::do_next()
 
     app->enableUpdates(true);
 
-    doJavaScript("doLineHighLight();");
+    doJavaScript("doLineHighLight(" + to_string(emulatorInstance->Machine.cpu.pc) + ");");
 
     quitThread_nextIstructionThread = false;
 
     executeNextIstructionButton->setDisabled(true);
 
     isDebugStarted = true;
-    isNextButtonClicked = true;
 
     (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
         
@@ -558,9 +542,6 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
             memoryWidget->update();
 
             executeNextIstructionButton->setDisabled(false); 
-
-            if (!isNextButtonClicked)
-                doNextHighlightInContinueMode.emit();
 
             app->triggerUpdate();
             app->enableUpdates(false);
@@ -614,25 +595,31 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
 /**
  * ACTION continue
  * 
- * This method is invoked when the 'Continue' button has been triggered.
+ * execute in detatched mode the last part of .B68 file
+ * include std::atomic<bool> to kill it 
  * 
- * The main thing it does is execute doJavaScript("doLineHighLight();")
- * that triggers void Dispatcher::onBreakpointRequest(std::string result)
- * thanks to the JSingal associated.
+ * use runBinaryThread to perform this task
  */
 void Dispatcher::do_continue()
 {
     WApplication *app = WApplication::instance();
+    app->require("template/js/ace-editor/line-highlighter.js");
 
     app->enableUpdates(true);
+        
+    quitThread_runBinaryThread = false;
 
     executeNextIstructionButton->setDisabled(true);
     continueExecutionButton->setDisabled(true);
 
-    isNextButtonClicked = false;
-    isDebugStarted = true;
+    isRunningOnRunThread = true;
+
+    doJavaScript("removeAllMarkers();");
     
-    doJavaScript("doLineHighLight();");
+    if (runBinaryThread.joinable())
+        runBinaryThread.join();
+        
+    runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_runBinaryThread))); 
 }
 
 
@@ -677,74 +664,4 @@ void Dispatcher::do_stop()
         consoleWidget->setEmulator(nullptr);
         memoryWidget->setEmulator(nullptr);      
     }
-}
-
-
-/**
- * CB Handler when line highlighting is done.
- * 
- * If breakpoints have been set and 'Continue' button has been clicked,
- * this CB will be invoked.
- * 
- * The execution of the program will definitely stop on the breakpoit's line.
- * 
- * If there are other instructions that can be executed, the degub state will remain active.
- * 
- * If there isn't any breakpoint and 'Continue' button has been clicked, the entire program will be executed.
- * 
- * Otherwise if the 'Next' button has been clicked, we have a defined behavior: execute next line.
- */
-void Dispatcher::onBreakpointRequest(std::string result)
-{
-    breakpointLine = std::stoi(result);
-
-    if (!breakpointList.empty() && !isNextButtonClicked)
-    {
-        if (std::find(breakpointList.begin(), breakpointList.end(), breakpointLine) != breakpointList.end())
-        {
-            continueExecutionButton->setDisabled(false);
-            executeNextIstructionButton->setDisabled(false);
-            breakpointLine = -1;
-        }
-        else
-        {
-            WApplication *app = WApplication::instance();
-            app->require("template/js/ace-editor/line-highlighter.js");
-
-            app->enableUpdates(true);
-
-            quitThread_nextIstructionThread = false;
-
-            executeNextIstructionButton->setDisabled(true);
-
-            (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
-
-            if (nextIstructionThread.joinable())
-                nextIstructionThread.join();
-                
-            nextIstructionThread = std::thread(std::bind(&Dispatcher::doNext_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_nextIstructionThread)));
-        }
-    }
-    else if (breakpointList.empty() && !isNextButtonClicked)
-    {
-        WApplication *app = WApplication::instance();
-
-        app->enableUpdates(true);
-        
-        quitThread_runBinaryThread = false;
-
-        executeNextIstructionButton->setDisabled(true);
-        continueExecutionButton->setDisabled(true);
-
-        isRunningOnRunThread = true;
-
-        doJavaScript("removeAllMarkers();");
-        
-        if (runBinaryThread.joinable())
-            runBinaryThread.join();
-            
-        runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_runBinaryThread)));     
-
-    }
-    
 }
