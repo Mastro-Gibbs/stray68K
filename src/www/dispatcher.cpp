@@ -9,8 +9,6 @@
 #include <Wt/WFileResource.h>
 
 
-unsigned long long FILE_COUNTER = 0;
-
 /**
  * Class constructor
  * 
@@ -180,13 +178,6 @@ Dispatcher::Dispatcher()
         runButton->setDisabled(true);
         debugButton->setDisabled(true);
         assembleButton->setDisabled(false);
-        doJavaScript("\
-            var editor = ace.edit('editor'); \
-            var breakpoints = editor.session.getBreakpoints(); \
-            for (var ln in breakpoints) { \
-                editor.session.clearBreakpoint(ln); \
-            }\
-        ");
     });
 
     clearConsoleButton->clicked().connect(this, [=] { 
@@ -198,18 +189,11 @@ Dispatcher::Dispatcher()
     });
 
     downloadSourceCode->clicked().connect(this, [=]{
-        string content = escapeText(editorWidget->getText()).toUTF8();
-
-        time_t now = std::time(nullptr);
-        char buf[150];
-        strftime(buf, sizeof(buf), "%Y_%m_%d_%H_%M_%S", localtime(&now));
-        string dateTimeStr(buf);
-        string filename = "source" + dateTimeStr + ".X68";
+        string content  = escapeText(editorWidget->getText()).toUTF8();
+        string filename = editorWidget->getSourceFileNameByTime();
 
         downloadSourceCode->disable();
-
         downloadSourceCode->doJavaScript("downloadSourceFile('" + filename + "');");
-
         downloadSourceCode->enable();
     });
 
@@ -270,7 +254,7 @@ void Dispatcher::__compile()
     {
         consoleWidget->writeAssemblingStarted();
         
-        string fname = "sources/src" + to_string(FILE_COUNTER++) + ".X68";
+        string fname = "sources/" + editorWidget->getSourceFileNameByTime();
 
         emulationData.setSrc(fname);
 
@@ -336,7 +320,6 @@ void Dispatcher::do_run()
     if (emulationData.valid())
     { 
         WApplication *app = WApplication::instance();
-        app->require("template/js/ace-editor/line-highlighter.js");
 
         registerRenderWidget->clear();
         editorWidget->disable(true);
@@ -368,8 +351,6 @@ void Dispatcher::do_run()
         isDebugMode = false;
         isRunningOnRunThread = false;
         isDebugStarted = false;
-
-        doJavaScript("removeAllMarkers();");
 
         (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
         
@@ -537,6 +518,8 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
     
         if (uiLock) 
         {
+            (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
+            
             consoleWidget->pushStdout(em->Machine.dump);
             registerRenderWidget->update(em->Machine.dump);
             memoryWidget->update();

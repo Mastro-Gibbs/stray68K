@@ -12,95 +12,66 @@
 char* Jcpu(struct EmulationMachine* emulator)
 {
     char *res = NULL;
-    char buf[410];
 
-    sprintf(buf, "%s", "{\"CPU\":{");
+    const char* base = "{\"CPU\":{\"D0\":\"%X\",\"D1\":\"%X\",\"D2\":\"%X\",\"D3\":\"%X\",\"D4\":\"%X\",\"D5\":\"%X\",\"D6\":\"%X\",\"D7\":\"%X\",\"A0\":\"%X\",\"A1\":\"%X\",\"A2\":\"%X\",\"A3\":\"%X\",\"A4\":\"%X\",\"A5\":\"%X\",\"A6\":\"%X\",\"A7\":\"%X\",\"US\":\"%X\",\"SS\":\"%X\",\"PC\":\"%X\",\"SR\":\"%X\"}}";
 
-    for (u16 i = 0; i < 8; i++)
-    {
-        sprintf(buf+strlen(buf), "\"D%d\":\"%X\",", i, emulator->Machine.cpu.data_r[i]);
-    }
+    s32 size = snprintf(NULL, 0, base,  emulator->Machine.cpu.data_r[0],
+                                        emulator->Machine.cpu.data_r[1],
+                                        emulator->Machine.cpu.data_r[2],
+                                        emulator->Machine.cpu.data_r[3],
+                                        emulator->Machine.cpu.data_r[4],
+                                        emulator->Machine.cpu.data_r[5],
+                                        emulator->Machine.cpu.data_r[6],
+                                        emulator->Machine.cpu.data_r[7],
+                                        emulator->Machine.cpu.addr_r[0],
+                                        emulator->Machine.cpu.addr_r[1],
+                                        emulator->Machine.cpu.addr_r[2],
+                                        emulator->Machine.cpu.addr_r[3],
+                                        emulator->Machine.cpu.addr_r[4],
+                                        emulator->Machine.cpu.addr_r[5],
+                                        emulator->Machine.cpu.addr_r[6],
+                                        read_addrreg(emulator, 7),
+                                        emulator->Machine.cpu.usp,
+                                        emulator->Machine.cpu.ssp,
+                                        emulator->Machine.cpu.pc,
+                                        emulator->Machine.cpu.sr);
 
-    for (u16 i = 0; i < 7; i++)
-    {
-        sprintf(buf+strlen(buf), "\"A%d\":\"%X\",", i, emulator->Machine.cpu.addr_r[i]);
-    }
-
-    sprintf(buf+strlen(buf), "\"A7\":\"%X\",", read_addrreg(emulator, 7));
-    sprintf(buf+strlen(buf), "\"US\":\"%X\",", emulator->Machine.cpu.usp);
-    sprintf(buf+strlen(buf), "\"SS\":\"%X\",", emulator->Machine.cpu.ssp);
-    sprintf(buf+strlen(buf), "\"PC\":\"%X\",", emulator->Machine.cpu.pc);
-    sprintf(buf+strlen(buf), "\"SR\":\"%X\"", emulator->Machine.cpu.sr);
-    strncat(buf+strlen(buf), "}}\0", 3);
-
-    ssize_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size-1);
-
-    res[size-1] = '\0';
-
-    return res;
-}
-
-
-char* Jram(struct EmulationMachine* emulator, u32 from, u32 to, u32 sh)
-{
-    char *res = NULL;
-
-    const char *base = "{\"RAM\":{\"BEGIN\":\"%X\",\"END\":\"%X\",\"HALT\":\"%X\",\"DUMP\":\"";
-    const ssize_t base_size = strlen(base);
-
-    char buf[((to - from) + base_size + 10) * 2];
-
-    sprintf(buf, base, from, to, sh);
-
-    for (u32 curr = from; curr <= to; curr++)
-    {
-        u8 byte = emulator->Machine.ram.self[curr];
-
-        (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
-    }
-
-    strncat(buf+strlen(buf), "\"}}\0", 4);
-
-    ssize_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size-1);
-
-    res[size-1] = '\0';
+    res = malloc(sizeof(char) * (size+3));
+    snprintf(res, size+2, base, emulator->Machine.cpu.data_r[0],
+                                emulator->Machine.cpu.data_r[1],
+                                emulator->Machine.cpu.data_r[2],
+                                emulator->Machine.cpu.data_r[3],
+                                emulator->Machine.cpu.data_r[4],
+                                emulator->Machine.cpu.data_r[5],
+                                emulator->Machine.cpu.data_r[6],
+                                emulator->Machine.cpu.data_r[7],
+                                emulator->Machine.cpu.addr_r[0],
+                                emulator->Machine.cpu.addr_r[1],
+                                emulator->Machine.cpu.addr_r[2],
+                                emulator->Machine.cpu.addr_r[3],
+                                emulator->Machine.cpu.addr_r[4],
+                                emulator->Machine.cpu.addr_r[5],
+                                emulator->Machine.cpu.addr_r[6],
+                                read_addrreg(emulator, 7),
+                                emulator->Machine.cpu.usp,
+                                emulator->Machine.cpu.ssp,
+                                emulator->Machine.cpu.pc,
+                                emulator->Machine.cpu.sr);
 
     return res;
 }
 
 
-char* Jstack(struct EmulationMachine* emulator, u32 bottom, u32 top)
+char* Jram(u32 from, u32 to, u32 sh)
 {
     char *res = NULL;
 
-    const char *base = "{\"STACK\":{\"BOTTOM\":\"%X\",\"TOP\":\"%X\",\"DUMP\":\"";
-    const ssize_t base_size = strlen(base);
+    const char *base = "{\"RAM\":{\"BEGIN\":\"%X\",\"END\":\"%X\",\"HALT\":\"%X\"}}";
+    
+    s32 size = snprintf(NULL, 0, base, from, to, sh);
 
-    char buf[((bottom - top) + base_size + 10) * 2];
-
-    sprintf(buf, base, bottom, top);
-
-    for (u32 curr = top; curr < bottom; curr++)
-    {
-        u8 byte = emulator->Machine.ram.self[curr];
-
-        (byte <= 0xF) ? sprintf(buf+strlen(buf), "0%X", byte) : sprintf(buf+strlen(buf), "%X", byte);
-    }
-
-    strncat(buf+strlen(buf), "\"}}\0", 4);
-
-    ssize_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size-1);
-
-    res[size-1] = '\0';
+    res = (char *) malloc(sizeof(char) * (size+3));
+    snprintf(res, size+2, base, from, to, sh);
 
     return res;
 }
@@ -108,17 +79,12 @@ char* Jstack(struct EmulationMachine* emulator, u32 bottom, u32 top)
 
 char* Jchrono(u64 usec)
 {
-    char *res;
-    char buf[100];
+    char *res = NULL;
 
-    sprintf(buf, "{\"TIME\":%lu}", usec);
+    s32 size = snprintf(NULL, 0, "{\"TIME\":%lu}", usec);
 
-    ssize_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size);
-
-    res[size-1] = '\0';
+    res = (char *) malloc(sizeof(char) * (size+3));
+    snprintf(res, size+2, "{\"TIME\":%lu}", usec);
 
     return res;
 
@@ -126,18 +92,13 @@ char* Jchrono(u64 usec)
 
 char* Jop(char *mnem, u32 code_promoted)
 {
-    char *res;
-    char buf[100];
+    char *res = NULL;
     u16 code = (u16) code_promoted;
 
-    sprintf(buf, "{\"OP\":{\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
+    s32 size = snprintf(NULL, 0, "{\"OP\":{\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
 
-    ssize_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size);
-
-    res[size-1] = '\0';
+    res = (char*) malloc(sizeof(char) * (size+3));
+    snprintf(res, size+2, "{\"OP\":{\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
 
     return res;
 }
@@ -145,8 +106,9 @@ char* Jop(char *mnem, u32 code_promoted)
 
 char* Jexception(char* cause, u32 type)
 {
-    char *res;
-    char buf[300];
+    char *res  = NULL;
+    char* base = NULL;
+    s32   size = 0;
 
     if (type == TRAP_EXC_TYPE)
     {
@@ -154,34 +116,39 @@ char* Jexception(char* cause, u32 type)
         cause = strstr(cause, ": ") + 2;
 
         const char* colon = strstr(cause, ",");
-        size_t size = (size_t) (colon - cause);
+        size_t _size = (size_t) (colon - cause);
 
-        char code[size + 1];
-        snprintf(code, size+1, "%s", cause);
+        char code[_size + 1];
+        snprintf(code, _size+1, "%s", cause);
 
         cause = strstr(cause, ": ") + 2;
 
-        sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CODE\":\"%s\",\"MNEM\":\"%s\"}}", "TYPE", "TRAP", code, cause);
+        base = "{\"EXCEPTION\":{\"TYPE\":\"TRAP\",\"CODE\":\"%s\",\"MNEM\":\"%s\"}}";
+        size = snprintf(NULL, 0, base, code, cause);
+        res = malloc(sizeof(char) * (size+3));
+        snprintf(res, size+2, base, code, cause);
     }
     else if (type == PANIC_EXC_TYPE)
     {
-        sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CAUSE\":\"%s\"}}", "TYPE", "PANIC", cause);
+        base = "{\"EXCEPTION\":{\"TYPE\":\"PANIC\",\"CAUSE\":\"%s\"}}";
+        size = snprintf(NULL, 0, base, cause);
     }
     else if (type == MERR_EXC_TYPE)
     {
-        sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CAUSE\":\"%s\"}}", "TYPE", "EMULATOR-ERROR", cause);
+        base = "{\"EXCEPTION\":{\"TYPE\":\"EMULATOR-ERROR\",\"CAUSE\":\"%s\"}}";
+        size = snprintf(NULL, 0, base, cause);
     }
     else if (type == 3)
     {
-        sprintf(buf, "{\"EXCEPTION\":{\"%s\":\"%s\",\"CAUSE\":\"%s\"}}", "TYPE", "ASSEMBLER ERROR", cause);
+        base = "{\"EXCEPTION\":{\"TYPE\":\"ASSEMBLER ERROR\",\"CAUSE\":\"%s\"}}";
+        size = snprintf(NULL, 0, base, cause);
     }
-
-    size_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
-
-    strncpy(res, buf, size);
-
-    res[size-1] = '\0';
+    
+    if (type != TRAP_EXC_TYPE)
+    {
+        res = malloc(sizeof(char) * (size+3));
+        snprintf(res, size+2, base, cause);
+    }
 
     return res;
 }
@@ -189,104 +156,38 @@ char* Jexception(char* cause, u32 type)
 
 char* Jwarning(char *cause, char* mnem, u32 code_promoted)
 {
-    char *res;
-    char buf[350];
-
+    char *res = NULL;
     u16 code = (u16) code_promoted;
 
-    sprintf(buf, "{\"WARNING\":{\"CAUSE\":\"%s\",\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", cause, mnem, code);
+    const char* base = "{\"WARNING\":{\"CAUSE\":\"%s\",\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}";
 
-    ssize_t size = strlen(buf) + 1;
-    res = malloc(sizeof (* res) * size);
+    s32 size = snprintf(NULL, 0, base, cause, mnem, code);
 
-    strncpy(res, buf, size);
-
-    res[size-1] = '\0';
+    res = (char*) malloc(sizeof(char) * (size+3));
+    snprintf(res, size+2, base, cause, mnem, code);
 
     return res;
 }
 
 
-#define SANIFICATE_ESCAPE_SEQUENCE(iostr, str)  do { \
-                                                    u32 length, i, j; \
-                                                    length = strlen(str); \
-                                                    i = 0; \
-                                                    j = 0; \
-                                                    for (; i < length; i++, j++) { \
-                                                        char c = str[i]; \
-                                                        \
-                                                        switch (c) { \
-                                                            case '\033': \
-                                                                iostr = realloc(iostr, strlen(iostr) + 5); \
-                                                                iostr[j++] = '\\'; iostr[j++] = '0'; \
-                                                                iostr[j++] = '3';  iostr[j]   = '3'; \
-                                                                break; \
-                                                            case '\n': \
-                                                                iostr = realloc(iostr, strlen(iostr) + 3); \
-                                                                iostr[j++] = '\\'; iostr[j] = 'n'; \
-                                                                break; \
-                                                            case '\t': \
-                                                                iostr = realloc(iostr, strlen(iostr) + 3); \
-                                                                iostr[j++] = '\\'; iostr[j] = 't'; \
-                                                                break; \
-                                                            case '\r': \
-                                                                iostr = realloc(iostr, strlen(iostr) + 3); \
-                                                                iostr[j++] = '\\'; iostr[j] = 'r'; \
-                                                                break; \
-                                                            default: \
-                                                                iostr[j] = c; \
-                                                                break; \
-                                                        } \
-                                                    } \
-                                                    iostr[j] = '\0'; \
-                                                } while(0);
-
-char* Jio(char* io, u32 type)
+char* Jio(char* io)
 {
     if (io)
     {   
-        char *res;
-        ssize_t size = strlen(io) + 1;
-        char buf[(size + 30) * 2];
+        char* res  = NULL;
+        char* base = NULL;
+        s32   size = 0;
 
-        if (type == INPUT)
-            sprintf(buf, "{\"IO\":{\"TYPE\":\"I\",\"VAL\":%s}}", io);
-        else
-        {
-            char *str = malloc(sizeof(s8) * strlen(io) + 1);
-            SANIFICATE_ESCAPE_SEQUENCE(str, io);
-            sprintf(buf, "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\"}}", str);
-            free(str);
-        }
+        base = "{\"IO\":{\"TYPE\":\"O\",\"VAL\":\"%s\"}}";
+        size = snprintf(NULL, 0, base, io);
 
-        res = malloc(sizeof (* res) * size);
-
-        res[size-1] = '\0';
-
-        size = strlen(buf) + 1;
-        res = malloc(sizeof (* res) * size);
-
-        strncpy(res, buf, size);
-
-        res[size-1] = '\0';
+        res = malloc(sizeof(char) * (size+3));
+        snprintf(res, size+2, base, io);
 
         return res;
     }
     
     return NULL;
-}
-
-char* Jconcat(char *dst, char *src)
-{
-    const size_t dsts = strlen(dst);
-    const size_t srcs = strlen(src);
-
-    dst = realloc(dst, dsts + srcs);
-
-    dst[dsts - 1] = ',';
-    memcpy(dst + dsts, src + 1, srcs);
-
-    return dst;
 }
 
 
@@ -307,15 +208,7 @@ char* Jconcat2(struct EmulationMachine* emulator, char *dst, char* (*Jsrc)(), ..
         _end   = va_arg(va_ptr, u32);
         _sh   = va_arg(va_ptr, u32);
 
-        src = Jram(emulator, _start, _end, _sh);
-    }
-    else if (Jsrc == Jstack)
-    {
-        u32 _bottom, _top;
-        _bottom = va_arg(va_ptr, u32);
-        _top    = va_arg(va_ptr, u32);
-
-        src = Jstack(emulator, _bottom, _top);
+        src = Jram(_start, _end, _sh);
     }
     else if (Jsrc == Jchrono)
         src = Jchrono(va_arg(va_ptr, u64));
@@ -336,9 +229,8 @@ char* Jconcat2(struct EmulationMachine* emulator, char *dst, char* (*Jsrc)(), ..
     else if (Jsrc == Jio)
     {
         char *buff = va_arg(va_ptr, char *);
-        u32   type = va_arg(va_ptr, u32);
 
-        src = Jio(buff, type);
+        src = Jio(buff);
     }
     else if (Jsrc == Jwarning)
     {

@@ -1,11 +1,11 @@
 var lines = new Map();
 
-editor = ace.edit('editor');
 var Range = ace.require('ace/range').Range;
 
 function getLines()
 {
 	lines = new Map();
+	var editor = ace.edit('editor');
 	var array = editor.getValue().split('\n');
 
 	for (let index = 0, i = 0; index < array.length; index++) 
@@ -37,6 +37,8 @@ function getLines()
 linesIndex = 0;
 function doLineHighLight(programcounter)
 {
+	var editor = ace.edit('editor');
+
 	removeAllMarkers(); 
 
 	try
@@ -79,6 +81,7 @@ function resetHighlightingIndex()
 
 function removeAllMarkers()
 {
+	var editor = ace.edit('editor');
 	let prevMarkers = editor.session.getMarkers();
 	if (prevMarkers) {
 		let prevMarkersArr = Object.keys(prevMarkers);
@@ -139,6 +142,7 @@ function extractLabel(instruction)
 
 function extractRTxLabel(index)
 {
+	var editor = ace.edit('editor');
 	var array = editor.getValue().split('\n');
 
 	for (let i = index-1; i != 0; i--) 
@@ -225,6 +229,7 @@ function extractLinesIndex(lookahead)
 
 function fixUp()
 {
+	var editor = ace.edit('editor');
 	var array = editor.getValue().split('\n');
 
 	for (const [key1, value1] of lines)

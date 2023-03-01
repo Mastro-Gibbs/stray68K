@@ -60,3 +60,63 @@ function showEditorError(editor, msg)
         editor.setReadOnly(false);
     });
 }
+
+
+function initACEEditor()
+{
+    var editor_template  = "\t; Stray68K Motorola68000-ASM Emulator\n\n\n\tORG\t\t$1000\n\n\t\n\t; place code here\n\n\n\tEND"; 
+
+    var editor = ace.edit('editor'); 
+    editor.setTheme('ace/theme/tomorrow_night'); 
+    editor.setFontSize(16); 
+    editor.session.setMode('ace/mode/motorola68000'); 
+   
+    editor.setValue(editor_template); 
+    editor.focus();
+    editor.gotoLine(6, 1, true);
+
+    editor.addEventListener('input', function(){ 
+        let prevMarkers = editor.session.getMarkers();
+        if (prevMarkers) {
+            let prevMarkersArr = Object.keys(prevMarkers);
+            for (let item of prevMarkersArr)
+                editor.session.removeMarker(prevMarkers[item].id);
+        }
+        Wt.emit('EditorCpp', 'onEditorInput_Signal'); 
+    }); 
+   
+    editor.commands.addCommands(
+        [
+            {
+                name: 'zoomin', 
+                bindKey: {win: 'Ctrl-Alt-I'},
+                exec: function(editor) {
+                    editor.setFontSize(editor.getFontSize() + 2);
+                },
+                readOnly: false,
+            }, 
+            {
+                name: 'zoomout',
+                bindKey: {win: 'Ctrl-Alt-D'},
+                exec: function(editor) {
+                    editor.setFontSize(editor.getFontSize() - 2);
+                },
+                readOnly: false,
+            }
+        ]
+    );
+   
+    editor.on('gutterclick', function(e) {
+        showEditorError(editor, 'Breakpoints are not available for now.');
+    });
+    
+    var langTools = ace.require('ace/ext/language_tools'); 
+   
+    langTools.setCompleters([myCompleter]);
+   
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true
+    });
+}

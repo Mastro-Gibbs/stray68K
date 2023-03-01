@@ -76,10 +76,10 @@ static void ErrorMessageCommon(SemanticState *state)
 
 	for (location = state->location; location != NULL; location = location->previous)
     {
-        int size = snprintf(NULL, 0, "On line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+        int size = snprintf(NULL, 0, "On line %lu ", location->line_number);
 
         char *str = (char *)malloc(sizeof(char) * (size+1));
-        snprintf(str, size, "On line %lu of '%s'...", location->line_number, location->file_path != NULL ? location->file_path : "[No path given]");
+        snprintf(str, size, "On line %lu ", location->line_number);
 
         asseble_error(state, str, size);
         free(str);

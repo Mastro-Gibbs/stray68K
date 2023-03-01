@@ -22,7 +22,8 @@ class Editor : public WTemplate
         Editor();
 
         std::string getText();
-        const std::vector<int>& getBreakpointList(); 
+
+        std::string getSourceFileNameByTime();
 
         void disable(bool status);
 

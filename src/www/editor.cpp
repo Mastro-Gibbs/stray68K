@@ -1,6 +1,9 @@
 #include "editor.hpp"
 
 #include <algorithm>
+#include <ctime>
+
+unsigned long long FILE_ID = 0;
 
 Editor::Editor()
     : self(""),
@@ -27,6 +30,18 @@ void Editor::onContentRequest(std::string result)
 std::string Editor::getText()
 {
     return self;
+}
+
+std::string Editor::getSourceFileNameByTime()
+{
+    char buf[150];
+
+    time_t now = std::time(nullptr);
+
+    strftime(buf, sizeof(buf), "%Y_%m_%d_%H_%M_%S", localtime(&now));
+    string dateTimeStr(buf);
+
+    return "source" + dateTimeStr + "_" + to_string(FILE_ID++) + ".X68";
 }
 
 
