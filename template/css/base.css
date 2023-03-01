@@ -1,5 +1,6 @@
 body {
     background: #353740;
+    user-select: none;
 }
 
 .ace_gutter .ace_breakpoint {

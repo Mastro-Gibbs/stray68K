@@ -47,10 +47,8 @@ void Console::setUpConsole()
 
                     flush_buffer(emulatorInstance);
                 }
-                else
-                {
-                    _content = self->text().toUTF8();
-                }
+                
+                _content = self->text().toUTF8();
             }
         }
     });

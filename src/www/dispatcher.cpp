@@ -518,7 +518,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
     
         if (uiLock) 
         {
-            (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
+            consoleWidget->disable(true);
             
             consoleWidget->pushStdout(em->Machine.dump);
             registerRenderWidget->update(em->Machine.dump);

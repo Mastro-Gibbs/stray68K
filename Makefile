@@ -209,7 +209,6 @@ $(OBJECTS_DIR)/utils.o: $(EMULATOR_DIR)/utils.c $(EMULATOR_DIR)/utils.h \
 	$(CC) -c $(CFLAGS) -o $(OBJECTS_DIR)/utils.o $(EMULATOR_DIR)/utils.c
 
 $(OBJECTS_DIR)/main.o: $(SOURCE_DIR)/main.cpp \
-		$(SOURCE_DIR)/stray_m68k.h \
 		$(EMULATOR_DIR)/emulator.h \
 		$(EMULATOR_DIR)/cpu.h \
 		$(EMULATOR_DIR)/handler.h \

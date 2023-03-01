@@ -415,7 +415,7 @@ char* eval_print_seq(struct EmulationMachine *emulator)
 c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restrict ram_ptr)
 {
     char cchar = 0x0, lookahead = 0x0; 
-    u32  index = 0;
+    s32  index = 0;
 
     cchar = read_byte(emulator, *ram_ptr);
 
@@ -444,14 +444,14 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
         case 's':
         case 'S':
         {
-            u32 d0_reg = 0x0; 
+            u32 d0_reg = 0x0, stack_value = 0x0; 
 
             lookahead = read_byte(emulator, (*ram_ptr)+1); 
 
-            if (lookahead == 0x00 || (lookahead - 0x30) > 7)
-                return c_false;
-            
-            index = lookahead - 0x30;
+            if (lookahead == 0x00 || (lookahead - 0x30) > 6)
+                index = -1;
+            else
+                index = lookahead - 0x30;
             
             d0_reg = read_datareg(emulator, 0);
 
@@ -464,21 +464,41 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
 
                 if (str) 
                 { 
-                    u32 rptr2 = read_addrreg(emulator, index); 
-                    u32 i = 0;                 
-                    while (i < d0_reg && i < buffer_len(emulator))
-                    { 
-                        write_byte(emulator, rptr2++, str[i]); 
-                        i++; 
-                    } 
+                    if (index >= 0)
+                    {
+                        *ram_ptr = *ram_ptr + 1;
 
-                    write_byte(emulator, rptr2, 0x00);    
+                        u32 rptr2 = read_addrreg(emulator, index); 
+                        u32 i = 0;                 
+                        while (i < d0_reg && i < buffer_len(emulator))
+                        { 
+                            write_byte(emulator, rptr2++, str[i]); 
+                            i++; 
+                        } 
+
+                        write_byte(emulator, rptr2, 0x00); 
+                    }
+                    else
+                    {
+                        const u32 len = (u32) strlen(str);
+                        u32 stack_ptr = read_addrreg(emulator, 7);
+
+                        if (emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX == stack_ptr)
+                            stack_value = 0;
+                        else
+                            stack_value = pop_long(emulator);
+
+                        stack_value += len;
+                        push_long(emulator, stack_value);
+                    }
+                       
                     free(str); 
                 } 
                 init_buffer(emulator); 
             } 
+            else return c_false;
 
-            *ram_ptr += *ram_ptr + 2;
+            *ram_ptr = *ram_ptr + 1;
             break; 
         }
 
@@ -561,7 +581,7 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
 
 void eval_scan_seq(struct EmulationMachine* emulator)
 {
-    u32  ram_ptr = 0;
+    u32  ram_ptr = 0x0;
     char cchar   = 0x0;
 
     ram_ptr = read_addrreg(emulator, 0);
