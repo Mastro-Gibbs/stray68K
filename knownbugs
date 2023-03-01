@@ -5,4 +5,4 @@
 [EMULATOR]
 	trap #15 with string[0] == '\n' sometimes cause 'realloc(): invalid next size'! [SOLVED]
 
-	trap #14 for ints with multiple inline scans puts fist scanned int into all target regs
+	trap #14 for ints with multiple inline scans puts fist scanned int into all target regs [SOLVED]
