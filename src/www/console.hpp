@@ -15,11 +15,11 @@ using namespace Wt;
 using namespace std;
 
 extern "C" {
-    void flush_buffer(struct EmulationMachine* emulator);
+    void flush_InputBuffer(struct EmulationMachine* emulator);
 
-    void init_buffer(struct EmulationMachine* emulator);
+    void init_InputBuffer(struct EmulationMachine* emulator);
 
-    void cwrite(struct EmulationMachine* emulator, char _c);
+    void InputBuffer_cwrite(struct EmulationMachine* emulator, char _c);
 }
 
 
@@ -50,8 +50,8 @@ class Console : public WTemplate
     private:
         WTextArea* self;
 
-        string _map;
-        string _content;
+        string _machineDump;
+        string _selfContent;
 
         struct EmulationMachine* emulatorInstance;
 

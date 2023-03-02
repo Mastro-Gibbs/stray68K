@@ -120,10 +120,6 @@
     border-radius: 4px;
 }
 
-.from::selection {
-    background-color: transparent;
-}
-
 .from:focus {
     outline: none;
 }

@@ -39,7 +39,7 @@ u32 peek_ORG_from_file(struct EmulationMachine *emulator)
     u8  org[4];
     u32 value = ORG_DEFAULT;
 
-    fp = fopen(emulator->ExecArgs.executable_path, "rb");
+    fp = fopen(emulator->binary_path, "rb");
 
     if (fread(&is_org, 1, 1, fp) == 0)
         EMULATOR_ERROR("Error incomes while loading invalid binary");
@@ -66,7 +66,7 @@ FILE* open_file_and_extract_ORG(struct EmulationMachine *emulator)
     u8  org[4];
     u32 value = ORG_DEFAULT;
 
-    fp = fopen(emulator->ExecArgs.executable_path, "rb");
+    fp = fopen(emulator->binary_path, "rb");
 
     if (fread(&is_org, 1, 1, fp) == 0)
         EMULATOR_ERROR("Error incomes while loading invalid binary");
@@ -81,7 +81,7 @@ FILE* open_file_and_extract_ORG(struct EmulationMachine *emulator)
     else
         fseek(fp, 0, SEEK_SET);
 
-    emulator->Machine.RuntimeData.org_pointer = value;
+    emulator->Machine.RunTime.org_pointer = value;
     emulator->Machine.cpu.pc                 = value;
 
     return fp;
@@ -108,9 +108,9 @@ void load_bytecode(struct EmulationMachine *emulator)
             for (; i < 8 && len != 0; i++)
                 len = fread(&sh[i], 1, 1, fp);
 
-            if (halt_compare(sh) && emulator->Machine.RuntimeData.simhalt == 0)
+            if (halt_compare(sh) && emulator->Machine.RunTime.simhalt == 0)
             {
-                emulator->Machine.RuntimeData.simhalt = emulator->Machine.cpu.pc + span;
+                emulator->Machine.RunTime.simhalt = emulator->Machine.cpu.pc + span;
                 continue;
             }
             else fseek(fp, ftell(fp) - ((!len) ? (i-2) : (i-1)),  SEEK_SET);
@@ -123,10 +123,10 @@ void load_bytecode(struct EmulationMachine *emulator)
 
     fclose(fp);
 
-    emulator->Machine.RuntimeData.last_loaded_byte_index = emulator->Machine.cpu.pc + span;
+    emulator->Machine.RunTime.last_loaded_byte_index = emulator->Machine.cpu.pc + span;
 
-    if (emulator->Machine.RuntimeData.simhalt == 0)
-        emulator->Machine.RuntimeData.simhalt = emulator->Machine.RuntimeData.last_loaded_byte_index;
+    if (emulator->Machine.RunTime.simhalt == 0)
+        emulator->Machine.RunTime.simhalt = emulator->Machine.RunTime.last_loaded_byte_index;
 
 }
 
@@ -142,23 +142,23 @@ obtain_emulation_machine(const char *path)
     emulator->Machine.State = BEGIN_STATE;
     emulator->Machine.dump  = NULL;
 
-    emulator->Machine.RuntimeData.operation_code = 0;
-    emulator->Machine.RuntimeData.mnemonic       = NULL;
+    emulator->Machine.RunTime.operation_code = 0;
+    emulator->Machine.RunTime.mnemonic       = NULL;
 
-    emulator->Machine.RuntimeData.org_pointer = ORG_DEFAULT;
-    emulator->Machine.RuntimeData.simhalt     = 0;
-    emulator->Machine.RuntimeData.last_loaded_byte_index = 0;
+    emulator->Machine.RunTime.org_pointer = ORG_DEFAULT;
+    emulator->Machine.RunTime.simhalt     = 0;
+    emulator->Machine.RunTime.last_loaded_byte_index = 0;
 
-    emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX = 0x01000000;
-    emulator->Machine.RuntimeData.JSR_CALL_COUNTER   = 0;
+    emulator->Machine.RunTime.STACK_BOTTOM_INDEX = 0x01000000;
+    emulator->Machine.RunTime.JSR_CALL_COUNTER   = 0;
 
-    emulator->Machine.Chrono.dt = 0;
+    emulator->Machine.RunTime.Chrono.dt = 0;
 
     emulator->Machine.IO.buffer  = NULL;
     emulator->Machine.IO.Type    = IO_UNDEF;
 
-    emulator->ExecArgs.executable_path = malloc(strlen(path) + 1);
-    strcpy(emulator->ExecArgs.executable_path, path);
+    emulator->binary_path = malloc(strlen(path) + 1);
+    strcpy(emulator->binary_path, path);
 
     init_cpu(emulator);
 
@@ -180,15 +180,15 @@ void begin_emulator(struct EmulationMachine* emulator)
 
     emit_dump(emulator);
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_begin);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.RunTime.Chrono.t_begin);
 }
 
 void end_emulator(struct EmulationMachine* emulator)
 {
-    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.RunTime.Chrono.t_end);
 
-    emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
-                           (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
+    emulator->Machine.RunTime.Chrono.dt = (emulator->Machine.RunTime.Chrono.t_end.tv_sec - emulator->Machine.RunTime.Chrono.t_begin.tv_sec) * 1000000 +
+                           (emulator->Machine.RunTime.Chrono.t_end.tv_nsec - emulator->Machine.RunTime.Chrono.t_begin.tv_nsec) / 1000;
 
     emulator->Machine.IO.Type = IO_UNDEF;
     emulator->Machine.State = FINAL_STATE;
@@ -199,8 +199,8 @@ void end_emulator(struct EmulationMachine* emulator)
     if (emulator->Machine.dump)
         free(emulator->Machine.dump);
 
-    if (emulator->ExecArgs.executable_path)
-        free(emulator->ExecArgs.executable_path);
+    if (emulator->binary_path)
+        free(emulator->binary_path);
     
     destroy_codes(emulator);
 
@@ -210,21 +210,21 @@ void end_emulator(struct EmulationMachine* emulator)
 
 int is_last_istr(struct EmulationMachine* emulator)
 {
-    return (emulator->Machine.cpu.pc + WORD_SPAN) < emulator->Machine.RuntimeData.simhalt ? 0 : 1;
+    return (emulator->Machine.cpu.pc + WORD_SPAN) < emulator->Machine.RunTime.simhalt ? 0 : 1;
 }
 
 
 /* EMULATOR */
 int emulate(struct EmulationMachine* emulator)
 {
-    if (emulator->Machine.cpu.pc < emulator->Machine.RuntimeData.simhalt)
+    if (emulator->Machine.cpu.pc < emulator->Machine.RunTime.simhalt)
     {
         if (execute_instruction(emulator) == RETURN_ERR)
         {
-            clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
+            clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.RunTime.Chrono.t_end);
 
-            emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
-                                   (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
+            emulator->Machine.RunTime.Chrono.dt = (emulator->Machine.RunTime.Chrono.t_end.tv_sec - emulator->Machine.RunTime.Chrono.t_begin.tv_sec) * 1000000 +
+                                   (emulator->Machine.RunTime.Chrono.t_end.tv_nsec - emulator->Machine.RunTime.Chrono.t_begin.tv_nsec) / 1000;
 
             emit_dump(emulator);
 
@@ -234,10 +234,10 @@ int emulate(struct EmulationMachine* emulator)
         return (RETURN_OK);
     }
 
-    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.Chrono.t_end);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &emulator->Machine.RunTime.Chrono.t_end);
 
-    emulator->Machine.Chrono.dt = (emulator->Machine.Chrono.t_end.tv_sec - emulator->Machine.Chrono.t_begin.tv_sec) * 1000000 +
-                                   (emulator->Machine.Chrono.t_end.tv_nsec - emulator->Machine.Chrono.t_begin.tv_nsec) / 1000;
+    emulator->Machine.RunTime.Chrono.dt = (emulator->Machine.RunTime.Chrono.t_end.tv_sec - emulator->Machine.RunTime.Chrono.t_begin.tv_sec) * 1000000 +
+                                   (emulator->Machine.RunTime.Chrono.t_end.tv_nsec - emulator->Machine.RunTime.Chrono.t_begin.tv_nsec) / 1000;
 
     emulator->Machine.State = FINAL_STATE;
 

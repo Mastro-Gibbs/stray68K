@@ -72,6 +72,29 @@ string format1ByteReg(string s)
     return string(s);
 }
 
+u32 fixFromAddress(u32 from)
+{
+    u32 fixed = 0x0;
+
+    if (from > 0xFFFEC0)
+        fixed = 0xFFFEC0;
+    else if ((from % 16) != 0)
+        fixed = from - (from % 16);
+
+    return fixed;
+}
+
+string toHexString(u32 val)
+{
+    stringstream ss;
+    ss << hex << val << "\n";
+    string s = ss.str();
+    transform(s.begin(), s.end(), s.begin(), ::toupper);
+
+    return s;
+}
+
+
 
 void MemoryView::fetchBlock()
 {
@@ -80,7 +103,8 @@ void MemoryView::fetchBlock()
 
     string _s = from->text().toUTF8();
     
-    offset_ = stoi(_s, nullptr, 16);
+    offset_ = fixFromAddress(stoi(_s, nullptr, 16));
+    from->setText(toHexString(offset_));
 
     for (size_t i = 0, j = 0; i < 20; i++, j += 16)
     {
@@ -91,7 +115,7 @@ void MemoryView::fetchBlock()
         addresses->setText(addresses->text() + format32BitReg(s));
     }
 
-    const unsigned char* block = read_chunk(emulator, offset_, offset_ + (16*20));
+    unsigned char* block = read_chunk(emulator, offset_, offset_ + (16*20));
 
     for (size_t i = 0, j = 0; i < (16*20); i++, j++)
     {
@@ -112,6 +136,8 @@ void MemoryView::fetchBlock()
     }
 
     renderChunck(block, 15*20);
+
+    free(block);
 }
 
 
@@ -138,7 +164,7 @@ void MemoryView::update(unsigned int _from)
             addresses->setText(addresses->text() + format32BitReg(s));
         }
 
-        const unsigned char* block = read_chunk(emulator, address, address + (16*20));
+        unsigned char* block = read_chunk(emulator, address, address + (16*20));
 
         for (size_t i = 0, j = 0; i < (16*20); i++, j++)
         {
@@ -159,7 +185,10 @@ void MemoryView::update(unsigned int _from)
         }
 
         renderChunck(block, 15*20);
+    
+        free(block);
     }
+
 }
 
 

@@ -42,13 +42,13 @@ extern "C" {
 
     int emulate (struct EmulationMachine* emulatorInstance);
 
-    void flush_buffer(struct EmulationMachine* emulatorInstance);
+    void flush_InputBuffer(struct EmulationMachine* emulatorInstance);
 
-    void init_buffer(struct EmulationMachine* emulatorInstance);
+    void init_InputBuffer(struct EmulationMachine* emulatorInstance);
 
-    void cwrite(struct EmulationMachine* emulatorInstance, char _c);
+    void InputBuffer_cwrite(struct EmulationMachine* emulatorInstance, char _c);
 
-    void set_buffering_enabled(struct EmulationMachine* emulatorInstance, c_bool _bool);
+    void set_InputBuffer_enabled(struct EmulationMachine* emulatorInstance, c_bool _bool);
 
     u32 peek_ORG_from_file(struct EmulationMachine *emulatorInstance);
 

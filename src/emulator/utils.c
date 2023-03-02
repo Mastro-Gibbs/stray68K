@@ -5,64 +5,67 @@
 #include <unistd.h>
 
 
-void flush_buffer(struct EmulationMachine* emulator) 
+void flush_InputBuffer(struct EmulationMachine* emulator) 
 { 
-    emulator->Machine.InputBuffer._valid = 1; 
+    emulator->Machine.IO.InputBuffer._valid = 1; 
 }
 
-void init_buffer(struct EmulationMachine* emulator) 
+void init_InputBuffer(struct EmulationMachine* emulator) 
 { 
     for(size_t i = 0; i < 4096; ++i) 
-        emulator->Machine.InputBuffer.self[i] = 0;  
+        emulator->Machine.IO.InputBuffer.self[i] = 0;  
     
-    emulator->Machine.InputBuffer._pos = 0; 
-    emulator->Machine.InputBuffer._valid = c_false; 
-    emulator->Machine.InputBuffer._able  = c_true; 
+    emulator->Machine.IO.InputBuffer._pos = 0; 
+    emulator->Machine.IO.InputBuffer._valid = c_false; 
+    emulator->Machine.IO.InputBuffer._able  = c_true; 
 }
 
-void cwrite(struct EmulationMachine* emulator, char _c) 
+void InputBuffer_cwrite(struct EmulationMachine* emulator, char _c) 
 { 
-    emulator->Machine.InputBuffer.self[emulator->Machine.InputBuffer._pos] = _c;
-    emulator->Machine.InputBuffer._pos += 1; 
+    if (emulator->Machine.IO.InputBuffer._pos == 4095)
+        return;
+        
+    emulator->Machine.IO.InputBuffer.self[emulator->Machine.IO.InputBuffer._pos] = _c;
+    emulator->Machine.IO.InputBuffer._pos += 1; 
 }
 
-void set_buffering_enabled(struct EmulationMachine* emulator, c_bool _bool)
+void set_InputBuffer_enabled(struct EmulationMachine* emulator, c_bool _bool)
 {
-    emulator->Machine.InputBuffer._able  = _bool; 
+    emulator->Machine.IO.InputBuffer._able  = _bool; 
 }
 
 c_bool is_buffer_valid(struct EmulationMachine* emulator)
 {
-    return emulator->Machine.InputBuffer._valid;
+    return emulator->Machine.IO.InputBuffer._valid;
 }
 
 c_bool is_buffering_enabled(struct EmulationMachine* emulator)
 {
-    return emulator->Machine.InputBuffer._able;
+    return emulator->Machine.IO.InputBuffer._able;
 }
 
 u32 buffer_len(struct EmulationMachine* emulator)
 {
-    return emulator->Machine.InputBuffer._pos;
+    return emulator->Machine.IO.InputBuffer._pos;
 }
 
-u32 read_int_buffer(struct EmulationMachine* emulator) 
+u32 read_int_InputBuffer(struct EmulationMachine* emulator) 
 {
     u32 res = 0;
 
-    sscanf(emulator->Machine.InputBuffer.self, "%u", &res);
+    sscanf(emulator->Machine.IO.InputBuffer.self, "%u", &res);
 
     return res;
 }
 
-char* read_str_buffer(struct EmulationMachine* emulator)
+char* read_str_InputBuffer(struct EmulationMachine* emulator)
 {
     char* str = malloc(4096);
 
     if (str) 
     {
-        sscanf(emulator->Machine.InputBuffer.self, "%[^\n]", str);
-        str[emulator->Machine.InputBuffer._pos] = '\0';
+        sscanf(emulator->Machine.IO.InputBuffer.self, "%[^\n]", str);
+        str[emulator->Machine.IO.InputBuffer._pos] = '\0';
     }
 
     return str;
@@ -460,7 +463,7 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
 
             if (is_buffering_enabled(emulator)) 
             { 
-                char* str = read_str_buffer(emulator);
+                char* str = read_str_InputBuffer(emulator);
 
                 if (str) 
                 { 
@@ -483,7 +486,7 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
                         const u32 len = (u32) strlen(str);
                         u32 stack_ptr = read_addrreg(emulator, 7);
 
-                        if (emulator->Machine.RuntimeData.STACK_BOTTOM_INDEX == stack_ptr)
+                        if (emulator->Machine.RunTime.STACK_BOTTOM_INDEX == stack_ptr)
                             stack_value = 0;
                         else
                             stack_value = pop_long(emulator);
@@ -494,7 +497,7 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
                        
                     free(str); 
                 } 
-                init_buffer(emulator); 
+                init_InputBuffer(emulator); 
             } 
             else return c_false;
 
@@ -554,9 +557,9 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
 
             if (is_buffering_enabled(emulator)) 
             {
-                value = read_int_buffer(emulator) & mask_by_opsize(size);
+                value = read_int_InputBuffer(emulator) & mask_by_opsize(size);
                 
-                init_buffer(emulator);
+                init_InputBuffer(emulator);
                 
                 switch (rtype)
                 {
@@ -641,20 +644,20 @@ void emit_dump(struct EmulationMachine *emulator)
     emulator->Machine.dump = NULL;
 
     emulator->Machine.dump = Jcpu(emulator);
-    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jram,    emulator->Machine.RuntimeData.org_pointer, emulator->Machine.RuntimeData.last_loaded_byte_index, emulator->Machine.RuntimeData.simhalt);
+    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jram,    emulator->Machine.RunTime.org_pointer, emulator->Machine.RunTime.last_loaded_byte_index, emulator->Machine.RunTime.simhalt);
 
-    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jop,     emulator->Machine.RuntimeData.mnemonic, emulator->Machine.RuntimeData.operation_code);
-    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jchrono, emulator->Machine.Chrono.dt);
+    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jop,     emulator->Machine.RunTime.mnemonic, emulator->Machine.RunTime.operation_code);
+    emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jchrono, emulator->Machine.RunTime.Chrono.dt);
 
     if (emulator->Machine.State == IO_STATE && emulator->Machine.IO.Type == OUTPUT)
         emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jio, emulator->Machine.IO.buffer);
 
     if (emulator->Machine.State == TRAP_STATE)
-        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.Exception.trap_cause, TRAP_EXC_TYPE);
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.RunTime.Exception.trap_cause, TRAP_EXC_TYPE);
     else if (emulator->Machine.State == PANIC_STATE)
-        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.Exception.panic_cause, PANIC_EXC_TYPE);
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.RunTime.Exception.panic_cause, PANIC_EXC_TYPE);
     else if (emulator->Machine.State == MERR_STATE)
-        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.Exception.merr_cause, MERR_EXC_TYPE);
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jexception, emulator->Machine.RunTime.Exception.merr_cause, MERR_EXC_TYPE);
     else if (emulator->Machine.State == WARNING_STATE)
-        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jwarning, emulator->Machine.Warning.cause, emulator->Machine.Warning.mnem, emulator->Machine.Warning.code);
+        emulator->Machine.dump = Jconcat2(emulator, emulator->Machine.dump, Jwarning, emulator->Machine.RunTime.Warning.cause, emulator->Machine.RunTime.Warning.mnem, emulator->Machine.RunTime.Warning.code);
 }

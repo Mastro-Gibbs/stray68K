@@ -10,13 +10,14 @@
 #include <stdio.h>
 
 
-void flush_buffer(struct EmulationMachine* emulator);
-void init_buffer(struct EmulationMachine* emulator);
-void cwrite(struct EmulationMachine* emulator, char _c);
-void set_buffering_enabled(struct EmulationMachine* emulator, c_bool _bool);
+void flush_InputBuffer(struct EmulationMachine* emulator);
+void init_InputBuffer(struct EmulationMachine* emulator);
 
-u32   read_int_buffer(struct EmulationMachine* emulator);
-char* read_str_buffer(struct EmulationMachine* emulator);
+void InputBuffer_cwrite(struct EmulationMachine* emulator, char _c);
+void set_InputBuffer_enabled(struct EmulationMachine* emulator, c_bool _bool);
+
+u32   read_int_InputBuffer(struct EmulationMachine* emulator);
+char* read_str_InputBuffer(struct EmulationMachine* emulator);
 
 
 /*
@@ -29,8 +30,8 @@ char* read_str_buffer(struct EmulationMachine* emulator);
 #define EMULATOR_ERROR(fmt, ...) do {                                    \
                             emulator->Machine.State = MERR_STATE;                      \
                             printf("[\033[01m\033[91mEMULATOR ERROR\033[0m] ");            \
-                            sprintf(emulator->Machine.Exception.merr_cause, fmt, ##__VA_ARGS__); \
-                            printf ("%s\n", emulator->Machine.Exception.merr_cause);             \
+                            sprintf(emulator->Machine.RunTime.Exception.merr_cause, fmt, ##__VA_ARGS__); \
+                            printf ("%s\n", emulator->Machine.RunTime.Exception.merr_cause);             \
                             fflush(stdout);                              \
                             emit_dump(emulator); \
                             destroy_codes(emulator);                             \
@@ -77,7 +78,7 @@ char* read_str_buffer(struct EmulationMachine* emulator);
                                                                         default: \
                                                                         {\
                                                                             emulator->Machine.State = PANIC_STATE; \
-                                                                            sprintf(emulator->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
+                                                                            sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
                                                                             return (RETURN_ERR); \
                                                                         }\
                                                                     } \
@@ -176,7 +177,7 @@ char* read_str_buffer(struct EmulationMachine* emulator);
                                                                     default: \
                                                                     { \
                                                                         emulator->Machine.State = PANIC_STATE; \
-                                                                        sprintf(emulator->Machine.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
+                                                                        sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Addressing mode not handled! (read_EA)"); \
                                                                         return (RETURN_ERR); \
                                                                     } \
                                                                 } \
@@ -258,7 +259,7 @@ char* read_str_buffer(struct EmulationMachine* emulator);
                                                                 default: \
                                                                 { \
                                                                     emulator->Machine.State = PANIC_STATE; \
-                                                                    sprintf(emulator->Machine.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
+                                                                    sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Writing an invalid Effective Address, %d!", mode); \
                                                                     return (RETURN_ERR); \
                                                                 } \
                                                             } \

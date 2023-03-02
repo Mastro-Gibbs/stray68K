@@ -38,7 +38,7 @@ unsigned char* read_chunk(struct EmulationMachine* emulator, const unsigned int 
 {
     u8 *read = malloc(sizeof (u8) * end+1);
 
-    for (u32 iter = 0; iter < end; iter++)
+    for (u32 iter = 0; iter < (end-pointer); iter++)
         read[iter] = emulator->Machine.ram.self[pointer + iter];
 
     read[end] = '\0';

@@ -4,132 +4,122 @@
 #include <regex.h>
 #include <termios.h>
 
-#define RAM_MAX_SIZE    0x00FFFFFF
+#define RAM_MAX_SIZE 0x00FFFFFF
 
-
-//handler return types
+// handler return types
 #define RETURN_OK_PC_NO_INCR 2
-#define RETURN_OK            1
-#define RETURN_ERR           0
-#define RETURN_FINISH        0
+#define RETURN_OK 1
+#define RETURN_ERR 0
+#define RETURN_FINISH 0
 
 typedef unsigned short int opcode;
 
-
 /* CPU */
 typedef unsigned short int srflags;
-typedef unsigned char      bit;
-
+typedef unsigned char bit;
 
 /* UTILS */
-typedef double             f64;
-typedef float              f32;
+typedef double f64;
+typedef float f32;
 
-typedef unsigned long      u64;
-typedef unsigned int       u32;
+typedef unsigned long u64;
+typedef unsigned int u32;
 typedef unsigned short int u16;
-typedef unsigned char      u8;
+typedef unsigned char u8;
 
-typedef long               s64;
-typedef int                s32;
-typedef short int          s16;
-typedef char               s8;
-
+typedef long s64;
+typedef int s32;
+typedef short int s16;
+typedef char s8;
 
 /* HANDLERS */
 typedef unsigned short int bitmask;
-
 
 typedef unsigned char c_bool;
 
 enum
 {
-	c_false = 0,
-	c_true  = 1
+    c_false = 0,
+    c_true = 1
 };
 
-
-//FORWARDING EMULATOR MACHINE COMPLEX STRUCT
+// FORWARDING EMULATOR MACHINE COMPLEX STRUCT
 struct EmulationMachine;
 
-//CPU STRUCT
+// CPU STRUCT
 typedef struct __m68k__cpu__
 {
-    u32 data_r[8];  // D0..D7 -> data registers
+    u32 data_r[8]; // D0..D7 -> data registers
 
-    u32 addr_r[7];  // A0..A6 -> address registers
+    u32 addr_r[7]; // A0..A6 -> address registers
 
-    u32 usp;        // aka A7 -> user stack pointer
+    u32 usp; // aka A7 -> user stack pointer
 
-    u32 ssp;        // system stack pointer
+    u32 ssp; // system stack pointer
 
-    u32 pc;         // program counter
+    u32 pc; // program counter
 
-    srflags sr;        // status register flags
+    srflags sr; // status register flags
 
 } m68k_cpu;
 
-
-//RAM STRUCT
+// RAM STRUCT
 typedef struct __m68k__ram__
 {
-    u8  self[0x01000000];
+    u8 self[0x01000000];
     u32 size;
 
 } m68k_ram;
 
-
-//OPCODE STRUCT
+// OPCODE STRUCT
 typedef struct __m68k__opcode__
 {
     opcode code;
     opcode mask;
-    char*  mnemonic;
+    char *mnemonic;
 
-    u32 (*handler) (struct EmulationMachine* emulator);
+    u32 (*handler)(struct EmulationMachine *emulator);
 
 } m68k_opcode;
 
-
-//OPCODE WEREHOUSE DS
+// OPCODE WEREHOUSE DS
 typedef struct __m68k__codemap__
 {
     u8 key;
     u8 size;
-    m68k_opcode  **instances;
+    m68k_opcode **instances;
 
 } m68k_codemap;
 
-
-//EMULATOR MACHINE COMPLEX STRUCT
+// EMULATOR MACHINE COMPLEX STRUCT
 struct EmulationMachine
 {
-    struct
-    {
-        char* executable_path;
-    } ExecArgs;
+    char* binary_path;
 
     struct
     {
+        char *dump;
+
         m68k_cpu cpu;
         m68k_ram ram;
+        struct __m68k__codemap__ *codemap;
 
         enum
         {
-            BEGIN_STATE     = 0,
+            BEGIN_STATE = 0,
             EXECUTION_STATE = 1,
-            FINAL_STATE     = 2,
-            PANIC_STATE     = 3,
-            WARNING_STATE   = 4,
-            TRAP_STATE      = 5,
-            MERR_STATE      = 6,
-            IO_STATE        = 7,
-            SLEEP_STATE     = 8
+            FINAL_STATE = 2,
+            PANIC_STATE = 3,
+            WARNING_STATE = 4,
+            TRAP_STATE = 5,
+            MERR_STATE = 6,
+            IO_STATE = 7,
+            SLEEP_STATE = 8
         } State;
 
         struct
         {
-            u16  operation_code;
+            u16 operation_code;
             char *mnemonic;
 
             u32 simhalt;
@@ -141,52 +131,58 @@ struct EmulationMachine
 
             struct termios oldt;
             struct termios newt;
-        } RuntimeData;
 
-        struct
-        {
-            struct timespec t_begin;
-            struct timespec t_end;
-            u64 dt;
-        } Chrono;
+            struct
+            {
+                struct timespec t_begin;
+                struct timespec t_end;
+                u64 dt;
+            } Chrono;
 
-        struct
-        {
-            char panic_cause[200];
-            char trap_cause [250];
-            char merr_cause [250];
+            struct
+            {
+                char panic_cause[200];
+                char trap_cause[250];
+                char merr_cause[250];
 
-            enum { PANIC_EXC_TYPE = 0, TRAP_EXC_TYPE  = 1, MERR_EXC_TYPE  = 2 } Type;
-        } Exception;
+                enum
+                {
+                    PANIC_EXC_TYPE = 0,
+                    TRAP_EXC_TYPE = 1,
+                    MERR_EXC_TYPE = 2
+                } Type;
+            } Exception;
 
-        struct 
-        {
-            char mnem[10];
-            u32  code;
-            char cause[250];
-        } Warning;
+            struct
+            {
+                char mnem[10];
+                u32 code;
+                char cause[250];
+            } Warning;
+
+        } RunTime;
 
         struct
         {
             char *buffer;
-            enum { INPUT = 0,    OUTPUT = 1,  IO_UNDEF = 2 } Type;
+            enum
+            {
+                INPUT = 0,
+                OUTPUT = 1,
+                IO_UNDEF = 2
+            } Type;
+
+            struct
+            {
+                s8 self[4096];
+                u32 _pos;
+                c_bool _valid;
+                c_bool _able;
+
+            } InputBuffer;
         } IO;
 
-        struct
-        {
-            s8  self[4096];
-            u32 _pos;
-            c_bool _valid;
-            c_bool _able;
-
-        } InputBuffer;
-
-        char* dump;
-
-        struct __m68k__codemap__ *codemap;
-
     } Machine;
-
 };
 
 #endif // __MOTOROLATYPES_H__68000

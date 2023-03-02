@@ -3,7 +3,7 @@
 
     <message id="editor-msg">
         <div class="containeritem-editor-style">
-            <div contenteditable='true' id="editor"></div>
+            <div id="editor"></div>
         </div>
     </message>
 

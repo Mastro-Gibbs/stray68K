@@ -215,7 +215,7 @@
 // GROUP 0x00
 u32 ORItoCCR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
@@ -232,7 +232,7 @@ u32 ORItoCCR(struct EmulationMachine* emulator)
 
 u32 ORItoSR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
@@ -249,7 +249,7 @@ u32 ORItoSR(struct EmulationMachine* emulator)
 
 u32 ORI(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -273,7 +273,7 @@ u32 ORI(struct EmulationMachine* emulator)
 
 u32 ANDItoCCR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
@@ -290,7 +290,7 @@ u32 ANDItoCCR(struct EmulationMachine* emulator)
 
 u32 ANDItoSR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
@@ -307,7 +307,7 @@ u32 ANDItoSR(struct EmulationMachine* emulator)
 
 u32 ANDI(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -341,7 +341,7 @@ u32 ANDI(struct EmulationMachine* emulator)
 
 u32 SUBI(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     opsize size = (code & SIZE_MASK) >> 6;
     opsize tmps = size;
 
@@ -376,7 +376,7 @@ u32 SUBI(struct EmulationMachine* emulator)
 
 u32 ADDI(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     opsize size = (code & SIZE_MASK) >> 6;
     opsize tmps = size;
 
@@ -411,7 +411,7 @@ u32 ADDI(struct EmulationMachine* emulator)
 
 u32 EORItoCCR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
@@ -428,7 +428,7 @@ u32 EORItoCCR(struct EmulationMachine* emulator)
 
 u32 EORItoSR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
@@ -445,7 +445,7 @@ u32 EORItoSR(struct EmulationMachine* emulator)
 
 u32 EORI(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -469,7 +469,7 @@ u32 EORI(struct EmulationMachine* emulator)
 
 u32 CMPI(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -498,13 +498,13 @@ u32 CMPI(struct EmulationMachine* emulator)
 
 u32 MOVEP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
 
     emulator->Machine.State = WARNING_STATE;
     
-    sprintf(emulator->Machine.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.Warning.code = code;
-    sprintf(emulator->Machine.Warning.mnem, "%s", "MOVEP");
+    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
+    emulator->Machine.RunTime.Warning.code = code;
+    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "MOVEP");
 
     return (RETURN_OK);
 }
@@ -539,7 +539,7 @@ u32 BSET(struct EmulationMachine* emulator)
 // GROUP 0x01
 u32 MOVE(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_reg,  src_reg;
     u32 dst_mode, src_mode;
     u32 rVal;
@@ -610,7 +610,7 @@ u32 MOVEA(struct EmulationMachine* emulator)
 // group 0X04
 u32 MOVEfromSR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
 
@@ -628,7 +628,7 @@ u32 MOVEfromSR(struct EmulationMachine* emulator)
 
 u32 MOVEtoCCR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
 
@@ -653,7 +653,7 @@ u32 MOVEtoCCR(struct EmulationMachine* emulator)
 
 u32 MOVEtoSR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
 
@@ -678,7 +678,7 @@ u32 MOVEtoSR(struct EmulationMachine* emulator)
 
 u32 NEGX(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -701,7 +701,7 @@ u32 NEGX(struct EmulationMachine* emulator)
 
 u32 CLR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 reg  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -733,7 +733,7 @@ u32 CLR(struct EmulationMachine* emulator)
 
 u32 NEG(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -756,7 +756,7 @@ u32 NEG(struct EmulationMachine* emulator)
 
 u32 NOT(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
@@ -779,7 +779,7 @@ u32 NOT(struct EmulationMachine* emulator)
 
 u32 EXT(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  regptr = (code & 0x0007);
     opsize size = (code & 0x0040) == 0 ? WORD : LONG;
 
@@ -798,7 +798,7 @@ u32 EXT(struct EmulationMachine* emulator)
 
 u32 NBCD(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 lo_val, hi_val;
     bit carry;
 
@@ -837,7 +837,7 @@ u32 NBCD(struct EmulationMachine* emulator)
 
 u32 SWAP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
 
     u32 val = read_addrreg(emulator, code & reg_mask);
@@ -852,7 +852,7 @@ u32 SWAP(struct EmulationMachine* emulator)
 
 u32 PEA(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     ADDRMode mode = (code & 0b0000000000111000) >> 3;
 
     if (mode == ADDRESS || mode == ADDRESSDisp)
@@ -872,11 +872,11 @@ u32 PEA(struct EmulationMachine* emulator)
 
 u32 ILLEGAL(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     emulator->Machine.State = TRAP_STATE;
-    sprintf(emulator->Machine.Exception.trap_cause,
+    sprintf(emulator->Machine.RunTime.Exception.trap_cause,
             "Raised trap exception: Code: %d, Mnemonic: %s",
             IllegalInstruction, trap_code_toString(IllegalInstruction));
 
@@ -886,13 +886,13 @@ u32 ILLEGAL(struct EmulationMachine* emulator)
 
 u32 TAS(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
 
     emulator->Machine.State = WARNING_STATE;
     
-    sprintf(emulator->Machine.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.Warning.code = code;
-    sprintf(emulator->Machine.Warning.mnem, "%s", "TAS");
+    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
+    emulator->Machine.RunTime.Warning.code = code;
+    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "TAS");
 
     return (RETURN_OK);
 }
@@ -900,7 +900,7 @@ u32 TAS(struct EmulationMachine* emulator)
 
 u32 TST(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
     bitmask mode_mask = 0b0000000000111000;
     bitmask size_mask = 0b0000000011000000;
@@ -935,7 +935,7 @@ u32 TST(struct EmulationMachine* emulator)
 
 u32 TRAP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u16 vector = (u16)(code & 0x0000000F);
 
     emulator->Machine.IO.Type = IO_UNDEF;
@@ -980,7 +980,7 @@ u32 TRAP(struct EmulationMachine* emulator)
         {
             emulator->Machine.State   = TRAP_STATE;
 
-            sprintf(emulator->Machine.Exception.trap_cause,
+            sprintf(emulator->Machine.RunTime.Exception.trap_cause,
                     "Raised trap exception: Code: %d, Mnemonic: %s",
                     0x20 + vector, trap_code_toString(0x20 + vector));
         }
@@ -992,7 +992,7 @@ u32 TRAP(struct EmulationMachine* emulator)
 
 u32 LINK(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
 
     u32 reg = code & reg_mask;
@@ -1017,7 +1017,7 @@ u32 LINK(struct EmulationMachine* emulator)
 
 u32 UNLK(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
     u32 reg = code & reg_mask;
 
@@ -1030,11 +1030,11 @@ u32 UNLK(struct EmulationMachine* emulator)
 
 u32 MOVEUSP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     if (!((emulator->Machine.cpu.sr & SUPERVISOR) ? 1 : 0))
     {
         emulator->Machine.State = TRAP_STATE;
-        sprintf(emulator->Machine.Exception.trap_cause,
+        sprintf(emulator->Machine.RunTime.Exception.trap_cause,
                 "Raised trap exception: Code: %d, Mnemonic: %s",
                 PrivilegeViolation, trap_code_toString(PrivilegeViolation));
 
@@ -1061,13 +1061,13 @@ u32 MOVEUSP(struct EmulationMachine* emulator)
 
 u32 RESET(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     
     emulator->Machine.State = WARNING_STATE;
 
-    sprintf(emulator->Machine.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.Warning.code = code;
-    sprintf(emulator->Machine.Warning.mnem, "%s", "RESET");
+    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
+    emulator->Machine.RunTime.Warning.code = code;
+    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "RESET");
 
     return (RETURN_OK);
 }
@@ -1075,7 +1075,7 @@ u32 RESET(struct EmulationMachine* emulator)
 
 u32 NOP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     return (RETURN_OK);
@@ -1084,13 +1084,13 @@ u32 NOP(struct EmulationMachine* emulator)
 
 u32 STOP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
    
     emulator->Machine.State = WARNING_STATE;
 
-    sprintf(emulator->Machine.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.Warning.code = code;
-    sprintf(emulator->Machine.Warning.mnem, "%s", "STOP");
+    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
+    emulator->Machine.RunTime.Warning.code = code;
+    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "STOP");
 
     return (RETURN_OK);
 }
@@ -1098,7 +1098,7 @@ u32 STOP(struct EmulationMachine* emulator)
 
 u32 RTE(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     if ((emulator->Machine.cpu.sr & SUPERVISOR) ? 1 : 0)
@@ -1112,7 +1112,7 @@ u32 RTE(struct EmulationMachine* emulator)
     else
     {
         emulator->Machine.State = TRAP_STATE;
-        sprintf(emulator->Machine.Exception.trap_cause,
+        sprintf(emulator->Machine.RunTime.Exception.trap_cause,
                 "Raised trap exception: Code: %d, Mnemonic: %s",
                 PrivilegeViolation, trap_code_toString(PrivilegeViolation));
 
@@ -1125,18 +1125,18 @@ u32 RTE(struct EmulationMachine* emulator)
 
 u32 RTS(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
-    if (emulator->Machine.RuntimeData.JSR_CALL_COUNTER == 0)
+    const opcode code = emulator->Machine.RunTime.operation_code; 
+    if (emulator->Machine.RunTime.JSR_CALL_COUNTER == 0)
     {
         emulator->Machine.State = PANIC_STATE;
-        sprintf(emulator->Machine.Exception.panic_cause, "RTS instruction invoked in main label, code: 0x%X", code);
+        sprintf(emulator->Machine.RunTime.Exception.panic_cause, "RTS instruction invoked in main label, code: 0x%X", code);
 
         return (RETURN_ERR);
     }
 
     emulator->Machine.cpu.pc = (pop_long(emulator));
 
-    emulator->Machine.RuntimeData.JSR_CALL_COUNTER--;
+    emulator->Machine.RunTime.JSR_CALL_COUNTER--;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1144,13 +1144,13 @@ u32 RTS(struct EmulationMachine* emulator)
 
 u32 TRAPV(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     if ((emulator->Machine.cpu.sr & OVERFLOW))
     {
         emulator->Machine.State = TRAP_STATE;
-        sprintf(emulator->Machine.Exception.trap_cause,
+        sprintf(emulator->Machine.RunTime.Exception.trap_cause,
                 "Raised trap exception: Code: %d, Mnemonic: %s",
                 TRAPVInstruction, trap_code_toString(TRAPVInstruction));
 
@@ -1163,7 +1163,7 @@ u32 TRAPV(struct EmulationMachine* emulator)
 
 u32 RTR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     srflags ccr   = pop_word(emulator);
@@ -1180,7 +1180,7 @@ u32 RTR(struct EmulationMachine* emulator)
 
 u32 JSR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     ADDRMode mode = (code & ADDRMODE_MASK);
     u32  addr_reg = (code & SRC_MASK);
 
@@ -1196,7 +1196,7 @@ u32 JSR(struct EmulationMachine* emulator)
     else
     {
         emulator->Machine.State = PANIC_STATE;
-        sprintf(emulator->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+        sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
     }
@@ -1206,7 +1206,7 @@ u32 JSR(struct EmulationMachine* emulator)
 
     emulator->Machine.cpu.pc = (jmp_addr);
 
-    emulator->Machine.RuntimeData.JSR_CALL_COUNTER++;
+    emulator->Machine.RunTime.JSR_CALL_COUNTER++;
 
     return (RETURN_OK_PC_NO_INCR);
 }
@@ -1214,7 +1214,7 @@ u32 JSR(struct EmulationMachine* emulator)
 
 u32 JMP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     ADDRMode mode = (code & ADDRMODE_MASK);
     u32  addr_reg = (code & SRC_MASK);
 
@@ -1235,7 +1235,7 @@ u32 JMP(struct EmulationMachine* emulator)
     else
     {
         emulator->Machine.State = PANIC_STATE;
-        sprintf(emulator->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+        sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
     }
@@ -1248,13 +1248,13 @@ u32 JMP(struct EmulationMachine* emulator)
 
 u32 MOVEM(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
 
     emulator->Machine.State = WARNING_STATE;
     
-    sprintf(emulator->Machine.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.Warning.code = code;
-    sprintf(emulator->Machine.Warning.mnem, "%s", "MOVEM");
+    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
+    emulator->Machine.RunTime.Warning.code = code;
+    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "MOVEM");
 
     return (RETURN_OK);
 }
@@ -1262,7 +1262,7 @@ u32 MOVEM(struct EmulationMachine* emulator)
 
 u32 CHK(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
 
     u32 addr_reg = (code & SRC_MASK);
     u32 data_reg = (code & DST_MASK) >> 9;
@@ -1285,7 +1285,7 @@ u32 CHK(struct EmulationMachine* emulator)
 
         {
             emulator->Machine.State = TRAP_STATE;
-            sprintf(emulator->Machine.Exception.trap_cause,
+            sprintf(emulator->Machine.RunTime.Exception.trap_cause,
                     "Raised trap exception: Code: %d, Mnemonic: %s",
                     CHKInstruction, trap_code_toString(CHKInstruction));
 
@@ -1299,7 +1299,7 @@ u32 CHK(struct EmulationMachine* emulator)
 
 u32 LEA(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u8 mode     = (code & ADDRMODE_MASK);
     u8 addr_reg = (code & DST_MASK) >> 9;
 
@@ -1312,7 +1312,7 @@ u32 LEA(struct EmulationMachine* emulator)
     else
     {
         emulator->Machine.State = PANIC_STATE;
-        sprintf(emulator->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+        sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
         return (RETURN_ERR);
     }
@@ -1328,7 +1328,7 @@ u32 LEA(struct EmulationMachine* emulator)
 // GROUP 0x05
 u32 DBcc(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     opsize size = WORD;
     CCm condition = (code & 0x0F00) >> 8;
 
@@ -1364,7 +1364,7 @@ u32 DBcc(struct EmulationMachine* emulator)
 
 u32 Scc(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst = (code & SRC_MASK);
     opsize   size = BYTE;
     ADDRMode mode = (code & 0b0000000000111000) >> 3;
@@ -1386,7 +1386,7 @@ u32 Scc(struct EmulationMachine* emulator)
 
 u32 ADDQ(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 value = (code & DST_MASK) >> 9;
 
     if (value == 0) value = 8;
@@ -1423,7 +1423,7 @@ u32 ADDQ(struct EmulationMachine* emulator)
 
 u32 SUBQ(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 value = (code & DST_MASK) >> 9;
 
     if (value == 0) value = 8;
@@ -1463,7 +1463,7 @@ u32 SUBQ(struct EmulationMachine* emulator)
 // GROUP 0x06
 u32 BRA(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 pc   = emulator->Machine.cpu.pc;
     s32  disp = (code & 0x00FF);
 
@@ -1485,7 +1485,7 @@ u32 BRA(struct EmulationMachine* emulator)
 
 u32 BSR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 pc = emulator->Machine.cpu.pc;
 
     u32 disp = code & 0x00FF;
@@ -1505,7 +1505,7 @@ u32 BSR(struct EmulationMachine* emulator)
 
     emulator->Machine.cpu.pc = (pc + disp);
 
-    emulator->Machine.RuntimeData.JSR_CALL_COUNTER++;
+    emulator->Machine.RunTime.JSR_CALL_COUNTER++;
 
     return (RETURN_OK);
 }
@@ -1513,7 +1513,7 @@ u32 BSR(struct EmulationMachine* emulator)
 
 u32 Bcc(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     CCm condition = (code & 0x0F00) >> 8;
 
     if (eval_cc(emulator, condition))
@@ -1548,7 +1548,7 @@ u32 Bcc(struct EmulationMachine* emulator)
 // GROUP 0x07
 u32 MOVEQ(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst = (code & DST_MASK) >> 9;
     s32 val;
     SIGN_EXTENDED(val, (code & 0b0000000011111111), LONG);
@@ -1566,7 +1566,7 @@ u32 MOVEQ(struct EmulationMachine* emulator)
 // GROUP 0x08
 u32 DIVU(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
 
     void **a;
@@ -1580,7 +1580,7 @@ u32 DIVU(struct EmulationMachine* emulator)
     if (*sVal == 0)
     {
         emulator->Machine.State = TRAP_STATE;
-        sprintf(emulator->Machine.Exception.trap_cause,
+        sprintf(emulator->Machine.RunTime.Exception.trap_cause,
                 "Raised trap exception: Code: %d, Mnemonic: %s",
                 DivideByZero, trap_code_toString(DivideByZero));
 
@@ -1617,7 +1617,7 @@ u32 DIVU(struct EmulationMachine* emulator)
 
 u32 DIVS(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 _val, signed_sVal, signed_dVal;
 
     void **a;
@@ -1636,7 +1636,7 @@ u32 DIVS(struct EmulationMachine* emulator)
     if (signed_sVal == 0)
     {
         emulator->Machine.State = TRAP_STATE;
-        sprintf(emulator->Machine.Exception.trap_cause,
+        sprintf(emulator->Machine.RunTime.Exception.trap_cause,
                 "Raised trap exception: Code: %d, Mnemonic: %s",
                 DivideByZero, trap_code_toString(DivideByZero));
 
@@ -1676,7 +1676,7 @@ u32 SBCD(struct EmulationMachine* emulator)
 
 u32 OR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
 
     void **a;
@@ -1717,7 +1717,7 @@ u32 OR(struct EmulationMachine* emulator)
 // GROUP 0x09
 u32 SUBA(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_reg = (code & DST_MASK) >> 9;
     u32 src_reg = (code & SRC_MASK);
     ADDRMode mode = (code & 0b0000000000111000) >> 3;
@@ -1748,7 +1748,7 @@ u32 SUBA(struct EmulationMachine* emulator)
 
 u32 SUBX(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
     opsize         size   = (code & SIZE_MASK) >> 6;
@@ -1782,7 +1782,7 @@ u32 SUBX(struct EmulationMachine* emulator)
 
 u32 SUB(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 _val, signed_sVal, signed_dVal;
 
     void **a;
@@ -1826,7 +1826,7 @@ u32 SUB(struct EmulationMachine* emulator)
 // GROUP 0x0B
 u32 CMPA(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_reg = (code & DST_MASK) >> 9;
     u32 src_reg = (code & SRC_MASK);
 
@@ -1871,7 +1871,7 @@ u32 CMPA(struct EmulationMachine* emulator)
 
 u32 CMPM(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_addr_reg = (code & DST_MASK) >> 9;
     u32 src_addr_reg = (code & SRC_MASK);
     opsize      size = (code & SIZE_MASK) >> 6;
@@ -1901,7 +1901,7 @@ u32 CMPM(struct EmulationMachine* emulator)
 
 u32 EOR(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
 
     void **a;
@@ -1931,7 +1931,7 @@ u32 EOR(struct EmulationMachine* emulator)
 
 u32 CMP(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
 
@@ -1979,7 +1979,7 @@ u32 CMP(struct EmulationMachine* emulator)
 // GROUP 0x0C
 u32 MULU(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
 
     void **a;
@@ -2007,7 +2007,7 @@ u32 MULU(struct EmulationMachine* emulator)
 
 u32 MULS(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 _val, signed_sVal, signed_dVal;;
 
     void **a;
@@ -2044,7 +2044,7 @@ u32 ABCD(struct EmulationMachine* emulator)
 
 u32 EXG(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 rX = (code & 0x0007);
     u32 rY = (code & 0x0E00) >> 9;
     bit mode         = (bit)((code & 0x00F8) >> 3);
@@ -2073,7 +2073,7 @@ u32 EXG(struct EmulationMachine* emulator)
         default:
         {
             emulator->Machine.State = PANIC_STATE;
-            sprintf(emulator->Machine.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
+            sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Unmenaged mode 0x%X", mode);
 
             return (RETURN_ERR);
         }
@@ -2085,7 +2085,7 @@ u32 EXG(struct EmulationMachine* emulator)
 
 u32 AND(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
 
     void **a;
@@ -2126,7 +2126,7 @@ u32 AND(struct EmulationMachine* emulator)
 // GROUP 0x0D
 u32 ADDA(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
     ADDRMode   mode    = (code & 0b0000000000111000) >> 3;
@@ -2156,7 +2156,7 @@ u32 ADDA(struct EmulationMachine* emulator)
 
 u32 ADDX(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
     u32  src_reg = (code & SRC_MASK);
     opsize         size    = (code & SIZE_MASK) >> 6;
@@ -2190,7 +2190,7 @@ u32 ADDX(struct EmulationMachine* emulator)
 
 u32 ADD(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     s32  _val, signed_sVal, signed_dVal;
 
     void **a;
@@ -2284,7 +2284,7 @@ u32 ROL(struct EmulationMachine* emulator)
 //Bxxx
 u32 Bxxx(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code; 
+    const opcode code = emulator->Machine.RunTime.operation_code; 
     bit mode = (code & 0x0100) == 0x0000; // if true mean IMMEDIATE, read extension word
 
     u32 dst = (code & 0x0007);
@@ -2353,7 +2353,7 @@ u32 Bxxx(struct EmulationMachine* emulator)
 //abcd-sbcd
 u32 xBCD(struct EmulationMachine* emulator, BCD_type type)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code;
+    const opcode code = emulator->Machine.RunTime.operation_code;
 
     u32 srcval, dstval, result;
 
@@ -2440,7 +2440,7 @@ u32 perform_BCD(struct EmulationMachine* emulator, BCD_type type, u32 src, u32 d
 //A-Lxx
 u32 ALxx(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code;
+    const opcode code = emulator->Machine.RunTime.operation_code;
 
     Rot al_dir  = (code & 0x0100) >> 8;
     opsize size = (code & 0x00C0) >> 6;
@@ -2453,7 +2453,7 @@ u32 ALxx(struct EmulationMachine* emulator)
         /* cannot reach this case, i really hope :D */
         {
             emulator->Machine.State = PANIC_STATE;
-            sprintf(emulator->Machine.Exception.panic_cause, "ALxx invalid size 0x%X", BYTE);
+            sprintf(emulator->Machine.RunTime.Exception.panic_cause, "ALxx invalid size 0x%X", BYTE);
 
             return (RETURN_ERR);
         }
@@ -2558,7 +2558,7 @@ u32 ALxx(struct EmulationMachine* emulator)
 //Roxx
 u32 ROxx(struct EmulationMachine* emulator)
 {
-    const opcode code = emulator->Machine.RuntimeData.operation_code;
+    const opcode code = emulator->Machine.RunTime.operation_code;
 
     Rot rot_dir = (code & 0x0100) >> 8;
     opsize size = (code & 0x00C0) >> 6;
@@ -2571,7 +2571,7 @@ u32 ROxx(struct EmulationMachine* emulator)
         /* cannot reach this case, i really hope :D */
         {
             emulator->Machine.State = PANIC_STATE;
-            sprintf(emulator->Machine.Exception.panic_cause, "ROxx invalid size 0x%X", BYTE);
+            sprintf(emulator->Machine.RunTime.Exception.panic_cause, "ROxx invalid size 0x%X", BYTE);
 
             return (RETURN_ERR);
         }
@@ -2718,7 +2718,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 0), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 0), aborting.");
             return;
         }
 
@@ -2730,7 +2730,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[0].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 1), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 1), aborting.");
             return;
         }
         em->Machine.codemap[0].instances[0]  = new_opcode_t(0b0000000000111100, 0b1111111111111111, "ORItoCCR",  ORItoCCR);
@@ -2763,7 +2763,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[1].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 2), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 2), aborting.");
             return;
         }
         em->Machine.codemap[1].instances[0] = new_opcode_t(0b0001000000000000, 0b1111000000000000, "MOVE", MOVE);
@@ -2776,7 +2776,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[2].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 3), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 3), aborting.");
             return;
         }
         em->Machine.codemap[2].instances[0] = new_opcode_t(0b0010000001000000, 0b1111000111000000, "MOVEA", MOVEA);
@@ -2790,7 +2790,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[3].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 4), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 4), aborting.");
             return;
         }
         em->Machine.codemap[3].instances[0] = new_opcode_t(0b0011000001000000, 0b1111000111000000, "MOVEA", MOVEA);
@@ -2804,7 +2804,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[4].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 5), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 5), aborting.");
             return;
         }
         em->Machine.codemap[4].instances[0]  = new_opcode_t(0b0100000011000000, 0b1111111111000000, "MOVEfromSR", MOVEfromSR);
@@ -2846,7 +2846,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[5].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 6), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 6), aborting.");
             return;
         }
         em->Machine.codemap[5].instances[0] = new_opcode_t(0b0101000011001000, 0b1111000011111000, "DBcc", DBcc);
@@ -2862,7 +2862,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[6].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 7), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 7), aborting.");
             return;
         }
         em->Machine.codemap[6].instances[0] = new_opcode_t(0b0110000000000000, 0b1111111100000000, "BRA", BRA);
@@ -2877,7 +2877,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[7].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 8), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 8), aborting.");
             return;
         }
         em->Machine.codemap[7].instances[0] = new_opcode_t(0b0111000000000000, 0b1111000100000000, "MOVEQ", MOVEQ);
@@ -2890,7 +2890,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[8].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 9), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 9), aborting.");
             return;
         }
         em->Machine.codemap[8].instances[0] = new_opcode_t(0b1000000011000000, 0b1111000111000000, "DIVU", DIVU);
@@ -2906,7 +2906,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[9].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 10), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 10), aborting.");
             return;
         }
         em->Machine.codemap[9].instances[0] = new_opcode_t(0b1001000011000000, 0b1111000011000000, "SUBA", SUBA);
@@ -2921,7 +2921,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[10].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 11), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 11), aborting.");
             return;
         }
         em->Machine.codemap[10].instances[0] = new_opcode_t(0b1011000011000000, 0b1111000011000000, "CMPA", CMPA);
@@ -2937,7 +2937,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[11].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 12), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 12), aborting.");
             return;
         }
         em->Machine.codemap[11].instances[0] = new_opcode_t(0b1100000011000000, 0b1111000111000000, "MULU", MULU);
@@ -2954,7 +2954,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[12].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 13), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 13), aborting.");
             return;
         }
         em->Machine.codemap[12].instances[0] = new_opcode_t(0b1101000011000000, 0b1111000011000000, "ADDA", ADDA);
@@ -2969,7 +2969,7 @@ void init_opcodes(struct EmulationMachine *em)
         if (!em->Machine.codemap[13].instances)
         {
             em->Machine.State = PANIC_STATE;
-            sprintf(em->Machine.Exception.panic_cause, "Internal error (em->Machine.codemap stage 14), aborting.");
+            sprintf(em->Machine.RunTime.Exception.panic_cause, "Internal error (em->Machine.codemap stage 14), aborting.");
             return;
         }
         em->Machine.codemap[13].instances[0]  = new_opcode_t(0b1110000011000000, 0b1111111111000000, "ASR",  ASR);
@@ -3038,7 +3038,7 @@ void destroy_codes(struct EmulationMachine *em)
  */
 m68k_opcode* get_opcode_t(struct EmulationMachine* emulator)
 {
-    const u8 code_group_id = (u8)((emulator->Machine.RuntimeData.operation_code & 0xF000) >> 12);
+    const u8 code_group_id = (u8)((emulator->Machine.RunTime.operation_code & 0xF000) >> 12);
 
     if (code_group_id < 0x0F && code_group_id != 0x0A)
     {
@@ -3047,9 +3047,9 @@ m68k_opcode* get_opcode_t(struct EmulationMachine* emulator)
             &emulator->Machine.codemap[code_group_id];
 
         for (unsigned char iter = 0; iter < tmp->size; iter++)
-            if ((emulator->Machine.RuntimeData.operation_code & tmp->instances[iter]->mask) == tmp->instances[iter]->code)
+            if ((emulator->Machine.RunTime.operation_code & tmp->instances[iter]->mask) == tmp->instances[iter]->code)
             {
-                emulator->Machine.RuntimeData.mnemonic = tmp->instances[iter]->mnemonic;
+                emulator->Machine.RunTime.mnemonic = tmp->instances[iter]->mnemonic;
                 return tmp->instances[iter];
             }
     }
@@ -3067,7 +3067,7 @@ u32 run_opcode(struct EmulationMachine* emulator)
     if (tmp == NULL)
     {
         emulator->Machine.State = PANIC_STATE;
-        sprintf(emulator->Machine.Exception.panic_cause, "Instruction code 0x%X not reconized", emulator->Machine.RuntimeData.operation_code);
+        sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Instruction code 0x%X not reconized", emulator->Machine.RunTime.operation_code);
         return (RETURN_ERR);
     }
 
@@ -3089,11 +3089,11 @@ u32 execute_instruction(struct EmulationMachine *emulator)
     if ((istruction_ptr % 2) != 0)
     {
         emulator->Machine.State = PANIC_STATE;
-        sprintf(emulator->Machine.Exception.panic_cause, "Segmentation fault while reading next istruction on odd address");
+        sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Segmentation fault while reading next istruction on odd address");
         return (RETURN_ERR);
     }
 
-    emulator->Machine.RuntimeData.operation_code = read_word(emulator, istruction_ptr);
+    emulator->Machine.RunTime.operation_code = read_word(emulator, istruction_ptr);
 
     return run_opcode(emulator);
 }
@@ -3101,7 +3101,7 @@ u32 execute_instruction(struct EmulationMachine *emulator)
 
 c_bool is_next_inst_scan(struct EmulationMachine *emulator)
 {
-    if (emulator->Machine.cpu.pc < emulator->Machine.RuntimeData.simhalt)
+    if (emulator->Machine.cpu.pc < emulator->Machine.RunTime.simhalt)
     {
         u32 istruction_ptr = emulator->Machine.cpu.pc;
         u16 code = read_word(emulator, istruction_ptr);

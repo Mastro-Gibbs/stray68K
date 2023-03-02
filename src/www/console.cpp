@@ -5,7 +5,7 @@
 
 Console::Console()
     : self(nullptr),
-      _map(""),
+      _machineDump(""),
       emulatorInstance(nullptr),
       WTemplate(tr("console-msg"))
 {
@@ -25,15 +25,15 @@ void Console::setUpConsole()
     self->keyWentUp().connect([&](const WKeyEvent &event) {
         if (event.key() == Key::Enter)
         {
-            init_buffer(emulatorInstance);
+            init_InputBuffer(emulatorInstance);
 
             std::string textUtf8 = self->text().toUTF8();
 
-            size_t pos = textUtf8.find(_content);
+            size_t pos = textUtf8.find(_selfContent);
             
             if (pos != std::string::npos)
             {
-                textUtf8.erase(pos, _content.length());
+                textUtf8.erase(pos, _selfContent.length());
 
                 size_t inputLen = textUtf8.length() - 1; // cut-off '\n' char
             
@@ -42,25 +42,25 @@ void Console::setUpConsole()
                     for (size_t i = 0; i < inputLen; ++i)
                     {
                         char c = textUtf8[i];
-                        cwrite(emulatorInstance, c);
+                        InputBuffer_cwrite(emulatorInstance, c);
                     }
 
-                    flush_buffer(emulatorInstance);
+                    flush_InputBuffer(emulatorInstance);
                 }
                 
-                _content = self->text().toUTF8();
+                _selfContent = self->text().toUTF8();
             }
         }
     });
 
     self->keyWentDown().connect(this, [=](const WKeyEvent &event){
-        if (event.key() == Key::Backspace && _content.length() > self->text().toUTF8().length())
-            self->setText(_content);
+        if (event.key() == Key::Backspace && _selfContent.length() > self->text().toUTF8().length())
+            self->setText(_selfContent);
     });
 
     self->keyWentUp().connect(this, [=](const WKeyEvent &event){
-        if (event.key() == Key::Backspace && _content.length() > self->text().toUTF8().length())
-            self->setText(_content);
+        if (event.key() == Key::Backspace && _selfContent.length() > self->text().toUTF8().length())
+            self->setText(_selfContent);
     });
 }
 
@@ -72,7 +72,7 @@ void Console::insert(const string& str)
     else
         self->setText(self->text() + str);
 
-    _content = self->text().toUTF8();
+    _selfContent = self->text().toUTF8();
 }
 
 void Console::pushStdout(const char* map)
@@ -81,7 +81,7 @@ void Console::pushStdout(const char* map)
     {
         string _json = string(map);
 
-        if (_map == _json) return;
+        if (_machineDump == _json) return;
 
         json_map json{ json_data{ _json } }; 
 
@@ -126,7 +126,7 @@ void Console::pushStdout(const char* map)
         catch (boost::bad_get& e) { }
         catch (runtime_error& e)  { }
 
-        _map = string(_json);
+        _machineDump = string(_json);
     }
 }
 
@@ -138,7 +138,7 @@ void Console::pushText(const string& out, bool nl)
 void Console::clear()
 {
     self->setText("");
-    _content = "";
+    _selfContent = "";
 }
 
 void Console::disable(bool status)

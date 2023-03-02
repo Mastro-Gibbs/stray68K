@@ -338,7 +338,7 @@ void Dispatcher::do_run()
 
         begin_emulator(emulatorInstance);
 
-        init_buffer(emulatorInstance);
+        init_InputBuffer(emulatorInstance);
 
         memoryWidget->update(peek_ORG_from_file(emulatorInstance));
 
@@ -457,7 +457,7 @@ void Dispatcher::do_debug()
 
         begin_emulator(emulatorInstance);
 
-        init_buffer(emulatorInstance);
+        init_InputBuffer(emulatorInstance);
 
         memoryWidget->update(peek_ORG_from_file(emulatorInstance));
 
@@ -596,6 +596,8 @@ void Dispatcher::do_continue()
     continueExecutionButton->setDisabled(true);
 
     isRunningOnRunThread = true;
+    isDebugMode = false;
+    isDebugStarted = false;
 
     doJavaScript("removeAllMarkers();");
     
@@ -614,7 +616,7 @@ void Dispatcher::do_continue()
  */
 void Dispatcher::do_stop()
 {
-    set_buffering_enabled(emulatorInstance, c_false);
+    set_InputBuffer_enabled(emulatorInstance, c_false);
 
     quitThread_runBinaryThread = true;
     quitThread_nextIstructionThread = true;
@@ -632,7 +634,7 @@ void Dispatcher::do_stop()
 
         end_emulator(emulatorInstance);
         emulatorInstance = nullptr;
-
+        
         consoleWidget->disable(true);
         consoleWidget->writeProgramFinished();
 
