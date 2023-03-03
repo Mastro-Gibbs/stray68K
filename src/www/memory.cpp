@@ -30,8 +30,7 @@ void MemoryView::setUpMemory()
     f_le->setInputMask("HHHHHHHH");
 
     auto go_btn = make_unique<WPushButton>();
-    go_btn->setText("Fetch");
-    go_btn->setStyleClass("fetch-btn");
+    go_btn->setStyleClass("fetch-btn-icon fa fa-paper-plane icon-1-3");
 
     bitfield   = bindWidget("bitfield",  move(bfield));
     addresses  = bindWidget("addresses", move(addrs));
@@ -45,12 +44,12 @@ void MemoryView::setUpMemory()
     addresses->setReadOnly(true);
 
     go->clicked().connect(this, &MemoryView::fetchBlock);
-    enableFetch(false);
 }
 
 void MemoryView::setEmulator(struct EmulationMachine* _emulator)
 {
     emulator = _emulator;
+    update(0x1000);
 }
 
 string format32BitReg(string s)
@@ -80,6 +79,8 @@ u32 fixFromAddress(u32 from)
         fixed = 0xFFFEC0;
     else if ((from % 16) != 0)
         fixed = from - (from % 16);
+    else
+        fixed = from;
 
     return fixed;
 }
@@ -87,7 +88,7 @@ u32 fixFromAddress(u32 from)
 string toHexString(u32 val)
 {
     stringstream ss;
-    ss << hex << val << "\n";
+    ss << hex << val;
     string s = ss.str();
     transform(s.begin(), s.end(), s.begin(), ::toupper);
 
@@ -102,8 +103,12 @@ void MemoryView::fetchBlock()
     bitfield->setText("");
 
     string _s = from->text().toUTF8();
-    
+
+    if (_s.empty())
+        _s = "0";
+
     offset_ = fixFromAddress(stoi(_s, nullptr, 16));
+
     from->setText(toHexString(offset_));
 
     for (size_t i = 0, j = 0; i < 20; i++, j += 16)
@@ -189,17 +194,6 @@ void MemoryView::update(unsigned int _from)
         free(block);
     }
 
-}
-
-
-void MemoryView::enableFetch(bool status)
-{
-    go->setDisabled(!status);
-    
-    if (status)
-        go->setStyleClass("fetch-btn");
-    else
-        go->setStyleClass("fetch-btn-disabled");
 }
 
 

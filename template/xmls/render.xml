@@ -11,7 +11,9 @@
                         ${console}
                         <div class="popup-div-console" id="console-popup">Need Input</div>
                     </div>
-                    ${clear-btn}
+                    <div class="popup-div-clr">
+                        ${clear-btn}
+                    </div>
                 </div>
                 <div class="float-right">
                     <div class="popup-div-download">

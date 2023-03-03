@@ -1,11 +1,14 @@
 #include "register.hpp"
 
 
-#define INVALID_MNEMONIC  "invalid"
+#define INVALID_MNEMONIC  "none"
 #define REG_DEF_VAL_2byte "0000"
 #define REG_DEF_VAL_4byte "00000000"
+#define SSP_DEF_VAL_4byte "01000000"
+#define USP_DEF_VAL_4byte "00FF0000"
 #define REG_DEF_VAL_16BIT "0000000000000000"
-
+#define CCR_DEF_VAL_16BIT 0x2000
+#define TIME              "0"
 
 string format32BitReg(string* s)
 {
@@ -73,10 +76,12 @@ void RegisterRender::clear()
         addr_reg[i]->setText(REG_DEF_VAL_4byte);
     }
 
-    setUSP(REG_DEF_VAL_4byte);
-    setSSP(REG_DEF_VAL_4byte);
+    addr_reg[7]->setText(SSP_DEF_VAL_4byte);
+
+    setUSP(USP_DEF_VAL_4byte);
+    setSSP(SSP_DEF_VAL_4byte);
     setPC (REG_DEF_VAL_4byte);
-    setCCR(0);
+    setCCR(CCR_DEF_VAL_16BIT);
 
     setMnemonic("", false);
     setHCode("", false);
@@ -106,8 +111,8 @@ void RegisterRender::init_data_reg()
         data_reg[i]->setId(_id);
 
         data_reg[i]->doJavaScript("\
-            const textarea" + _id + " = document.getElementById('" + _id + "'); \
-            const popup" + _id + " = document.getElementById('div-" + _id + "'); \
+            var textarea" + _id + " = document.getElementById('" + _id + "'); \
+            var popup" + _id + " = document.getElementById('div-" + _id + "'); \
             \
             textarea" + _id + ".addEventListener('mouseover', function() { \
                 popup" + _id + ".style.display = 'block'; \
@@ -138,8 +143,8 @@ void RegisterRender::init_addr_reg()
         addr_reg[i]->setId(_id);
 
         addr_reg[i]->doJavaScript("\
-            const textarea" + _id + " = document.getElementById('" + _id + "'); \
-            const popup" + _id + " = document.getElementById('div-" + _id + "'); \
+            var textarea" + _id + " = document.getElementById('" + _id + "'); \
+            var popup" + _id + " = document.getElementById('div-" + _id + "'); \
             \
             textarea" + _id + ".addEventListener('mouseover', function() { \
                 popup" + _id + ".style.display = 'block'; \
@@ -189,8 +194,8 @@ void RegisterRender::init_other_regs()
     CCR->setId(_id);
 
     CCR->doJavaScript("\
-        const textarea" + _id + " = document.getElementById('" + _id + "'); \
-        const popup" + _id + " = document.getElementById('div-" + _id + "'); \
+        var textarea" + _id + " = document.getElementById('" + _id + "'); \
+        var popup" + _id + " = document.getElementById('div-" + _id + "'); \
         \
         textarea" + _id + ".addEventListener('mouseover', function() { \
             popup" + _id + ".style.display = 'block'; \
@@ -263,15 +268,13 @@ void RegisterRender::init_others()
 void RegisterRender::setTime(unsigned int val, bool valid)
 {
     if (!valid)
-        time->setText(REG_DEF_VAL_16BIT);
+        time->setText(TIME);
     else
     {
         unsigned int _val = val;
         _val /= 1000;
 
-        string result = to_string(_val);
-
-        time->setText(format16BitReg(&result));
+        time->setText(to_string(_val));
     }
 }
 

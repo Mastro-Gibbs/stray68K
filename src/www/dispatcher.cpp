@@ -55,7 +55,7 @@ Dispatcher::Dispatcher()
 
     // creating all buttons
     auto c_btn = make_unique<WPushButton>();
-    c_btn->setText("Code");
+    c_btn->setText("Editor");
     c_btn->setStyleClass("button-box-item2-selected");
 
     auto m_btn = make_unique<WPushButton>();
@@ -67,8 +67,7 @@ Dispatcher::Dispatcher()
     k_btn->setStyleClass("button-box-item2-2");
 
     auto clear_c = make_unique<WPushButton>();
-    clear_c->setStyleClass("button-box-item2");
-    clear_c->setText("Clear");
+    clear_c->setStyleClass("button-box-item2-icon fa fa-trash icon-1-3");
 
     auto dload = make_unique<WPushButton>();
     dload->setStyleClass("button-box-item2-icon fa fa-download icon-1-3");
@@ -204,6 +203,7 @@ Dispatcher::Dispatcher()
     // setting-up some widgets
     memoryWidget->setUpMemory();
     consoleWidget->setUpConsole();
+    registerRenderWidget->clear();
 
     stackedWidget->setCurrentWidget(editorWidget);
 
@@ -312,8 +312,6 @@ void Dispatcher::do_run()
         runButton->setDisabled(true);
         debugButton->setDisabled(true);
 
-        memoryWidget->enableFetch(true);
-
         begin_emulator(&emulatorInstance, emulationData.bin().c_str());
 
         init_InputBuffer(&emulatorInstance);
@@ -370,13 +368,14 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
     
     if (uiLock) 
     {
+        memoryWidget->update();
+
+        end_emulator(em);
+
         registerRenderWidget->update(em->Machine.dump);
         consoleWidget->pushStdout(em->Machine.dump);
 
-        memoryWidget->update();
-        memoryWidget->enableFetch(false);
-
-        end_emulator(em);
+        clear_emulator(em);
 
         consoleWidget->disable(true);
 
@@ -421,8 +420,6 @@ void Dispatcher::do_debug()
         executeNextIstructionButton->setDisabled(false);
         continueExecutionButton->setDisabled(false);
         stopExecutionButton->setDisabled(false);
-
-        memoryWidget->enableFetch(true);
 
         runButton->setDisabled(true);
         debugButton->setDisabled(true);
@@ -511,13 +508,14 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
 
         if (uiLock) 
         {
+            memoryWidget->update();
+
+            end_emulator(em);
+
             registerRenderWidget->update(em->Machine.dump);
             consoleWidget->pushStdout(em->Machine.dump);
 
-            memoryWidget->update();
-            memoryWidget->enableFetch(false);
-
-            end_emulator(em);
+            clear_emulator(em);
 
             doJavaScript("resetHighlightingIndex();");
 
@@ -539,6 +537,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
         else 
         {
             end_emulator(em);
+            clear_emulator(em);
             return;
         }       
     }
@@ -595,6 +594,10 @@ void Dispatcher::do_stop()
     if (isDebugMode)
     {
         end_emulator(&emulatorInstance);
+
+        registerRenderWidget->update(emulatorInstance.Machine.dump);
+
+        clear_emulator(&emulatorInstance);
 
         consoleWidget->writeProgramStopped();
         consoleWidget->disable(true);

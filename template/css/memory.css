@@ -33,7 +33,7 @@
     align-items: center;
     float: right;
     width: 30%;
-    padding-right: 25px;
+    padding-right: 5px;
 }
 
 
@@ -113,10 +113,10 @@
 .from {
     font-size: 16px;
     font-family: monospace;
-    background-color: transparent;
+    background-color: #40414f;
     max-width: 8ch;
     color: #d1d5db;
-    border-width: 1px;
+    border-width: 0px;
     border-radius: 4px;
 }
 
@@ -124,32 +124,27 @@
     outline: none;
 }
 
-.fetch-btn {
-    width: 70px;
-    height: 25px;
-    font-size: small;
+.fetch-btn-icon {
     background-color: transparent;
-    color: #eae094;
+    color: rgb(234, 224, 148);
+    display: inline-block;
     border: none;
-    margin-left: 15px;
+    margin-left: 5px;
     transition-duration: .3s;
 }
 
-.fetch-btn:hover {
-    cursor: pointer;
+.fetch-btn-icon:hover {
     background-color: #484747;
-    border-radius: 1px;
+    border-radius: 3px;
+    cursor: pointer;
+    border: none;
 }
 
-.fetch-btn-disabled {
-    cursor: default;
+.fetch-btn-icon:disabled {
     background-color: transparent;
-    width: 70px;
-    height: 25px;
-    font-size: small;
     color: #5e5e5e;
+    cursor: default;
     border: none;
-    margin-left: 15px;
 }
 
 
@@ -157,4 +152,24 @@
     grid-column-start: 1;
     grid-column-end: 2;
     background-color: transparent;
+}
+
+
+.popup-div-fetch {
+    position: relative;
+}
+  
+.popup-div-fetch:hover::before {
+    font-size: small;
+    font-family: monospace;
+    content: "Fetch";
+    position: absolute;
+    top: 110%;
+    padding: 5px;
+    background-color: #292731;
+    color: #eae094;
+    border-radius: 2px;
+    white-space: nowrap;
+    font-weight: 600;
+    animation: fade-in 1s forwards;
 }

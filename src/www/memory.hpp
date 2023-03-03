@@ -29,8 +29,6 @@ class MemoryView : public WTemplate
 
         void update(unsigned int _from = 0);
 
-        void enableFetch(bool status);
-
         void setEmulator(struct EmulationMachine* _emulator);
 
     private:

@@ -40,6 +40,9 @@ extern "C" {
     void 
     end_emulator(struct EmulationMachine* emulatorInstance);
 
+    void 
+    clear_emulator(struct EmulationMachine* emulator);
+
     int 
     emulate (struct EmulationMachine* emulatorInstance);
 
@@ -97,6 +100,8 @@ class Dispatcher : public WContainerWidget
                 nextIstructionThread.joinable())
             nextIstructionThread.join();
         }
+
+        struct EmulationMachine* emulator();
 
     private:
         struct EmulationMachine  emulatorInstance;

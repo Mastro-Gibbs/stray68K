@@ -13,7 +13,9 @@
                     </div>
                     <div class="float-right2">
                         ${from}
-                        ${go}
+                        <div class="popup-div-fetch">
+                            ${go}
+                        </div>
                     </div>
                 </div>
             </div>

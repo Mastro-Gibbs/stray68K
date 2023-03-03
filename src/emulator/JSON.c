@@ -95,6 +95,9 @@ char* Jop(char *mnem, u32 code_promoted)
     char *res = NULL;
     u16 code = (u16) code_promoted;
 
+    if (!mnem)
+        mnem = "none";
+
     s32 size = snprintf(NULL, 0, "{\"OP\":{\"MNEMONIC\":\"%s\",\"CODE\":\"%X\"}}", mnem, code);
 
     res = (char*) malloc(sizeof(char) * (size+3));

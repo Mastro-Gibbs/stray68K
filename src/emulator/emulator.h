@@ -9,6 +9,9 @@ begin_emulator(struct EmulationMachine* restrict emulator, const char *path);
 void 
 end_emulator(struct EmulationMachine* restrict emulator);
 
+void 
+end_emulator(struct EmulationMachine* restrict emulator);
+
 int emulate
 (struct EmulationMachine* restrict emulator);
 

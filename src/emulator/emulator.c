@@ -217,6 +217,14 @@ void end_emulator(struct EmulationMachine* restrict emulator)
         emulator->Machine.IO.Type = IO_UNDEF;
         emulator->Machine.State = FINAL_STATE;
 
+        emit_dump(emulator);
+    }
+}
+
+void clear_emulator(struct EmulationMachine* restrict emulator)
+{
+    if (emulator)
+    {
         if (emulator->Machine.IO.buffer)
             free(emulator->Machine.IO.buffer);
 
