@@ -14,17 +14,37 @@
                     ${clear-btn}
                 </div>
                 <div class="float-right">
-                    ${download}
-                    ${compile}
-                    ${run}
-                    ${debug}
+                    <div class="popup-div-download">
+                        ${download}
+                    </div>
+                    <div class="popup-div-assemble">
+                        ${compile}
+                    </div>
+                    <div class="popup-div-run">
+                        ${run}
+                    </div>
+                    <div class="popup-div-debug">
+                        ${debug}
+                    </div>
                 </div>
             </div>
             <div class="button-box3 containeritem-navbar2">
-                ${next}
-                ${continue}
-                ${stop}
-                ${clr}
+                <div class="float-left2">
+                    <div class="popup-div-next">
+                        ${next}
+                    </div>
+                    <div class="popup-div-continue">
+                        ${continue}
+                    </div>
+                    <div class="popup-div-stop">
+                        ${stop}
+                    </div>
+                </div>
+                <div class="float-right">
+                    <div class="popup-div-clr">
+                        ${clr}
+                    </div>
+                </div>
             </div>
             <div class="containeritem-widget">
                 <div>

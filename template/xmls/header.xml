@@ -3,8 +3,17 @@
 
     <message id="header-msg">
         <div class="header">
-            <div class="popup-div">
-                ${title}
+            <div class="containerX">
+                <div class="centerX">
+                    <div class="popup-div">
+                        ${title}
+                    </div>
+                </div>
+                <div class="rightX">
+                    <a class="popup-div-qm" href="stray68K/help" target="_blank">
+                        <i id="qm" class="fa fa-question-circle-o fa-2x" aria-hidden="true"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </message>

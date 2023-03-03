@@ -15,8 +15,7 @@ Editor::Editor()
 
     jsEditorContentRequestSignal.connect(std::bind(&Editor::onContentRequest, this, std::placeholders::_1));
 
-    jsEditorInputSignal.connect(this, [=]
-                                { onTextChange.emit(); });
+    jsEditorInputSignal.connect(std::bind(&Editor::onEditorInput, this, std::placeholders::_1));
 }
 
 void Editor::onContentRequest(std::string result)
@@ -24,6 +23,11 @@ void Editor::onContentRequest(std::string result)
     self = result;
 
     onTextAvailable.emit();
+}
+
+void Editor::onEditorInput(std::string result)
+{
+    onTextChange.emit();
 }
 
 

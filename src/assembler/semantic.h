@@ -32,9 +32,7 @@
 #define PROGRAM_COUNTER_OF_EXPRESSION ",PROGRAM_COUNTER_OF_EXPRESSION"
 
 
-SemanticState* obtain_semantic_state();
-
-void free_SemanticState(SemanticState* state);
+void free_AssemblerError(SemanticState* state);
 
 
 cc_bool ClownAssembler_Assemble(SemanticState* state, FILE *input_file, FILE *output_file, FILE *listing_file, FILE *symbol_file, const char *input_file_path, cc_bool debug, cc_bool case_insensitive, cc_bool equ_set_descope_local_labels);

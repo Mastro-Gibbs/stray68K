@@ -3,20 +3,17 @@
 
 #include "motorolatypes.h"
 
-int 
-is_last_istr(struct EmulationMachine* emulator);
+void 
+begin_emulator(struct EmulationMachine* restrict emulator, const char *path);
 
 void 
-begin_emulator(struct EmulationMachine* emulator);
-
-void 
-end_emulator(struct EmulationMachine* emulator);
+end_emulator(struct EmulationMachine* restrict emulator);
 
 int emulate
-(struct EmulationMachine* emulator);
+(struct EmulationMachine* restrict emulator);
 
-struct EmulationMachine*
-obtain_emulation_machine(const char *path);
+struct EmulationMachine
+obtain_emulation_machine();
 
 
 #endif // __EMULATOR_H__68000

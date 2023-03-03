@@ -28,12 +28,8 @@ Dispatcher::Dispatcher()
     assembleButton(nullptr),
     runButton(nullptr),
     debugButton(nullptr),
-    emulatorInstance(nullptr),
-    assemblerState(nullptr),
     quitThread_runBinaryThread(false),
-    quitThread_nextIstructionThread(false),
     isDebugMode(false),
-    isRunningOnRunThread(false),
     isDebugStarted(false),
     WContainerWidget()
 {
@@ -70,42 +66,33 @@ Dispatcher::Dispatcher()
     k_btn->setText("Console");
     k_btn->setStyleClass("button-box-item2-2");
 
-    auto n_btn = make_unique<WPushButton>();
-    n_btn->setText("Next");
-    n_btn->setStyleClass("button-box-item2");
-
-    auto s_btn = make_unique<WPushButton>();
-    s_btn->setText("Stop");
-    s_btn->setStyleClass("button-box-item2");
-
-    auto t_btn = make_unique<WPushButton>();
-    t_btn->setText("Continue");
-    t_btn->setStyleClass("button-box-item2");
-
-    auto clr_btn = make_unique<WPushButton>();
-    clr_btn->setText("Clear");
-    clr_btn->setStyleClass("button-box-item2");
-
-    auto comp_btn = make_unique<WPushButton>();
-    comp_btn->setText("Assemble");
-    comp_btn->setStyleClass("button-box-item2");
-
-    auto r_btn = make_unique<WPushButton>();
-    r_btn->setText("Run");
-    r_btn->setStyleClass("button-box-item2");
-
-    auto d_btn = make_unique<WPushButton>();
-    d_btn->setText("Debug");
-    d_btn->setStyleClass("button-box-item2");
-
     auto clear_c = make_unique<WPushButton>();
     clear_c->setStyleClass("button-box-item2");
     clear_c->setText("Clear");
 
     auto dload = make_unique<WPushButton>();
-    dload->setStyleClass("button-box-item2");
-    dload->setText("Download");
+    dload->setStyleClass("button-box-item2-icon fa fa-download icon-1-3");
 
+    auto comp_btn = make_unique<WPushButton>();
+    comp_btn->setStyleClass("button-box-item2-icon fa fa-cogs icon-1-3");
+
+    auto r_btn = make_unique<WPushButton>();
+    r_btn->setStyleClass("button-box-item2-icon fa fa-play icon-1-3");
+
+    auto d_btn = make_unique<WPushButton>();
+    d_btn->setStyleClass("button-box-item2-icon fa fa-bug icon-1-3");
+
+    auto n_btn = make_unique<WPushButton>();
+    n_btn->setStyleClass("button-box-item2-icon fa fa-step-forward icon-1-3");
+
+    auto s_btn = make_unique<WPushButton>();
+    s_btn->setStyleClass("button-box-item2-icon fa fa-stop icon-1-3");
+
+    auto t_btn = make_unique<WPushButton>();
+    t_btn->setStyleClass("button-box-item2-icon fa fa-fast-forward icon-1-3");
+
+    auto clr_btn = make_unique<WPushButton>();
+    clr_btn->setStyleClass("button-box-item2-icon fa fa-trash icon-1-3");
 
     // get instance of WStackedWidget
     auto stack = make_unique<Wt::WStackedWidget>();
@@ -221,6 +208,9 @@ Dispatcher::Dispatcher()
     stackedWidget->setCurrentWidget(editorWidget);
 
     doJavaScript("hidePopupConsoleDiv();");
+
+    memoryWidget->setEmulator(&emulatorInstance);
+    consoleWidget->setEmulator(&emulatorInstance);
 }
 
 
@@ -267,38 +257,30 @@ void Dispatcher::__compile()
             string bname = fname;
             replace(bname.begin(), bname.end(), 'X', 'B');
 
-            assemblerState = obtain_semantic_state();
+            int status = EXIT_FAILURE;
+            status = assemble(&assemblerState, fname.c_str());
 
-            if (assemblerState)
+            switch (status)
             {
-                int status = EXIT_FAILURE;
-                status = assemble(assemblerState, fname.c_str());
+                case EXIT_FAILURE:
+                    consoleWidget->pushText(string(assemblerState._asseble_error));
+                    emulationData.setValid(false);
+                    break;
 
-                switch (status)
-                {
-                    case EXIT_FAILURE:
-                        consoleWidget->pushText(string(assemblerState->_asseble_error));
-                        emulationData.setValid(false);
-                        break;
+                case EXIT_WARNING:
+                    consoleWidget->pushText(string(assemblerState._asseble_error), false);
 
-                    case EXIT_WARNING:
-                        consoleWidget->pushText(string(assemblerState->_asseble_error), false);
-
-                    case EXIT_SUCCESS:
-                        emulationData.setBin(bname);
-                        emulationData.setValid(true);
-                        consoleWidget->writeAssemblingDone();
-                        runButton->setDisabled(false);
-                        debugButton->setDisabled(false);
-                        assembleButton->setDisabled(true);
-                        break;
-                }
-
-                free_SemanticState(assemblerState);
-
+                case EXIT_SUCCESS:
+                    emulationData.setBin(bname);
+                    emulationData.setValid(true);
+                    consoleWidget->writeAssemblingDone();
+                    runButton->setDisabled(false);
+                    debugButton->setDisabled(false);
+                    assembleButton->setDisabled(true);
+                    break;
             }
-            else
-            { consoleWidget->writeAssemblingFail(); emulationData.setValid(false); }  
+
+            free_AssemblerError(&assemblerState);
         }
         else
         {   consoleWidget->writeAssemblingFail(); emulationData.setValid(false); }
@@ -331,16 +313,12 @@ void Dispatcher::do_run()
         debugButton->setDisabled(true);
 
         memoryWidget->enableFetch(true);
-         
-        emulatorInstance = obtain_emulation_machine(emulationData.bin().c_str());
-        consoleWidget->setEmulator(emulatorInstance);
-        memoryWidget->setEmulator(emulatorInstance);
 
-        begin_emulator(emulatorInstance);
+        begin_emulator(&emulatorInstance, emulationData.bin().c_str());
 
-        init_InputBuffer(emulatorInstance);
+        init_InputBuffer(&emulatorInstance);
 
-        memoryWidget->update(peek_ORG_from_file(emulatorInstance));
+        memoryWidget->update(peek_ORG_from_file(&emulatorInstance));
 
         consoleWidget->writeProgramStarted();
 
@@ -349,15 +327,16 @@ void Dispatcher::do_run()
         quitThread_runBinaryThread = false;
 
         isDebugMode = false;
-        isRunningOnRunThread = false;
         isDebugStarted = false;
 
-        (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
+        (is_next_inst_scan(&emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
         
         if (runBinaryThread.joinable())
             runBinaryThread.join();
             
-        runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_runBinaryThread)));     
+        runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, &emulatorInstance, std::ref(quitThread_runBinaryThread)));     
+    
+        
     }
 }
 
@@ -379,7 +358,9 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
 
             consoleWidget->pushStdout(em->Machine.dump);
             registerRenderWidget->update(em->Machine.dump);
-            memoryWidget->update();
+
+            if (stackedWidget->currentWidget() == memoryWidget)
+                memoryWidget->update();
 
             app->triggerUpdate();
         }
@@ -390,13 +371,12 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
     if (uiLock) 
     {
         registerRenderWidget->update(em->Machine.dump);
-        consoleWidget->pushStdout(emulatorInstance->Machine.dump);
+        consoleWidget->pushStdout(em->Machine.dump);
 
         memoryWidget->update();
         memoryWidget->enableFetch(false);
 
         end_emulator(em);
-        em = nullptr;
 
         consoleWidget->disable(true);
 
@@ -410,9 +390,6 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
         continueExecutionButton->setDisabled(true);
         stopExecutionButton->setDisabled(true);
 
-        consoleWidget->setEmulator(nullptr);
-        memoryWidget->setEmulator(nullptr);
-
         app->triggerUpdate();
 
         app->enableUpdates(false);
@@ -420,7 +397,6 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
     else 
     {
         end_emulator(em);
-        em = nullptr;
         return;
     }
 }
@@ -429,7 +405,7 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
 /**
  * ACTION debug
  * 
- * init emulatorInstance and pseudo-stdin
+ * init &emulatorInstance and pseudo-stdin
  * just it
  */
 void Dispatcher::do_debug()
@@ -450,24 +426,23 @@ void Dispatcher::do_debug()
 
         runButton->setDisabled(true);
         debugButton->setDisabled(true);
-    
-        emulatorInstance = obtain_emulation_machine(emulationData.bin().c_str());
-        consoleWidget->setEmulator(emulatorInstance);
-        memoryWidget->setEmulator(emulatorInstance);
 
-        begin_emulator(emulatorInstance);
+        if (&emulatorInstance)
+        {
+            begin_emulator(&emulatorInstance, emulationData.bin().c_str());
 
-        init_InputBuffer(emulatorInstance);
+            init_InputBuffer(&emulatorInstance);
 
-        memoryWidget->update(peek_ORG_from_file(emulatorInstance));
+            memoryWidget->update(peek_ORG_from_file(&emulatorInstance));
 
-        consoleWidget->writeProgramStarted();
+            consoleWidget->writeProgramStarted();
 
-        isDebugMode = true;
-        isDebugStarted = false;
+            isDebugMode = true;
+            isDebugStarted = false;
 
-        doJavaScript("removeAllMarkers();");
-        doJavaScript("getLines();");
+            doJavaScript("removeAllMarkers();");
+            doJavaScript("getLines();");
+        }
     }
 }
 
@@ -485,20 +460,19 @@ void Dispatcher::do_next()
 
     app->enableUpdates(true);
 
-    doJavaScript("doLineHighLight(" + to_string(emulatorInstance->Machine.cpu.pc) + ");");
-
-    quitThread_nextIstructionThread = false;
+    doJavaScript("doLineHighLight(" + to_string(emulatorInstance.Machine.cpu.pc) + ");");
 
     executeNextIstructionButton->setDisabled(true);
+    continueExecutionButton->setDisabled(true);
 
     isDebugStarted = true;
 
-    (is_next_inst_scan(emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
+    (is_next_inst_scan(&emulatorInstance) == c_true) ? consoleWidget->disable(false) : consoleWidget->disable(true);
         
     if (nextIstructionThread.joinable())
         nextIstructionThread.join();
         
-    nextIstructionThread = std::thread(std::bind(&Dispatcher::doNext_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_nextIstructionThread)));
+    nextIstructionThread = std::thread(std::bind(&Dispatcher::doNext_WorkerThreadBody, this, app, &emulatorInstance));
 }
 
 
@@ -510,9 +484,9 @@ void Dispatcher::do_next()
  * 'fetch and push' last data to widgets 
  * 
  */
-void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em, std::atomic<bool>& quit)
+void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em)
 {
-    if (!quit && emulate(emulatorInstance))
+    if (emulate(em))
     {
         WApplication::UpdateLock uiLock(app);
     
@@ -525,6 +499,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
             memoryWidget->update();
 
             executeNextIstructionButton->setDisabled(false); 
+            continueExecutionButton->setDisabled(false);
 
             app->triggerUpdate();
             app->enableUpdates(false);
@@ -533,7 +508,7 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
     else
     {
         WApplication::UpdateLock uiLock(app);
-        
+
         if (uiLock) 
         {
             registerRenderWidget->update(em->Machine.dump);
@@ -543,7 +518,6 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
             memoryWidget->enableFetch(false);
 
             end_emulator(em);
-            em = nullptr;
 
             doJavaScript("resetHighlightingIndex();");
 
@@ -558,9 +532,6 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
             continueExecutionButton->setDisabled(true);
             stopExecutionButton->setDisabled(true);
 
-            consoleWidget->setEmulator(nullptr);
-            memoryWidget->setEmulator(nullptr);
-
             app->triggerUpdate();
 
             app->enableUpdates(false);
@@ -568,7 +539,6 @@ void Dispatcher::doNext_WorkerThreadBody(WApplication* app, struct EmulationMach
         else 
         {
             end_emulator(em);
-            em = nullptr;
             return;
         }       
     }
@@ -595,7 +565,6 @@ void Dispatcher::do_continue()
     executeNextIstructionButton->setDisabled(true);
     continueExecutionButton->setDisabled(true);
 
-    isRunningOnRunThread = true;
     isDebugMode = false;
     isDebugStarted = false;
 
@@ -604,7 +573,7 @@ void Dispatcher::do_continue()
     if (runBinaryThread.joinable())
         runBinaryThread.join();
         
-    runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, emulatorInstance, std::ref(quitThread_runBinaryThread))); 
+    runBinaryThread = std::thread(std::bind(&Dispatcher::doRun_WorkerThreadBody, this, app, &emulatorInstance, std::ref(quitThread_runBinaryThread))); 
 }
 
 
@@ -616,27 +585,19 @@ void Dispatcher::do_continue()
  */
 void Dispatcher::do_stop()
 {
-    set_InputBuffer_enabled(emulatorInstance, c_false);
+    set_InputBuffer_enabled(&emulatorInstance, c_false);
 
     quitThread_runBinaryThread = true;
-    quitThread_nextIstructionThread = true;
 
     doJavaScript("resetHighlightingIndex();");
     doJavaScript("removeAllMarkers();");
 
-    if (isDebugMode && (!isRunningOnRunThread || !isDebugStarted))
+    if (isDebugMode)
     {
-        registerRenderWidget->update(emulatorInstance->Machine.dump);
-        consoleWidget->pushStdout(emulatorInstance->Machine.dump);
+        end_emulator(&emulatorInstance);
 
-        memoryWidget->update();
-        memoryWidget->enableFetch(false);
-
-        end_emulator(emulatorInstance);
-        emulatorInstance = nullptr;
-        
+        consoleWidget->writeProgramStopped();
         consoleWidget->disable(true);
-        consoleWidget->writeProgramFinished();
 
         editorWidget->disable(false);
         runButton->setDisabled(false);
@@ -646,7 +607,6 @@ void Dispatcher::do_stop()
         continueExecutionButton->setDisabled(true);
         stopExecutionButton->setDisabled(true);
 
-        consoleWidget->setEmulator(nullptr);
-        memoryWidget->setEmulator(nullptr);      
+        isDebugMode = false;
     }
 }

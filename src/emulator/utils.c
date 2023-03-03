@@ -5,12 +5,12 @@
 #include <unistd.h>
 
 
-void flush_InputBuffer(struct EmulationMachine* emulator) 
+void flush_InputBuffer(struct EmulationMachine* restrict emulator) 
 { 
     emulator->Machine.IO.InputBuffer._valid = 1; 
 }
 
-void init_InputBuffer(struct EmulationMachine* emulator) 
+void init_InputBuffer(struct EmulationMachine* restrict emulator) 
 { 
     for(size_t i = 0; i < 4096; ++i) 
         emulator->Machine.IO.InputBuffer.self[i] = 0;  
@@ -20,7 +20,7 @@ void init_InputBuffer(struct EmulationMachine* emulator)
     emulator->Machine.IO.InputBuffer._able  = c_true; 
 }
 
-void InputBuffer_cwrite(struct EmulationMachine* emulator, char _c) 
+void InputBuffer_cwrite(struct EmulationMachine* restrict emulator, char _c) 
 { 
     if (emulator->Machine.IO.InputBuffer._pos == 4095)
         return;
@@ -29,27 +29,27 @@ void InputBuffer_cwrite(struct EmulationMachine* emulator, char _c)
     emulator->Machine.IO.InputBuffer._pos += 1; 
 }
 
-void set_InputBuffer_enabled(struct EmulationMachine* emulator, c_bool _bool)
+void set_InputBuffer_enabled(struct EmulationMachine* restrict emulator, c_bool _bool)
 {
     emulator->Machine.IO.InputBuffer._able  = _bool; 
 }
 
-c_bool is_buffer_valid(struct EmulationMachine* emulator)
+c_bool is_buffer_valid(struct EmulationMachine* restrict emulator)
 {
     return emulator->Machine.IO.InputBuffer._valid;
 }
 
-c_bool is_buffering_enabled(struct EmulationMachine* emulator)
+c_bool is_buffering_enabled(struct EmulationMachine* restrict emulator)
 {
     return emulator->Machine.IO.InputBuffer._able;
 }
 
-u32 buffer_len(struct EmulationMachine* emulator)
+u32 buffer_len(struct EmulationMachine* restrict emulator)
 {
     return emulator->Machine.IO.InputBuffer._pos;
 }
 
-u32 read_int_InputBuffer(struct EmulationMachine* emulator) 
+u32 read_int_InputBuffer(struct EmulationMachine* restrict emulator) 
 {
     u32 res = 0;
 
@@ -58,7 +58,7 @@ u32 read_int_InputBuffer(struct EmulationMachine* emulator)
     return res;
 }
 
-char* read_str_InputBuffer(struct EmulationMachine* emulator)
+char* read_str_InputBuffer(struct EmulationMachine* restrict emulator)
 {
     char* str = malloc(4096);
 
@@ -121,7 +121,7 @@ u32 hash (const char* word)
 
 
 /* IO EA */
-u32 read_ram(struct EmulationMachine* emulator, u32 *addr, opsize *size)
+u32 read_ram(struct EmulationMachine* restrict emulator, u32 *addr, opsize *size)
 {
     switch (*size) {
         case BYTE:
@@ -415,7 +415,7 @@ char* eval_print_seq(struct EmulationMachine *emulator)
 }
 
 
-c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restrict ram_ptr)
+c_bool eval_scan_placeholder_seq(struct EmulationMachine* restrict emulator, u32* restrict ram_ptr)
 {
     char cchar = 0x0, lookahead = 0x0; 
     s32  index = 0;
@@ -582,7 +582,7 @@ c_bool eval_scan_placeholder_seq(struct EmulationMachine* emulator, u32* restric
     return c_true;
 }
 
-void eval_scan_seq(struct EmulationMachine* emulator)
+void eval_scan_seq(struct EmulationMachine* restrict emulator)
 {
     u32  ram_ptr = 0x0;
     char cchar   = 0x0;

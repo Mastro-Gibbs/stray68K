@@ -82,7 +82,7 @@ function initACEEditor()
             for (let item of prevMarkersArr)
                 editor.session.removeMarker(prevMarkers[item].id);
         }
-        Wt.emit('EditorCpp', 'onEditorInput_Signal'); 
+        Wt.emit('EditorCpp', 'onEditorInput_Signal', null); 
     }); 
    
     editor.commands.addCommands(

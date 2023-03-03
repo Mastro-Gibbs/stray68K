@@ -10,14 +10,14 @@
 #include <stdio.h>
 
 
-void flush_InputBuffer(struct EmulationMachine* emulator);
-void init_InputBuffer(struct EmulationMachine* emulator);
+void flush_InputBuffer(struct EmulationMachine* restrict emulator);
+void init_InputBuffer(struct EmulationMachine* restrict emulator);
 
-void InputBuffer_cwrite(struct EmulationMachine* emulator, char _c);
-void set_InputBuffer_enabled(struct EmulationMachine* emulator, c_bool _bool);
+void InputBuffer_cwrite(struct EmulationMachine* restrict emulator, char _c);
+void set_InputBuffer_enabled(struct EmulationMachine* restrict emulator, c_bool _bool);
 
-u32   read_int_InputBuffer(struct EmulationMachine* emulator);
-char* read_str_InputBuffer(struct EmulationMachine* emulator);
+u32   read_int_InputBuffer(struct EmulationMachine* restrict emulator);
+char* read_str_InputBuffer(struct EmulationMachine* restrict emulator);
 
 
 /*
@@ -413,7 +413,7 @@ u32 hash (const char* word);
 
 
 /* IO EA */
-u32 read_ram(struct EmulationMachine* emulator, u32 *addr, opsize *size);
+u32 read_ram(struct EmulationMachine* restrict emulator, u32 *addr, opsize *size);
 
 /* MISC */
 sspan size_to_span(opsize size);

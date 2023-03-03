@@ -26,33 +26,42 @@ using namespace std;
 
 extern "C" {
 
-    SemanticState* obtain_semantic_state();
+    // assembler func headers
+    void 
+    free_AssemblerError(SemanticState* state);
 
-    void free_SemanticState(SemanticState* state);
+    int  
+    assemble(SemanticState* astatus, const char* filepath);
 
-    int assemble(SemanticState* astatus, const char* filepath);
+    // emulator func headers
+    void 
+    begin_emulator(struct EmulationMachine* emulatorInstance, const char *path);
 
-    struct EmulationMachine* obtain_emulation_machine(const char *path);
+    void 
+    end_emulator(struct EmulationMachine* emulatorInstance);
 
-    int is_last_istr(struct EmulationMachine* emulatorInstance);
+    int 
+    emulate (struct EmulationMachine* emulatorInstance);
 
-    void begin_emulator(struct EmulationMachine* emulatorInstance);
+    u32
+    peek_ORG_from_file(struct EmulationMachine *emulatorInstance);
 
-    void end_emulator(struct EmulationMachine* emulatorInstance);
+    c_bool
+    is_next_inst_scan(struct EmulationMachine *emulator);
 
-    int emulate (struct EmulationMachine* emulatorInstance);
 
-    void flush_InputBuffer(struct EmulationMachine* emulatorInstance);
+    // input buffer func headers
+    void 
+    flush_InputBuffer(struct EmulationMachine* emulatorInstance);
 
-    void init_InputBuffer(struct EmulationMachine* emulatorInstance);
+    void 
+    init_InputBuffer(struct EmulationMachine* emulatorInstance);
 
-    void InputBuffer_cwrite(struct EmulationMachine* emulatorInstance, char _c);
+    void 
+    InputBuffer_cwrite(struct EmulationMachine* emulatorInstance, char _c);
 
-    void set_InputBuffer_enabled(struct EmulationMachine* emulatorInstance, c_bool _bool);
-
-    u32 peek_ORG_from_file(struct EmulationMachine *emulatorInstance);
-
-    c_bool is_next_inst_scan(struct EmulationMachine *emulator);
+    void 
+    set_InputBuffer_enabled(struct EmulationMachine* emulatorInstance, c_bool _bool);
 }
 
 typedef struct __emulation_data__ 
@@ -90,8 +99,8 @@ class Dispatcher : public WContainerWidget
         }
 
     private:
-        struct EmulationMachine* emulatorInstance;
-        SemanticState*           assemblerState;
+        struct EmulationMachine  emulatorInstance;
+        SemanticState            assemblerState;
 
         EmulationData emulationData;
 
@@ -123,12 +132,9 @@ class Dispatcher : public WContainerWidget
         thread nextIstructionThread;
 
         std::atomic<bool> quitThread_runBinaryThread;
-        std::atomic<bool> quitThread_nextIstructionThread;
 
         std::atomic<bool> isDebugMode;
-        std::atomic<bool> isRunningOnRunThread;
         std::atomic<bool> isDebugStarted;
-
 
         void do_compile();
         void __compile();
@@ -141,7 +147,7 @@ class Dispatcher : public WContainerWidget
         void do_continue();
 
         void doRun_WorkerThreadBody(WApplication *app,  struct EmulationMachine* em, std::atomic<bool>& quit);
-        void doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em, std::atomic<bool>& quit);
+        void doNext_WorkerThreadBody(WApplication* app, struct EmulationMachine* em);
 };
 
 

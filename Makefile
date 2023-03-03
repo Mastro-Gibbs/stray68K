@@ -5,14 +5,14 @@
 ####### Compiler, tools and options
 
 CC            = gcc
-CFLAGS        = -pipe -g -Wall -Wextra -fPIC
+CFLAGS        = -pipe -g -Wall -Wextra -fPIC -O3
 DEL_FILE      = rm -f
 MKDIR         = mkdir -p
 DEL_DIR       = rmdir
 ROOT_DIR      := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 CXX       = g++
-CXXFLAGS  = -std=c++14
+CXXFLAGS  = -std=c++14 -O3
 LIBS      = -lwthttp -lwt
 
 LEX           = flex

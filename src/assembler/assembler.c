@@ -190,6 +190,9 @@ int assemble(SemanticState* state, const char* filepath)
 
             fclose(input_file);
         }
+    
+        if (output_file_path)
+            free(output_file_path);
     }
 
     return exit_code;

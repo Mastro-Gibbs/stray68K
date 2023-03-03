@@ -22,142 +22,142 @@ c_bool is_next_inst_scan(struct EmulationMachine *emulator);
  *
  */
 // GROUP 0x00
-u32 ORItoCCR(struct EmulationMachine* emulator);  //ok
-u32 ORItoSR(struct EmulationMachine* emulator);   //ok
-u32 ORI(struct EmulationMachine* emulator);       //ok
-u32 ANDItoCCR(struct EmulationMachine* emulator); //ok
-u32 ANDItoSR(struct EmulationMachine* emulator);  //ok
-u32 ANDI(struct EmulationMachine* emulator);      //ok
-u32 SUBI(struct EmulationMachine* emulator);      //ok
-u32 ADDI(struct EmulationMachine* emulator);      //ok
-u32 EORItoCCR(struct EmulationMachine* emulator); //ok
-u32 EORItoSR(struct EmulationMachine* emulator);  //ok
-u32 EORI(struct EmulationMachine* emulator);      //ok
-u32 CMPI(struct EmulationMachine* emulator);      //ok
-u32 MOVEP(struct EmulationMachine* emulator);     // maybe next -warn
-u32 BTST(struct EmulationMachine* emulator);      //ok
-u32 BCHG(struct EmulationMachine* emulator);      //ok
-u32 BCLR(struct EmulationMachine* emulator);      //ok
-u32 BSET(struct EmulationMachine* emulator);      //ok
+u32 ORItoCCR(struct EmulationMachine* restrict emulator);  //ok
+u32 ORItoSR(struct EmulationMachine* restrict emulator);   //ok
+u32 ORI(struct EmulationMachine* restrict emulator);       //ok
+u32 ANDItoCCR(struct EmulationMachine* restrict emulator); //ok
+u32 ANDItoSR(struct EmulationMachine* restrict emulator);  //ok
+u32 ANDI(struct EmulationMachine* restrict emulator);      //ok
+u32 SUBI(struct EmulationMachine* restrict emulator);      //ok
+u32 ADDI(struct EmulationMachine* restrict emulator);      //ok
+u32 EORItoCCR(struct EmulationMachine* restrict emulator); //ok
+u32 EORItoSR(struct EmulationMachine* restrict emulator);  //ok
+u32 EORI(struct EmulationMachine* restrict emulator);      //ok
+u32 CMPI(struct EmulationMachine* restrict emulator);      //ok
+u32 MOVEP(struct EmulationMachine* restrict emulator);     // maybe next -warn
+u32 BTST(struct EmulationMachine* restrict emulator);      //ok
+u32 BCHG(struct EmulationMachine* restrict emulator);      //ok
+u32 BCLR(struct EmulationMachine* restrict emulator);      //ok
+u32 BSET(struct EmulationMachine* restrict emulator);      //ok
 
 
 // GROUP 0x01
-u32 MOVE(struct EmulationMachine* emulator);   //ok
+u32 MOVE(struct EmulationMachine* restrict emulator);   //ok
 
 
 // GROUP 0x02-0x03
-u32 MOVEA(struct EmulationMachine* emulator);  //ok
+u32 MOVEA(struct EmulationMachine* restrict emulator);  //ok
 
 
 // group 0X04
-u32 MOVEfromSR(struct EmulationMachine* emulator); //ok
-u32 MOVEtoCCR(struct EmulationMachine* emulator);  //ok
-u32 MOVEtoSR(struct EmulationMachine* emulator);   //ok
-u32 NEGX(struct EmulationMachine* emulator);       //ok
-u32 CLR(struct EmulationMachine* emulator);        //ok
-u32 NEG(struct EmulationMachine* emulator);        //ok
-u32 NOT(struct EmulationMachine* emulator);        //ok
-u32 EXT(struct EmulationMachine* emulator);        //ok
-u32 NBCD(struct EmulationMachine* emulator);       //ok
-u32 SWAP(struct EmulationMachine* emulator);       //ok
-u32 PEA(struct EmulationMachine* emulator);        //ok
-u32 ILLEGAL(struct EmulationMachine* emulator);    //ok
-u32 TAS(struct EmulationMachine* emulator);        // ?? -warn
-u32 TST(struct EmulationMachine* emulator);        //ok
-u32 TRAP(struct EmulationMachine* emulator);       //ok
-u32 LINK(struct EmulationMachine* emulator);       //ok
-u32 UNLK(struct EmulationMachine* emulator);       //ok
-u32 MOVEUSP(struct EmulationMachine* emulator);    //ok
-u32 RESET(struct EmulationMachine* emulator);      // ?? -warn
-u32 NOP(struct EmulationMachine* emulator);        //ok
-u32 STOP(struct EmulationMachine* emulator);       // ?? -warn
-u32 RTE(struct EmulationMachine* emulator);        //ok
-u32 RTS(struct EmulationMachine* emulator);        //ok
-u32 TRAPV(struct EmulationMachine* emulator);      //ok
-u32 RTR(struct EmulationMachine* emulator);        //ok
-u32 JSR(struct EmulationMachine* emulator);        //ok
-u32 JMP(struct EmulationMachine* emulator);        //ok
-u32 MOVEM(struct EmulationMachine* emulator);      // wtf -warn
-u32 CHK(struct EmulationMachine* emulator);        // ok -warn
-u32 LEA(struct EmulationMachine* emulator);        //ok
+u32 MOVEfromSR(struct EmulationMachine* restrict emulator); //ok
+u32 MOVEtoCCR(struct EmulationMachine* restrict emulator);  //ok
+u32 MOVEtoSR(struct EmulationMachine* restrict emulator);   //ok
+u32 NEGX(struct EmulationMachine* restrict emulator);       //ok
+u32 CLR(struct EmulationMachine* restrict emulator);        //ok
+u32 NEG(struct EmulationMachine* restrict emulator);        //ok
+u32 NOT(struct EmulationMachine* restrict emulator);        //ok
+u32 EXT(struct EmulationMachine* restrict emulator);        //ok
+u32 NBCD(struct EmulationMachine* restrict emulator);       //ok
+u32 SWAP(struct EmulationMachine* restrict emulator);       //ok
+u32 PEA(struct EmulationMachine* restrict emulator);        //ok
+u32 ILLEGAL(struct EmulationMachine* restrict emulator);    //ok
+u32 TAS(struct EmulationMachine* restrict emulator);        // ?? -warn
+u32 TST(struct EmulationMachine* restrict emulator);        //ok
+u32 TRAP(struct EmulationMachine* restrict emulator);       //ok
+u32 LINK(struct EmulationMachine* restrict emulator);       //ok
+u32 UNLK(struct EmulationMachine* restrict emulator);       //ok
+u32 MOVEUSP(struct EmulationMachine* restrict emulator);    //ok
+u32 RESET(struct EmulationMachine* restrict emulator);      // ?? -warn
+u32 NOP(struct EmulationMachine* restrict emulator);        //ok
+u32 STOP(struct EmulationMachine* restrict emulator);       // ?? -warn
+u32 RTE(struct EmulationMachine* restrict emulator);        //ok
+u32 RTS(struct EmulationMachine* restrict emulator);        //ok
+u32 TRAPV(struct EmulationMachine* restrict emulator);      //ok
+u32 RTR(struct EmulationMachine* restrict emulator);        //ok
+u32 JSR(struct EmulationMachine* restrict emulator);        //ok
+u32 JMP(struct EmulationMachine* restrict emulator);        //ok
+u32 MOVEM(struct EmulationMachine* restrict emulator);      // wtf -warn
+u32 CHK(struct EmulationMachine* restrict emulator);        // ok -warn
+u32 LEA(struct EmulationMachine* restrict emulator);        //ok
 
 
 // GROUP 0x05
-u32 DBcc(struct EmulationMachine* emulator);      //ok
-u32 Scc(struct EmulationMachine* emulator);       //ok
-u32 ADDQ(struct EmulationMachine* emulator);      //ok
-u32 SUBQ(struct EmulationMachine* emulator);      //ok
+u32 DBcc(struct EmulationMachine* restrict emulator);      //ok
+u32 Scc(struct EmulationMachine* restrict emulator);       //ok
+u32 ADDQ(struct EmulationMachine* restrict emulator);      //ok
+u32 SUBQ(struct EmulationMachine* restrict emulator);      //ok
 
 
 // GROUP 0x06
-u32 BRA(struct EmulationMachine* emulator);      //ok
-u32 BSR(struct EmulationMachine* emulator);      //ok
-u32 Bcc(struct EmulationMachine* emulator);      //ok
+u32 BRA(struct EmulationMachine* restrict emulator);      //ok
+u32 BSR(struct EmulationMachine* restrict emulator);      //ok
+u32 Bcc(struct EmulationMachine* restrict emulator);      //ok
 
 
 // GROUP 0x07
-u32 MOVEQ(struct EmulationMachine* emulator);     //ok
+u32 MOVEQ(struct EmulationMachine* restrict emulator);     //ok
 
 
 // GROUP 0x08
-u32 DIVU(struct EmulationMachine* emulator);   //ok
-u32 DIVS(struct EmulationMachine* emulator);   //ok
-u32 SBCD(struct EmulationMachine* emulator);   //ok
-u32 OR(struct EmulationMachine* emulator);     //ok
+u32 DIVU(struct EmulationMachine* restrict emulator);   //ok
+u32 DIVS(struct EmulationMachine* restrict emulator);   //ok
+u32 SBCD(struct EmulationMachine* restrict emulator);   //ok
+u32 OR(struct EmulationMachine* restrict emulator);     //ok
 
 
 // GROUP 0x09
-u32 SUBA(struct EmulationMachine* emulator);  //ok
-u32 SUBX(struct EmulationMachine* emulator);  //ok
-u32 SUB(struct EmulationMachine* emulator);   //ok
+u32 SUBA(struct EmulationMachine* restrict emulator);  //ok
+u32 SUBX(struct EmulationMachine* restrict emulator);  //ok
+u32 SUB(struct EmulationMachine* restrict emulator);   //ok
 
 
 // GROUP 0x0B
-u32 CMPA(struct EmulationMachine* emulator);  //ok
-u32 CMPM(struct EmulationMachine* emulator);  //ok
-u32 EOR(struct EmulationMachine* emulator);   //ok
-u32 CMP(struct EmulationMachine* emulator);   //ok
+u32 CMPA(struct EmulationMachine* restrict emulator);  //ok
+u32 CMPM(struct EmulationMachine* restrict emulator);  //ok
+u32 EOR(struct EmulationMachine* restrict emulator);   //ok
+u32 CMP(struct EmulationMachine* restrict emulator);   //ok
 
 
 // GROUP 0x0C
-u32 MULU(struct EmulationMachine* emulator);  //ok
-u32 MULS(struct EmulationMachine* emulator);  //ok
-u32 ABCD(struct EmulationMachine* emulator);  //ok
-u32 EXG(struct EmulationMachine* emulator);   //ok
-u32 AND(struct EmulationMachine* emulator);   //ok
+u32 MULU(struct EmulationMachine* restrict emulator);  //ok
+u32 MULS(struct EmulationMachine* restrict emulator);  //ok
+u32 ABCD(struct EmulationMachine* restrict emulator);  //ok
+u32 EXG(struct EmulationMachine* restrict emulator);   //ok
+u32 AND(struct EmulationMachine* restrict emulator);   //ok
 
 
 // GROUP 0x0D
-u32 ADDA(struct EmulationMachine* emulator);  //ok
-u32 ADDX(struct EmulationMachine* emulator);  //ok
-u32 ADD(struct EmulationMachine* emulator);   //ok
+u32 ADDA(struct EmulationMachine* restrict emulator);  //ok
+u32 ADDX(struct EmulationMachine* restrict emulator);  //ok
+u32 ADD(struct EmulationMachine* restrict emulator);   //ok
 
 
 // GROUP 0x0E
-u32 ASR(struct EmulationMachine* emulator);   //ok
-u32 ASL(struct EmulationMachine* emulator);   //ok
-u32 LSR(struct EmulationMachine* emulator);   //ok
-u32 LSL(struct EmulationMachine* emulator);   //ok
-u32 ROXR(struct EmulationMachine* emulator);  //ok
-u32 ROXL(struct EmulationMachine* emulator);  //ok
-u32 ROR(struct EmulationMachine* emulator);   //ok
-u32 ROL(struct EmulationMachine* emulator);   //ok
+u32 ASR(struct EmulationMachine* restrict emulator);   //ok
+u32 ASL(struct EmulationMachine* restrict emulator);   //ok
+u32 LSR(struct EmulationMachine* restrict emulator);   //ok
+u32 LSL(struct EmulationMachine* restrict emulator);   //ok
+u32 ROXR(struct EmulationMachine* restrict emulator);  //ok
+u32 ROXL(struct EmulationMachine* restrict emulator);  //ok
+u32 ROR(struct EmulationMachine* restrict emulator);   //ok
+u32 ROL(struct EmulationMachine* restrict emulator);   //ok
 
 
 //Bxxx
-u32 Bxxx(struct EmulationMachine* emulator);
+u32 Bxxx(struct EmulationMachine* restrict emulator);
 
 
 //abcd-sbcd
-u32 xBCD(struct EmulationMachine* emulator, BCD_type type);
-u32 perform_BCD(struct EmulationMachine* emulator, BCD_type type, u32 src, u32 dest);
+u32 xBCD(struct EmulationMachine* restrict emulator, BCD_type type);
+u32 perform_BCD(struct EmulationMachine* restrict emulator, BCD_type type, u32 src, u32 dest);
 
 
 //A-Lxx
-u32 ALxx(struct EmulationMachine* emulator);
+u32 ALxx(struct EmulationMachine* restrict emulator);
 
 //Roxx
-u32 ROxx(struct EmulationMachine* emulator);
+u32 ROxx(struct EmulationMachine* restrict emulator);
 
 /*
  * END DUMBS PROTOS

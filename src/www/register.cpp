@@ -300,8 +300,8 @@ void RegisterRender::setCCR(unsigned int val)
     CCR->setText(format16BitReg(&bits));
 
     CCR->doJavaScript(" \
-        const textarea" + CCR->id() + " = document.getElementById('" + CCR->id() + "'); \
-        const popup" + CCR->id() + " = document.getElementById('div-" + CCR->id() + "'); \
+        var textarea" + CCR->id() + " = document.getElementById('" + CCR->id() + "'); \
+        var popup" + CCR->id() + " = document.getElementById('div-" + CCR->id() + "'); \
         \
         popup" + CCR->id() + ".innerHTML = 'X:' + textarea" + CCR->id() + ".value.charAt(11) + ' N:' + textarea" + CCR->id() + ".value.charAt(12) + ' Z:' + textarea" + CCR->id() + ".value.charAt(13) + ' V:' + textarea" + CCR->id() + ".value.charAt(14) + ' C:' + textarea" + CCR->id() + ".value.charAt(15);\
     ");
@@ -349,8 +349,8 @@ void RegisterRender::setDataReg(unsigned int index, string result)
     reg->setText(format32BitReg(&result));
 
     reg->doJavaScript(" \
-        const textarea" + reg->id() + " = document.getElementById('" + reg->id() + "'); \
-        const popup" + reg->id() + " = document.getElementById('div-" + reg->id() + "'); \
+        var textarea" + reg->id() + " = document.getElementById('" + reg->id() + "'); \
+        var popup" + reg->id() + " = document.getElementById('div-" + reg->id() + "'); \
         \
         popup" + reg->id() + ".innerHTML = parseInt(textarea" + reg->id() + ".value, 16); \
     ");
@@ -363,8 +363,8 @@ void RegisterRender::setAddrReg(unsigned int index, string result)
     reg->setText(format32BitReg(&result));
 
     reg->doJavaScript(" \
-        const textarea" + reg->id() + " = document.getElementById('" + reg->id() + "'); \
-        const popup" + reg->id() + " = document.getElementById('div-" + reg->id() + "'); \
+        var textarea" + reg->id() + " = document.getElementById('" + reg->id() + "'); \
+        var popup" + reg->id() + " = document.getElementById('div-" + reg->id() + "'); \
         \
         popup" + reg->id() + ".innerHTML = parseInt(textarea" + reg->id() + ".value, 16); \
     ");
@@ -390,29 +390,34 @@ void RegisterRender::update(const char* map)
 {
     if (map != NULL)
     {
-        string _json = string(map);
-
-        json_map json{ json_data{ _json } }; 
-
-        for (size_t i = 0; i < 8; i++)
+        try
         {
-            setDataReg(i, string(json["CPU"]["D" + to_string(i)]));
-            setAddrReg(i, string(json["CPU"]["A" + to_string(i)]));
+            string _json = string(map);
+
+            json_map json{ json_data{ _json } }; 
+
+            for (size_t i = 0; i < 8; i++)
+            {
+                setDataReg(i, string(json["CPU"]["D" + to_string(i)]));
+                setAddrReg(i, string(json["CPU"]["A" + to_string(i)]));
+            }
+
+            setUSP(string(json["CPU"]["US"]));
+            setSSP(string(json["CPU"]["SS"]));
+            setPC (string(json["CPU"]["PC"]));
+            setCCR(stoi(string(json["CPU"]["SR"]), nullptr, 16));
+
+            setMnemonic(string(json["OP"]["MNEMONIC"]));
+            setHCode(string(json["OP"]["CODE"]));
+            setBCode(stoi(string(json["OP"]["CODE"]), nullptr, 16));
+            setTime((unsigned long) json["TIME"]);
+
+            setFWB(string(json["RAM"]["BEGIN"]));
+            setLWB(string(json["RAM"]["END"]));
+            setHALT(string(json["RAM"]["HALT"]));
         }
-
-        setUSP(string(json["CPU"]["US"]));
-        setSSP(string(json["CPU"]["SS"]));
-        setPC (string(json["CPU"]["PC"]));
-        setCCR(stoi(string(json["CPU"]["SR"]), nullptr, 16));
-
-        setMnemonic(string(json["OP"]["MNEMONIC"]));
-        setHCode(string(json["OP"]["CODE"]));
-        setBCode(stoi(string(json["OP"]["CODE"]), nullptr, 16));
-        setTime((unsigned long) json["TIME"]);
-
-        setFWB(string(json["RAM"]["BEGIN"]));
-        setLWB(string(json["RAM"]["END"]));
-        setHALT(string(json["RAM"]["HALT"]));
+        catch (boost::bad_get& e) { }
+        catch (runtime_error& e)  { }
     }
 
 }

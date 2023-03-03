@@ -56,10 +56,14 @@ void Console::setUpConsole()
     self->keyWentDown().connect(this, [=](const WKeyEvent &event){
         if (event.key() == Key::Backspace && _selfContent.length() > self->text().toUTF8().length())
             self->setText(_selfContent);
+        else if (self->text().toUTF8().find(_selfContent) == std::string::npos)
+            self->setText(_selfContent);
     });
 
     self->keyWentUp().connect(this, [=](const WKeyEvent &event){
         if (event.key() == Key::Backspace && _selfContent.length() > self->text().toUTF8().length())
+            self->setText(_selfContent);
+        else if (self->text().toUTF8().find(_selfContent) == std::string::npos)
             self->setText(_selfContent);
     });
 }

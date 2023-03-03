@@ -2,34 +2,12 @@
     margin-top: -8px;
     margin-right: -8px;
     margin-left: -8px;
+    min-width: 100%;
+    min-height: 4em;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 100%;
-    min-height: 4em;
     background-color: #e37424;
-}
-
-@media (max-width: 1024px) {
-    .header {
-        margin-top: -8px;
-        margin-right: -8px;
-        margin-left: -8px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-width: 100%;
-        min-height: 4em;
-        background-color: #e37424;
-    }
-
-    .header-title {
-        font-size: large;
-        color: rgb(69, 69, 69);
-        text-decoration: solid;
-        border: none;
-        background: transparent;
-    }
 }
 
 .header-title {
@@ -38,12 +16,10 @@
     text-decoration: solid;
     border: none;
     background: transparent;
-    transition-duration: .3s;
 }
 
+
 .header-title:hover {
-    font-size: 42px;
-    color: #eae094;
     cursor: pointer;
 }
 
@@ -54,11 +30,10 @@
 .popup-div:hover::before {
     font-size: medium;
     font-family: monospace;
-    content: "Open Help";
+    content: "Source Code";
     position: absolute;
     top: 100%;
     left: 50%;
-    transform: translateX(-50%);
     padding: 5px;
     background-color: #292731;
     color: #eae094;
@@ -66,6 +41,28 @@
     white-space: nowrap;
     font-weight: 600;
     animation: fade-in 1.5s forwards;
+    transform: translateX(-50%);
+}
+
+.popup-div-qm {
+    position: relative;
+}
+  
+.popup-div-qm:hover::before {
+    font-size: medium;
+    font-family: monospace;
+    content: "Open Help";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    padding: 5px;
+    background-color: #292731;
+    color: #eae094;
+    border-radius: 2px;
+    white-space: nowrap;
+    font-weight: 600;
+    animation: fade-in .5s forwards;
+    transform: translateX(-80%);
 }
 
 @keyframes fade-in {
@@ -76,4 +73,31 @@
     to {
         opacity: 1;
     }
+}
+
+.containerX {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.centerX {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.rightX {
+    text-align: right;
+    margin-right: 1%;
+}
+
+#qm {
+    color: #eae094;
+}
+
+#qm:hover {
+    cursor: pointer;
 }

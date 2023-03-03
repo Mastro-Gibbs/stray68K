@@ -4,7 +4,7 @@
 #include "motorolatypes.h"
 
 
-char* Jcpu(struct EmulationMachine* emulator);
+char* Jcpu(struct EmulationMachine* restrict emulator);
 
 char* Jram(u32 from, u32 to, u32 sh);
 
@@ -18,7 +18,7 @@ char* Jwarning(char* cause, char* mnem, u32 code_promoted);
 
 char* Jio(char* io);
 
-char* Jconcat2(struct EmulationMachine* emulator, char *dst, char* (*Jsrc)(), ...);
+char* Jconcat2(struct EmulationMachine* restrict emulator, char *dst, char* (*Jsrc)(), ...);
 
 
 

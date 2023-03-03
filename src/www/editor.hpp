@@ -31,6 +31,7 @@ class Editor : public WTemplate
         void                  onContentRequest(std::string result);
 
         JSignal<std::string>  jsEditorInputSignal;
+        void                  onEditorInput(std::string result);
 
         Signal<> onTextChange;
         Signal<> onTextAvailable;

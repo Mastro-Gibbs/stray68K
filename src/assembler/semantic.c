@@ -4563,6 +4563,9 @@ static void ParseLine(SemanticState *state, const char *source_line, const char 
 						}
 					}
 
+					if (destination_location->file_path)
+						free(destination_location->file_path);
+
 					/* Add the new fix-up to the list. */
 					if (state->fix_up_list_head == NULL)
 						state->fix_up_list_head = fix_up;
@@ -5379,21 +5382,8 @@ cc_bool ClownAssembler_Assemble(SemanticState* state, FILE *input_file, FILE *ou
 }
 
 
-SemanticState* obtain_semantic_state()
+void free_AssemblerError(SemanticState* state)
 {
-    SemanticState* state = NULL;
-    state = malloc(sizeof(*state));    
-
-	return (state);
-}
-
-void free_SemanticState(SemanticState* state)
-{
-	if (state)
-	{
-		if (state->_asseble_error)
-			free(state->_asseble_error);
-		
-		free(state);
-	}	
+	if (state && state->_asseble_error)
+		free(state->_asseble_error);
 }

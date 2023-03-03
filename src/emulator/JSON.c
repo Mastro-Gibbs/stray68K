@@ -9,7 +9,7 @@
 #include "ram.h"
 
 
-char* Jcpu(struct EmulationMachine* emulator)
+char* Jcpu(struct EmulationMachine* restrict emulator)
 {
     char *res = NULL;
 
@@ -191,7 +191,7 @@ char* Jio(char* io)
 }
 
 
-char* Jconcat2(struct EmulationMachine* emulator, char *dst, char* (*Jsrc)(), ...)
+char* Jconcat2(struct EmulationMachine* restrict emulator, char *dst, char* (*Jsrc)(), ...)
 {
     va_list va_ptr;
 

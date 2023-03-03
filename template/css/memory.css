@@ -142,7 +142,7 @@
 }
 
 .fetch-btn-disabled {
-    cursor: not-allowed;
+    cursor: default;
     background-color: transparent;
     width: 70px;
     height: 25px;

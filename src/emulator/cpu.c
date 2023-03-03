@@ -10,7 +10,7 @@ void init_cpu(struct EmulationMachine *emulator)
 }
 
 
-void reset_cpu(struct EmulationMachine* emulator)
+void reset_cpu(struct EmulationMachine* restrict emulator)
 {
     unsigned char iter;
     for(iter = 0; iter < 8; iter++)
@@ -28,7 +28,7 @@ void reset_cpu(struct EmulationMachine* emulator)
 
 
 // DATA REGS GETTER & SETTER
-u32 read_datareg(struct EmulationMachine* emulator, const u32 reg)
+u32 read_datareg(struct EmulationMachine* restrict emulator, const u32 reg)
 {
     if (reg < 8)
         return emulator->Machine.cpu.data_r[reg];
@@ -39,7 +39,7 @@ u32 read_datareg(struct EmulationMachine* emulator, const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_datareg(struct EmulationMachine* emulator, const u32 reg, const u32 val, opsize* const size)
+void  write_datareg(struct EmulationMachine* restrict emulator, const u32 reg, const u32 val, opsize* const size)
 {
     opsize static_size;
 
@@ -70,7 +70,7 @@ void  write_datareg(struct EmulationMachine* emulator, const u32 reg, const u32 
     }
 }
 
-u32 read_addrreg(struct EmulationMachine* emulator, const u32 reg)
+u32 read_addrreg(struct EmulationMachine* restrict emulator, const u32 reg)
 {
     if (reg < 8)
     {
@@ -88,7 +88,7 @@ u32 read_addrreg(struct EmulationMachine* emulator, const u32 reg)
 /*
  * @param size is ptr, we can pass NULL value to get the default (LONG)
  */
-void  write_addrreg(struct EmulationMachine* emulator, const u32 reg, const u32 val, opsize* const size)
+void  write_addrreg(struct EmulationMachine* restrict emulator, const u32 reg, const u32 val, opsize* const size)
 {
     if (reg > 7) return;
 
@@ -164,7 +164,7 @@ void  write_addrreg(struct EmulationMachine* emulator, const u32 reg, const u32 
     }
 }
 
-void incr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsize size)
+void incr_addr_reg(struct EmulationMachine* restrict emulator, const u32 reg, const opsize size)
 {
     u32 tmp = read_addrreg(emulator, reg);
 
@@ -178,7 +178,7 @@ void incr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsiz
     write_addrreg(emulator, reg, tmp, NULL);
 }
 
-void decr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsize size)
+void decr_addr_reg(struct EmulationMachine* restrict emulator, const u32 reg, const opsize size)
 {
     u32 tmp = read_addrreg(emulator, reg);
 
@@ -195,7 +195,7 @@ void decr_addr_reg(struct EmulationMachine* emulator, const u32 reg, const opsiz
 
 
 /* STACKS */
-u16 pop_word(struct EmulationMachine* emulator)
+u16 pop_word(struct EmulationMachine* restrict emulator)
 {
     u32 stack = read_addrreg(emulator, 7);
     u16 value = read_word(emulator, stack);
@@ -205,7 +205,7 @@ u16 pop_word(struct EmulationMachine* emulator)
     return (value);
 }
 
-u32 pop_long(struct EmulationMachine* emulator)
+u32 pop_long(struct EmulationMachine* restrict emulator)
 {
     u32 stack = read_addrreg(emulator, 7);
     u32 value = read_long(emulator, stack);
@@ -215,7 +215,7 @@ u32 pop_long(struct EmulationMachine* emulator)
     return (value);
 }
 
-void push_word(struct EmulationMachine* emulator, const u16 word)
+void push_word(struct EmulationMachine* restrict emulator, const u16 word)
 {
     u32 stack = read_addrreg(emulator, 7);
     stack -= WORD_SPAN;
@@ -223,7 +223,7 @@ void push_word(struct EmulationMachine* emulator, const u16 word)
     write_word(emulator, stack, word);
 }
 
-void push_long(struct EmulationMachine* emulator, const u32 longword)
+void push_long(struct EmulationMachine* restrict emulator, const u32 longword)
 {
     u32 stack = read_addrreg(emulator, 7);
     stack -= LONG_SPAN;
@@ -234,7 +234,7 @@ void push_long(struct EmulationMachine* emulator, const u32 longword)
 
 
 /* CONDITION CODES */
-bit eval_cc(struct EmulationMachine* emulator, const CCm cc)
+bit eval_cc(struct EmulationMachine* restrict emulator, const CCm cc)
 {
     switch (cc) {
         case T:
@@ -277,8 +277,8 @@ bit eval_cc(struct EmulationMachine* emulator, const CCm cc)
 
 
 /* PROGRAM COUNTER */
-void set_pc(struct EmulationMachine* emulator, const u32 pc) { emulator->Machine.cpu.pc = pc; }
+void set_pc(struct EmulationMachine* restrict emulator, const u32 pc) { emulator->Machine.cpu.pc = pc; }
 
-u32 get_pc(struct EmulationMachine* emulator) { return (emulator->Machine.cpu.pc); }
+u32 get_pc(struct EmulationMachine* restrict emulator) { return (emulator->Machine.cpu.pc); }
 
 

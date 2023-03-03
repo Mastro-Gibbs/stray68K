@@ -17,24 +17,24 @@ void erase_ram(struct EmulationMachine *emulator)
 
 
 /* MEMORY READ */
-u8 read_byte(struct EmulationMachine* emulator, const u32 pointer)
+u8 read_byte(struct EmulationMachine* restrict emulator, const u32 pointer)
 {
     return emulator->Machine.ram.self[pointer];
 }
 
-u16 read_word(struct EmulationMachine* emulator, const u32 pointer)
+u16 read_word(struct EmulationMachine* restrict emulator, const u32 pointer)
 {
     return (u16)((emulator->Machine.ram.self[pointer] << 8) + emulator->Machine.ram.self[pointer + 1]);
 }
 
-u32 read_long(struct EmulationMachine* emulator, const u32 pointer)
+u32 read_long(struct EmulationMachine* restrict emulator, const u32 pointer)
 {
     return (u32)((emulator->Machine.ram.self[pointer] << 24) + (emulator->Machine.ram.self[pointer + 1] << 16) + 
                  (emulator->Machine.ram.self[pointer + 2] << 8) + emulator->Machine.ram.self[pointer + 3]);
 }
 
 
-unsigned char* read_chunk(struct EmulationMachine* emulator, const unsigned int pointer, const unsigned int end)
+unsigned char* read_chunk(struct EmulationMachine* restrict emulator, const unsigned int pointer, const unsigned int end)
 {
     u8 *read = malloc(sizeof (u8) * end+1);
 
@@ -46,7 +46,7 @@ unsigned char* read_chunk(struct EmulationMachine* emulator, const unsigned int 
     return read;
 }
 
-unsigned char* read_stack(struct EmulationMachine* emulator, const unsigned int pointer)
+unsigned char* read_stack(struct EmulationMachine* restrict emulator, const unsigned int pointer)
 {
     u8 *read = malloc(sizeof (u8) * 41);
 
@@ -60,18 +60,18 @@ unsigned char* read_stack(struct EmulationMachine* emulator, const unsigned int 
 
 
 /* MEMORY WRITE */
-void write_byte(struct EmulationMachine* emulator, const u32 pointer, const u8 value)
+void write_byte(struct EmulationMachine* restrict emulator, const u32 pointer, const u8 value)
 {
     emulator->Machine.ram.self[pointer] = value;
 }
 
-void write_word(struct EmulationMachine* emulator, const u32 pointer, const u16 value)
+void write_word(struct EmulationMachine* restrict emulator, const u32 pointer, const u16 value)
 {
     emulator->Machine.ram.self[pointer]     = (u8)((value >> 8) & 0xFF);
     emulator->Machine.ram.self[pointer + 1] = (u8)(value & 0xFF);
 }
 
-void write_long(struct EmulationMachine* emulator, const u32 pointer, const u32 value)
+void write_long(struct EmulationMachine* restrict emulator, const u32 pointer, const u32 value)
 {
     emulator->Machine.ram.self[pointer]     = (u8)((value >> 24) & 0xFF);
     emulator->Machine.ram.self[pointer + 1] = (u8)((value >> 16) & 0xFF);

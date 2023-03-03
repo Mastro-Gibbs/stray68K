@@ -213,7 +213,7 @@
  */
 
 // GROUP 0x00
-u32 ORItoCCR(struct EmulationMachine* emulator)
+u32 ORItoCCR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -230,7 +230,7 @@ u32 ORItoCCR(struct EmulationMachine* emulator)
 }
 
 
-u32 ORItoSR(struct EmulationMachine* emulator)
+u32 ORItoSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -247,7 +247,7 @@ u32 ORItoSR(struct EmulationMachine* emulator)
 }
 
 
-u32 ORI(struct EmulationMachine* emulator)
+u32 ORI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
@@ -271,7 +271,7 @@ u32 ORI(struct EmulationMachine* emulator)
 }
 
 
-u32 ANDItoCCR(struct EmulationMachine* emulator)
+u32 ANDItoCCR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -288,7 +288,7 @@ u32 ANDItoCCR(struct EmulationMachine* emulator)
 }
 
 
-u32 ANDItoSR(struct EmulationMachine* emulator)
+u32 ANDItoSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -305,7 +305,7 @@ u32 ANDItoSR(struct EmulationMachine* emulator)
 }
 
 
-u32 ANDI(struct EmulationMachine* emulator)
+u32 ANDI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
@@ -339,7 +339,7 @@ u32 ANDI(struct EmulationMachine* emulator)
 }
 
 
-u32 SUBI(struct EmulationMachine* emulator)
+u32 SUBI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     opsize size = (code & SIZE_MASK) >> 6;
@@ -374,7 +374,7 @@ u32 SUBI(struct EmulationMachine* emulator)
 }
 
 
-u32 ADDI(struct EmulationMachine* emulator)
+u32 ADDI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     opsize size = (code & SIZE_MASK) >> 6;
@@ -409,7 +409,7 @@ u32 ADDI(struct EmulationMachine* emulator)
 }
 
 
-u32 EORItoCCR(struct EmulationMachine* emulator)
+u32 EORItoCCR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -426,7 +426,7 @@ u32 EORItoCCR(struct EmulationMachine* emulator)
 }
 
 
-u32 EORItoSR(struct EmulationMachine* emulator)
+u32 EORItoSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -443,7 +443,7 @@ u32 EORItoSR(struct EmulationMachine* emulator)
 }
 
 
-u32 EORI(struct EmulationMachine* emulator)
+u32 EORI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
@@ -467,7 +467,7 @@ u32 EORI(struct EmulationMachine* emulator)
 }
 
 
-u32 CMPI(struct EmulationMachine* emulator)
+u32 CMPI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
@@ -496,7 +496,7 @@ u32 CMPI(struct EmulationMachine* emulator)
 }
 
 
-u32 MOVEP(struct EmulationMachine* emulator)
+u32 MOVEP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
 
@@ -510,25 +510,25 @@ u32 MOVEP(struct EmulationMachine* emulator)
 }
 
 
-u32 BTST(struct EmulationMachine* emulator)
+u32 BTST(struct EmulationMachine* restrict emulator)
 {
     return Bxxx(emulator);
 }
 
 
-u32 BCHG(struct EmulationMachine* emulator)
+u32 BCHG(struct EmulationMachine* restrict emulator)
 {
     return Bxxx(emulator);
 }
 
 
-u32 BCLR(struct EmulationMachine* emulator)
+u32 BCLR(struct EmulationMachine* restrict emulator)
 {
     return Bxxx(emulator);
 }
 
 
-u32 BSET(struct EmulationMachine* emulator)
+u32 BSET(struct EmulationMachine* restrict emulator)
 {
     return Bxxx(emulator);
 }
@@ -537,7 +537,7 @@ u32 BSET(struct EmulationMachine* emulator)
 
 
 // GROUP 0x01
-u32 MOVE(struct EmulationMachine* emulator)
+u32 MOVE(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_reg,  src_reg;
@@ -594,7 +594,7 @@ u32 MOVE(struct EmulationMachine* emulator)
 
 
 // GROUP 0x02-0x03
-u32 MOVEA(struct EmulationMachine* emulator)
+u32 MOVEA(struct EmulationMachine* restrict emulator)
 {
     /* hack:
          call 'move' with dst_mode as 001 aka ADDRReg.
@@ -608,7 +608,7 @@ u32 MOVEA(struct EmulationMachine* emulator)
 
 
 // group 0X04
-u32 MOVEfromSR(struct EmulationMachine* emulator)
+u32 MOVEfromSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
@@ -626,7 +626,7 @@ u32 MOVEfromSR(struct EmulationMachine* emulator)
 }
 
 
-u32 MOVEtoCCR(struct EmulationMachine* emulator)
+u32 MOVEtoCCR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
@@ -651,7 +651,7 @@ u32 MOVEtoCCR(struct EmulationMachine* emulator)
 }
 
 
-u32 MOVEtoSR(struct EmulationMachine* emulator)
+u32 MOVEtoSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
@@ -676,7 +676,7 @@ u32 MOVEtoSR(struct EmulationMachine* emulator)
 }
 
 
-u32 NEGX(struct EmulationMachine* emulator)
+u32 NEGX(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
@@ -699,7 +699,7 @@ u32 NEGX(struct EmulationMachine* emulator)
 }
 
 
-u32 CLR(struct EmulationMachine* emulator)
+u32 CLR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 reg  = (code & SRC_MASK);
@@ -731,7 +731,7 @@ u32 CLR(struct EmulationMachine* emulator)
 }
 
 
-u32 NEG(struct EmulationMachine* emulator)
+u32 NEG(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
@@ -754,7 +754,7 @@ u32 NEG(struct EmulationMachine* emulator)
 }
 
 
-u32 NOT(struct EmulationMachine* emulator)
+u32 NOT(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst  = (code & SRC_MASK);
@@ -777,7 +777,7 @@ u32 NOT(struct EmulationMachine* emulator)
 }
 
 
-u32 EXT(struct EmulationMachine* emulator)
+u32 EXT(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  regptr = (code & 0x0007);
@@ -796,7 +796,7 @@ u32 EXT(struct EmulationMachine* emulator)
 }
 
 
-u32 NBCD(struct EmulationMachine* emulator)
+u32 NBCD(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 lo_val, hi_val;
@@ -835,7 +835,7 @@ u32 NBCD(struct EmulationMachine* emulator)
 }
 
 
-u32 SWAP(struct EmulationMachine* emulator)
+u32 SWAP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
@@ -850,7 +850,7 @@ u32 SWAP(struct EmulationMachine* emulator)
 }
 
 
-u32 PEA(struct EmulationMachine* emulator)
+u32 PEA(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     ADDRMode mode = (code & 0b0000000000111000) >> 3;
@@ -870,7 +870,7 @@ u32 PEA(struct EmulationMachine* emulator)
 }
 
 
-u32 ILLEGAL(struct EmulationMachine* emulator)
+u32 ILLEGAL(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -884,7 +884,7 @@ u32 ILLEGAL(struct EmulationMachine* emulator)
 }
 
 
-u32 TAS(struct EmulationMachine* emulator)
+u32 TAS(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
 
@@ -898,7 +898,7 @@ u32 TAS(struct EmulationMachine* emulator)
 }
 
 
-u32 TST(struct EmulationMachine* emulator)
+u32 TST(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask dst_mask  = 0b0000000000000111;
@@ -933,7 +933,7 @@ u32 TST(struct EmulationMachine* emulator)
 }
 
 
-u32 TRAP(struct EmulationMachine* emulator)
+u32 TRAP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u16 vector = (u16)(code & 0x0000000F);
@@ -947,7 +947,9 @@ u32 TRAP(struct EmulationMachine* emulator)
             emulator->Machine.IO.Type = OUTPUT;
             emulator->Machine.State   = IO_STATE;
 
-            return iotask(emulator);
+            iotask(emulator);
+
+            return (RETURN_OK);
         }
 
         case TRAP_SCAN:
@@ -955,7 +957,9 @@ u32 TRAP(struct EmulationMachine* emulator)
             emulator->Machine.IO.Type = INPUT;
             emulator->Machine.State   = IO_STATE;
 
-            return iotask(emulator);
+            iotask(emulator);
+
+            return (RETURN_OK);
         }
 
         case TRAP_SLEEP:
@@ -990,7 +994,7 @@ u32 TRAP(struct EmulationMachine* emulator)
 }
 
 
-u32 LINK(struct EmulationMachine* emulator)
+u32 LINK(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
@@ -1015,7 +1019,7 @@ u32 LINK(struct EmulationMachine* emulator)
 }
 
 
-u32 UNLK(struct EmulationMachine* emulator)
+u32 UNLK(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bitmask reg_mask = 0b0000000000000111;
@@ -1028,7 +1032,7 @@ u32 UNLK(struct EmulationMachine* emulator)
 }
 
 
-u32 MOVEUSP(struct EmulationMachine* emulator)
+u32 MOVEUSP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     if (!((emulator->Machine.cpu.sr & SUPERVISOR) ? 1 : 0))
@@ -1059,7 +1063,7 @@ u32 MOVEUSP(struct EmulationMachine* emulator)
 }
 
 
-u32 RESET(struct EmulationMachine* emulator)
+u32 RESET(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     
@@ -1073,7 +1077,7 @@ u32 RESET(struct EmulationMachine* emulator)
 }
 
 
-u32 NOP(struct EmulationMachine* emulator)
+u32 NOP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -1082,7 +1086,7 @@ u32 NOP(struct EmulationMachine* emulator)
 }
 
 
-u32 STOP(struct EmulationMachine* emulator)
+u32 STOP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
    
@@ -1096,7 +1100,7 @@ u32 STOP(struct EmulationMachine* emulator)
 }
 
 
-u32 RTE(struct EmulationMachine* emulator)
+u32 RTE(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -1123,7 +1127,7 @@ u32 RTE(struct EmulationMachine* emulator)
 }
 
 
-u32 RTS(struct EmulationMachine* emulator)
+u32 RTS(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     if (emulator->Machine.RunTime.JSR_CALL_COUNTER == 0)
@@ -1142,7 +1146,7 @@ u32 RTS(struct EmulationMachine* emulator)
 }
 
 
-u32 TRAPV(struct EmulationMachine* emulator)
+u32 TRAPV(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -1161,7 +1165,7 @@ u32 TRAPV(struct EmulationMachine* emulator)
 }
 
 
-u32 RTR(struct EmulationMachine* emulator)
+u32 RTR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
@@ -1178,7 +1182,7 @@ u32 RTR(struct EmulationMachine* emulator)
 }
 
 
-u32 JSR(struct EmulationMachine* emulator)
+u32 JSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     ADDRMode mode = (code & ADDRMODE_MASK);
@@ -1212,7 +1216,7 @@ u32 JSR(struct EmulationMachine* emulator)
 }
 
 
-u32 JMP(struct EmulationMachine* emulator)
+u32 JMP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     ADDRMode mode = (code & ADDRMODE_MASK);
@@ -1246,7 +1250,7 @@ u32 JMP(struct EmulationMachine* emulator)
 }
 
 
-u32 MOVEM(struct EmulationMachine* emulator)
+u32 MOVEM(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
 
@@ -1260,7 +1264,7 @@ u32 MOVEM(struct EmulationMachine* emulator)
 }
 
 
-u32 CHK(struct EmulationMachine* emulator)
+u32 CHK(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
 
@@ -1297,7 +1301,7 @@ u32 CHK(struct EmulationMachine* emulator)
 }
 
 
-u32 LEA(struct EmulationMachine* emulator)
+u32 LEA(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u8 mode     = (code & ADDRMODE_MASK);
@@ -1326,7 +1330,7 @@ u32 LEA(struct EmulationMachine* emulator)
 
 
 // GROUP 0x05
-u32 DBcc(struct EmulationMachine* emulator)
+u32 DBcc(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     opsize size = WORD;
@@ -1362,7 +1366,7 @@ u32 DBcc(struct EmulationMachine* emulator)
 }
 
 
-u32 Scc(struct EmulationMachine* emulator)
+u32 Scc(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst = (code & SRC_MASK);
@@ -1384,7 +1388,7 @@ u32 Scc(struct EmulationMachine* emulator)
 }
 
 
-u32 ADDQ(struct EmulationMachine* emulator)
+u32 ADDQ(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 value = (code & DST_MASK) >> 9;
@@ -1421,7 +1425,7 @@ u32 ADDQ(struct EmulationMachine* emulator)
 }
 
 
-u32 SUBQ(struct EmulationMachine* emulator)
+u32 SUBQ(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 value = (code & DST_MASK) >> 9;
@@ -1461,7 +1465,7 @@ u32 SUBQ(struct EmulationMachine* emulator)
 
 
 // GROUP 0x06
-u32 BRA(struct EmulationMachine* emulator)
+u32 BRA(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 pc   = emulator->Machine.cpu.pc;
@@ -1483,7 +1487,7 @@ u32 BRA(struct EmulationMachine* emulator)
 }
 
 
-u32 BSR(struct EmulationMachine* emulator)
+u32 BSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 pc = emulator->Machine.cpu.pc;
@@ -1511,7 +1515,7 @@ u32 BSR(struct EmulationMachine* emulator)
 }
 
 
-u32 Bcc(struct EmulationMachine* emulator)
+u32 Bcc(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     CCm condition = (code & 0x0F00) >> 8;
@@ -1546,7 +1550,7 @@ u32 Bcc(struct EmulationMachine* emulator)
 
 
 // GROUP 0x07
-u32 MOVEQ(struct EmulationMachine* emulator)
+u32 MOVEQ(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst = (code & DST_MASK) >> 9;
@@ -1564,7 +1568,7 @@ u32 MOVEQ(struct EmulationMachine* emulator)
 
 
 // GROUP 0x08
-u32 DIVU(struct EmulationMachine* emulator)
+u32 DIVU(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
@@ -1615,7 +1619,7 @@ u32 DIVU(struct EmulationMachine* emulator)
 }
 
 
-u32 DIVS(struct EmulationMachine* emulator)
+u32 DIVS(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 _val, signed_sVal, signed_dVal;
@@ -1668,13 +1672,13 @@ u32 DIVS(struct EmulationMachine* emulator)
 }
 
 
-u32 SBCD(struct EmulationMachine* emulator)
+u32 SBCD(struct EmulationMachine* restrict emulator)
 {
     return xBCD(emulator, SUBTRACTION);
 }
 
 
-u32 OR(struct EmulationMachine* emulator)
+u32 OR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
@@ -1715,7 +1719,7 @@ u32 OR(struct EmulationMachine* emulator)
 
 
 // GROUP 0x09
-u32 SUBA(struct EmulationMachine* emulator)
+u32 SUBA(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_reg = (code & DST_MASK) >> 9;
@@ -1746,7 +1750,7 @@ u32 SUBA(struct EmulationMachine* emulator)
 }
 
 
-u32 SUBX(struct EmulationMachine* emulator)
+u32 SUBX(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
@@ -1780,7 +1784,7 @@ u32 SUBX(struct EmulationMachine* emulator)
 }
 
 
-u32 SUB(struct EmulationMachine* emulator)
+u32 SUB(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 _val, signed_sVal, signed_dVal;
@@ -1824,7 +1828,7 @@ u32 SUB(struct EmulationMachine* emulator)
 
 
 // GROUP 0x0B
-u32 CMPA(struct EmulationMachine* emulator)
+u32 CMPA(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_reg = (code & DST_MASK) >> 9;
@@ -1869,7 +1873,7 @@ u32 CMPA(struct EmulationMachine* emulator)
 }
 
 
-u32 CMPM(struct EmulationMachine* emulator)
+u32 CMPM(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 dst_addr_reg = (code & DST_MASK) >> 9;
@@ -1899,7 +1903,7 @@ u32 CMPM(struct EmulationMachine* emulator)
 }
 
 
-u32 EOR(struct EmulationMachine* emulator)
+u32 EOR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
@@ -1929,7 +1933,7 @@ u32 EOR(struct EmulationMachine* emulator)
 }
 
 
-u32 CMP(struct EmulationMachine* emulator)
+u32 CMP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
@@ -1977,7 +1981,7 @@ u32 CMP(struct EmulationMachine* emulator)
 
 
 // GROUP 0x0C
-u32 MULU(struct EmulationMachine* emulator)
+u32 MULU(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
@@ -2005,7 +2009,7 @@ u32 MULU(struct EmulationMachine* emulator)
 }
 
 
-u32 MULS(struct EmulationMachine* emulator)
+u32 MULS(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     s32 _val, signed_sVal, signed_dVal;;
@@ -2036,13 +2040,13 @@ u32 MULS(struct EmulationMachine* emulator)
 }
 
 
-u32 ABCD(struct EmulationMachine* emulator)
+u32 ABCD(struct EmulationMachine* restrict emulator)
 {
     return xBCD(emulator, ADDICTION);
 }
 
 
-u32 EXG(struct EmulationMachine* emulator)
+u32 EXG(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 rX = (code & 0x0007);
@@ -2083,7 +2087,7 @@ u32 EXG(struct EmulationMachine* emulator)
 }
 
 
-u32 AND(struct EmulationMachine* emulator)
+u32 AND(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32 _val;
@@ -2124,7 +2128,7 @@ u32 AND(struct EmulationMachine* emulator)
 
 
 // GROUP 0x0D
-u32 ADDA(struct EmulationMachine* emulator)
+u32 ADDA(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
@@ -2154,7 +2158,7 @@ u32 ADDA(struct EmulationMachine* emulator)
 }
 
 
-u32 ADDX(struct EmulationMachine* emulator)
+u32 ADDX(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     u32  dst_reg = (code & DST_MASK) >> 9;
@@ -2188,7 +2192,7 @@ u32 ADDX(struct EmulationMachine* emulator)
 }
 
 
-u32 ADD(struct EmulationMachine* emulator)
+u32 ADD(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     s32  _val, signed_sVal, signed_dVal;
@@ -2232,49 +2236,49 @@ u32 ADD(struct EmulationMachine* emulator)
 
 
 // GROUP 0x0E
-u32 ASR(struct EmulationMachine* emulator)
+u32 ASR(struct EmulationMachine* restrict emulator)
 {
     return ALxx(emulator);
 }
 
 
-u32 ASL(struct EmulationMachine* emulator)
+u32 ASL(struct EmulationMachine* restrict emulator)
 {
     return ALxx(emulator);
 }
 
 
-u32 LSR(struct EmulationMachine* emulator)
+u32 LSR(struct EmulationMachine* restrict emulator)
 {
     return ALxx(emulator);
 }
 
 
-u32 LSL(struct EmulationMachine* emulator)
+u32 LSL(struct EmulationMachine* restrict emulator)
 {
     return ALxx(emulator);
 }
 
 
-u32 ROXR(struct EmulationMachine* emulator)
+u32 ROXR(struct EmulationMachine* restrict emulator)
 {
     return ROxx(emulator);
 }
 
 
-u32 ROXL(struct EmulationMachine* emulator)
+u32 ROXL(struct EmulationMachine* restrict emulator)
 {
     return ROxx(emulator);
 }
 
 
-u32 ROR(struct EmulationMachine* emulator)
+u32 ROR(struct EmulationMachine* restrict emulator)
 {
     return ROxx(emulator);
 }
 
 
-u32 ROL(struct EmulationMachine* emulator)
+u32 ROL(struct EmulationMachine* restrict emulator)
 {
     return ROxx(emulator);
 }
@@ -2282,7 +2286,7 @@ u32 ROL(struct EmulationMachine* emulator)
 
 
 //Bxxx
-u32 Bxxx(struct EmulationMachine* emulator)
+u32 Bxxx(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     bit mode = (code & 0x0100) == 0x0000; // if true mean IMMEDIATE, read extension word
@@ -2351,7 +2355,7 @@ u32 Bxxx(struct EmulationMachine* emulator)
 
 
 //abcd-sbcd
-u32 xBCD(struct EmulationMachine* emulator, BCD_type type)
+u32 xBCD(struct EmulationMachine* restrict emulator, BCD_type type)
 {
     const opcode code = emulator->Machine.RunTime.operation_code;
 
@@ -2390,7 +2394,7 @@ u32 xBCD(struct EmulationMachine* emulator, BCD_type type)
     return (RETURN_OK);
 }
 
-u32 perform_BCD(struct EmulationMachine* emulator, BCD_type type, u32 src, u32 dest)
+u32 perform_BCD(struct EmulationMachine* restrict emulator, BCD_type type, u32 src, u32 dest)
 {
     s32 lo_val, hi_val;
     bit carry;
@@ -2438,7 +2442,7 @@ u32 perform_BCD(struct EmulationMachine* emulator, BCD_type type, u32 src, u32 d
 
 
 //A-Lxx
-u32 ALxx(struct EmulationMachine* emulator)
+u32 ALxx(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code;
 
@@ -2556,7 +2560,7 @@ u32 ALxx(struct EmulationMachine* emulator)
 }
 
 //Roxx
-u32 ROxx(struct EmulationMachine* emulator)
+u32 ROxx(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code;
 
@@ -3036,7 +3040,7 @@ void destroy_codes(struct EmulationMachine *em)
  * FINDER
  *
  */
-m68k_opcode* get_opcode_t(struct EmulationMachine* emulator)
+m68k_opcode* get_opcode_t(struct EmulationMachine* restrict emulator)
 {
     const u8 code_group_id = (u8)((emulator->Machine.RunTime.operation_code & 0xF000) >> 12);
 
@@ -3058,7 +3062,7 @@ m68k_opcode* get_opcode_t(struct EmulationMachine* emulator)
 }
 
 
-u32 run_opcode(struct EmulationMachine* emulator)
+u32 run_opcode(struct EmulationMachine* restrict emulator)
 {
     emulator->Machine.State = EXECUTION_STATE;
 
