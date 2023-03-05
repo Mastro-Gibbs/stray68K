@@ -20,6 +20,12 @@ u32   read_int_InputBuffer(struct EmulationMachine* restrict emulator);
 char* read_str_InputBuffer(struct EmulationMachine* restrict emulator);
 
 
+#define debugger(fmt, ...) do { \
+                                printf(fmt, ##__VA_ARGS__); \
+                                fflush(stdout); \
+                           } while (0);
+
+
 /*
  * MACRO used to raise a condition that blocks normal emulator flow,
  * like a ByteCode mistake loading.

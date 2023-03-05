@@ -13,7 +13,7 @@ define("ace/mode/motorola68000_highlight_rules", ["require", "exports", "module"
                         },
                         {
                             token: 'variable.parameter.register.assembly',
-                            regex: '\\b(A[0-7]|D[0-7]|SP|PC|SR)\\b',
+                            regex: '\\b(A[0-7]|D[0-7]|SP|PC|SR|CCR)\\b',
                             caseInsensitive: !0
                         },
                         {

@@ -168,6 +168,7 @@ var completions = [
     { value: 'SP',  score: 3, meta: 'Register' },
     { value: 'PC',  score: 3, meta: 'Register' },
     { value: 'SR',  score: 3, meta: 'Register' },
+    { value: 'CCR',  score: 3, meta: 'Register' },
 
     { value: 'B',  score: 6, meta: 'Instruction size' },
     { value: 'W',  score: 6, meta: 'Instruction size' },

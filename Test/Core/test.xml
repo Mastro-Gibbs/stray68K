@@ -1,0 +1,352 @@
+<EMULATOR>
+    <GLOBAL>
+        <nothandled>
+            <what>
+                ABSShort
+            </what>
+            <what>
+                ABSLong
+            </what>
+        </nothandled>
+    </GLOBAL>
+
+    <INSTRUCTION>
+    
+        <ORItoCCR status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        u8 bits = read_byte(emulator, addr);
+                    </native>
+                    <rectification>
+                        u8 bits = (u8) (read_word(emulator, addr) & mask_by_opsize(BYTE));
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        INCR_PC(BYTE_SPAN);
+                    </native>
+                    <rectification>
+                        INCR_PC(WORD_SPAN);
+                    </rectification>
+                </bug>
+            </bugs>
+        </ORItoCCR>
+
+        <ORItoSR status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        INCR_PC(BYTE_SPAN);
+                    </native>
+                    <rectification>
+                        INCR_PC(WORD_SPAN);
+                    </rectification>
+                </bug>
+            </bugs>
+        </ORItoSR>
+
+        <ORI status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        opsize size = (code & SIZE_MASK) >> 6;
+                        [missing line]
+                    </native>
+                    <rectification>
+                        opsize size = (code & SIZE_MASK) >> 6;
+                        opsize tmpsize = (size == BYTE) ? WORD : size;
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        u32 ori_mask = read_ram(emulator, &addr, &size);
+                    </native>
+                    <rectification>
+                        u32 ori_mask = read_ram(emulator, &addr, &tmpsize);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        INCR_PC(size_to_span(size));
+                    </native>
+                    <rectification>
+                        INCR_PC(size_to_span(tmpsize));
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        u32 ori_mask = read_ram(emulator, &addr, &tmpsize);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        ori_mask &= mask_by_opsize(size);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+
+                        if (mode == ADDRESSPostIncr)
+                            incr_addr_reg(emulator, dst, size);
+                    </rectification>
+                </bug>
+            </bugs>
+        </ORI>
+
+        <ANDItoCCR status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        u16 bits = (u16) (read_byte(emulator, addr) & 0x001F) | 0xFFE0;
+                    </native>
+                    <rectification>
+                        u8 bits =  (u8)  (((read_word(emulator, addr) & 0x001F) | 0xFFE0) & mask_by_opsize(BYTE));
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        INCR_PC(BYTE_SPAN);
+                    </native>
+                    <rectification>
+                        INCR_PC(WORD_SPAN);
+                    </rectification>
+                </bug>
+            </bugs>
+        </ANDItoCCR>
+    
+        <ANDItoSR status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        emulator->Machine.cpu.sr = (flags | bits);
+                    </native>
+                    <rectification>
+                        emulator->Machine.cpu.sr = (flags & bits);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        INCR_PC(BYTE_SPAN);
+                    </native>
+                    <rectification>
+                        INCR_PC(WORD_SPAN);
+                    </rectification>
+                </bug>
+            </bugs>
+        </ANDItoSR>
+
+        <ANDI status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        opsize size = (code & SIZE_MASK) >> 6;
+                        [missing line]
+                    </native>
+                    <rectification>
+                        opsize size = (code & SIZE_MASK) >> 6;
+                        opsize tmpsize = (size == BYTE) ? WORD : size;
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        u32 andi_mask = read_ram(emulator, &addr, &size);
+                    </native>
+                    <rectification>
+                        u32 andi_mask = read_ram(emulator, &addr, &tmpsize);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        value |= andi_mask;
+                    </native>
+                    <rectification>
+                        value &= andi_mask;
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        INCR_PC(size_to_span(size));
+                    </native>
+                    <rectification>
+                        INCR_PC(size_to_span(tmpsize));
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        switch (size) {
+                            case BYTE:
+                                andi_mask &= 0xFFFFFF00;
+                                break;
+                            case WORD:
+                                andi_mask &= 0xFFFF0000;
+                                break;
+                            default:
+                                break;
+                        }
+                    </native>
+                    <rectification>
+                        andi_mask &= mask_by_opsize(size);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+
+                        if (mode == ADDRESSPostIncr)
+                            incr_addr_reg(emulator, dst, size);
+                    </rectification>
+                </bug>
+            </bugs>
+        </ANDI>
+
+        <SUBI status="TESTING" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        WRITE_EFFECTIVE_ADDRESS(dReg, (u32) res, size, mode);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        WRITE_EFFECTIVE_ADDRESS(dReg, (u32) res, size, mode);
+                        if (mode == ADDRESSPostIncr)
+                            incr_addr_reg(emulator, dReg, size);
+                    </rectification>
+                </bug>
+            </bugs>
+        </SUBI>
+
+        <ADDI status="TESTING" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        WRITE_EFFECTIVE_ADDRESS(dReg, (u32) res, size, mode);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        WRITE_EFFECTIVE_ADDRESS(dReg, (u32) res, size, mode);
+                        if (mode == ADDRESSPostIncr)
+                            incr_addr_reg(emulator, dReg, size);
+                    </rectification>
+                </bug>
+            </bugs>
+        </ADDI>
+
+        <EORItoCCR status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        u16 bits = (u16) (read_byte(emulator, addr) & 0x001F) | 0xFFE0;
+                    </native>
+                    <rectification>
+                        u8  bits = (u8)  (read_word(emulator, addr) & 0x001F);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        INCR_PC(BYTE_SPAN);
+                    </native>
+                    <rectification>
+                        INCR_PC(WORD_SPAN);
+                    </rectification>
+                </bug>
+            </bugs>
+        </EORItoCCR>
+
+        <EORItoSR status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        INCR_PC(BYTE_SPAN);
+                    </native>
+                    <rectification>
+                        INCR_PC(WORD_SPAN);
+                    </rectification>
+                </bug>
+            </bugs>
+        </EORItoSR>
+
+        <EORI status="PASS" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        opsize size = (code & SIZE_MASK) >> 6;
+                        [missing line]
+                    </native>
+                    <rectification>
+                        opsize size = (code & SIZE_MASK) >> 6;
+                        opsize tmpsize = (size == BYTE) ? WORD : size;
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        u32 eori_mask = read_ram(emulator, &addr, &size);
+                    </native>
+                    <rectification>
+                        u32 eori_mask = read_ram(emulator, &addr, &tmpsize);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        INCR_PC(size_to_span(size));
+                    </native>
+                    <rectification>
+                        INCR_PC(size_to_span(tmpsize));
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        u32 eori_mask = read_ram(emulator, &addr, &tmpsize);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        eori_mask &= mask_by_opsize(size);
+                    </rectification>
+                </bug>
+                <bug>
+                    <native>
+                        WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+
+                        if (mode == ADDRESSPostIncr)
+                            incr_addr_reg(emulator, dst, size);
+                    </rectification>
+                </bug>
+            </bugs>
+        </EORI>
+
+        <CMPI status="TESTING" bugs=true>
+            <bugs>
+                <bug>
+                    <native>
+                        READ_EFFECTIVE_ADDRESS(val, dst, size, mode, NORMAL);
+                        [missing line]
+                    </native>
+                    <rectification>
+                        READ_EFFECTIVE_ADDRESS(val, dst, size, mode, NORMAL);
+
+                        if (mode == ADDRESSPostIncr)
+                            incr_addr_reg(emulator, dst, size);
+                    </rectification>
+                </bug>
+            </bugs>
+        </CMPI>
+
+        <MOVEP status="UNMENAGED" bugs=false>
+            <note>WARNING_STATE turns into PANIC_STATE</note>
+        </MOVEP>
+
+    </INSTRUCTION>
+</EMULATOR>
+

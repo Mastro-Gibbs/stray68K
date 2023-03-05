@@ -369,6 +369,8 @@ void Dispatcher::doRun_WorkerThreadBody(WApplication *app, struct EmulationMachi
     if (uiLock) 
     {
         memoryWidget->update();
+        registerRenderWidget->update(em->Machine.dump);
+        consoleWidget->pushStdout(em->Machine.dump);
 
         end_emulator(em);
 

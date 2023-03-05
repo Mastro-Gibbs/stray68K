@@ -91,17 +91,32 @@ void Console::pushStdout(const char* map)
 
         try 
         {
-            string type = string(json["EXCEPTION"]["TYPE"]);
-            string mnem = string(json["EXCEPTION"]["MNEM"]);
-            string code = string(json["EXCEPTION"]["CODE"]);
+            std:stringstream ss;
+            try { 
+                string type = string(json["EXCEPTION"]["TYPE"]);  
+                ss << "[EXCEPTION]\n\tType: " << type << endl;
+            } 
+            catch (boost::bad_get& e) { } catch (runtime_error& e)  { }
 
-            insert("[EXCEPTION]\n\tType:    ");
-            insert(type);
-            insert("\n\tMessage: ");
-            insert(mnem);
-            insert("\n\tCode:    ");
-            insert(code);
-            insert("\n");
+            try { 
+                string cause = string(json["EXCEPTION"]["CAUSE"]);
+                ss << "\tCause: " << cause << endl;
+            } 
+            catch (boost::bad_get& e) { } catch (runtime_error& e)  { }
+
+            try { 
+                string mnem = string(json["EXCEPTION"]["MNEM"]); 
+                ss << "\tMessage: " << mnem << endl;
+            } 
+            catch (boost::bad_get& e) { } catch (runtime_error& e)  { }
+
+            try { 
+                string code = string(json["EXCEPTION"]["CODE"]);
+                ss << "\tCode: " << code << endl;
+            } 
+            catch (boost::bad_get& e) { } catch (runtime_error& e)  { }
+
+            insert(ss.str());
         } 
         catch (boost::bad_get& e) { }
         catch (runtime_error& e)  { }

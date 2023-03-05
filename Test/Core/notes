@@ -1,0 +1,8 @@
+[HANDLER]
+    ~~2549~~ {dVal &= msb} -> {dVal &= mask_by_opsize(size);}
+
+    Some WARNING_STATE has changed to PANIC_STATE
+
+[EMULATOR]
+    menage EMULATOR_ERROR macro
+

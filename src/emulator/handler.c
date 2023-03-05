@@ -219,17 +219,17 @@ u32 ORItoCCR(struct EmulationMachine* restrict emulator)
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
-    u8 bits  = read_byte(emulator, addr);
+    u8 bits  = (u8)  (read_word(emulator, addr) & mask_by_opsize(BYTE));
     srflags flags = emulator->Machine.cpu.sr;
 
     emulator->Machine.cpu.sr = (flags | bits);
 
-    INCR_PC(BYTE_SPAN);
+    INCR_PC(WORD_SPAN);
 
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 ORItoSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -241,12 +241,12 @@ u32 ORItoSR(struct EmulationMachine* restrict emulator)
 
     emulator->Machine.cpu.sr = (flags | bits);
 
-    INCR_PC(BYTE_SPAN);
+    INCR_PC(WORD_SPAN);
 
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 ORI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -254,40 +254,47 @@ u32 ORI(struct EmulationMachine* restrict emulator)
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
 
+    opsize tmpsize = (size == BYTE) ? WORD : size;
+
     u32 value;
     READ_EFFECTIVE_ADDRESS(value, dst, size, mode, NORMAL);
     u32 addr     = emulator->Machine.cpu.pc + WORD_SPAN;
-    u32 ori_mask = read_ram(emulator, &addr, &size);
+    u32 ori_mask = read_ram(emulator, &addr, &tmpsize);
+
+    ori_mask &= mask_by_opsize(size);
 
     value |= ori_mask;
 
     WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
 
+    if (mode == ADDRESSPostIncr)
+        incr_addr_reg(emulator, dst, size);
+
     SET_SRFLAGS(ori, size, 0, 0, value);
 
-    INCR_PC(size_to_span(size));
+    INCR_PC(size_to_span(tmpsize));
 
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 ANDItoCCR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
-    u16 bits = (u16) (read_byte(emulator, addr) & 0x001F) | 0xFFE0;
+    u8 bits =  (u8)  (((read_word(emulator, addr) & 0x001F) | 0xFFE0) & mask_by_opsize(BYTE));
     srflags flags = emulator->Machine.cpu.sr;
 
     emulator->Machine.cpu.sr = (flags & bits);
 
-    INCR_PC(BYTE_SPAN);
+    INCR_PC(WORD_SPAN);
 
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 ANDItoSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -297,14 +304,14 @@ u32 ANDItoSR(struct EmulationMachine* restrict emulator)
     u16 bits = read_word(emulator, addr);
     srflags flags = emulator->Machine.cpu.sr;
 
-    emulator->Machine.cpu.sr = (flags | bits);
+    emulator->Machine.cpu.sr = (flags & bits);
 
-    INCR_PC(BYTE_SPAN);
+    INCR_PC(WORD_SPAN);
 
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 ANDI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -312,33 +319,29 @@ u32 ANDI(struct EmulationMachine* restrict emulator)
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
 
+    opsize tmpsize = (size == BYTE) ? WORD : size;
+
     u32 value;
     READ_EFFECTIVE_ADDRESS(value, dst, size, mode, NORMAL);
     u32 addr      = emulator->Machine.cpu.pc + WORD_SPAN;
-    u32 andi_mask = read_ram(emulator, &addr, &size);
+    u32 andi_mask = read_ram(emulator, &addr, &tmpsize);
 
-    switch (size) {
-        case BYTE:
-            andi_mask |= 0xFFFFFF00;
-            break;
-        case WORD:
-            andi_mask |= 0xFFFF0000;
-            break;
-        default:
-            break;
-    }
+    andi_mask &= mask_by_opsize(size);
 
-    value |= andi_mask;
+    value &= andi_mask;
 
     WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+    if (mode == ADDRESSPostIncr)
+        incr_addr_reg(emulator, dst, size);
+
     SET_SRFLAGS(andi, size, 0, 0, value);
 
-    INCR_PC(size_to_span(size));
+    INCR_PC(size_to_span(tmpsize));
 
     return (RETURN_OK);
 }
 
-
+/* TESTING */
 u32 SUBI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -366,6 +369,9 @@ u32 SUBI(struct EmulationMachine* restrict emulator)
 
     WRITE_EFFECTIVE_ADDRESS(dReg, (u32) res, size, mode);
 
+    if (mode == ADDRESSPostIncr)
+        incr_addr_reg(emulator, dReg, size);
+
     SET_SRFLAGS(subi, size, sVal, dVal, (u32) res);
 
     INCR_PC(size_to_span(tmps));
@@ -373,7 +379,7 @@ u32 SUBI(struct EmulationMachine* restrict emulator)
     return (RETURN_OK);
 }
 
-
+/* TESTING */
 u32 ADDI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -401,6 +407,9 @@ u32 ADDI(struct EmulationMachine* restrict emulator)
 
     WRITE_EFFECTIVE_ADDRESS(dReg, (u32) res, size, mode);
 
+    if (mode == ADDRESSPostIncr)
+        incr_addr_reg(emulator, dReg, size);
+
     SET_SRFLAGS(addi, size, sVal, dVal, (u32) res);
 
     INCR_PC(size_to_span(tmps));
@@ -408,24 +417,24 @@ u32 ADDI(struct EmulationMachine* restrict emulator)
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 EORItoCCR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
     UNUSED(code)
 
     u32 addr = (u32) (emulator->Machine.cpu.pc + WORD_SPAN);
-    u16 bits = (u16) (read_byte(emulator, addr) & 0x001F) | 0xFFE0;
+    u8  bits = (u8)  (read_word(emulator, addr) & 0x001F);
     srflags flags = emulator->Machine.cpu.sr;
 
     emulator->Machine.cpu.sr = (flags ^ bits);
 
-    INCR_PC(BYTE_SPAN);
+    INCR_PC(WORD_SPAN);
 
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 EORItoSR(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -437,12 +446,12 @@ u32 EORItoSR(struct EmulationMachine* restrict emulator)
 
     emulator->Machine.cpu.sr = (flags ^ bits);
 
-    INCR_PC(BYTE_SPAN);
+    INCR_PC(WORD_SPAN);
 
     return (RETURN_OK);
 }
 
-
+/* PASS STAGE 1 TESTING */
 u32 EORI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -450,23 +459,31 @@ u32 EORI(struct EmulationMachine* restrict emulator)
     u32 mode = (code & 0b0000000000111000) >> 3;
     opsize size = (code & SIZE_MASK) >> 6;
 
+    opsize tmpsize = (size == BYTE) ? WORD : size;
+
     u32 value;
     READ_EFFECTIVE_ADDRESS(value, dst, size, mode, NORMAL);
 
     u32 addr      = emulator->Machine.cpu.pc + WORD_SPAN;
-    u32 eori_mask = read_ram(emulator, &addr, &size);
+    u32 eori_mask = read_ram(emulator, &addr, &tmpsize);
+
+    eori_mask &= mask_by_opsize(size);
 
     value ^= eori_mask;
 
     WRITE_EFFECTIVE_ADDRESS(dst, value, size, mode);
+
+    if (mode == ADDRESSPostIncr)
+        incr_addr_reg(emulator, dst, size);
+
     SET_SRFLAGS(eori, size, 0, 0, value);
 
-    INCR_PC(size_to_span(size));
+    INCR_PC(size_to_span(tmpsize));
 
     return (RETURN_OK);
 }
 
-
+/* TESTING */
 u32 CMPI(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
@@ -482,6 +499,9 @@ u32 CMPI(struct EmulationMachine* restrict emulator)
     u32 val;
     READ_EFFECTIVE_ADDRESS(val, dst, size, mode, NORMAL);
 
+    if (mode == ADDRESSPostIncr)
+        incr_addr_reg(emulator, dst, size);
+
     SIGN_EXTENDED(dst_val, val, size);
     u32 addr    = emulator->Machine.cpu.pc + WORD_SPAN;
     SIGN_EXTENDED(ram_val, read_ram(emulator, &addr, &tmpsize), size);
@@ -495,18 +515,15 @@ u32 CMPI(struct EmulationMachine* restrict emulator)
     return (RETURN_OK);
 }
 
-
+/* UNABLE TO TEST */
 u32 MOVEP(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
 
-    emulator->Machine.State = WARNING_STATE;
-    
-    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.RunTime.Warning.code = code;
-    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "MOVEP");
+    emulator->Machine.State = PANIC_STATE;
+    sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Unmenaged operation: MOVEP, code: 0x%X", code);
 
-    return (RETURN_OK);
+    return (RETURN_ERR);
 }
 
 
@@ -888,13 +905,10 @@ u32 TAS(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
 
-    emulator->Machine.State = WARNING_STATE;
-    
-    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.RunTime.Warning.code = code;
-    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "TAS");
+    emulator->Machine.State = PANIC_STATE;
+    sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Unmenaged operation: TAS, code: 0x%X", code);
 
-    return (RETURN_OK);
+    return (RETURN_ERR);
 }
 
 
@@ -1254,13 +1268,10 @@ u32 MOVEM(struct EmulationMachine* restrict emulator)
 {
     const opcode code = emulator->Machine.RunTime.operation_code; 
 
-    emulator->Machine.State = WARNING_STATE;
-    
-    sprintf(emulator->Machine.RunTime.Warning.cause, "%s", "Unmenaged operation");
-    emulator->Machine.RunTime.Warning.code = code;
-    sprintf(emulator->Machine.RunTime.Warning.mnem, "%s", "MOVEM");
+    emulator->Machine.State = PANIC_STATE;
+    sprintf(emulator->Machine.RunTime.Exception.panic_cause, "Unmenaged operation: MOVEM, code: 0x%X", code);
 
-    return (RETURN_OK);
+    return (RETURN_ERR);
 }
 
 
@@ -2503,7 +2514,7 @@ u32 ALxx(struct EmulationMachine* restrict emulator)
             logical = (code & 0x0018) != 0;
 
             u32 data_reg = (code & 0x0007);
-            u32 dVal     = read_addrreg(emulator, data_reg) & mask_by_opsize(size);
+            u32 dVal     = read_datareg(emulator, data_reg) & mask_by_opsize(size);
 
             bit two_reg_op = (code & 0x0020) != 0;
             u32 src = (code & 0x0E00) >> 9;
@@ -2513,7 +2524,7 @@ u32 ALxx(struct EmulationMachine* restrict emulator)
             u32 msb   = most_significant_byte(size);
 
             if (two_reg_op)
-                sVal = read_addrreg(emulator, src) & 0x003F;
+                sVal = read_datareg(emulator, src) & 0x003F;
             else
                 sVal = src != 0 ? shift : 8;
 
@@ -2546,7 +2557,7 @@ u32 ALxx(struct EmulationMachine* restrict emulator)
                 }
             }
 
-            dVal &= msb;
+            dVal &= mask_by_opsize(size);
             write_datareg(emulator, data_reg, dVal, &size);
 
             SET_SRFLAGS(asl, size, sVal, bso, dVal);

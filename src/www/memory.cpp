@@ -107,7 +107,7 @@ void MemoryView::fetchBlock()
     if (_s.empty())
         _s = "0";
 
-    offset_ = fixFromAddress(stoi(_s, nullptr, 16));
+    offset_ = fixFromAddress(std::stoul(_s, nullptr, 16));
 
     from->setText(toHexString(offset_));
 
@@ -204,6 +204,7 @@ void MemoryView::renderChunck(const unsigned char* block, unsigned int chunk_beg
     char c[33];
 
     for (size_t _i = chunk_begin, _j = 0; _j < 32; ++_i, ++_j )
+    {   
         if (block[_i] < 0x20 || block[_i] > 0x7E)
         {
             c[_j++] = '-';
@@ -214,7 +215,8 @@ void MemoryView::renderChunck(const unsigned char* block, unsigned int chunk_beg
             c[_j++] = (char) block[_i];
             c[_j]   = ' ';   
         }
-    
+    }
+
     c[32] = '\0';
 
     bitfield->setText(bitfield->text() + string(c) + "\n");

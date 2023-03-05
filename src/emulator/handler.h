@@ -15,8 +15,6 @@ u32 execute_instruction(struct EmulationMachine *emulator);
 
 c_bool is_next_inst_scan(struct EmulationMachine *emulator);
 
-
-
 /*
  * BEGIN DUMBS PROTOS
  *

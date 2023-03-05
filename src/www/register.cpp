@@ -408,11 +408,11 @@ void RegisterRender::update(const char* map)
             setUSP(string(json["CPU"]["US"]));
             setSSP(string(json["CPU"]["SS"]));
             setPC (string(json["CPU"]["PC"]));
-            setCCR(stoi(string(json["CPU"]["SR"]), nullptr, 16));
+            setCCR((unsigned int) std::stoul(string(json["CPU"]["SR"]), nullptr, 16));
 
             setMnemonic(string(json["OP"]["MNEMONIC"]));
             setHCode(string(json["OP"]["CODE"]));
-            setBCode(stoi(string(json["OP"]["CODE"]), nullptr, 16));
+            setBCode(std::stoul(string(json["OP"]["CODE"]), nullptr, 16));
             setTime((unsigned long) json["TIME"]);
 
             setFWB(string(json["RAM"]["BEGIN"]));

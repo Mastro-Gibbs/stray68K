@@ -133,12 +133,12 @@ char* Jexception(char* cause, u32 type)
     }
     else if (type == PANIC_EXC_TYPE)
     {
-        base = "{\"EXCEPTION\":{\"TYPE\":\"PANIC\",\"CAUSE\":\"%s\"}}";
+        base = "{\"EXCEPTION\":{\"TYPE\":\"CORE PANIC\",\"CAUSE\":\"%s\"}}";
         size = snprintf(NULL, 0, base, cause);
     }
     else if (type == MERR_EXC_TYPE)
     {
-        base = "{\"EXCEPTION\":{\"TYPE\":\"EMULATOR-ERROR\",\"CAUSE\":\"%s\"}}";
+        base = "{\"EXCEPTION\":{\"TYPE\":\"EMULATOR ERROR\",\"CAUSE\":\"%s\"}}";
         size = snprintf(NULL, 0, base, cause);
     }
     else if (type == 3)
